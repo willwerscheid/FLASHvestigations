@@ -130,46 +130,10 @@ fl$KL_l[[k]] = KL_l
 flash_get_objective(data, fl) - flash_get_objective(data, init_fl)
 ```
 
-## Perturbation analysis
-
-It's possible that numerical error is responsible for the decrease, but it seems unlikely to me that this is the whole story.
-
-Indeed, assume that numerical error is sufficient to explain the decrease. Recall that the objective consists of a part that is calculated from `R2` and `tau`, a part that comes from `KL_l`, and a part that comes from `KL_f`. The first part is coded as `-0.5 * sum(log((2 * pi)/tau) + tau * R2)`, and R2 is updated as `R2k - 2 * outer(l, f) * Rk + outer(l2, f2)` (where `Rk` is residuals for all factors but the `k`th and similarly for `R2k`). The *updated* parts of the objective have magnitude:
-
-```{r obj1}
-sum(fl$tau * outer(fl$EL[, k], fl$EF[, k]) * Rk)
--0.5 * sum(fl$tau * outer(fl$EL2[, k], fl$EF2[, k]))
-```
-
-So, errors in the sixth digit of either of these components could explain the decrease in the objective function. Let there be errors in the updates to `EL2` and consider the latter part of the objective:
-$$ -\frac{1}{2} \sum_{i, j} \tau_{i, j} \left( \bar{l^2}_i + \epsilon_i \right) \bar{f^2}_j 
-= -\frac{1}{2} \sum_i \bar{l^2}_i \sum_j \tau_{i, j} \bar{f^2}_j -\frac{1}{2} \sum_i \epsilon_i \sum_j \tau_{i, j} \bar{f^2}_j $$
-so we'd need to see errors in (roughly) the sixth digit of `EL2`. A similar calculation shows that errors in the sixth digit of `EL` could suffice to explain the decrease.
-
-To test this hypothesis, I check to see what happens if only five digits are retained when performing the above calculations.
-```{r slow6}
-last_obj = flash_get_objective(data, fl)
-  
-digits = 5
-s2 = 1/(fl$EF2[, k] %*% t(fl$tau))
-s = sqrt(s2)
-Rk = flashr:::flash_get_Rk(data, fl, k)
-x = fl$EF[, k] %*% t(Rk * fl$tau) * s2
-ebnm_l = flashr:::ebnm_pn(x, s, list())
-
-KL_l = (ebnm_l$penloglik 
-        - flashr:::NM_posterior_e_loglik(x, s, ebnm_l$postmean,
-                                         ebnm_l$postmean2))
-
-fl$EL[, k] = signif(ebnm_l$postmean, digits=digits)
-fl$EL2[, k] = signif(ebnm_l$postmean2, digits=digits)
-fl$gl[[k]] = ebnm_l$fitted_g
-fl$KL_l[[k]] = KL_l
-flash_get_objective(data, fl) - last_obj
-```
-
-So an overall error that is *roughly* on the scale of the decrease in objective function is produced.
-
 ## Conclusions and questions
 
-Still, the error is not quite as large, and it would be very surprising to me if `EL` and `EL2` could only be trusted to five digits. More seriously, the sawtooth pattern discussed above points to a more regular feature of the optimization. Indeed, it appears that all of the triangles (objectives after updating factors) are biased upwards and all of the squares (objectives after updating loadings) are biased slightly downwards. Still, this would not explain the decrease in the objective that occurs after a complete iteration.
+The decrease appears too large to be explained by numerical error. Indeed, it would be very surprising to me if `EL` and `EL2` could only be trusted to five digits or so (as would have to be the case to produce errors of the above magnitude). 
+
+More seriously, the sawtooth pattern depicted above points to a more regular feature of the optimization. Indeed, it appears that all of the triangles (objectives after updating factors) are biased upwards and all of the squares (objectives after updating loadings) are biased slightly downwards. 
+
+The theory appears to be sound, so what is going on here?
