@@ -1,0 +1,83 @@
+---
+title: "Objective Function: ebnm_pn vs. ebnm_ash"
+author: "Jason Willwerscheid"
+date: "7/14/2018"
+output:
+  workflowr::wflow_html
+---
+
+## Introduction
+
+Here I use `ebnm_ash` to see if I obtain similar decreases in the objective function as I obtained in the [previous investigation](objective.html).
+
+## Fits
+
+I use the same dataset as in the previous investigation.
+
+```{r example}
+# devtools::install_github("stephenslab/flashr", ref="trackObj")
+devtools::load_all("/Users/willwerscheid/GitHub/flashr")
+# devtools::install_github("stephenslab/ebnm")
+devtools::load_all("/Users/willwerscheid/GitHub/ebnm")
+
+gtex <- readRDS(gzcon(url("https://github.com/stephenslab/gtexresults/blob/master/data/MatrixEQTLSumStats.Portable.Z.rds?raw=TRUE")))
+strong <- gtex$strong.z
+```
+
+I fit four factors greedily using both `ebnm_pn` and `ebnm_ash`.
+
+```{r flash}
+pn_res <- flash_add_greedy(strong, Kmax=4, verbose=FALSE)
+ash_res <- flash_add_greedy(strong, Kmax=4, ebnm_fn = "ebnm_ash", 
+                            verbose=FALSE)
+
+plot_obj <- function(res, k, niters) {
+  obj_data <- as.vector(rbind(res$obj[[k]]$after_tau,
+                              res$obj[[k]]$after_f,
+                              res$obj[[k]]$after_l))
+  max_obj <- max(obj_data)
+  obj_data <- obj_data - max_obj
+  iter <- 1:length(obj_data) / 3
+  
+  if (length(obj_data) > niters*3) {
+    idx <- (length(obj_data) - niters*3 + 1):length(obj_data)
+    obj_data <- obj_data[idx]
+    iter <- iter[idx]
+  }
+  
+  plt_xlab = "Iteration"
+  plt_ylab = "Diff. from maximum obj."
+  plt_colors <- c("indianred1", "indianred3", "indianred4")
+  plt_pch <- c(16, 17, 15)
+  
+  plot(iter, obj_data, col=plt_colors, pch=plt_pch,
+       xlab=plt_xlab, ylab=plt_ylab)
+  legend("bottomright", c("after tau", "after f", "after l"),
+         col=plt_colors, pch=plt_pch)}
+```
+
+## Results: ebnm_pn
+
+The problem discussed in the [previous investigation](objective.html) occurs every time.
+
+```{r plot_pn}
+plot_obj(pn_res, 1, niters=3)
+plot_obj(pn_res, 2, niters=5)
+plot_obj(pn_res, 3, niters=20)
+plot_obj(pn_res, 4, niters=10)
+```
+
+## Results: ebnm_ash
+
+But no obvious problems occur when using `ebnm_ash`.
+
+```{r plot_ash}
+plot_obj(ash_res, 1, niters=3)
+plot_obj(ash_res, 2, niters=5)
+plot_obj(ash_res, 3, niters=10)
+plot_obj(ash_res, 4, niters=20)
+```
+
+## Conclusions
+
+When using `ebnm_ash`, the objective does not suffer from the same erratic behavior as when using `ebnm_pn`. Is there a weird bug somewhere in the computation of the likelihood function for `ebnm_pn`?
