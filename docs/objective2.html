@@ -321,7 +321,8 @@ div.section {
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
-<p><details> <summary> <strong style="color:red;">✖</strong> <strong>R Markdown file:</strong> uncommitted changes </summary> The R Markdown is untracked by Git. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
 </details>
 </li>
 <li>
@@ -340,7 +341,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/76eacb75d7f6a19857f7adfe769a3fd76643e3bb" target="_blank">76eacb7</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/a19a4a0f4eada7a1db91af999a07b4edfc934c38" target="_blank">a19a4a0</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -350,23 +351,95 @@ Ignored files:
     Ignored:    docs/.DS_Store
     Ignored:    docs/figure/.DS_Store
 
-Untracked files:
-    Untracked:  analysis/objective2.Rmd
-
-Unstaged changes:
-    Modified:   analysis/objective.Rmd
-
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
 </li>
 </ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/a19a4a0f4eada7a1db91af999a07b4edfc934c38/analysis/objective2.Rmd" target="_blank">a19a4a0</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/objective2.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/67360f4c720162730c59327eee6fa0b2979ece17/analysis/objective2.Rmd" target="_blank">67360f4</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+<td style="text-align:left;">
+manual objective2 commit
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/67360f4c720162730c59327eee6fa0b2979ece17/docs/objective2.html" target="_blank">67360f4</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+<td style="text-align:left;">
+manual objective2 commit
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
 <hr />
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>Here I use <code>ebnm_ash</code> to see if I obtain similar decreases in the objective function as I obtained in the <a href="objective.html">previous investigation</a>.</p>
+<p>Here I use <code>ebnm_ash</code> to see if I obtain similar decreases in the objective function as were obtained in the <a href="objective.html">previous investigation</a>.</p>
 </div>
-<div id="results" class="section level2">
-<h2>Results</h2>
+<div id="fits" class="section level2">
+<h2>Fits</h2>
 <p>I use the same dataset as in the previous investigation.</p>
 <pre class="r"><code># devtools::install_github(&quot;stephenslab/flashr&quot;, ref=&quot;trackObj&quot;)
 devtools::load_all(&quot;/Users/willwerscheid/GitHub/flashr&quot;)</code></pre>
@@ -411,28 +484,34 @@ strong &lt;- gtex$strong.z</code></pre>
        xlab=plt_xlab, ylab=plt_ylab)
   legend(&quot;bottomright&quot;, c(&quot;after tau&quot;, &quot;after f&quot;, &quot;after l&quot;),
          col=plt_colors, pch=plt_pch)}</code></pre>
+</div>
+<div id="results-ebnm_pn" class="section level2">
+<h2>Results: ebnm_pn</h2>
 <p>The problem discussed in the <a href="objective.html">previous investigation</a> occurs every time.</p>
 <pre class="r"><code>plot_obj(pn_res, 1, niters=3)</code></pre>
-<p><img src="figure/objective2.Rmd/ebnm_pn-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/objective2.Rmd/plot_pn-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>plot_obj(pn_res, 2, niters=5)</code></pre>
-<p><img src="figure/objective2.Rmd/ebnm_pn-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/objective2.Rmd/plot_pn-2.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>plot_obj(pn_res, 3, niters=20)</code></pre>
-<p><img src="figure/objective2.Rmd/ebnm_pn-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/objective2.Rmd/plot_pn-3.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>plot_obj(pn_res, 4, niters=10)</code></pre>
-<p><img src="figure/objective2.Rmd/ebnm_pn-4.png" width="672" style="display: block; margin: auto;" /></p>
-<p>But it does not occur when using <code>ebnm_ash</code>.</p>
+<p><img src="figure/objective2.Rmd/plot_pn-4.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="results-ebnm_ash" class="section level2">
+<h2>Results: ebnm_ash</h2>
+<p>But no obvious problems occur when using <code>ebnm_ash</code>.</p>
 <pre class="r"><code>plot_obj(ash_res, 1, niters=3)</code></pre>
-<p><img src="figure/objective2.Rmd/ebnm_ash-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/objective2.Rmd/plot_ash-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>plot_obj(ash_res, 2, niters=5)</code></pre>
-<p><img src="figure/objective2.Rmd/ebnm_ash-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/objective2.Rmd/plot_ash-2.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>plot_obj(ash_res, 3, niters=10)</code></pre>
-<p><img src="figure/objective2.Rmd/ebnm_ash-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/objective2.Rmd/plot_ash-3.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>plot_obj(ash_res, 4, niters=20)</code></pre>
-<p><img src="figure/objective2.Rmd/ebnm_ash-4.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/objective2.Rmd/plot_ash-4.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="conclusions" class="section level2">
 <h2>Conclusions</h2>
-<p>When using <code>ebnm_ash</code>, the objective does not suffer from the same erratic behavior as when using <code>ebnm_pn</code>. Is there a small bug somewhere in the computation of the likelihood function for <code>ebnm_pn</code>?</p>
+<p>When using <code>ebnm_ash</code>, the objective does not suffer from the same erratic behavior as when using <code>ebnm_pn</code>. Is there a weird bug somewhere in the computation of the likelihood function for <code>ebnm_pn</code>?</p>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
