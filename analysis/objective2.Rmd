@@ -8,7 +8,7 @@ output:
 
 ## Introduction
 
-Here I use `ebnm_ash` to see if I obtain similar decreases in the objective function as I obtained in the [previous investigation](objective.html).
+Here I use `ebnm_ash` to see if I obtain similar decreases in the objective function as were obtained in the [previous investigation](objective.html).
 
 ## Fits
 
