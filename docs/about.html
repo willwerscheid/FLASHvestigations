@@ -225,12 +225,22 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> f6928cc </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/82c7cdd1d6fe660851f65975e7c1fff62ec60737" target="_blank">82c7cdd</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
+    Ignored:    .DS_Store
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/objective2.Rmd
+    Untracked:  docs/figure/objective2.Rmd/
+
+Unstaged changes:
+    Modified:   analysis/objective.Rmd
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -264,7 +274,41 @@ Message
 Rmd
 </td>
 <td style="text-align:left;">
-f6928cc
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/82c7cdd1d6fe660851f65975e7c1fff62ec60737/analysis/about.Rmd" target="_blank">82c7cdd</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+<td style="text-align:left;">
+wflow_publish(c(“analysis/index.Rmd”, “analysis/about.Rmd”))
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/76eacb75d7f6a19857f7adfe769a3fd76643e3bb/docs/about.html" target="_blank">76eacb7</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/f6928cc38fc84fe9d0d5ddcf11d954fba36c6910/analysis/about.Rmd" target="_blank">f6928cc</a>
 </td>
 <td style="text-align:left;">
 Jason Willwerscheid
@@ -281,7 +325,7 @@ wflow_publish(c(“analysis/index.Rmd”, “analysis/about.Rmd”))
 Rmd
 </td>
 <td style="text-align:left;">
-56d7ded
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/56d7ded8c6138ce9a71293c5e31a2363fa6f0c75/analysis/about.Rmd" target="_blank">56d7ded</a>
 </td>
 <td style="text-align:left;">
 Jason Willwerscheid
@@ -298,7 +342,7 @@ Start workflowr project.
 </ul>
 <p></details></p>
 <hr />
-<p>Here I collect various investigations into the inner workings of FLASH.</p>
+<p>Here I collect various investigations into the mysteries of FLASH.</p>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
 TeX fonts only; see
