@@ -341,13 +341,19 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> db11cbb </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/8258811dc5225f6e927d7d2d00eebf80c0bab176" target="_blank">8258811</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
+    Ignored:    .DS_Store
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
-    Ignored:    docs/figure/
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/objective2.Rmd
+    Untracked:  docs/figure/objective2.Rmd/
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -381,7 +387,41 @@ Message
 Rmd
 </td>
 <td style="text-align:left;">
-db11cbb
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/8258811dc5225f6e927d7d2d00eebf80c0bab176/analysis/objective.Rmd" target="_blank">8258811</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/objective.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/0b30bef854ef3b0dbd073845cd63e93ca75cef56/docs/objective.html" target="_blank">0b30bef</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/db11cbbe1d46c0f7f68f920c925d3f6a6e790c68/analysis/objective.Rmd" target="_blank">db11cbb</a>
 </td>
 <td style="text-align:left;">
 Jason Willwerscheid
@@ -467,6 +507,36 @@ plt_xlab = &quot;Iteration&quot;
 plt_ylab = &quot;Diff. from maximum obj.&quot;
 plot(iter, obj_data, type=&#39;l&#39;, xlab=plt_xlab, ylab=plt_ylab)</code></pre>
 <p><img src="figure/objective.Rmd/plot-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of plot-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/0b30bef854ef3b0dbd073845cd63e93ca75cef56/docs/figure/objective.Rmd/plot-1.png" target="_blank">0b30bef</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>Discarding the first 8 iterations in order to zoom in on the problem area:</p>
 <pre class="r"><code>obj_data &lt;- obj_data[-(1:24)]
 iter &lt;- iter[-(1:24)]
@@ -478,6 +548,36 @@ plot(iter, obj_data, col=plt_colors, pch=plt_pch,
 legend(&quot;bottomright&quot;, c(&quot;after tau&quot;, &quot;after f&quot;, &quot;after l&quot;),
        col=plt_colors, pch=plt_pch)</code></pre>
 <p><img src="figure/objective.Rmd/plot2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of plot2-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/0b30bef854ef3b0dbd073845cd63e93ca75cef56/docs/figure/objective.Rmd/plot2-1.png" target="_blank">0b30bef</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>I backtrack to just before the “bad” update.</p>
 <pre class="r"><code>res2 &lt;- flash_add_greedy(strong, Kmax=4, stopAtObj=-1297147.7)</code></pre>
 <pre><code>fitting factor/loading 1</code></pre>
@@ -548,41 +648,11 @@ fl$KL_l[[k]] = KL_l
 flash_get_objective(data, fl) - flash_get_objective(data, init_fl)</code></pre>
 <pre><code>[1] -0.1154585</code></pre>
 </div>
-<div id="perturbation-analysis" class="section level2">
-<h2>Perturbation analysis</h2>
-<p>It’s possible that numerical error is responsible for the decrease, but it seems unlikely to me that this is the whole story.</p>
-<p>Indeed, assume that numerical error is sufficient to explain the decrease. Recall that the objective consists of a part that is calculated from <code>R2</code> and <code>tau</code>, a part that comes from <code>KL_l</code>, and a part that comes from <code>KL_f</code>. The first part is coded as <code>-0.5 * sum(log((2 * pi)/tau) + tau * R2)</code>, and R2 is updated as <code>R2k - 2 * outer(l, f) * Rk + outer(l2, f2)</code> (where <code>Rk</code> is residuals for all factors but the <code>k</code>th and similarly for <code>R2k</code>). The <em>updated</em> parts of the objective have magnitude:</p>
-<pre class="r"><code>sum(fl$tau * outer(fl$EL[, k], fl$EF[, k]) * Rk)</code></pre>
-<pre><code>[1] 43462.72</code></pre>
-<pre class="r"><code>-0.5 * sum(fl$tau * outer(fl$EL2[, k], fl$EF2[, k]))</code></pre>
-<pre><code>[1] -21594.06</code></pre>
-<p>So, errors in the sixth digit of either of these components could explain the decrease in the objective function. Let there be errors in the updates to <code>EL2</code> and consider the latter part of the objective: <span class="math display">\[ -\frac{1}{2} \sum_{i, j} \tau_{i, j} \left( \bar{l^2}_i + \epsilon_i \right) \bar{f^2}_j 
-= -\frac{1}{2} \sum_i \bar{l^2}_i \sum_j \tau_{i, j} \bar{f^2}_j -\frac{1}{2} \sum_i \epsilon_i \sum_j \tau_{i, j} \bar{f^2}_j \]</span> so we’d need to see errors in (roughly) the sixth digit of <code>EL2</code>. A similar calculation shows that errors in the sixth digit of <code>EL</code> could suffice to explain the decrease.</p>
-<p>To test this hypothesis, I check to see what happens if only five digits are retained when performing the above calculations.</p>
-<pre class="r"><code>last_obj = flash_get_objective(data, fl)
-  
-digits = 5
-s2 = 1/(fl$EF2[, k] %*% t(fl$tau))
-s = sqrt(s2)
-Rk = flashr:::flash_get_Rk(data, fl, k)
-x = fl$EF[, k] %*% t(Rk * fl$tau) * s2
-ebnm_l = flashr:::ebnm_pn(x, s, list())
-
-KL_l = (ebnm_l$penloglik 
-        - flashr:::NM_posterior_e_loglik(x, s, ebnm_l$postmean,
-                                         ebnm_l$postmean2))
-
-fl$EL[, k] = signif(ebnm_l$postmean, digits=digits)
-fl$EL2[, k] = signif(ebnm_l$postmean2, digits=digits)
-fl$gl[[k]] = ebnm_l$fitted_g
-fl$KL_l[[k]] = KL_l
-flash_get_objective(data, fl) - last_obj</code></pre>
-<pre><code>[1] -0.01432302</code></pre>
-<p>So an overall error that is <em>roughly</em> on the scale of the decrease in objective function is produced.</p>
-</div>
 <div id="conclusions-and-questions" class="section level2">
 <h2>Conclusions and questions</h2>
-<p>Still, the error is not quite as large, and it would be very surprising to me if <code>EL</code> and <code>EL2</code> could only be trusted to five digits. More seriously, the sawtooth pattern discussed above points to a more regular feature of the optimization. Indeed, it appears that all of the triangles (objectives after updating factors) are biased upwards and all of the squares (objectives after updating loadings) are biased slightly downwards. Still, this would not explain the decrease in the objective that occurs after a complete iteration.</p>
+<p>The decrease appears too large to be explained by numerical error. Indeed, it would be very surprising to me if <code>EL</code> and <code>EL2</code> could only be trusted to five digits or so (as would have to be the case to produce errors of the above magnitude).</p>
+<p>More seriously, the sawtooth pattern depicted above points to a more regular feature of the optimization. Indeed, it appears that all of the triangles (objectives after updating factors) are biased upwards and all of the squares (objectives after updating loadings) are biased slightly downwards.</p>
+<p>The theory appears to be sound, so what is going on here?</p>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
