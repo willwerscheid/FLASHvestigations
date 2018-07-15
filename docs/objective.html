@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Decreases in the Objective Function</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Decreases in the Objective Function</h1>
+<h4 class="author"><em>Jason Willwerscheid</em></h4>
+<h4 class="date"><em>7/14/2018</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-07-15</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> db11cbb </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    docs/figure/
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+db11cbb
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/objective.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Here I begin to look into why the FLASH objective function can decrease after an iteration.</p>
+</div>
+<div id="illustration-of-problem" class="section level2">
+<h2>Illustration of problem</h2>
+<p>I’m using the “strong” tests from the MASH paper GTEx dataset. The first problem appears when fitting the fourth factor. Notice that in the final iteration, the objective decreases by a very small amount and a warning is displayed.</p>
+<pre class="r"><code># devtools::install_github(&quot;stephenslab/flashr&quot;, ref=&quot;trackObj&quot;)
+devtools::load_all(&quot;/Users/willwerscheid/GitHub/flashr&quot;)</code></pre>
+<pre><code>Loading flashr</code></pre>
+<pre class="r"><code># devtools::install_github(&quot;stephenslab/ebnm&quot;)
+devtools::load_all(&quot;/Users/willwerscheid/GitHub/ebnm&quot;)</code></pre>
+<pre><code>Loading ebnm</code></pre>
+<pre class="r"><code>gtex &lt;- readRDS(gzcon(url(&quot;https://github.com/stephenslab/gtexresults/blob/master/data/MatrixEQTLSumStats.Portable.Z.rds?raw=TRUE&quot;)))
+strong &lt;- gtex$strong.z
+res &lt;- flash_add_greedy(strong, Kmax=3, verbose=FALSE)</code></pre>
+<pre><code>fitting factor/loading 1</code></pre>
+<pre><code>fitting factor/loading 2</code></pre>
+<pre><code>fitting factor/loading 3</code></pre>
+<pre class="r"><code>res &lt;- flash_add_greedy(strong, f_init=res$f, Kmax=1, verbose=TRUE)</code></pre>
+<pre><code>fitting factor/loading 1</code></pre>
+<pre><code>Objective:-1298710.77860735</code></pre>
+<pre><code>Objective:-1297543.73149909</code></pre>
+<pre><code>Objective:-1297376.91372722</code></pre>
+<pre><code>Objective:-1297290.91328428</code></pre>
+<pre><code>Objective:-1297238.97898488</code></pre>
+<pre><code>Objective:-1297206.99734743</code></pre>
+<pre><code>Objective:-1297186.95839066</code></pre>
+<pre><code>Objective:-1297174.12546441</code></pre>
+<pre><code>Objective:-1297165.70006397</code></pre>
+<pre><code>Objective:-1297160.02771237</code></pre>
+<pre><code>Objective:-1297156.13460765</code></pre>
+<pre><code>Objective:-1297153.44144442</code></pre>
+<pre><code>Objective:-1297151.57875474</code></pre>
+<pre><code>Objective:-1297150.29283403</code></pre>
+<pre><code>Objective:-1297149.40714787</code></pre>
+<pre><code>Objective:-1297148.79985992</code></pre>
+<pre><code>Objective:-1297148.38694209</code></pre>
+<pre><code>Objective:-1297148.11014097</code></pre>
+<pre><code>Objective:-1297147.92880915</code></pre>
+<pre><code>Objective:-1297147.81438557</code></pre>
+<pre><code>Objective:-1297147.74670432</code></pre>
+<pre><code>Objective:-1297147.71143507</code></pre>
+<pre><code>Objective:-1297147.69841607</code></pre>
+<pre><code>Objective:-1297147.70039797</code></pre>
+<pre><code>Warning in r1_opt(flash_get_Rk(data, f, k), flash_get_R2k(data, f, k), f
+$EL[, : An iteration decreased the objective. This happens occasionally,
+perhaps due to numeric reasons. You could ignore this warning, but you
+might like to check out https://github.com/stephenslab/flashr/issues/26 for
+more details.</code></pre>
+<pre><code>performing nullcheck</code></pre>
+<pre><code>objective from deleting factor:-1301896.25041515</code></pre>
+<pre><code>objective from keeping factor:-1297147.70039797</code></pre>
+<pre><code>nullcheck complete, objective:-1297147.70039797</code></pre>
+</div>
+<div id="analysis" class="section level2">
+<h2>Analysis</h2>
+<p>A more granular tracking of the objective function reveals a larger problem. Recall that there are three steps in each iteration: updating the precision matrix, updating the factors (via the prior <span class="math inline">\(g_f\)</span>), and updating the loadings (via <span class="math inline">\(g_l\)</span>). Plotting the objective after each step rather than each iteration reveals a sawtooth pattern. (See branch <code>trackObj</code>, file <code>r1_opt.R</code> for the code used to obtain these results.)</p>
+<pre class="r"><code>obj_data &lt;- as.vector(rbind(res$obj[[1]]$after_tau,
+                            res$obj[[1]]$after_f,
+                            res$obj[[1]]$after_l))
+max_obj &lt;- max(obj_data)
+obj_data &lt;- obj_data - max_obj
+iter &lt;- 1:length(obj_data) / 3
+
+plt_xlab = &quot;Iteration&quot;
+plt_ylab = &quot;Diff. from maximum obj.&quot;
+plot(iter, obj_data, type=&#39;l&#39;, xlab=plt_xlab, ylab=plt_ylab)</code></pre>
+<p><img src="figure/objective.Rmd/plot-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Discarding the first 8 iterations in order to zoom in on the problem area:</p>
+<pre class="r"><code>obj_data &lt;- obj_data[-(1:24)]
+iter &lt;- iter[-(1:24)]
+plt_colors &lt;- c(&quot;indianred1&quot;, &quot;indianred3&quot;, &quot;indianred4&quot;)
+plt_pch &lt;- c(16, 17, 15)
+
+plot(iter, obj_data, col=plt_colors, pch=plt_pch,
+     xlab=plt_xlab, ylab=plt_ylab)
+legend(&quot;bottomright&quot;, c(&quot;after tau&quot;, &quot;after f&quot;, &quot;after l&quot;),
+       col=plt_colors, pch=plt_pch)</code></pre>
+<p><img src="figure/objective.Rmd/plot2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>I backtrack to just before the “bad” update.</p>
+<pre class="r"><code>res2 &lt;- flash_add_greedy(strong, Kmax=4, stopAtObj=-1297147.7)</code></pre>
+<pre><code>fitting factor/loading 1</code></pre>
+<pre><code>fitting factor/loading 2</code></pre>
+<pre><code>fitting factor/loading 3</code></pre>
+<pre><code>fitting factor/loading 4</code></pre>
+<pre class="r"><code>flash_get_objective(strong, res2$f) - flash_get_objective(strong, res$f)</code></pre>
+<pre><code>[1] 0.002208033</code></pre>
+<p>So at this point, the objective is indeed better than for the flash object attained above. The component parts of the objective are:</p>
+<pre class="r"><code>fl &lt;- res2$f
+data &lt;- flash_set_data(strong)
+k &lt;- 4
+
+KL_l &lt;- fl$KL_l[[k]]
+KL_f &lt;- fl$KL_f[[k]]
+loglik &lt;- flashr:::e_loglik(data, fl)
+list(KL_l = KL_l, KL_f = KL_f, loglik = loglik)</code></pre>
+<pre><code>$KL_l
+[1] -8324.579
+
+$KL_f
+[1] -128.9953
+
+$loglik
+[1] -1227372</code></pre>
+<p>First I update the precision (I follow the code in <code>r1_opt</code>). Only the “loglik” component is affected by this update:</p>
+<pre class="r"><code>init_fl = fl
+init_KL_l = KL_l
+init_KL_f = KL_f
+init_loglik = loglik
+
+R2 = flashr:::flash_get_R2(data, fl)
+fl$tau = flashr:::compute_precision(R2, data$missing, 
+                                    &quot;by_column&quot;, data$S)
+flashr:::e_loglik(data, fl) - init_loglik</code></pre>
+<pre><code>[1] 0.04309978</code></pre>
+<p>So the overall objective indeed increases. Now I update the loadings (FLASH updates factors first, but the order of updates is not supposed to affect the monotonicity of the objective function).</p>
+<pre class="r"><code>s2 = 1/(fl$EF2[, k] %*% t(fl$tau))
+s = sqrt(s2)
+Rk = flashr:::flash_get_Rk(data, fl, k)
+x = fl$EF[, k] %*% t(Rk * fl$tau) * s2
+ebnm_l = flashr:::ebnm_pn(x, s, list())
+KL_l = (ebnm_l$penloglik 
+        - flashr:::NM_posterior_e_loglik(x, s, ebnm_l$postmean,
+                                         ebnm_l$postmean2))
+
+fl$EL[, k] = ebnm_l$postmean
+fl$EL2[, k] = ebnm_l$postmean2
+fl$gl[[k]] = ebnm_l$fitted_g
+fl$KL_l[[k]] = KL_l
+flash_get_objective(data, fl) - flash_get_objective(data, init_fl)</code></pre>
+<pre><code>[1] -0.1154585</code></pre>
+<p>So the objective has in fact gotten worse. And tightening the control parameters or changing the initialization for the <code>ebnm</code> function does not help matters. For example:</p>
+<pre class="r"><code>s2 = 1/(fl$EF2[, k] %*% t(fl$tau))
+s = sqrt(s2)
+Rk = flashr:::flash_get_Rk(data, fl, k)
+x = fl$EF[, k] %*% t(Rk * fl$tau) * s2
+ebnm_l = flashr:::ebnm_pn(x, s, list(startpar=c(5,5),
+                                     control=list(factr=100)))
+KL_l = (ebnm_l$penloglik 
+        - flashr:::NM_posterior_e_loglik(x, s, ebnm_l$postmean,
+                                         ebnm_l$postmean2))
+
+fl$EL[, k] = ebnm_l$postmean
+fl$EL2[, k] = ebnm_l$postmean2
+fl$gl[[k]] = ebnm_l$fitted_g
+fl$KL_l[[k]] = KL_l
+flash_get_objective(data, fl) - flash_get_objective(data, init_fl)</code></pre>
+<pre><code>[1] -0.1154585</code></pre>
+</div>
+<div id="perturbation-analysis" class="section level2">
+<h2>Perturbation analysis</h2>
+<p>It’s possible that numerical error is responsible for the decrease, but it seems unlikely to me that this is the whole story.</p>
+<p>Indeed, assume that numerical error is sufficient to explain the decrease. Recall that the objective consists of a part that is calculated from <code>R2</code> and <code>tau</code>, a part that comes from <code>KL_l</code>, and a part that comes from <code>KL_f</code>. The first part is coded as <code>-0.5 * sum(log((2 * pi)/tau) + tau * R2)</code>, and R2 is updated as <code>R2k - 2 * outer(l, f) * Rk + outer(l2, f2)</code> (where <code>Rk</code> is residuals for all factors but the <code>k</code>th and similarly for <code>R2k</code>). The <em>updated</em> parts of the objective have magnitude:</p>
+<pre class="r"><code>sum(fl$tau * outer(fl$EL[, k], fl$EF[, k]) * Rk)</code></pre>
+<pre><code>[1] 43462.72</code></pre>
+<pre class="r"><code>-0.5 * sum(fl$tau * outer(fl$EL2[, k], fl$EF2[, k]))</code></pre>
+<pre><code>[1] -21594.06</code></pre>
+<p>So, errors in the sixth digit of either of these components could explain the decrease in the objective function. Let there be errors in the updates to <code>EL2</code> and consider the latter part of the objective: <span class="math display">\[ -\frac{1}{2} \sum_{i, j} \tau_{i, j} \left( \bar{l^2}_i + \epsilon_i \right) \bar{f^2}_j 
+= -\frac{1}{2} \sum_i \bar{l^2}_i \sum_j \tau_{i, j} \bar{f^2}_j -\frac{1}{2} \sum_i \epsilon_i \sum_j \tau_{i, j} \bar{f^2}_j \]</span> so we’d need to see errors in (roughly) the sixth digit of <code>EL2</code>. A similar calculation shows that errors in the sixth digit of <code>EL</code> could suffice to explain the decrease.</p>
+<p>To test this hypothesis, I check to see what happens if only five digits are retained when performing the above calculations.</p>
+<pre class="r"><code>last_obj = flash_get_objective(data, fl)
+  
+digits = 5
+s2 = 1/(fl$EF2[, k] %*% t(fl$tau))
+s = sqrt(s2)
+Rk = flashr:::flash_get_Rk(data, fl, k)
+x = fl$EF[, k] %*% t(Rk * fl$tau) * s2
+ebnm_l = flashr:::ebnm_pn(x, s, list())
+
+KL_l = (ebnm_l$penloglik 
+        - flashr:::NM_posterior_e_loglik(x, s, ebnm_l$postmean,
+                                         ebnm_l$postmean2))
+
+fl$EL[, k] = signif(ebnm_l$postmean, digits=digits)
+fl$EL2[, k] = signif(ebnm_l$postmean2, digits=digits)
+fl$gl[[k]] = ebnm_l$fitted_g
+fl$KL_l[[k]] = KL_l
+flash_get_objective(data, fl) - last_obj</code></pre>
+<pre><code>[1] -0.01432302</code></pre>
+<p>So an overall error that is <em>roughly</em> on the scale of the decrease in objective function is produced.</p>
+</div>
+<div id="conclusions-and-questions" class="section level2">
+<h2>Conclusions and questions</h2>
+<p>Still, the error is not quite as large, and it would be very surprising to me if <code>EL</code> and <code>EL2</code> could only be trusted to five digits. More seriously, the sawtooth pattern discussed above points to a more regular feature of the optimization. Indeed, it appears that all of the triangles (objectives after updating factors) are biased upwards and all of the squares (objectives after updating loadings) are biased slightly downwards. Still, this would not explain the decrease in the objective that occurs after a complete iteration.</p>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS Sierra 10.12.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ebnm_0.1-12   flashr_0.5-12
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.17        pillar_1.2.1        plyr_1.8.4         
+ [4] compiler_3.4.3      git2r_0.21.0        workflowr_1.0.1    
+ [7] R.methodsS3_1.7.1   R.utils_2.6.0       iterators_1.0.9    
+[10] tools_3.4.3         testthat_2.0.0      digest_0.6.15      
+[13] tibble_1.4.2        evaluate_0.10.1     memoise_1.1.0      
+[16] gtable_0.2.0        lattice_0.20-35     rlang_0.2.0        
+[19] Matrix_1.2-12       foreach_1.4.4       commonmark_1.4     
+[22] yaml_2.1.17         parallel_3.4.3      withr_2.1.1.9000   
+[25] stringr_1.3.0       roxygen2_6.0.1.9000 xml2_1.2.0         
+[28] knitr_1.20          devtools_1.13.4     rprojroot_1.3-2    
+[31] grid_3.4.3          R6_2.2.2            rmarkdown_1.8      
+[34] ggplot2_2.2.1       ashr_2.2-10         magrittr_1.5       
+[37] whisker_0.3-2       backports_1.1.2     scales_0.5.0       
+[40] codetools_0.2-15    htmltools_0.3.6     MASS_7.3-48        
+[43] assertthat_0.2.0    softImpute_1.4      colorspace_1.3-2   
+[46] stringi_1.1.6       lazyeval_0.2.1      munsell_0.4.3      
+[49] doParallel_1.0.11   pscl_1.5.2          truncnorm_1.0-8    
+[52] SQUAREM_2017.10-1   R.oo_1.21.0        </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
