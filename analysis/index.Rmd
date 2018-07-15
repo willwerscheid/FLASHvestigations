@@ -6,4 +6,4 @@ output:
     toc: false
 ---
 
-Welcome to my research website.
+Investigation 1. [The FLASH objective function appears to behave erratically.](objective.html)
