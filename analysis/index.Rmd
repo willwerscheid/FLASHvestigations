@@ -7,3 +7,5 @@ output:
 ---
 
 Investigation 1. [The FLASH objective function appears to behave erratically.](objective.html)
+
+Investigation 2. [This problem only occurs when using ebnm_pn, not ebnm_ash.](objective2.html)
