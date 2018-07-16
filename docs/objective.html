@@ -341,7 +341,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/87a47fdc56f07e5d21812f8d5dc5f145fe3a4e73" target="_blank">87a47fd</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/055d5723d07ea68bc92863c501b728048beb0aed" target="_blank">055d572</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -378,6 +378,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/055d5723d07ea68bc92863c501b728048beb0aed/analysis/objective.Rmd" target="_blank">055d572</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-16
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/objective.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/7db12a1efed12474ff15a3cf6c111dbf946d7107/docs/objective.html" target="_blank">7db12a1</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-16
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -555,6 +589,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/7db12a1efed12474ff15a3cf6c111dbf946d7107/docs/figure/objective.Rmd/plot-1.png" target="_blank">7db12a1</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-16
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/0b30bef854ef3b0dbd073845cd63e93ca75cef56/docs/figure/objective.Rmd/plot-1.png" target="_blank">0b30bef</a>
 </td>
 <td style="text-align:left;">
@@ -596,6 +641,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/7db12a1efed12474ff15a3cf6c111dbf946d7107/docs/figure/objective.Rmd/plot2-1.png" target="_blank">7db12a1</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-16
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/0b30bef854ef3b0dbd073845cd63e93ca75cef56/docs/figure/objective.Rmd/plot2-1.png" target="_blank">0b30bef</a>
 </td>
 <td style="text-align:left;">
@@ -609,13 +665,13 @@ Jason Willwerscheid
 </table>
 <p></details></p>
 <p>I backtrack to just before the “bad” update.</p>
-<pre class="r"><code>res2 &lt;- flash_add_greedy(strong, Kmax=4, stopAtObj=-1297147.7)</code></pre>
+<pre class="r"><code>res2 &lt;- flash_add_greedy(strong, Kmax=4, stopAtObj=-1297148.032)</code></pre>
 <pre><code>fitting factor/loading 1</code></pre>
 <pre><code>fitting factor/loading 2</code></pre>
 <pre><code>fitting factor/loading 3</code></pre>
 <pre><code>fitting factor/loading 4</code></pre>
 <pre class="r"><code>flash_get_objective(strong, res2$f) - flash_get_objective(strong, res$f)</code></pre>
-<pre><code>[1] -0.0004392141</code></pre>
+<pre><code>[1] 0.002265139</code></pre>
 <p>So at this point, the objective is indeed better than for the flash object attained above. The component parts of the objective are:</p>
 <pre class="r"><code>fl &lt;- res2$f
 data &lt;- flash_set_data(strong)
@@ -626,13 +682,13 @@ KL_f &lt;- fl$KL_f[[k]]
 loglik &lt;- flashr:::e_loglik(data, fl)
 list(KL_l = KL_l, KL_f = KL_f, loglik = loglik)</code></pre>
 <pre><code>$KL_l
-[1] -8310.447
+[1] -8324.404
 
 $KL_f
-[1] -128.9884
+[1] -128.9907
 
 $loglik
-[1] -1227385</code></pre>
+[1] -1227371</code></pre>
 <p>First I update the precision (I follow the code in <code>r1_opt</code>). Only the “loglik” component is affected by this update:</p>
 <pre class="r"><code>init_fl = fl
 init_KL_l = KL_l
@@ -643,7 +699,7 @@ R2 = flashr:::flash_get_R2(data, fl)
 fl$tau = flashr:::compute_precision(R2, data$missing, 
                                     &quot;by_column&quot;, data$S)
 flashr:::e_loglik(data, fl) - init_loglik</code></pre>
-<pre><code>[1] 0.03286114</code></pre>
+<pre><code>[1] 0.04306088</code></pre>
 <p>So the overall objective indeed increases. Now I update the loadings (FLASH updates factors first, but the order of updates is not supposed to affect the monotonicity of the objective function).</p>
 <pre class="r"><code>s2 = 1/(fl$EF2[, k] %*% t(fl$tau))
 s = sqrt(s2)
@@ -659,7 +715,7 @@ fl$EL2[, k] = ebnm_l$postmean2
 fl$gl[[k]] = ebnm_l$fitted_g
 fl$KL_l[[k]] = KL_l
 flash_get_objective(data, fl) - flash_get_objective(data, init_fl)</code></pre>
-<pre><code>[1] -0.1077852</code></pre>
+<pre><code>[1] -0.1154427</code></pre>
 <p>So the objective has in fact gotten worse. And tightening the control parameters or changing the initialization for the <code>ebnm</code> function does not help matters. For example:</p>
 <pre class="r"><code>s2 = 1/(fl$EF2[, k] %*% t(fl$tau))
 s = sqrt(s2)
@@ -676,7 +732,7 @@ fl$EL2[, k] = ebnm_l$postmean2
 fl$gl[[k]] = ebnm_l$fitted_g
 fl$KL_l[[k]] = KL_l
 flash_get_objective(data, fl) - flash_get_objective(data, init_fl)</code></pre>
-<pre><code>[1] -0.1077852</code></pre>
+<pre><code>[1] -0.1154426</code></pre>
 </div>
 <div id="conclusions-and-questions" class="section level2">
 <h2>Conclusions and questions</h2>
