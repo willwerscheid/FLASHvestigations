@@ -117,7 +117,7 @@ s2 = 1/(fl$EF2[, k] %*% t(fl$tau))
 s = sqrt(s2)
 Rk = flashr:::flash_get_Rk(data, fl, k)
 x = fl$EF[, k] %*% t(Rk * fl$tau) * s2
-ebnm_l = flashr:::ebnm_pn(x, s, list(startpar=c(5,5),
+ebnm_l = flashr:::ebnm_pn(x, s, list(g=list(a=100),
                                      control=list(factr=100)))
 KL_l = (ebnm_l$penloglik 
         - flashr:::NM_posterior_e_loglik(x, s, ebnm_l$postmean,
