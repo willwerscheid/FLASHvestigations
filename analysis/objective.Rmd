@@ -60,7 +60,7 @@ legend("bottomright", c("after tau", "after f", "after l"),
 I backtrack to just before the "bad" update. 
 
 ```{r slow1}
-res2 <- flash_add_greedy(strong, Kmax=4, stopAtObj=-1297147.7)
+res2 <- flash_add_greedy(strong, Kmax=4, stopAtObj=-1297148.032)
 flash_get_objective(strong, res2$f) - flash_get_objective(strong, res$f)
 ```
 
