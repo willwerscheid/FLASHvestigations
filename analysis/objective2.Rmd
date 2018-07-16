@@ -53,7 +53,8 @@ plot_obj <- function(res, k, niters) {
   plot(iter, obj_data, col=plt_colors, pch=plt_pch,
        xlab=plt_xlab, ylab=plt_ylab)
   legend("bottomright", c("after tau", "after f", "after l"),
-         col=plt_colors, pch=plt_pch)}
+         col=plt_colors, pch=plt_pch)
+}
 ```
 
 ## Results: ebnm_pn
