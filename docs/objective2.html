@@ -289,7 +289,7 @@ div.tocify {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/jdblischak/workflowr">
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
     <span class="fa fa-github"></span>
      
   </a>
@@ -317,7 +317,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-07-15</p>
+<p><strong>Last updated:</strong> 2018-07-16</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -341,7 +341,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/a19a4a0f4eada7a1db91af999a07b4edfc934c38" target="_blank">a19a4a0</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/de79fe69467f792ccfe77920b86ed1a3428bd60c" target="_blank">de79fe6</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -350,6 +350,9 @@ Ignored files:
     Ignored:    .Rproj.user/
     Ignored:    docs/.DS_Store
     Ignored:    docs/figure/.DS_Store
+
+Unstaged changes:
+    Modified:   analysis/objective.Rmd
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -378,6 +381,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/b0dbc3adc2a7995dc6284d6eea27cbf97722dc56/analysis/objective2.Rmd" target="_blank">b0dbc3a</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-16
+</td>
+<td style="text-align:left;">
+add Rdata for variables before ‘bad’ update
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/019bf351280c990aa9f825790b7ff321b601d4b3/docs/objective2.html" target="_blank">019bf35</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -483,31 +520,272 @@ strong &lt;- gtex$strong.z</code></pre>
   plot(iter, obj_data, col=plt_colors, pch=plt_pch,
        xlab=plt_xlab, ylab=plt_ylab)
   legend(&quot;bottomright&quot;, c(&quot;after tau&quot;, &quot;after f&quot;, &quot;after l&quot;),
-         col=plt_colors, pch=plt_pch)}</code></pre>
+         col=plt_colors, pch=plt_pch)
+}</code></pre>
 </div>
 <div id="results-ebnm_pn" class="section level2">
 <h2>Results: ebnm_pn</h2>
 <p>The problem discussed in the <a href="objective.html">previous investigation</a> occurs every time.</p>
 <pre class="r"><code>plot_obj(pn_res, 1, niters=3)</code></pre>
 <p><img src="figure/objective2.Rmd/plot_pn-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of plot_pn-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/019bf351280c990aa9f825790b7ff321b601d4b3/docs/figure/objective2.Rmd/plot_pn-1.png" target="_blank">019bf35</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code>plot_obj(pn_res, 2, niters=5)</code></pre>
 <p><img src="figure/objective2.Rmd/plot_pn-2.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of plot_pn-2.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/019bf351280c990aa9f825790b7ff321b601d4b3/docs/figure/objective2.Rmd/plot_pn-2.png" target="_blank">019bf35</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code>plot_obj(pn_res, 3, niters=20)</code></pre>
 <p><img src="figure/objective2.Rmd/plot_pn-3.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of plot_pn-3.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/019bf351280c990aa9f825790b7ff321b601d4b3/docs/figure/objective2.Rmd/plot_pn-3.png" target="_blank">019bf35</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code>plot_obj(pn_res, 4, niters=10)</code></pre>
 <p><img src="figure/objective2.Rmd/plot_pn-4.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of plot_pn-4.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/019bf351280c990aa9f825790b7ff321b601d4b3/docs/figure/objective2.Rmd/plot_pn-4.png" target="_blank">019bf35</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 <div id="results-ebnm_ash" class="section level2">
 <h2>Results: ebnm_ash</h2>
 <p>But no obvious problems occur when using <code>ebnm_ash</code>.</p>
 <pre class="r"><code>plot_obj(ash_res, 1, niters=3)</code></pre>
 <p><img src="figure/objective2.Rmd/plot_ash-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of plot_ash-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/019bf351280c990aa9f825790b7ff321b601d4b3/docs/figure/objective2.Rmd/plot_ash-1.png" target="_blank">019bf35</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code>plot_obj(ash_res, 2, niters=5)</code></pre>
 <p><img src="figure/objective2.Rmd/plot_ash-2.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of plot_ash-2.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/019bf351280c990aa9f825790b7ff321b601d4b3/docs/figure/objective2.Rmd/plot_ash-2.png" target="_blank">019bf35</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code>plot_obj(ash_res, 3, niters=10)</code></pre>
 <p><img src="figure/objective2.Rmd/plot_ash-3.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of plot_ash-3.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/019bf351280c990aa9f825790b7ff321b601d4b3/docs/figure/objective2.Rmd/plot_ash-3.png" target="_blank">019bf35</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code>plot_obj(ash_res, 4, niters=20)</code></pre>
 <p><img src="figure/objective2.Rmd/plot_ash-4.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of plot_ash-4.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/019bf351280c990aa9f825790b7ff321b601d4b3/docs/figure/objective2.Rmd/plot_ash-4.png" target="_blank">019bf35</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-15
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 <div id="conclusions" class="section level2">
 <h2>Conclusions</h2>
