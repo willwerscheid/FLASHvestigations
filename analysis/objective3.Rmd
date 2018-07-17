@@ -1,0 +1,81 @@
+---
+title: "Bad Loadings Updates"
+author: "Jason Willwerscheid"
+date: "7/16/2018"
+output:
+  workflowr::wflow_html
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# devtools::install_github("stephenslab/flashr", ref="trackObj")
+devtools::load_all("/Users/willwerscheid/GitHub/flashr")
+# devtools::install_github("stephenslab/ebnm")
+devtools::load_all("/Users/willwerscheid/GitHub/ebnm")
+```
+
+
+## Introduction
+
+Here I look into the bad loadings updates some more. 
+
+First I load the flash object from just before the "bad" update discussed in the [first investigation](objective3.html). Next, I alternately update the precision and the loadings (I do not update the factors). I do so for 20 iterations.
+
+```{r iterate}
+load("data/before_bad.Rdata")
+
+init_fl <- res2$f
+data <- flash_set_data(strong)
+k <- 4
+
+fl = init_fl
+all_fls = list()
+niters = 20
+for (i in 1:niters) {
+  # update precision
+  R2 = flashr:::flash_get_R2(data, fl)
+  fl$tau = flashr:::compute_precision(R2, data$missing,
+                                      "by_column", data$S)
+  # update loadings
+  s2 = 1/(fl$EF2[, k] %*% t(fl$tau))
+  s = sqrt(s2)
+  Rk = flashr:::flash_get_Rk(data, fl, k)
+  x = fl$EF[, k] %*% t(Rk * fl$tau) * s2
+  ebnm_l = flashr:::ebnm_pn(x, s, list())
+  KL_l = (ebnm_l$penloglik
+          - flashr:::NM_posterior_e_loglik(x, s, ebnm_l$postmean,
+                                           ebnm_l$postmean2))
+  fl$EL[, k] = ebnm_l$postmean
+  fl$EL2[, k] = ebnm_l$postmean2
+  fl$gl[[k]] = ebnm_l$fitted_g
+  fl$KL_l[[k]] = KL_l
+
+  all_fls[[i]] = fl
+}
+```
+
+
+## Objective
+
+Interestingly, the objective function gets worse every iteration. Nonetheless, it is apparently converging to something.
+
+```{r obj}
+for (i in 1:niters) {
+  message(flash_get_objective(data, all_fls[[i]])
+          - flash_get_objective(data, init_fl))
+}
+```
+
+
+## Convergence of prior
+
+To confirm that convergence is taking place, I check the estimated prior $g_l$ after each iteration (the first list gives the values of $\pi_0$; the second, the values of $a$):
+
+```{r gl}
+for (i in 1:niters) {
+  message(all_fls[[i]]$gl[[4]]$pi0)
+}
+for (i in 1:niters) {
+  message(all_fls[[i]]$gl[[4]]$a)
+}
+```
