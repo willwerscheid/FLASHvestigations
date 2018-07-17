@@ -99,7 +99,7 @@ calc_KL <- function(x, s, g) {
 
 ## Alternate objective
 
-So maybe we could instead optimize (over $g$) `calc_KL(x, s, g) - 0.5 * sum(Etheta(x, s, g) / s - 2 * x * Etheta2(x, s, g))`? If the quantity calculated by `calc_KL` is indeed correct, then this is simply another way to write the objective $F(g, q)$ (with the constraint that $q$ is the posterior induced by $g$).
+So maybe we could instead optimize (over $g$) `calc_KL(x, s, g) - 0.5 * sum((1 / s^2) * (Etheta2(x, s, g) - 2 * x * Etheta(x, s, g))`? If the quantity calculated by `calc_KL` is indeed correct, then this is simply another way to write the objective $F(g, q)$ (with the constraint that $q$ is the posterior induced by $g$).
 
 ```{r Etheta}
 alt_obj <- function(x, s, pi0, a) {
