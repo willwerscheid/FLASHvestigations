@@ -341,7 +341,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/a0bccf91e8bdf3e50e532b290c9ae313c245a62c" target="_blank">a0bccf9</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/e811943688be6d783d32c4d45af52d5f09fe1e05" target="_blank">e811943</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -378,6 +378,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/e811943688be6d783d32c4d45af52d5f09fe1e05/analysis/obj_notes.Rmd" target="_blank">e811943</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-17
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/obj_notes.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/06211851c6ed5c7c2e1870b1d8ab53d50186e55d/docs/obj_notes.html" target="_blank">0621185</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-17
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -442,7 +476,7 @@ E_q \log \frac{g(l)}{q(l)}
 - \frac{(1 - \tilde{\pi}_0)a}{2} (\tilde{\mu}^2 + \tilde{\sigma}^2)
 + \frac{1 - \tilde{\pi}_0}{2}
 \end{aligned}\]</span></p>
-<p>So we should be able to calculate $E_q}  as follows:</p>
+<p>So we should be able to calculate <span class="math inline">\(E_q \log \frac{g(l)}{q(l)}\)</span> as follows:</p>
 <pre class="r"><code>calc_KL &lt;- function(x, s, g) {
   pi0 &lt;- g$pi0
   w &lt;- 1 - g$pi0
