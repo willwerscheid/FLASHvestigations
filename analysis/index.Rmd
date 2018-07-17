@@ -10,4 +10,6 @@ output:
 
 [Investigation 2.](objective2.html) This problem only occurs when using `ebnm_pn`, not `ebnm_ash`.
 
-[Investigation 3.](objective3.html) The objective can continue to get worse as the loadings are repeatedly updated. Nonetheless, convergence (from above) takes place.
+[Investigation 3.](objective3.html) The objective can continue to get worse as loadings are repeatedly updated. Nonetheless, convergence takes place (from above!).
+
+[Notes on computing the FLASH objective.](obj_notes.html)
