@@ -341,7 +341,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/e811943688be6d783d32c4d45af52d5f09fe1e05" target="_blank">e811943</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/3e874c67c33a579f1466176b76ad372248f0555a" target="_blank">3e874c6</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -378,6 +378,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/3e874c67c33a579f1466176b76ad372248f0555a/analysis/obj_notes.Rmd" target="_blank">3e874c6</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-17
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/obj_notes.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/02765a9e16870212a9b727f1c10fbcc5f81238a0/docs/obj_notes.html" target="_blank">02765a9</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-17
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -444,8 +478,8 @@ B_i = \sum_j \tau_{ij} R_{ij} Ef_j, \]</span> (<span class="math inline">\(R\)</
 <p>As Lemma 2 in the paper shows (see Appendix A.2), this expression is optimized by setting <span class="math inline">\(s_j^2 = A_j\)</span> and <span class="math inline">\(x_j = B_j s_j^2\)</span>, and then solving the EBNM problem, where the EBNM model is: <span class="math display">\[ \mathbf{x} = \mathbf{\theta} + \mathbf{e},\ \theta_1, \ldots, \theta_n \sim^{iid} g \]</span></p>
 <p>Solving the EBNM problem gives <span class="math display">\[\hat{g} = {\arg \max}_g\ p(x \mid g) \]</span> and <span class="math display">\[ \hat{q} = p(\theta \mid x, \hat{g}) \]</span></p>
 <p>Finally, to update the overall objective, we need to compute <span class="math inline">\(E_q \log \frac{g(\mathbf{l})}{q(\mathbf{l})}\)</span>. FLASH uses a clever trick, noticing that <span class="math display">\[ E_{\hat{q}} \log \frac{\hat{g}(\mathbf{l})}{\hat{q}(\mathbf{l})}
-= F(\hat{g}, \hat{q}) + \frac{1}{2} 
-E_{\hat{q}} \left[ \sum_j \log 2\pi s_j^2 + (1/s+j^2)(x_j - \theta_j)^2 \right]\]</span> (See Appendix A.4.)</p>
+= F(\hat{g}, \hat{q}) + \frac{1}{2} \sum_j
+\left[ \log 2\pi s_j^2 + (1/s_j^2) E_{\hat{q}} (x_j - \theta_j)^2 \right] \]</span> (See Appendix A.4.)</p>
 </div>
 <div id="direct-method" class="section level2">
 <h2>Direct method</h2>
