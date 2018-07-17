@@ -6,6 +6,8 @@ output:
     toc: false
 ---
 
-Investigation 1. [The FLASH objective function appears to behave erratically.](objective.html)
+[Investigation 1.](objective.html) The FLASH objective function appears to behave erratically.
 
-Investigation 2. [This problem only occurs when using ebnm_pn, not ebnm_ash.](objective2.html)
+[Investigation 2.](objective2.html) This problem only occurs when using `ebnm_pn`, not `ebnm_ash`.
+
+[Investigation 3.](objective3.html) [The objective can continue to get worse as the loadings are repeatedly updated. Nonetheless, convergence (from above) takes place.]
