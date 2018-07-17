@@ -75,7 +75,7 @@ E_q \log \frac{g(l)}{q(l)}
 + \frac{1 - \tilde{\pi}_0}{2}
 \end{aligned}$$
 
-So we should be able to calculate $E_q} \log \frac{g(l)}{q(l)} as follows:
+So we should be able to calculate $E_q \log \frac{g(l)}{q(l)}$ as follows:
 ```{r KL}
 calc_KL <- function(x, s, g) {
   pi0 <- g$pi0
