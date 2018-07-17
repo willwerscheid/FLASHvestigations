@@ -341,7 +341,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/3e874c67c33a579f1466176b76ad372248f0555a" target="_blank">3e874c6</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/eb42402eeb2bc2dcbed97f084f5b02f9b22173ba" target="_blank">eb42402</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -378,6 +378,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/eb42402eeb2bc2dcbed97f084f5b02f9b22173ba/analysis/obj_notes.Rmd" target="_blank">eb42402</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-17
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/obj_notes.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/96786343a4df8c33b3157a33589d99237615a873/docs/obj_notes.html" target="_blank">9678634</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-17
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -527,6 +561,31 @@ E_q \log \frac{g(l)}{q(l)}
   KLd &lt;- -(wpost / 2) * a * (pvar_cond + pmean_cond^2)
   KLe &lt;- (wpost / 2)
   sum(KLa) + sum(KLb) + sum(KLc) + sum(KLd) + sum(KLe)
+}</code></pre>
+</div>
+<div id="alternate-objective" class="section level2">
+<h2>Alternate objective</h2>
+<p>So maybe we could instead optimize (over <span class="math inline">\(g\)</span>) <code>calc_KL(x, s, g) - 0.5 * sum(Etheta(x, s, g) / s - 2 * x * Etheta2(x, s, g))</code>? If the quantity calculated by <code>calc_KL</code> is indeed correct, then this is simply another way to write the objective <span class="math inline">\(F(g, q)\)</span> (with the constraint that <span class="math inline">\(q\)</span> is the posterior induced by <span class="math inline">\(g\)</span>).</p>
+<pre class="r"><code>alt_obj &lt;- function(x, s, pi0, a) {
+  w &lt;- 1 - pi0
+  
+  wpost &lt;- ebnm:::wpost_normal(x, s, w, a)
+  pi0post &lt;- 1 - wpost[wpost &lt; 1]
+  pmean_cond &lt;- ebnm:::pmean_cond_normal(x, s, a)
+  pvar_cond &lt;- ebnm:::pvar_cond_normal(s, a)
+  
+  Etheta &lt;- wpost * pmean_cond
+  Etheta2 &lt;- wpost * (pmean_cond^2 + pvar_cond)
+  
+  KLa &lt;- pi0post * log(pi0 / pi0post)
+  KLb &lt;- wpost * log(w / wpost)
+  KLc &lt;- (wpost / 2) * log(a * pvar_cond)
+  KLd &lt;- -(wpost / 2) * a * (pvar_cond + pmean_cond^2)
+  KLe &lt;- (wpost / 2)
+  KL &lt;- sum(KLa) + sum(KLb) + sum(KLc) + sum(KLd) + sum(KLe)
+  
+  return(KL - 0.5 * sum(2 * pi * s^2 
+                        + (1 / s^2) * (x^2 - 2 * x * Etheta + Etheta2)))
 }</code></pre>
 </div>
 <div id="session-information" class="section level2">
