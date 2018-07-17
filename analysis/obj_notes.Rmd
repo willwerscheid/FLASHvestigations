@@ -95,3 +95,32 @@ calc_KL <- function(x, s, g) {
   sum(KLa) + sum(KLb) + sum(KLc) + sum(KLd) + sum(KLe)
 }
 ```
+
+
+## Alternate objective
+
+So maybe we could instead optimize (over $g$) `calc_KL(x, s, g) - 0.5 * sum(Etheta(x, s, g) / s - 2 * x * Etheta2(x, s, g))`? If the quantity calculated by `calc_KL` is indeed correct, then this is simply another way to write the objective $F(g, q)$ (with the constraint that $q$ is the posterior induced by $g$).
+
+```{r Etheta}
+alt_obj <- function(x, s, pi0, a) {
+  w <- 1 - pi0
+  
+  wpost <- ebnm:::wpost_normal(x, s, w, a)
+  pi0post <- 1 - wpost[wpost < 1]
+  pmean_cond <- ebnm:::pmean_cond_normal(x, s, a)
+  pvar_cond <- ebnm:::pvar_cond_normal(s, a)
+  
+  Etheta <- wpost * pmean_cond
+  Etheta2 <- wpost * (pmean_cond^2 + pvar_cond)
+  
+  KLa <- pi0post * log(pi0 / pi0post)
+  KLb <- wpost * log(w / wpost)
+  KLc <- (wpost / 2) * log(a * pvar_cond)
+  KLd <- -(wpost / 2) * a * (pvar_cond + pmean_cond^2)
+  KLe <- (wpost / 2)
+  KL <- sum(KLa) + sum(KLb) + sum(KLc) + sum(KLd) + sum(KLe)
+  
+  return(KL - 0.5 * sum(2 * pi * s^2 
+                        + (1 / s^2) * (x^2 - 2 * x * Etheta + Etheta2)))
+}
+```
