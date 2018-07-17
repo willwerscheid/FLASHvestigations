@@ -33,8 +33,8 @@ $$ \hat{q} = p(\theta \mid x, \hat{g}) $$
 
 Finally, to update the overall objective, we need to compute $E_q \log \frac{g(\mathbf{l})}{q(\mathbf{l})}$. FLASH uses a clever trick, noticing that
 $$ E_{\hat{q}} \log \frac{\hat{g}(\mathbf{l})}{\hat{q}(\mathbf{l})}
-= F(\hat{g}, \hat{q}) + \frac{1}{2} 
-E_{\hat{q}} \left[ \sum_j \log 2\pi s_j^2 + (1/s+j^2)(x_j - \theta_j)^2 \right]$$
+= F(\hat{g}, \hat{q}) + \frac{1}{2} \sum_j
+\left[ \log 2\pi s_j^2 + (1/s_j^2) E_{\hat{q}} (x_j - \theta_j)^2 \right] $$
 (See Appendix A.4.)
 
 ## Direct method
