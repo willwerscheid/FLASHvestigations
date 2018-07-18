@@ -21,10 +21,10 @@ $$ F(g, q) := E_q \left[ -\frac{1}{2} \sum_i (A_i l_i^2 - 2 B_i l_i) \right]
 with
 $$ A_i = \sum_j \tau_{ij} Ef^2_j \text{ and }
 B_i = \sum_j \tau_{ij} R_{ij} Ef_j, $$
-($R$ is the matrix of residuals (excluding factor $k$) and $EF_j$ and $EF^2_j$ are the expected values of $f_jk$ and $f_jk^2$ with respect to the distribution $q_{f_k}$ fitted during the factor update.)
+($R$ is the matrix of residuals (excluding factor $k$) and $Ef_j$ and $Ef^2_j$ are the expected values of $f_{jk}$ and $f_{jk}^2$ with respect to the distribution $q_{f_k}$ fitted during the factor update.)
 
 As Lemma 2 in the paper shows (see Appendix A.2), this expression is optimized by setting $s_j^2 = A_j$ and $x_j = B_j s_j^2$, and then solving the EBNM problem, where the EBNM model is:
-$$ \mathbf{x} = \mathbf{\theta} + \mathbf{e},\ \theta_1, \ldots, \theta_n \sim^{iid} g $$
+$$ \mathbf{x} = \mathbf{\theta} + \mathbf{e},\ \theta_1, \ldots, \theta_n \sim^{iid} g,\ e_j \sim N(0, s_j^2) $$
 
 Solving the EBNM problem gives 
 $$\hat{g} = {\arg \max}_g\ p(x \mid g) $$ 
