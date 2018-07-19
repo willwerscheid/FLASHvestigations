@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Comparing loadings update algorithms</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Comparing loadings update algorithms</h1>
+<h4 class="author"><em>Jason Willwerscheid</em></h4>
+<h4 class="date"><em>7/19/2018</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-07-19</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/bc2681ed33381070f6380baa1e90bba4efde8d6f" target="_blank">bc2681e</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Unstaged changes:
+    Modified:   analysis/flash_em.Rmd
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/bc2681ed33381070f6380baa1e90bba4efde8d6f/analysis/alt_alg.Rmd" target="_blank">bc2681e</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-19
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/alt_alg.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="intro" class="section level2">
+<h2>Intro</h2>
+<p>Here I implement the algorithm described in a <a href="flash_em.html">previous note</a> and compare results with FLASH.</p>
+</div>
+<div id="code" class="section level2">
+<h2>Code</h2>
+<p>Click “Code” to view the implementation.</p>
+<pre class="r"><code># INITIALIZATION FUNCTIONS ------------------------------------------
+
+add_new_altfl &lt;- function(data, fl, seed=1) {
+  set.seed(seed)
+  
+  altfl &lt;- list()
+  altfl$tau &lt;- fl$tau
+  altfl$Rk &lt;- flashr:::flash_get_R(data, fl)
+  
+  n &lt;- nrow(fl$tau)
+  p &lt;- ncol(fl$tau)
+  altfl$wl &lt;- rep(0.1, n)
+  altfl$wf &lt;- rep(0.1, p)
+  altfl$mul &lt;- rnorm(n)
+  altfl$muf &lt;- rnorm(p)
+  altfl$s2l &lt;- rep(1, n)
+  altfl$s2f &lt;- rep(1, p)
+  altfl$al &lt;- altfl$af &lt;- 1
+  altfl$pi0l &lt;- altfl$pi0f &lt;- 0.9
+  
+  altfl$KL &lt;- sum(unlist(fl$KL_l) + unlist(fl$KL_f))
+  
+  return(altfl)
+}
+
+fl_to_altfl &lt;- function(data, fl, k) {
+  altfl &lt;- list()
+  altfl$tau &lt;- fl$tau
+  altfl$Rk &lt;- flashr:::flash_get_R(data, fl)
+  
+  altfl$al &lt;- fl$gl[[k]]$a
+  altfl$pi0l &lt;- fl$gl[[k]]$pi0
+  altfl$af &lt;- fl$gf[[k]]$a
+  altfl$pi0f &lt;- fl$gf[[k]]$pi0
+
+  s2 = 1/(fl$EF2[, k] %*% t(fl$tau))
+  s = sqrt(s2)
+  Rk = flashr:::flash_get_Rk(data, fl, k)
+  x = fl$EF[, k] %*% t(Rk * fl$tau) * s2
+  w = 1 - fl$gl[[k]]$pi0
+  a = fl$gl[[k]]$a
+  
+  altfl$wl &lt;- ebnm:::wpost_normal(x, s, w, a)
+  altfl$mul &lt;- ebnm:::pmean_cond_normal(x, s, a)
+  altfl$s2l &lt;- ebnm:::pvar_cond_normal(s, a)
+  
+  s2 = 1/(fl$EL2[, k] %*% fl$tau)
+  s = sqrt(s2)
+  Rk = flashr:::flash_get_Rk(data, fl, k)
+  x = fl$EL[, k] %*% (Rk * fl$tau) * s2
+  w = 1 - fl$gf[[k]]$pi0
+  a = fl$gf[[k]]$a
+  
+  altfl$wf &lt;- ebnm:::wpost_normal(x, s, w, a)
+  altfl$muf &lt;- ebnm:::pmean_cond_normal(x, s, a)
+  altfl$s2f &lt;- ebnm:::pvar_cond_normal(s, a)
+  
+  altfl$KL &lt;- sum(unlist(fl$KL_l)[-k] + unlist(fl$KL_f)[-k])
+  
+  return(altfl)
+}
+
+altfl_to_fl &lt;- function(altfl, fl, k) {
+  fl$EL[, k] &lt;- compute_EX(altfl$wl, altfl$mul)
+  fl$EL2[, k] &lt;- compute_EX2(altfl$wl, altfl$mul, altfl$s2l)
+  fl$EF[, k] &lt;- compute_EX(altfl$wf, altfl$muf)
+  fl$EF2[, k] &lt;- compute_EX2(altfl$wf, altfl$muf, altfl$s2f)
+  
+  fl$gl[[k]] &lt;- list(pi0 = altfl$pi0l, a = altfl$al)
+  fl$gf[[k]] &lt;- list(pi0 = altfl$pi0f, a = altfl$af)
+  fl$ebnm_fn_l &lt;- fl$ebnm_fn_f &lt;- &quot;alt&quot;
+  fl$ebnm_param_l &lt;- fl$ebnm_param_f &lt;- list()
+  
+  fl$tau &lt;- altfl$tau
+  
+  return(fl)
+}
+
+# OBJECTIVE FUNCTION ------------------------------------------------
+
+compute_obj &lt;- function(altfl) {
+  with(altfl, {
+    EL &lt;- compute_EX(wl, mul)
+    EL2 &lt;- compute_EX2(wl, mul, s2l)
+    EF &lt;- compute_EX(wf, muf)
+    EF2 &lt;- compute_EX2(wf, muf, s2f)
+
+    obj &lt;- rep(0, 8)
+    
+    obj[1] &lt;- sum(0.5 * log(tau / (2 * pi)))
+    obj[2] &lt;- sum(-0.5 * (tau * (Rk^2 - 2 * Rk * outer(EL, EF) + outer(EL2, EF2))))
+    
+    tmp &lt;- (1 - wl) * (log(pi0l) - log(1 - wl)) 
+    obj[3] &lt;- sum(tmp[!is.nan(tmp)])
+    tmp &lt;- wl * (log(1 - pi0l) - log(wl))
+    obj[4] &lt;- sum(tmp[!is.nan(tmp)])
+    
+    obj[5] &lt;- sum(0.5 * wl * (log(al) + log(s2l) + 1 - al * (mul^2 + s2l)))
+    
+    tmp &lt;- (1 - wf) * (log(pi0f) - log(1 - wf))
+    obj[6] &lt;- sum(tmp[!is.nan(tmp)])
+    tmp &lt;- wf * (log(1 - pi0f) - log(wf))
+    obj[7] &lt;- sum(tmp[!is.nan(tmp)])
+    
+    obj[8] &lt;- sum(0.5 * wf * (log(af) + log(s2f) + 1 - af * (muf^2 + s2f)))
+  
+    return(sum(obj) + KL)
+  })
+}
+
+compute_EX &lt;- function(w, mu) {
+  return(as.vector(w * mu))
+}
+
+compute_EX2 &lt;- function(w, mu, sigma2) {
+  return(as.vector(w * (mu^2 + sigma2)))
+}
+
+# UPDATE FUNCTIONS --------------------------------------------------
+
+update_a &lt;- function(w, EX2) {
+  return(sum(w) / sum(EX2))
+}
+
+update_pi0 &lt;- function(w) {
+  return(sum(1 - w) / length(w))
+}
+
+update_mul &lt;- function(a, tau, Rk, EF, EF2) {
+  n &lt;- nrow(tau)
+  p &lt;- ncol(tau)
+  numer &lt;- rowSums(tau * Rk * matrix(EF, nrow=n, ncol=p, byrow=TRUE))
+  denom &lt;- a + rowSums(tau * matrix(EF2, nrow=n, ncol=p, byrow=TRUE))
+  return(numer / denom)
+}
+
+update_muf &lt;- function(a, tau, Rk, EL, EL2) {
+  n &lt;- nrow(tau)
+  p &lt;- ncol(tau)
+  numer &lt;- colSums(tau * Rk * matrix(EL, nrow=n, ncol=p, byrow=FALSE))
+  denom &lt;- a + colSums(tau * matrix(EL2, nrow=n, ncol=p, byrow=FALSE))
+  return(numer / denom)
+}
+
+update_s2l &lt;- function(a, tau, EF2) {
+  n &lt;- nrow(tau)
+  p &lt;- ncol(tau)
+  return(1 / (a + rowSums(tau * matrix(EF2, nrow=n, ncol=p, byrow=TRUE))))
+}
+
+update_s2f &lt;- function(a, tau, EL2) {
+  n &lt;- nrow(tau)
+  p &lt;- ncol(tau)
+  return(1 / (a + colSums(tau * matrix(EL2, nrow=n, ncol=p, byrow=FALSE))))
+}
+
+update_wl &lt;- function(a, pi0, mu, sigma2, tau, Rk, EF, EF2) {
+  C1 &lt;- log(1 - pi0) - log(pi0)
+  C2 &lt;- 0.5 * (log(a) + log(sigma2) - a * (mu^2 + sigma2) + 1)
+  C3 &lt;- rowSums(tau * (Rk * outer(mu, EF) - 0.5 * outer(mu^2 + sigma2, EF2)))
+  C &lt;- C1 + C2 + C3
+  return(1 / (1 + exp(-C)))
+}
+
+update_wf &lt;- function(a, pi0, mu, sigma2, tau, Rk, EL, EL2) {
+  C1 &lt;- log(1 - pi0) - log(pi0)
+  C2 &lt;- 0.5 * (log(a) + log(sigma2) - a * (mu^2 + sigma2) + 1)
+  C3 &lt;- colSums(tau * (Rk * outer(EL, mu) - 0.5 * outer(EL2, mu^2 + sigma2)))
+  C &lt;- C1 + C2 + C3
+  return(1 / (1 + exp(-C)))
+}
+
+# ALGORITHM ---------------------------------------------------------
+
+update_tau &lt;- function(altfl) {
+  within(altfl, {
+    EL &lt;- compute_EX(wl, mul)
+    EL2 &lt;- compute_EX2(wl, mul, s2l)
+    EF &lt;- compute_EX(wf, muf)
+    EF2 &lt;- compute_EX2(wf, muf, s2f)
+    
+    R2 &lt;- Rk^2 - 2 * Rk * outer(EL, EF) + outer(EL2, EF2)
+    tau &lt;- matrix(1 / colMeans(R2), nrow=nrow(tau), ncol=ncol(tau),
+                  byrow=TRUE)
+  })
+}
+
+update_loadings_post &lt;- function(altfl) {
+  within(altfl, {
+    EF &lt;- compute_EX(wf, muf)
+    EF2 &lt;- compute_EX2(wf, muf, s2f)
+    
+    mul &lt;- update_mul(al, tau, Rk, EF, EF2)
+    s2l &lt;- update_s2l(al, tau, EF2)
+    wl &lt;- update_wl(al, pi0l, mul, s2l, tau, Rk, EF, EF2)
+  })
+}
+
+update_loadings_prior &lt;- function(altfl) {
+  within(altfl, {
+    EL2 &lt;- compute_EX2(wl, mul, s2l)
+    
+    al &lt;- update_a(wl, EL2)
+    pi0l &lt;- update_pi0(wl)
+  })
+}
+  
+update_factor_post &lt;- function(altfl) {
+  within(altfl, {
+    EL &lt;- compute_EX(wl, mul)
+    EL2 &lt;- compute_EX2(wl, mul, s2l)
+    
+    muf &lt;- update_muf(af, tau, Rk, EL, EL2)
+    s2f &lt;- update_s2f(af, tau, EL2)
+    wf &lt;- update_wf(af, pi0f, muf, s2f, tau, Rk, EL, EL2)
+  })
+}
+
+update_factor_prior &lt;- function(altfl) {
+  within(altfl, {
+    EF2 &lt;- compute_EX2(wf, muf, s2f)
+    
+    af &lt;- update_a(wf, EF2)
+    pi0f &lt;- update_pi0(wf)
+  })
+}
+
+do_one_update &lt;- function(altfl) {
+  obj &lt;- rep(0, 5)
+  
+  altfl &lt;- update_tau(altfl)
+  obj[1] &lt;- compute_obj(altfl)
+  
+  altfl &lt;- update_loadings_post(altfl)
+  obj[2] &lt;- compute_obj(altfl)
+  
+  altfl &lt;- update_loadings_prior(altfl)
+  obj[3] &lt;- compute_obj(altfl)
+  
+  altfl &lt;- update_factor_post(altfl)
+  obj[4] &lt;- compute_obj(altfl)
+  
+  altfl &lt;- update_factor_prior(altfl)
+  obj[5] &lt;- compute_obj(altfl)
+  
+  return(list(altfl = altfl, obj = obj))
+}
+
+optimize_alt_fl &lt;- function(altfl, tol = .01, verbose = FALSE) {
+  obj &lt;- compute_obj(altfl)
+  diff &lt;- Inf
+  
+  while (diff &gt; tol) {
+    tmp &lt;- do_one_update(altfl)
+    new_obj &lt;- tmp$obj[length(tmp$obj)]
+    diff &lt;- new_obj - obj
+    obj &lt;- new_obj
+    if (verbose) {
+      message(paste(&quot;Objective:&quot;, obj))
+    }
+    altfl &lt;- tmp$altfl
+  }
+  
+  return(altfl)
+}</code></pre>
+</div>
+<div id="fit" class="section level2">
+<h2>Fit</h2>
+<p>Using the same dataset as in previous investigations, I fit a FLASH object with four factors (recall that it’s the fourth factor that has been causing problems during loadings updates):</p>
+<pre class="r"><code>load(&quot;./data/before_bad.Rdata&quot;)
+# devtools::install_github(&quot;stephenslab/flashr&quot;)
+devtools::load_all(&quot;/Users/willwerscheid/GitHub/flashr&quot;)</code></pre>
+<pre><code>Loading flashr</code></pre>
+<pre class="r"><code>fl &lt;- flash_add_greedy(data, Kmax=4, verbose=FALSE)</code></pre>
+<pre><code>fitting factor/loading 1</code></pre>
+<pre><code>fitting factor/loading 2</code></pre>
+<pre><code>fitting factor/loading 3</code></pre>
+<pre><code>fitting factor/loading 4</code></pre>
+<p>The objective as computed by FLASH is:</p>
+<pre class="r"><code>flash_get_objective(data, fl)</code></pre>
+<pre><code>[1] -1297148</code></pre>
+<p>I now convert the fourth factor to an “altfl” object. The objective as computed by the alternate method is:</p>
+<pre class="r"><code>altfl &lt;- fl_to_altfl(data, fl, 4)
+compute_obj(altfl)</code></pre>
+<pre><code>[1] -1288461</code></pre>
+<p>Next, I optimize the altfl object:</p>
+<pre class="r"><code>altfl &lt;- optimize_alt_fl(altfl, verbose=TRUE)</code></pre>
+<pre><code>Objective: -1267406.2685275</code></pre>
+<pre><code>Objective: -1260756.13822147</code></pre>
+<pre><code>Objective: -1257939.29612236</code></pre>
+<pre><code>Objective: -1257300.63730127</code></pre>
+<pre><code>Objective: -1257110.55550233</code></pre>
+<pre><code>Objective: -1257016.7314057</code></pre>
+<pre><code>Objective: -1256963.52277046</code></pre>
+<pre><code>Objective: -1256932.3695305</code></pre>
+<pre><code>Objective: -1256914.13309796</code></pre>
+<pre><code>Objective: -1256902.74309918</code></pre>
+<pre><code>Objective: -1256895.1068788</code></pre>
+<pre><code>Objective: -1256889.8003563</code></pre>
+<pre><code>Objective: -1256886.07583612</code></pre>
+<pre><code>Objective: -1256883.4080515</code></pre>
+<pre><code>Objective: -1256881.44636624</code></pre>
+<pre><code>Objective: -1256879.9749153</code></pre>
+<pre><code>Objective: -1256878.85630259</code></pre>
+<pre><code>Objective: -1256877.99813191</code></pre>
+<pre><code>Objective: -1256877.33547644</code></pre>
+<pre><code>Objective: -1256876.82128467</code></pre>
+<pre><code>Objective: -1256876.42074587</code></pre>
+<pre><code>Objective: -1256876.10774166</code></pre>
+<pre><code>Objective: -1256875.8624804</code></pre>
+<pre><code>Objective: -1256875.66985319</code></pre>
+<pre><code>Objective: -1256875.5182584</code></pre>
+<pre><code>Objective: -1256875.39874455</code></pre>
+<pre><code>Objective: -1256875.3043765</code></pre>
+<pre><code>Objective: -1256875.22976218</code></pre>
+<pre><code>Objective: -1256875.17069613</code></pre>
+<pre><code>Objective: -1256875.12388932</code></pre>
+<pre><code>Objective: -1256875.08676316</code></pre>
+<pre><code>Objective: -1256875.05729166</code></pre>
+<pre><code>Objective: -1256875.03387997</code></pre>
+<pre><code>Objective: -1256875.0152705</code></pre>
+<pre><code>Objective: -1256875.00047012</code></pre>
+<pre><code>Objective: -1256874.98869349</code></pre>
+<pre><code>Objective: -1256874.9793189</code></pre>
+<p>Finally, I put the altfl object back into the fourth factor of the flash object.</p>
+<pre class="r"><code>fl2 &lt;- altfl_to_fl(altfl, fl, 4)</code></pre>
+</div>
+<div id="comparison" class="section level2">
+<h2>Comparison</h2>
+<p>The fits are very different. For priors on both factors and loadings, the altfl fit favors less sparsity (smaller spikes, i.e., smaller <code>pi0</code>) and more shrinkage (narrower slabs, i.e., greater <code>a</code>).</p>
+<pre class="r"><code>list(loadings = fl$gl[[4]], alt_loadings = fl2$gl[[4]])</code></pre>
+<pre><code>$loadings
+$loadings$pi0
+[1] 0.7252435
+
+$loadings$a
+[1] 0.05228744
+
+
+$alt_loadings
+$alt_loadings$pi0
+[1] 0.6079064
+
+$alt_loadings$a
+[1] 0.1251973</code></pre>
+<pre class="r"><code>list(factors = fl$gf[[4]], alt_factors = fl2$gf[[4]])</code></pre>
+<pre><code>$factors
+$factors$pi0
+[1] 0.3667051
+
+$factors$a
+[1] 23.14738
+
+
+$alt_factors
+$alt_factors$pi0
+[1] 0.1302886
+
+$alt_factors$a
+[1] 36.28001</code></pre>
+<p>A scatterplot comparing the fitted fourth factor/loading appears as follows:</p>
+<pre class="r"><code>fitted &lt;- flash_get_fitted_values(fl)
+fitted2 &lt;- flash_get_fitted_values(fl2)
+
+minval &lt;- min(c(fitted, fitted2))
+maxval &lt;- max(c(fitted, fitted2))
+
+plot(fitted, fitted2, pch=&#39;.&#39;,
+     xlab=&quot;FLASH fit&quot;, ylab=&quot;Alternate fit&quot;,
+     xlim=c(minval, maxval), ylim=c(minval, maxval),
+     main=&quot;Fitted values&quot;)</code></pre>
+<p><img src="figure/alt_alg.Rmd/comp_fitted-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>To see what’s going on, I fit the estimated loadings against the estimated prior on the loadings. For the FLASH fit:</p>
+<pre class="r"><code>plot(density(fl$EL[, 4]), xlim=c(-15, 15), ylim=c(0, 0.1),
+     main=&quot;FLASH loadings&quot;)
+grid &lt;- seq(-15, 15, by=.05)
+y &lt;- (1 - fl$gl[[4]]$pi0) * dnorm(grid, 0, 1/sqrt(fl$gl[[4]]$a))
+lines(grid, y, lty=2)
+legend(&quot;topright&quot;, legend = c(&quot;fitted&quot;, &quot;prior&quot;), lty = c(1, 2))</code></pre>
+<p><img src="figure/alt_alg.Rmd/density1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>For the alternate approach:</p>
+<pre class="r"><code>plot(density(fl2$EL[, 4]), xlim=c(-15, 15), ylim=c(0, 0.1),
+     main=&quot;Alternate approach&quot;)
+grid &lt;- seq(-15, 15, by=.05)
+y &lt;- (1 - fl2$gl[[4]]$pi0) * dnorm(grid, 0, 1/sqrt(fl2$gl[[4]]$a))
+lines(grid, y, lty=2)
+legend(&quot;topright&quot;, legend = c(&quot;fitted&quot;, &quot;prior&quot;), lty = c(1, 2))</code></pre>
+<p><img src="figure/alt_alg.Rmd/density2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>It seems almost as if FLASH were fitting the model <span class="math display">\[ l_i \sim^{iid} g_l + e, \]</span> where <span class="math inline">\(e\)</span> is some error term, rather than the model <span class="math display">\[ l_i \sim^{iid} g_l. \]</span> This might explain why the prior gets pulled up more by the fitted values in the latter approach.</p>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS Sierra 10.12.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] flashr_0.5-12
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.17        pillar_1.2.1        plyr_1.8.4         
+ [4] compiler_3.4.3      git2r_0.21.0        workflowr_1.0.1    
+ [7] R.methodsS3_1.7.1   R.utils_2.6.0       iterators_1.0.9    
+[10] tools_3.4.3         testthat_2.0.0      digest_0.6.15      
+[13] tibble_1.4.2        evaluate_0.10.1     memoise_1.1.0      
+[16] gtable_0.2.0        lattice_0.20-35     rlang_0.2.0        
+[19] Matrix_1.2-12       foreach_1.4.4       commonmark_1.4     
+[22] yaml_2.1.17         parallel_3.4.3      ebnm_0.1-12        
+[25] withr_2.1.1.9000    stringr_1.3.0       roxygen2_6.0.1.9000
+[28] xml2_1.2.0          knitr_1.20          devtools_1.13.4    
+[31] rprojroot_1.3-2     grid_3.4.3          R6_2.2.2           
+[34] rmarkdown_1.8       ggplot2_2.2.1       ashr_2.2-10        
+[37] magrittr_1.5        whisker_0.3-2       backports_1.1.2    
+[40] scales_0.5.0        codetools_0.2-15    htmltools_0.3.6    
+[43] MASS_7.3-48         assertthat_0.2.0    softImpute_1.4     
+[46] colorspace_1.3-2    stringi_1.1.6       lazyeval_0.2.1     
+[49] munsell_0.4.3       doParallel_1.0.11   pscl_1.5.2         
+[52] truncnorm_1.0-8     SQUAREM_2017.10-1   R.oo_1.21.0        </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
