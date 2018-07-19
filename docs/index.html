@@ -225,7 +225,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/a9f8cc678d25b5ce3e0cbbc0f195eb39809b0bfa" target="_blank">a9f8cc6</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/eb264b175eab489dc4f703e4e846ac61cc30b924" target="_blank">eb264b1</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -234,6 +234,9 @@ Ignored files:
     Ignored:    .Rproj.user/
     Ignored:    docs/.DS_Store
     Ignored:    docs/figure/.DS_Store
+
+Unstaged changes:
+    Modified:   analysis/flash_em.Rmd
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -262,6 +265,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/eb264b175eab489dc4f703e4e846ac61cc30b924/analysis/index.Rmd" target="_blank">eb264b1</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-19
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/index.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/36a6312262223d1418cb2247125ce9332d39b701/docs/index.html" target="_blank">36a6312</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-19
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -510,6 +547,7 @@ Start workflowr project.
 <p><a href="objective3.html">Investigation 3.</a> The objective can continue to get worse as loadings are repeatedly updated. Nonetheless, convergence takes place (from above!).</p>
 <p><a href="obj_notes.html">Notes on computing the FLASH objective.</a></p>
 <p><a href="flash_em.html">An alternate algorithm for updating loadings.</a></p>
+<p><a href="alt_alg.html">Investigation 4.</a> The alternate algorithm yields much different results from FLASH. In particular, the fits of the priors on the loadings are visibly different.</p>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
 TeX fonts only; see
