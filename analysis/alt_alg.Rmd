@@ -1,0 +1,377 @@
+---
+title: "Comparing loadings update algorithms"
+author: "Jason Willwerscheid"
+date: "7/19/2018"
+output: 
+  workflowr::wflow_html:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Intro
+
+Here I implement the algorithm described in a [previous note](flash_em.html) and compare results with FLASH.
+
+## Code
+
+Click "Code" to view the implementation.
+
+```{r code}
+
+# INITIALIZATION FUNCTIONS ------------------------------------------
+
+add_new_altfl <- function(data, fl, seed=1) {
+  set.seed(seed)
+  
+  altfl <- list()
+  altfl$tau <- fl$tau
+  altfl$Rk <- flashr:::flash_get_R(data, fl)
+  
+  n <- nrow(fl$tau)
+  p <- ncol(fl$tau)
+  altfl$wl <- rep(0.1, n)
+  altfl$wf <- rep(0.1, p)
+  altfl$mul <- rnorm(n)
+  altfl$muf <- rnorm(p)
+  altfl$s2l <- rep(1, n)
+  altfl$s2f <- rep(1, p)
+  altfl$al <- altfl$af <- 1
+  altfl$pi0l <- altfl$pi0f <- 0.9
+  
+  altfl$KL <- sum(unlist(fl$KL_l) + unlist(fl$KL_f))
+  
+  return(altfl)
+}
+
+fl_to_altfl <- function(data, fl, k) {
+  altfl <- list()
+  altfl$tau <- fl$tau
+  altfl$Rk <- flashr:::flash_get_R(data, fl)
+  
+  altfl$al <- fl$gl[[k]]$a
+  altfl$pi0l <- fl$gl[[k]]$pi0
+  altfl$af <- fl$gf[[k]]$a
+  altfl$pi0f <- fl$gf[[k]]$pi0
+
+  s2 = 1/(fl$EF2[, k] %*% t(fl$tau))
+  s = sqrt(s2)
+  Rk = flashr:::flash_get_Rk(data, fl, k)
+  x = fl$EF[, k] %*% t(Rk * fl$tau) * s2
+  w = 1 - fl$gl[[k]]$pi0
+  a = fl$gl[[k]]$a
+  
+  altfl$wl <- ebnm:::wpost_normal(x, s, w, a)
+  altfl$mul <- ebnm:::pmean_cond_normal(x, s, a)
+  altfl$s2l <- ebnm:::pvar_cond_normal(s, a)
+  
+  s2 = 1/(fl$EL2[, k] %*% fl$tau)
+  s = sqrt(s2)
+  Rk = flashr:::flash_get_Rk(data, fl, k)
+  x = fl$EL[, k] %*% (Rk * fl$tau) * s2
+  w = 1 - fl$gf[[k]]$pi0
+  a = fl$gf[[k]]$a
+  
+  altfl$wf <- ebnm:::wpost_normal(x, s, w, a)
+  altfl$muf <- ebnm:::pmean_cond_normal(x, s, a)
+  altfl$s2f <- ebnm:::pvar_cond_normal(s, a)
+  
+  altfl$KL <- sum(unlist(fl$KL_l)[-k] + unlist(fl$KL_f)[-k])
+  
+  return(altfl)
+}
+
+altfl_to_fl <- function(altfl, fl, k) {
+  fl$EL[, k] <- compute_EX(altfl$wl, altfl$mul)
+  fl$EL2[, k] <- compute_EX2(altfl$wl, altfl$mul, altfl$s2l)
+  fl$EF[, k] <- compute_EX(altfl$wf, altfl$muf)
+  fl$EF2[, k] <- compute_EX2(altfl$wf, altfl$muf, altfl$s2f)
+  
+  fl$gl[[k]] <- list(pi0 = altfl$pi0l, a = altfl$al)
+  fl$gf[[k]] <- list(pi0 = altfl$pi0f, a = altfl$af)
+  fl$ebnm_fn_l <- fl$ebnm_fn_f <- "alt"
+  fl$ebnm_param_l <- fl$ebnm_param_f <- list()
+  
+  fl$tau <- altfl$tau
+  
+  return(fl)
+}
+
+# OBJECTIVE FUNCTION ------------------------------------------------
+
+compute_obj <- function(altfl) {
+  with(altfl, {
+    EL <- compute_EX(wl, mul)
+    EL2 <- compute_EX2(wl, mul, s2l)
+    EF <- compute_EX(wf, muf)
+    EF2 <- compute_EX2(wf, muf, s2f)
+
+    obj <- rep(0, 8)
+    
+    obj[1] <- sum(0.5 * log(tau / (2 * pi)))
+    obj[2] <- sum(-0.5 * (tau * (Rk^2 - 2 * Rk * outer(EL, EF) + outer(EL2, EF2))))
+    
+    tmp <- (1 - wl) * (log(pi0l) - log(1 - wl)) 
+    obj[3] <- sum(tmp[!is.nan(tmp)])
+    tmp <- wl * (log(1 - pi0l) - log(wl))
+    obj[4] <- sum(tmp[!is.nan(tmp)])
+    
+    obj[5] <- sum(0.5 * wl * (log(al) + log(s2l) + 1 - al * (mul^2 + s2l)))
+    
+    tmp <- (1 - wf) * (log(pi0f) - log(1 - wf))
+    obj[6] <- sum(tmp[!is.nan(tmp)])
+    tmp <- wf * (log(1 - pi0f) - log(wf))
+    obj[7] <- sum(tmp[!is.nan(tmp)])
+    
+    obj[8] <- sum(0.5 * wf * (log(af) + log(s2f) + 1 - af * (muf^2 + s2f)))
+  
+    return(sum(obj) + KL)
+  })
+}
+
+compute_EX <- function(w, mu) {
+  return(as.vector(w * mu))
+}
+
+compute_EX2 <- function(w, mu, sigma2) {
+  return(as.vector(w * (mu^2 + sigma2)))
+}
+
+# UPDATE FUNCTIONS --------------------------------------------------
+
+update_a <- function(w, EX2) {
+  return(sum(w) / sum(EX2))
+}
+
+update_pi0 <- function(w) {
+  return(sum(1 - w) / length(w))
+}
+
+update_mul <- function(a, tau, Rk, EF, EF2) {
+  n <- nrow(tau)
+  p <- ncol(tau)
+  numer <- rowSums(tau * Rk * matrix(EF, nrow=n, ncol=p, byrow=TRUE))
+  denom <- a + rowSums(tau * matrix(EF2, nrow=n, ncol=p, byrow=TRUE))
+  return(numer / denom)
+}
+
+update_muf <- function(a, tau, Rk, EL, EL2) {
+  n <- nrow(tau)
+  p <- ncol(tau)
+  numer <- colSums(tau * Rk * matrix(EL, nrow=n, ncol=p, byrow=FALSE))
+  denom <- a + colSums(tau * matrix(EL2, nrow=n, ncol=p, byrow=FALSE))
+  return(numer / denom)
+}
+
+update_s2l <- function(a, tau, EF2) {
+  n <- nrow(tau)
+  p <- ncol(tau)
+  return(1 / (a + rowSums(tau * matrix(EF2, nrow=n, ncol=p, byrow=TRUE))))
+}
+
+update_s2f <- function(a, tau, EL2) {
+  n <- nrow(tau)
+  p <- ncol(tau)
+  return(1 / (a + colSums(tau * matrix(EL2, nrow=n, ncol=p, byrow=FALSE))))
+}
+
+update_wl <- function(a, pi0, mu, sigma2, tau, Rk, EF, EF2) {
+  C1 <- log(1 - pi0) - log(pi0)
+  C2 <- 0.5 * (log(a) + log(sigma2) - a * (mu^2 + sigma2) + 1)
+  C3 <- rowSums(tau * (Rk * outer(mu, EF) - 0.5 * outer(mu^2 + sigma2, EF2)))
+  C <- C1 + C2 + C3
+  return(1 / (1 + exp(-C)))
+}
+
+update_wf <- function(a, pi0, mu, sigma2, tau, Rk, EL, EL2) {
+  C1 <- log(1 - pi0) - log(pi0)
+  C2 <- 0.5 * (log(a) + log(sigma2) - a * (mu^2 + sigma2) + 1)
+  C3 <- colSums(tau * (Rk * outer(EL, mu) - 0.5 * outer(EL2, mu^2 + sigma2)))
+  C <- C1 + C2 + C3
+  return(1 / (1 + exp(-C)))
+}
+
+# ALGORITHM ---------------------------------------------------------
+
+update_tau <- function(altfl) {
+  within(altfl, {
+    EL <- compute_EX(wl, mul)
+    EL2 <- compute_EX2(wl, mul, s2l)
+    EF <- compute_EX(wf, muf)
+    EF2 <- compute_EX2(wf, muf, s2f)
+    
+    R2 <- Rk^2 - 2 * Rk * outer(EL, EF) + outer(EL2, EF2)
+    tau <- matrix(1 / colMeans(R2), nrow=nrow(tau), ncol=ncol(tau),
+                  byrow=TRUE)
+  })
+}
+
+update_loadings_post <- function(altfl) {
+  within(altfl, {
+    EF <- compute_EX(wf, muf)
+    EF2 <- compute_EX2(wf, muf, s2f)
+    
+    mul <- update_mul(al, tau, Rk, EF, EF2)
+    s2l <- update_s2l(al, tau, EF2)
+    wl <- update_wl(al, pi0l, mul, s2l, tau, Rk, EF, EF2)
+  })
+}
+
+update_loadings_prior <- function(altfl) {
+  within(altfl, {
+    EL2 <- compute_EX2(wl, mul, s2l)
+    
+    al <- update_a(wl, EL2)
+    pi0l <- update_pi0(wl)
+  })
+}
+  
+update_factor_post <- function(altfl) {
+  within(altfl, {
+    EL <- compute_EX(wl, mul)
+    EL2 <- compute_EX2(wl, mul, s2l)
+    
+    muf <- update_muf(af, tau, Rk, EL, EL2)
+    s2f <- update_s2f(af, tau, EL2)
+    wf <- update_wf(af, pi0f, muf, s2f, tau, Rk, EL, EL2)
+  })
+}
+
+update_factor_prior <- function(altfl) {
+  within(altfl, {
+    EF2 <- compute_EX2(wf, muf, s2f)
+    
+    af <- update_a(wf, EF2)
+    pi0f <- update_pi0(wf)
+  })
+}
+
+do_one_update <- function(altfl) {
+  obj <- rep(0, 5)
+  
+  altfl <- update_tau(altfl)
+  obj[1] <- compute_obj(altfl)
+  
+  altfl <- update_loadings_post(altfl)
+  obj[2] <- compute_obj(altfl)
+  
+  altfl <- update_loadings_prior(altfl)
+  obj[3] <- compute_obj(altfl)
+  
+  altfl <- update_factor_post(altfl)
+  obj[4] <- compute_obj(altfl)
+  
+  altfl <- update_factor_prior(altfl)
+  obj[5] <- compute_obj(altfl)
+  
+  return(list(altfl = altfl, obj = obj))
+}
+
+optimize_alt_fl <- function(altfl, tol = .01, verbose = FALSE) {
+  obj <- compute_obj(altfl)
+  diff <- Inf
+  
+  while (diff > tol) {
+    tmp <- do_one_update(altfl)
+    new_obj <- tmp$obj[length(tmp$obj)]
+    diff <- new_obj - obj
+    obj <- new_obj
+    if (verbose) {
+      message(paste("Objective:", obj))
+    }
+    altfl <- tmp$altfl
+  }
+  
+  return(altfl)
+}
+```
+
+## Fit
+
+Using the same dataset as in previous investigations, I fit a FLASH object with four factors (recall that it's the fourth factor that has been causing problems during loadings updates):
+
+```{r flfit}
+load("./data/before_bad.Rdata")
+# devtools::install_github("stephenslab/flashr")
+devtools::load_all("/Users/willwerscheid/GitHub/flashr")
+fl <- flash_add_greedy(data, Kmax=4, verbose=FALSE)
+```
+
+The objective as computed by FLASH is:
+
+```{r flobj}
+flash_get_objective(data, fl)
+```
+
+I now convert the fourth factor to an "altfl" object. The objective as computed by the alternate method is:
+
+```{r altfl}
+altfl <- fl_to_altfl(data, fl, 4)
+compute_obj(altfl)
+```
+
+Next, I optimize the altfl object:
+
+```{r opt_altfl}
+altfl <- optimize_alt_fl(altfl, verbose=TRUE)
+```
+
+Finally, I put the altfl object back into the fourth factor of the flash object.
+
+```{r altfl_to_fl}
+fl2 <- altfl_to_fl(altfl, fl, 4)
+```
+
+## Comparison
+
+The fits are very different. For priors on both factors and loadings, the altfl fit favors less sparsity (smaller spikes, i.e., smaller `pi0`) and more shrinkage (narrower slabs, i.e., greater `a`).  
+
+```{r comp_priors}
+list(loadings = fl$gl[[4]], alt_loadings = fl2$gl[[4]])
+list(factors = fl$gf[[4]], alt_factors = fl2$gf[[4]])
+```
+
+A scatterplot comparing the fitted fourth factor/loading appears as follows:
+
+```{r comp_fitted}
+fitted <- flash_get_fitted_values(fl)
+fitted2 <- flash_get_fitted_values(fl2)
+
+minval <- min(c(fitted, fitted2))
+maxval <- max(c(fitted, fitted2))
+
+plot(fitted, fitted2, pch='.',
+     xlab="FLASH fit", ylab="Alternate fit",
+     xlim=c(minval, maxval), ylim=c(minval, maxval),
+     main="Fitted values")
+```
+
+To see what's going on, I fit the estimated loadings against the estimated prior on the loadings. For the FLASH fit:
+
+```{r density1}
+plot(density(fl$EL[, 4]), xlim=c(-15, 15), ylim=c(0, 0.1),
+     main="FLASH loadings")
+grid <- seq(-15, 15, by=.05)
+y <- (1 - fl$gl[[4]]$pi0) * dnorm(grid, 0, 1/sqrt(fl$gl[[4]]$a))
+lines(grid, y, lty=2)
+legend("topright", legend = c("fitted", "prior"), lty = c(1, 2))
+```
+
+For the alternate approach:
+
+```{r density2}
+plot(density(fl2$EL[, 4]), xlim=c(-15, 15), ylim=c(0, 0.1),
+     main="Alternate approach")
+grid <- seq(-15, 15, by=.05)
+y <- (1 - fl2$gl[[4]]$pi0) * dnorm(grid, 0, 1/sqrt(fl2$gl[[4]]$a))
+lines(grid, y, lty=2)
+legend("topright", legend = c("fitted", "prior"), lty = c(1, 2))
+```
+
+It seems almost as if FLASH were fitting the model 
+$$ l_i \sim^{iid} g_l + e, $$
+where $e$ is some error term, rather than the model
+$$ l_i \sim^{iid} g_l. $$
+This might explain why the prior gets pulled up more by the fitted values in the latter approach.
