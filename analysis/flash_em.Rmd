@@ -1,5 +1,5 @@
 ---
-title: "An alternate algorithm for FLASH factor updates"
+title: "An alternate algorithm for FLASH loadings updates"
 author: "Jason Willwerscheid"
 date: "7/18/2018"
 output:
