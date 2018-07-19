@@ -12,7 +12,7 @@
 <meta name="author" content="Jason Willwerscheid" />
 
 
-<title>Notes on Computing the FLASH Objective</title>
+<title>Notes on computing the FLASH objective</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -310,7 +310,7 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Notes on Computing the FLASH Objective</h1>
+<h1 class="title toc-ignore">Notes on computing the FLASH objective</h1>
 <h4 class="author"><em>Jason Willwerscheid</em></h4>
 <h4 class="date"><em>7/17/2018</em></h4>
 
@@ -341,7 +341,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/6c2cefd9280056a5dad65a2d8e1960967a9b0f51" target="_blank">6c2cefd</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/4d6f3da2ff79a3bc2e7410069098316f173765e2" target="_blank">4d6f3da</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -350,6 +350,9 @@ Ignored files:
     Ignored:    .Rproj.user/
     Ignored:    docs/.DS_Store
     Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/flash_em.Rmd
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -378,6 +381,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d6f3da2ff79a3bc2e7410069098316f173765e2/analysis/obj_notes.Rmd" target="_blank">4d6f3da</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-18
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/obj_notes.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/f34a82bd36e072887298dcffd66125378be2246d/docs/obj_notes.html" target="_blank">f34a82b</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-18
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -629,31 +666,6 @@ E_q \log \frac{g(l)}{q(l)}
   KLd &lt;- -(wpost / 2) * a * (pvar_cond + pmean_cond^2)
   KLe &lt;- (wpost / 2)
   sum(KLa) + sum(KLb) + sum(KLc) + sum(KLd) + sum(KLe)
-}</code></pre>
-</div>
-<div id="alternate-objective" class="section level2">
-<h2>Alternate objective</h2>
-<p>So maybe we could instead optimize (over <span class="math inline">\(g\)</span>) <code>calc_KL(x, s, g) - 0.5 * sum((1 / s^2) * (Etheta2(x, s, g) - 2 * x * Etheta(x, s, g))</code>? If the quantity calculated by <code>calc_KL</code> is indeed correct, then this is simply another way to write the objective <span class="math inline">\(F(g, q)\)</span> (with the constraint that <span class="math inline">\(q\)</span> is the posterior induced by <span class="math inline">\(g\)</span>).</p>
-<pre class="r"><code>alt_obj &lt;- function(x, s, pi0, a) {
-  w &lt;- 1 - pi0
-  
-  wpost &lt;- ebnm:::wpost_normal(x, s, w, a)
-  pi0post &lt;- 1 - wpost[wpost &lt; 1]
-  pmean_cond &lt;- ebnm:::pmean_cond_normal(x, s, a)
-  pvar_cond &lt;- ebnm:::pvar_cond_normal(s, a)
-  
-  Etheta &lt;- wpost * pmean_cond
-  Etheta2 &lt;- wpost * (pmean_cond^2 + pvar_cond)
-  
-  KLa &lt;- pi0post * log(pi0 / pi0post)
-  KLb &lt;- wpost * log(w / wpost)
-  KLc &lt;- (wpost / 2) * log(a * pvar_cond)
-  KLd &lt;- -(wpost / 2) * a * (pvar_cond + pmean_cond^2)
-  KLe &lt;- (wpost / 2)
-  KL &lt;- sum(KLa) + sum(KLb) + sum(KLc) + sum(KLd) + sum(KLe)
-  
-  return(KL - 0.5 * sum(2 * pi * s^2 
-                        + (1 / s^2) * (x^2 - 2 * x * Etheta + Etheta2)))
 }</code></pre>
 </div>
 <div id="session-information" class="section level2">
