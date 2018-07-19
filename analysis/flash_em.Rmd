@@ -1,0 +1,115 @@
+---
+title: "An alternate algorithm for FLASH factor updates"
+author: "Jason Willwerscheid"
+date: "7/18/2018"
+output:
+  workflowr::wflow_html
+---
+
+## Introduction
+
+If the expression for the KL divergence derived in the [previous note](obj_notes.html) is correct, then it seems likely that the FLASH objective can be optimized in a more direct fashion.
+
+## Notation
+
+It will simplify matters if I parametrize the posteriors for, respectively, the $i$th element of the $k$th loading and the $j$th element of the $k$th factor as
+$$ q_{l_i} \sim (1 - w_i^{(l)}) \delta_0 + w_i^{(l)} N(\mu_i^{(l)}, \sigma_i^{2(l)}) $$
+and
+$$ q_{f_j} \sim (1 - w_j^{(f)}) \delta_0 + w_j^{(f)} N(\mu_j^{(f)}, \sigma_j^{2(f)}) $$
+I parametrize the priors as
+$$ g_{l_i} \sim \pi_0^{(l)} \delta_0 + (1 - \pi_0^{(l)}) N(0, 1/a_l) $$
+and
+$$ g_{f_j} \sim \pi_0^{(f)} \delta_0 + (1 - \pi_0^{(f)}) N(0, 1/a_f) $$
+
+## Objective
+
+Using the expression for KL divergence derived in the previous note, the objective can be written:
+$$\begin{aligned}
+\sum_{i, j} \left[ \frac{1}{2} \log \frac{\tau_{ij}}{2 \pi} 
+- \frac{\tau_{ij}}{2} \left( (R_{ij}^{-k})^2 
+- 2 R_{ij}^{-k} w_i^{(l)} \mu_i^{(l)} w_j^{(f)} \mu_j^{(f)}
++ w_i^{(l)} (\mu_i^{(l)2} + \sigma_i^{2(l)}) 
+w_j^{(f)} (\mu_j^{(f)2} + \sigma_j^{2(f)}) \right) \right] \\
++\sum_i \left[ (1 - w_i^{(l)}) \log \frac{\pi_0^{(l)}}{1 - w_i^{(l)}}
++ w_i^{(l)} \log \frac{1 - \pi_0^{(l)}}{w_i^{(l)}} 
++ \frac{w_i^{(l)}}{2} \left( \log(a_l \sigma_i^{2(l)}) + 1 \right)
+- \frac{w_i^{(l)} a_l}{2}(\mu_i^{(l)2} + \sigma_i^{2(l)}) \right] \\
++\sum_i \left[ (1 - w_j^{(f)}) \log \frac{\pi_0^{(f)}}{1 - w_j^{(f)}}
++ w_j^{(f)} \log \frac{1 - \pi_0^{(f)}}{w_j^{(f)}} 
++ \frac{w_j^{(f)}}{2} \left( \log(a_f \sigma_j^{2(f)}) + 1 \right)
+- \frac{w_j^{(f)} a_f}{2}(\mu_j^{(f)2} + \sigma_j^{2(f)}) \right]
+\end{aligned} $$
+
+## Prior parameter updates
+
+I derive an algorithm for loadings updates by differentiating with respect to each variable ($a_l$, $\pi_0^{(l)}$, $\mu_1^{(l)}, \ldots, \mu_n^{(l)}$, $\sigma_1^{2(l)}, \ldots, \sigma_n^{2(l)}$, and $w_1^{(l)}, \ldots, w_n^{(l)}$) and setting each result equal to zero. 
+
+The updates for the prior parameters $a_l$ and $\pi_0^{(l)}$ turn out to be very simple. First, differentiating with respect to $a_l$ gives
+$$ \sum_i \left[ \frac{w_i^{(l)}}{2a_l} - \frac{w_i^{(l)}}{2}(\mu_i^{(l)2} + \sigma_i^{2(l)}) \right] $$
+Setting this equal to zero gives
+$$ a_l = \frac{\sum_i w_i^{(l)}}{\sum_i w_i^{(l)} (\mu_i^{(l)2} + \sigma_i^{2(l)})} = \frac{\sum_i w_i^{(l)}}{\sum_i E_ql_i^2} $$
+
+Next, differentiating with respect to $\pi_0^{(l)}$ gives
+$$ \sum_i \left[ \frac{1 - w_i^{(l)}}{\pi_0^{(l)}} - \frac{w_i^{(l)}}{1 - \pi_0^{(l)}} \right] $$
+Setting this equal to zero gives
+$$\begin{aligned}
+\pi_0^{(l)} \sum_i w_i^{(l)} &= (1 - \pi_0^{(l)}) \sum_i (1 - w_i^{(l)}) \\
+\pi_0^{(l)} &= \frac{1}{n} \sum_i (1 - w_i^{(l)})
+\end{aligned}$$
+
+## Posterior parameter updates
+
+The updates for the posterior parameters $\mu_i^{(l)}$ and $\sigma_i^{2(l)}$ also turn out to be quite manageable. Differentiating with respect to $\mu_i^{(l)}$ gives
+$$ \sum_j \tau_{ij} \left[ R_{ij}^{-k} w_i^{(l)} w_j^{(f)} \mu_j^{(f)}
+- w_i^{(l)} \mu_i^{(l)} w_j^{(f)} (\mu_j^{(f)2} + \sigma_j^{2(f)}) \right] - w_i^{(l)} a_l \mu_i^{(l)} $$
+Setting this equal to zero gives
+$$ \mu_i^{(l)} 
+= \frac{\sum_j \tau_{ij} R_{ij}^{-k} w_j^{(f)} \mu_j^{(f)}}
+{a_l + \sum_j \tau_{ij} w_j^{(f)} (\mu_j^{(f)2} + \sigma_j^{2(f)})}
+= \frac{\sum_j \tau_{ij} R_{ij}^{-k} Ef_j}
+{a_l + \sum_j \tau_{ij} Ef_j^{2}} $$ 
+
+Next, differentiating with respect to $\sigma_i^{2(l)}$ gives
+$$ -\frac{1}{2} \sum_j \tau_{ij} w_i^{(l)} w_j^{(f)} (\mu_j^{(f)2} + \sigma_j^{2(f)})
++ \frac{w_i^{(l)}}{2\sigma_i^{2(l)}} - \frac{w_i^{(l)} a_l}{2} $$
+Setting this equal to zero gives
+$$ \sigma_i^{2(l)} 
+= \frac{1}{a_l + \sum_j \tau_{ij} w_j^{(f)} (\mu_j^{(f)2} + \sigma_j^{2(f)})}
+= \frac{1}{a_l + \sum_j \tau_{ij} Ef_j^2} $$
+
+It remains to derive the update for $w_i^{(l)}$. Differentiating gives
+$$ \begin{aligned}
+\sum_j \left[ \tau_{ij} R_{ij}^{-k} \mu_i^{(l)} w_j^{(f)} \mu_j^{(f)}
+- \frac{\tau_{ij}}{2}(\mu_i^{(l)2} + \sigma_i^{2(l)}) 
+w_j^{(f)} (\mu_j^{(f)2} + \sigma_j^{2(f)}) \right] \\
+- \log \frac{\pi_0^{(l)}}{1 - w_i^{(l)}}
++ \log \frac{1 - \pi_0^{(l)}}{w_i^{(l)}}
++ \frac{1}{2} \left( \log (a_l \sigma_i^{2(l)}) + 1 \right)
+- \frac{a_l}{2} (\mu_i^{(l)2} + \sigma_i^{2(l)})
+\end{aligned}$$
+Setting this equal to zero gives
+$$ \begin{aligned}
+\log \frac{w_i^{(l)}}{1 - w_i^{(l)}}
+&= \log \frac{1 - \pi_0^{(l)}}{\pi_0^{(l)}} 
++ \frac{1}{2} \left( \log (a_l \sigma_i^{2(l)}) - a_l (\mu_i^{(l)2} + \sigma_i^{2(l)}) + 1 \right) \\
+&+ \sum_j \tau_{ij} \left[R_{ij}^{-k} \mu_i^{(l)} w_j^{(f)} \mu_j^{(f)}
+- \frac{1}{2}(\mu_i^{(l)2} + \sigma_i^{2(l)}) 
+w_j^{(f)} (\mu_j^{(f)2} + \sigma_j^{2(f)}) \right] \\
+&= \log \frac{\pi_0^{(l)}}{1 - \pi_0^{(l)}} 
++ \frac{1}{2} \left( \log (a_l \sigma_i^{2(l)}) - a_l (\mu_i^{(l)2} + \sigma_i^{2(l)}) + 1 \right) \\
+&+ \sum_j \tau_{ij} \left[R_{ij}^{-k} \mu_i^{(l)} Ef_j
+- \frac{1}{2}(\mu_i^{(l)2} + \sigma_i^{2(l)}) Ef_j^2 \right]
+\end{aligned}
+ $$
+
+## Algorithm
+
+I suggest that the loadings could be updated by
+
+0. Choosing starting values for $a_l$, $\pi_0^{(l)}$, and $w_1^{(l)}, \ldots, w_n^{(l)}$,
+
+and then repeating the following two steps until convergence:
+
+1. Update $\mu_1^{(l)}, \ldots, \mu_n^{(l)}$ and $\sigma_1^{2(l)}, \ldots, \sigma_n^{2(l)}$, and then update $w_1^{(l)}, \ldots, w_n^{(l)}$.
+
+2. Update $a_l$ and $\pi_0^{(l)}$.
