@@ -15,3 +15,5 @@ output:
 [Notes on computing the FLASH objective.](obj_notes.html)
 
 [An alternate algorithm for updating loadings.](flash_em.html)
+
+[Investigation 4.](alt_alg.html) The alternate algorithm yields much different results from FLASH. In particular, the fits of the priors on the loadings are visibly different.
