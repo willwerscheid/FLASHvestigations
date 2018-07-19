@@ -13,3 +13,5 @@ output:
 [Investigation 3.](objective3.html) The objective can continue to get worse as loadings are repeatedly updated. Nonetheless, convergence takes place (from above!).
 
 [Notes on computing the FLASH objective.](obj_notes.html)
+
+[An alternate algorithm for updating loadings.](flash_em.html)
