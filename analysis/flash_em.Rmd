@@ -35,7 +35,7 @@ w_j^{(f)} (\mu_j^{(f)2} + \sigma_j^{2(f)}) \right) \right] \\
 + \frac{w_i^{(l)}}{2} \left( \log(a_l \sigma_i^{2(l)}) 
 - a_l (\mu_i^{(l)2} + \sigma_i^{2(l)}) + 1 \right)
  \right] \\
-+ \sum_i \left[ (1 - w_j^{(f)}) \log \frac{\pi_0^{(f)}}{1 - w_j^{(f)}}
++ \sum_j \left[ (1 - w_j^{(f)}) \log \frac{\pi_0^{(f)}}{1 - w_j^{(f)}}
 + w_j^{(f)} \log \frac{1 - \pi_0^{(f)}}{w_j^{(f)}} 
 + \frac{w_j^{(f)}}{2} \left( \log(a_f \sigma_j^{2(f)}) 
 - a_f (\mu_j^{(f)2} + \sigma_j^{2(f)})+ 1 \right)

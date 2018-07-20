@@ -6,7 +6,7 @@ output:
     toc: false
 ---
 
-## Current
+## In Progress
 
 [Note 1.](obj_notes.html) Notes on computing the FLASH objective function. I derive an explicit expression for the KL divergence between prior and posterior. 
 
