@@ -13,7 +13,7 @@ $$ Y = LF' + E $$
 
 When updating loading $l_k$, we are optimizing over $g_{l_k}$ and $q_{l_k}$. $g_{l_k} \in \mathcal{G}$ is the prior on the elements of the $k$th column of the loadings matrix:
 $$ l_{1k}, \ldots, l_{nk} \sim^{iid} g_{l_k} $$
-$q_{l_k}$ is an arbitrary distribution which enters the problem via the variational approach. For convenience, I drop the subscripts in the following.
+$q_{l_k}$ is an arbitrary distribution which enters into the problem via the variational approach. For convenience, I drop the subscripts in the following.
 
 The part of the objective that depends on $g$ and $q$ is
 $$ F(g, q) := E_q \left[ -\frac{1}{2} \sum_i (A_i l_i^2 - 2 B_i l_i) \right]
@@ -41,58 +41,45 @@ $$ E_{\hat{q}} \log \frac{\hat{g}(\mathbf{l})}{\hat{q}(\mathbf{l})}
 
 When using `ebnm_pn`, however, it seems possible to compute $E_q \log \frac{g(\mathbf{l})}{q(\mathbf{l})}$ directly. Since the elements $l_1, \ldots, l_n$ are i.i.d. from $g$ (by the FLASH model) and the posterior distributions are mutually independent (by the EBNM model),
 $$ E_q \log \frac{g(\mathbf{l})}{q(\mathbf{l})}
-= \sum_j E_{q_j} \log \frac{g(l_j)}{q(l_j)} $$
+= \sum_i E_{q_i} \log \frac{g(l_i)}{q(l_i)} $$
 
-I drop the subscripts $j$. Write
+I drop the subscripts $i$. Write
 $$ g \sim \pi_0 \delta_0 + (1 - \pi_0) N(0, 1/a) $$
 and
-$$ q \sim \tilde{\pi}_0 \delta_0 + (1 - \tilde{\pi}_0) N(\tilde{\mu}, \tilde{\sigma}^2) $$
-(I parametrize the normals differently to follow the code more closely.)
+$$ q \sim (1 - \tilde{w}) \delta_0 + \tilde{w} N(\tilde{\mu}, \tilde{\sigma}^2) $$
+(I use different parametrizations to make the derivation cleaner and to  follow the code more closely.)
 
 Then
 $$\begin{aligned}
 E_q \log \frac{g(l)}{q(l)}
-&= \tilde{\pi_0} \log \frac{\pi_0}{\tilde{\pi}_0}
-+ \int (1 - \tilde{\pi}_0) \text{dnorm}(x; \tilde{\mu}, \tilde{\sigma}^2)
+&= (1 - \tilde{w}) \log \frac{\pi_0}{1 - \tilde{w}}
++ \int \tilde{w}\ \text{dnorm}(x; \tilde{\mu}, \tilde{\sigma}^2)
 \log \frac{(1 - \pi_0)\text{dnorm}(x; 0, 1/a)}
-{(1 - \tilde{\pi}_0)\text{dnorm}(x; \tilde{\mu}, \tilde{\sigma}^2)}\ dx \\
-&= \tilde{\pi_0} \log \frac{\pi_0}{\tilde{\pi}_0}
-+ (1 - \tilde{\pi_0}) \log \frac{1 - \pi_0}{1 - \tilde{\pi}_0} \\
+{\tilde{w}\ \text{dnorm}(x; \tilde{\mu}, \tilde{\sigma}^2)}\ dx \\
+&= (1 - \tilde{w}) \log \frac{\pi_0}{1 - \tilde{w}}
++ \tilde{w} \log \frac{1 - \pi_0}{\tilde{w}} \\
 &\ 
-+ \int (1 - \tilde{\pi}_0) \text{dnorm}(x; \tilde{\mu}, \tilde{\sigma}^2)
++ \int \tilde{w}\ \text{dnorm}(x; \tilde{\mu}, \tilde{\sigma}^2)
 \log \left( \sqrt{a \tilde{\sigma}^2} 
 \exp \left( -\frac{ax^2}{2} + \frac{(x - \tilde{\mu})^2}{2 \tilde{\sigma}^2} \right) \right)
-\ dx \\
-&= \tilde{\pi_0} \log \frac{\pi_0}{\tilde{\pi}_0}
-+ (1 - \tilde{\pi_0}) \log \frac{1 - \pi_0}{1 - \tilde{\pi}_0} 
-+ \frac{1 - \tilde{\pi_0}}{2} \log (a \tilde{\sigma}^2) \\
-&\ 
-- \frac{(1 - \tilde{\pi}_0)a}{2} E_{N(x; \tilde{\mu}, \tilde{\sigma}^2)} x^2 + \frac{1 - \tilde{\pi}_0}{2 \tilde{\sigma}^2} E_{N(x; \tilde{\mu}, \tilde{\sigma}^2)} (x - \tilde{\mu})^2 \\
-&= \tilde{\pi_0} \log \frac{\pi_0}{\tilde{\pi}_0}
-+ (1 - \tilde{\pi_0}) \log \frac{1 - \pi_0}{1 - \tilde{\pi}_0} 
-+ \frac{1 - \tilde{\pi_0}}{2} \log (a \tilde{\sigma}^2)
-- \frac{(1 - \tilde{\pi}_0)a}{2} (\tilde{\mu}^2 + \tilde{\sigma}^2)
-+ \frac{1 - \tilde{\pi}_0}{2}
+\ dx
 \end{aligned}$$
 
-So we should be able to calculate $E_q \log \frac{g(l)}{q(l)}$ as follows:
-```{r KL}
-calc_KL <- function(x, s, g) {
-  pi0 <- g$pi0
-  w <- 1 - g$pi0
-  a <- g$a
-  
-  wpost <- ebnm:::wpost_normal(x, s, w, a) # 1 - \tilde{\pi}_0
-  pi0post <- 1 - wpost[wpost < 1] # \tilde{\pi}_0
-  pmean_cond <- ebnm:::pmean_cond_normal(x, s, a) # \tilde{\mu}
-  pvar_cond <- ebnm:::pvar_cond_normal(s, a) # \tilde{\sigma}^2
+The last integral is equal to
+$$\begin{aligned}
+\frac{\tilde{w}}{2} \log (a \tilde{\sigma}^2)
+&- \frac{\tilde{w} a}{2} E_{N(x; \tilde{\mu}, \tilde{\sigma}^2)} x^2 + \frac{\tilde{w}}{2 \tilde{\sigma}^2} E_{N(x; \tilde{\mu}, \tilde{\sigma}^2)} (x - \tilde{\mu})^2 \\
+&= \frac{\tilde{w}}{2} \log (a \tilde{\sigma}^2)
+- \frac{\tilde{w} a}{2} (\tilde{\mu}^2 + \tilde{\sigma}^2)
++ \frac{\tilde{w}}{2}
+\end{aligned}$$
 
-  KLa <- pi0post * log(pi0 / pi0post)
-  KLb <- wpost * log(w / wpost)
-  KLc <- (wpost / 2) * log(a * pvar_cond)
-  KLd <- -(wpost / 2) * a * (pvar_cond + pmean_cond^2)
-  KLe <- (wpost / 2)
-  sum(KLa) + sum(KLb) + sum(KLc) + sum(KLd) + sum(KLe)
-}
-```
+Thus
+$$ E_q \log \frac{g(l)}{q(l)}
+= (1 - \tilde{w}) \log \frac{\pi_0}{1 - \tilde{w}}
++ \tilde{w} \log \frac{1 - \pi_0}{\tilde{w}}
++ \frac{\tilde{w}}{2} \left( 
+\log (a \tilde{\sigma}^2) - a(\tilde{\mu}^2 + \tilde{\sigma}^2) + 1
+\right)
+$$
 
