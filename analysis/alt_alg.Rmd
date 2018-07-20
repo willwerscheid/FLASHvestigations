@@ -294,8 +294,12 @@ Using the same dataset as in previous investigations, I fit a FLASH object with 
 
 ```{r flfit}
 load("./data/before_bad.Rdata")
+
 # devtools::install_github("stephenslab/flashr")
 devtools::load_all("/Users/willwerscheid/GitHub/flashr")
+# devtools::install_github("stephenslab/flashr")
+devtools::load_all("/Users/willwerscheid/GitHub/ebnm")
+
 fl <- flash_add_greedy(data, Kmax=4, verbose=FALSE)
 ```
 
@@ -370,8 +374,4 @@ lines(grid, y, lty=2)
 legend("topright", legend = c("fitted", "prior"), lty = c(1, 2))
 ```
 
-It seems almost as if FLASH were fitting the model 
-$$ l_i \sim^{iid} g_l + e, $$
-where $e$ is some error term, rather than the model
-$$ l_i \sim^{iid} g_l. $$
-This might explain why the prior gets pulled up more by the fitted values in the latter approach.
+This doesn't seem right!
