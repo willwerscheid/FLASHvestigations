@@ -326,7 +326,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/8911eb8f3ce534a992198cd3aecbbe5069e86e50" target="_blank">8911eb8</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/4fc94bd76eeb18ead30130cc05641c64986868c5" target="_blank">4fc94bd</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -335,9 +335,6 @@ Ignored files:
     Ignored:    .Rproj.user/
     Ignored:    docs/.DS_Store
     Ignored:    docs/figure/.DS_Store
-
-Unstaged changes:
-    Modified:   analysis/index.Rmd
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -366,6 +363,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4fc94bd76eeb18ead30130cc05641c64986868c5/analysis/flash_em.Rmd" target="_blank">4fc94bd</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-20
+</td>
+<td style="text-align:left;">
+wflow_publish(c(“analysis/index.Rmd”, “analysis/flash_em.Rmd”))
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/5487b70a33a8df0d5ad4acd2d839426c8a9b2f95/docs/flash_em.html" target="_blank">5487b70</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-20
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -477,7 +508,7 @@ w_j^{(f)} (\mu_j^{(f)2} + \sigma_j^{2(f)}) \right) \right] \\
 + \frac{w_i^{(l)}}{2} \left( \log(a_l \sigma_i^{2(l)}) 
 - a_l (\mu_i^{(l)2} + \sigma_i^{2(l)}) + 1 \right)
  \right] \\
-+ \sum_i \left[ (1 - w_j^{(f)}) \log \frac{\pi_0^{(f)}}{1 - w_j^{(f)}}
++ \sum_j \left[ (1 - w_j^{(f)}) \log \frac{\pi_0^{(f)}}{1 - w_j^{(f)}}
 + w_j^{(f)} \log \frac{1 - \pi_0^{(f)}}{w_j^{(f)}} 
 + \frac{w_j^{(f)}}{2} \left( \log(a_f \sigma_j^{2(f)}) 
 - a_f (\mu_j^{(f)2} + \sigma_j^{2(f)})+ 1 \right)
