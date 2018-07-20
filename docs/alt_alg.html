@@ -292,9 +292,6 @@ div.tocify {
 <li>
   <a href="about.html">About</a>
 </li>
-<li>
-  <a href="license.html">License</a>
-</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -334,7 +331,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-07-19</p>
+<p><strong>Last updated:</strong> 2018-07-20</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -358,7 +355,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/bc2681ed33381070f6380baa1e90bba4efde8d6f" target="_blank">bc2681e</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/c23f41c789d7a6e4906bd341fdf68860e4f461cc" target="_blank">c23f41c</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -367,9 +364,6 @@ Ignored files:
     Ignored:    .Rproj.user/
     Ignored:    docs/.DS_Store
     Ignored:    docs/figure/.DS_Store
-
-Unstaged changes:
-    Modified:   analysis/flash_em.Rmd
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -398,6 +392,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/c23f41c789d7a6e4906bd341fdf68860e4f461cc/analysis/alt_alg.Rmd" target="_blank">c23f41c</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-20
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/alt_alg.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/2cbe7dd2bd145f6ecf2508dbf659131b807265b9/docs/alt_alg.html" target="_blank">2cbe7dd</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-19
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -697,9 +725,13 @@ optimize_alt_fl &lt;- function(altfl, tol = .01, verbose = FALSE) {
 <h2>Fit</h2>
 <p>Using the same dataset as in previous investigations, I fit a FLASH object with four factors (recall that it’s the fourth factor that has been causing problems during loadings updates):</p>
 <pre class="r"><code>load(&quot;./data/before_bad.Rdata&quot;)
+
 # devtools::install_github(&quot;stephenslab/flashr&quot;)
 devtools::load_all(&quot;/Users/willwerscheid/GitHub/flashr&quot;)</code></pre>
 <pre><code>Loading flashr</code></pre>
+<pre class="r"><code># devtools::install_github(&quot;stephenslab/flashr&quot;)
+devtools::load_all(&quot;/Users/willwerscheid/GitHub/ebnm&quot;)</code></pre>
+<pre><code>Loading ebnm</code></pre>
 <pre class="r"><code>fl &lt;- flash_add_greedy(data, Kmax=4, verbose=FALSE)</code></pre>
 <pre><code>fitting factor/loading 1</code></pre>
 <pre><code>fitting factor/loading 2</code></pre>
@@ -707,50 +739,51 @@ devtools::load_all(&quot;/Users/willwerscheid/GitHub/flashr&quot;)</code></pre>
 <pre><code>fitting factor/loading 4</code></pre>
 <p>The objective as computed by FLASH is:</p>
 <pre class="r"><code>flash_get_objective(data, fl)</code></pre>
-<pre><code>[1] -1297148</code></pre>
+<pre><code>[1] -1297135</code></pre>
 <p>I now convert the fourth factor to an “altfl” object. The objective as computed by the alternate method is:</p>
 <pre class="r"><code>altfl &lt;- fl_to_altfl(data, fl, 4)
 compute_obj(altfl)</code></pre>
-<pre><code>[1] -1288461</code></pre>
+<pre><code>[1] -1287925</code></pre>
 <p>Next, I optimize the altfl object:</p>
 <pre class="r"><code>altfl &lt;- optimize_alt_fl(altfl, verbose=TRUE)</code></pre>
-<pre><code>Objective: -1267406.2685275</code></pre>
-<pre><code>Objective: -1260756.13822147</code></pre>
-<pre><code>Objective: -1257939.29612236</code></pre>
-<pre><code>Objective: -1257300.63730127</code></pre>
-<pre><code>Objective: -1257110.55550233</code></pre>
-<pre><code>Objective: -1257016.7314057</code></pre>
-<pre><code>Objective: -1256963.52277046</code></pre>
-<pre><code>Objective: -1256932.3695305</code></pre>
-<pre><code>Objective: -1256914.13309796</code></pre>
-<pre><code>Objective: -1256902.74309918</code></pre>
-<pre><code>Objective: -1256895.1068788</code></pre>
-<pre><code>Objective: -1256889.8003563</code></pre>
-<pre><code>Objective: -1256886.07583612</code></pre>
-<pre><code>Objective: -1256883.4080515</code></pre>
-<pre><code>Objective: -1256881.44636624</code></pre>
-<pre><code>Objective: -1256879.9749153</code></pre>
-<pre><code>Objective: -1256878.85630259</code></pre>
-<pre><code>Objective: -1256877.99813191</code></pre>
-<pre><code>Objective: -1256877.33547644</code></pre>
-<pre><code>Objective: -1256876.82128467</code></pre>
-<pre><code>Objective: -1256876.42074587</code></pre>
-<pre><code>Objective: -1256876.10774166</code></pre>
-<pre><code>Objective: -1256875.8624804</code></pre>
-<pre><code>Objective: -1256875.66985319</code></pre>
-<pre><code>Objective: -1256875.5182584</code></pre>
-<pre><code>Objective: -1256875.39874455</code></pre>
-<pre><code>Objective: -1256875.3043765</code></pre>
-<pre><code>Objective: -1256875.22976218</code></pre>
-<pre><code>Objective: -1256875.17069613</code></pre>
-<pre><code>Objective: -1256875.12388932</code></pre>
-<pre><code>Objective: -1256875.08676316</code></pre>
-<pre><code>Objective: -1256875.05729166</code></pre>
-<pre><code>Objective: -1256875.03387997</code></pre>
-<pre><code>Objective: -1256875.0152705</code></pre>
-<pre><code>Objective: -1256875.00047012</code></pre>
-<pre><code>Objective: -1256874.98869349</code></pre>
-<pre><code>Objective: -1256874.9793189</code></pre>
+<pre><code>Objective: -1266527.52893897</code></pre>
+<pre><code>Objective: -1259591.41880171</code></pre>
+<pre><code>Objective: -1256717.73280192</code></pre>
+<pre><code>Objective: -1256092.73281445</code></pre>
+<pre><code>Objective: -1255909.73574933</code></pre>
+<pre><code>Objective: -1255818.46915015</code></pre>
+<pre><code>Objective: -1255766.3647692</code></pre>
+<pre><code>Objective: -1255735.3950312</code></pre>
+<pre><code>Objective: -1255716.97331457</code></pre>
+<pre><code>Objective: -1255705.43249546</code></pre>
+<pre><code>Objective: -1255697.71996832</code></pre>
+<pre><code>Objective: -1255692.31493727</code></pre>
+<pre><code>Objective: -1255688.43367143</code></pre>
+<pre><code>Objective: -1255685.61158832</code></pre>
+<pre><code>Objective: -1255683.53045841</code></pre>
+<pre><code>Objective: -1255681.97109968</code></pre>
+<pre><code>Objective: -1255680.78688195</code></pre>
+<pre><code>Objective: -1255679.87854253</code></pre>
+<pre><code>Objective: -1255679.17674322</code></pre>
+<pre><code>Objective: -1255678.63159121</code></pre>
+<pre><code>Objective: -1255678.20636055</code></pre>
+<pre><code>Objective: -1255677.87357066</code></pre>
+<pre><code>Objective: -1255677.61241567</code></pre>
+<pre><code>Objective: -1255677.40700628</code></pre>
+<pre><code>Objective: -1255677.24512755</code></pre>
+<pre><code>Objective: -1255677.11733974</code></pre>
+<pre><code>Objective: -1255677.01631629</code></pre>
+<pre><code>Objective: -1255676.93635016</code></pre>
+<pre><code>Objective: -1255676.87298197</code></pre>
+<pre><code>Objective: -1255676.82271789</code></pre>
+<pre><code>Objective: -1255676.78281419</code></pre>
+<pre><code>Objective: -1255676.75111177</code></pre>
+<pre><code>Objective: -1255676.72590854</code></pre>
+<pre><code>Objective: -1255676.7058606</code></pre>
+<pre><code>Objective: -1255676.68990533</code></pre>
+<pre><code>Objective: -1255676.67720158</code></pre>
+<pre><code>Objective: -1255676.66708273</code></pre>
+<pre><code>Objective: -1255676.65902003</code></pre>
 <p>Finally, I put the altfl object back into the fourth factor of the flash object.</p>
 <pre class="r"><code>fl2 &lt;- altfl_to_fl(altfl, fl, 4)</code></pre>
 </div>
@@ -760,33 +793,33 @@ compute_obj(altfl)</code></pre>
 <pre class="r"><code>list(loadings = fl$gl[[4]], alt_loadings = fl2$gl[[4]])</code></pre>
 <pre><code>$loadings
 $loadings$pi0
-[1] 0.7252435
+[1] 0.72317
 
 $loadings$a
-[1] 0.05228744
+[1] 0.04110932
 
 
 $alt_loadings
 $alt_loadings$pi0
-[1] 0.6079064
+[1] 0.6009072
 
 $alt_loadings$a
-[1] 0.1251973</code></pre>
+[1] 0.09951342</code></pre>
 <pre class="r"><code>list(factors = fl$gf[[4]], alt_factors = fl2$gf[[4]])</code></pre>
 <pre><code>$factors
 $factors$pi0
-[1] 0.3667051
+[1] 0.3616584
 
 $factors$a
-[1] 23.14738
+[1] 29.84806
 
 
 $alt_factors
 $alt_factors$pi0
-[1] 0.1302886
+[1] 0.1264111
 
 $alt_factors$a
-[1] 36.28001</code></pre>
+[1] 46.48745</code></pre>
 <p>A scatterplot comparing the fitted fourth factor/loading appears as follows:</p>
 <pre class="r"><code>fitted &lt;- flash_get_fitted_values(fl)
 fitted2 &lt;- flash_get_fitted_values(fl2)
@@ -799,6 +832,36 @@ plot(fitted, fitted2, pch=&#39;.&#39;,
      xlim=c(minval, maxval), ylim=c(minval, maxval),
      main=&quot;Fitted values&quot;)</code></pre>
 <p><img src="figure/alt_alg.Rmd/comp_fitted-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of comp_fitted-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/2cbe7dd2bd145f6ecf2508dbf659131b807265b9/docs/figure/alt_alg.Rmd/comp_fitted-1.png" target="_blank">2cbe7dd</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-19
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>To see what’s going on, I fit the estimated loadings against the estimated prior on the loadings. For the FLASH fit:</p>
 <pre class="r"><code>plot(density(fl$EL[, 4]), xlim=c(-15, 15), ylim=c(0, 0.1),
      main=&quot;FLASH loadings&quot;)
@@ -807,6 +870,36 @@ y &lt;- (1 - fl$gl[[4]]$pi0) * dnorm(grid, 0, 1/sqrt(fl$gl[[4]]$a))
 lines(grid, y, lty=2)
 legend(&quot;topright&quot;, legend = c(&quot;fitted&quot;, &quot;prior&quot;), lty = c(1, 2))</code></pre>
 <p><img src="figure/alt_alg.Rmd/density1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of density1-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/2cbe7dd2bd145f6ecf2508dbf659131b807265b9/docs/figure/alt_alg.Rmd/density1-1.png" target="_blank">2cbe7dd</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-19
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>For the alternate approach:</p>
 <pre class="r"><code>plot(density(fl2$EL[, 4]), xlim=c(-15, 15), ylim=c(0, 0.1),
      main=&quot;Alternate approach&quot;)
@@ -815,7 +908,37 @@ y &lt;- (1 - fl2$gl[[4]]$pi0) * dnorm(grid, 0, 1/sqrt(fl2$gl[[4]]$a))
 lines(grid, y, lty=2)
 legend(&quot;topright&quot;, legend = c(&quot;fitted&quot;, &quot;prior&quot;), lty = c(1, 2))</code></pre>
 <p><img src="figure/alt_alg.Rmd/density2-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>It seems almost as if FLASH were fitting the model <span class="math display">\[ l_i \sim^{iid} g_l + e, \]</span> where <span class="math inline">\(e\)</span> is some error term, rather than the model <span class="math display">\[ l_i \sim^{iid} g_l. \]</span> This might explain why the prior gets pulled up more by the fitted values in the latter approach.</p>
+<details> <summary><em>Expand here to see past versions of density2-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/2cbe7dd2bd145f6ecf2508dbf659131b807265b9/docs/figure/alt_alg.Rmd/density2-1.png" target="_blank">2cbe7dd</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-19
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
+<p>This doesn’t seem right!</p>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
@@ -835,7 +958,7 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] flashr_0.5-12
+[1] ebnm_0.1-13   flashr_0.5-12
 
 loaded via a namespace (and not attached):
  [1] Rcpp_0.12.17        pillar_1.2.1        plyr_1.8.4         
@@ -845,17 +968,17 @@ loaded via a namespace (and not attached):
 [13] tibble_1.4.2        evaluate_0.10.1     memoise_1.1.0      
 [16] gtable_0.2.0        lattice_0.20-35     rlang_0.2.0        
 [19] Matrix_1.2-12       foreach_1.4.4       commonmark_1.4     
-[22] yaml_2.1.17         parallel_3.4.3      ebnm_0.1-12        
-[25] withr_2.1.1.9000    stringr_1.3.0       roxygen2_6.0.1.9000
-[28] xml2_1.2.0          knitr_1.20          devtools_1.13.4    
-[31] rprojroot_1.3-2     grid_3.4.3          R6_2.2.2           
-[34] rmarkdown_1.8       ggplot2_2.2.1       ashr_2.2-10        
-[37] magrittr_1.5        whisker_0.3-2       backports_1.1.2    
-[40] scales_0.5.0        codetools_0.2-15    htmltools_0.3.6    
-[43] MASS_7.3-48         assertthat_0.2.0    softImpute_1.4     
-[46] colorspace_1.3-2    stringi_1.1.6       lazyeval_0.2.1     
-[49] munsell_0.4.3       doParallel_1.0.11   pscl_1.5.2         
-[52] truncnorm_1.0-8     SQUAREM_2017.10-1   R.oo_1.21.0        </code></pre>
+[22] yaml_2.1.17         parallel_3.4.3      withr_2.1.1.9000   
+[25] stringr_1.3.0       roxygen2_6.0.1.9000 xml2_1.2.0         
+[28] knitr_1.20          devtools_1.13.4     rprojroot_1.3-2    
+[31] grid_3.4.3          R6_2.2.2            rmarkdown_1.8      
+[34] ggplot2_2.2.1       ashr_2.2-10         magrittr_1.5       
+[37] whisker_0.3-2       backports_1.1.2     scales_0.5.0       
+[40] codetools_0.2-15    htmltools_0.3.6     MASS_7.3-48        
+[43] assertthat_0.2.0    softImpute_1.4      colorspace_1.3-2   
+[46] stringi_1.1.6       lazyeval_0.2.1      munsell_0.4.3      
+[49] doParallel_1.0.11   pscl_1.5.2          truncnorm_1.0-8    
+[52] SQUAREM_2017.10-1   R.oo_1.21.0        </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
