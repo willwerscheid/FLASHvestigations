@@ -1,5 +1,5 @@
 ---
-title: "Objective Function: ebnm_pn vs. ebnm_ash"
+title: "Objective function: ebnm_pn vs. ebnm_ash"
 author: "Jason Willwerscheid"
 date: "7/14/2018"
 output:

@@ -1,5 +1,5 @@
 ---
-title: "Bad Loadings Updates"
+title: "Bad loadings updates"
 author: "Jason Willwerscheid"
 date: "7/16/2018"
 output:
@@ -8,10 +8,6 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-# devtools::install_github("stephenslab/flashr", ref="trackObj")
-devtools::load_all("/Users/willwerscheid/GitHub/flashr")
-# devtools::install_github("stephenslab/ebnm")
-devtools::load_all("/Users/willwerscheid/GitHub/ebnm")
 ```
 
 
@@ -22,6 +18,11 @@ Here I look into the bad loadings updates some more.
 First I load the flash object from just before the "bad" update discussed in the [first investigation](objective3.html). Next, I alternately update the precision and the loadings (I do not update the factors). I do so for 20 iterations.
 
 ```{r iterate}
+# devtools::install_github("stephenslab/flashr", ref="trackObj")
+devtools::load_all("/Users/willwerscheid/GitHub/flashr")
+# devtools::install_github("stephenslab/ebnm")
+devtools::load_all("/Users/willwerscheid/GitHub/ebnm")
+
 load("data/before_bad.Rdata")
 
 init_fl <- res2$f
@@ -55,7 +56,7 @@ for (i in 1:niters) {
 ```
 
 
-## Objective
+## Convergence of objective
 
 Interestingly, the objective function gets worse every iteration. Nonetheless, it is apparently converging to something.
 
@@ -69,7 +70,7 @@ for (i in 1:niters) {
 
 ## Convergence of prior
 
-To confirm that convergence is taking place, I check the estimated prior $g_l$ after each iteration (the first list gives the values of $\pi_0$; the second, the values of $a$):
+To confirm that convergence is taking place, I check the estimated prior $g_l$ after each iteration. The first list gives the values of $\pi_0$; the second, the values of $a$:
 
 ```{r gl}
 for (i in 1:niters) {
