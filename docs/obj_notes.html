@@ -317,7 +317,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-07-18</p>
+<p><strong>Last updated:</strong> 2018-07-20</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -326,22 +326,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
-<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
-</details>
-</li>
-<li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
-<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
-</details>
-</li>
-<li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
-<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
-</details>
-</li>
-<li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/4d6f3da2ff79a3bc2e7410069098316f173765e2" target="_blank">4d6f3da</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/8911eb8f3ce534a992198cd3aecbbe5069e86e50" target="_blank">8911eb8</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -351,8 +336,8 @@ Ignored files:
     Ignored:    docs/.DS_Store
     Ignored:    docs/figure/.DS_Store
 
-Untracked files:
-    Untracked:  analysis/flash_em.Rmd
+Unstaged changes:
+    Modified:   analysis/index.Rmd
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -381,6 +366,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/8911eb8f3ce534a992198cd3aecbbe5069e86e50/analysis/obj_notes.Rmd" target="_blank">8911eb8</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-20
+</td>
+<td style="text-align:left;">
+wflow_publish(c(“analysis/obj_notes.Rmd”,
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/de6736c8035a7158886c00112652b2ff31943802/docs/obj_notes.html" target="_blank">de6736c</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-18
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -610,7 +629,7 @@ wflow_publish(“analysis/obj_notes.Rmd”)
 <div id="indirect-method" class="section level2">
 <h2>Indirect method</h2>
 <p>Recall the FLASH model: <span class="math display">\[ Y = LF&#39; + E \]</span></p>
-<p>When updating loading <span class="math inline">\(l_k\)</span>, we are optimizing over <span class="math inline">\(g_{l_k}\)</span> and <span class="math inline">\(q_{l_k}\)</span>. <span class="math inline">\(g_{l_k} \in \mathcal{G}\)</span> is the prior on the elements of the <span class="math inline">\(k\)</span>th column of the loadings matrix: <span class="math display">\[ l_{1k}, \ldots, l_{nk} \sim^{iid} g_{l_k} \]</span> <span class="math inline">\(q_{l_k}\)</span> is an arbitrary distribution which enters the problem via the variational approach. For convenience, I drop the subscripts in the following.</p>
+<p>When updating loading <span class="math inline">\(l_k\)</span>, we are optimizing over <span class="math inline">\(g_{l_k}\)</span> and <span class="math inline">\(q_{l_k}\)</span>. <span class="math inline">\(g_{l_k} \in \mathcal{G}\)</span> is the prior on the elements of the <span class="math inline">\(k\)</span>th column of the loadings matrix: <span class="math display">\[ l_{1k}, \ldots, l_{nk} \sim^{iid} g_{l_k} \]</span> <span class="math inline">\(q_{l_k}\)</span> is an arbitrary distribution which enters into the problem via the variational approach. For convenience, I drop the subscripts in the following.</p>
 <p>The part of the objective that depends on <span class="math inline">\(g\)</span> and <span class="math inline">\(q\)</span> is <span class="math display">\[ F(g, q) := E_q \left[ -\frac{1}{2} \sum_i (A_i l_i^2 - 2 B_i l_i) \right]
 + E_q \log \frac{g(\mathbf{l})}{q(\mathbf{l})} \]</span> with <span class="math display">\[ A_i = \sum_j \tau_{ij} Ef^2_j \text{ and }
 B_i = \sum_j \tau_{ij} R_{ij} Ef_j, \]</span> (<span class="math inline">\(R\)</span> is the matrix of residuals (excluding factor <span class="math inline">\(k\)</span>) and <span class="math inline">\(Ef_j\)</span> and <span class="math inline">\(Ef^2_j\)</span> are the expected values of <span class="math inline">\(f_{jk}\)</span> and <span class="math inline">\(f_{jk}^2\)</span> with respect to the distribution <span class="math inline">\(q_{f_k}\)</span> fitted during the factor update.)</p>
@@ -623,76 +642,36 @@ B_i = \sum_j \tau_{ij} R_{ij} Ef_j, \]</span> (<span class="math inline">\(R\)</
 <div id="direct-method" class="section level2">
 <h2>Direct method</h2>
 <p>When using <code>ebnm_pn</code>, however, it seems possible to compute <span class="math inline">\(E_q \log \frac{g(\mathbf{l})}{q(\mathbf{l})}\)</span> directly. Since the elements <span class="math inline">\(l_1, \ldots, l_n\)</span> are i.i.d. from <span class="math inline">\(g\)</span> (by the FLASH model) and the posterior distributions are mutually independent (by the EBNM model), <span class="math display">\[ E_q \log \frac{g(\mathbf{l})}{q(\mathbf{l})}
-= \sum_j E_{q_j} \log \frac{g(l_j)}{q(l_j)} \]</span></p>
-<p>I drop the subscripts <span class="math inline">\(j\)</span>. Write <span class="math display">\[ g \sim \pi_0 \delta_0 + (1 - \pi_0) N(0, 1/a) \]</span> and <span class="math display">\[ q \sim \tilde{\pi}_0 \delta_0 + (1 - \tilde{\pi}_0) N(\tilde{\mu}, \tilde{\sigma}^2) \]</span> (I parametrize the normals differently to follow the code more closely.)</p>
+= \sum_i E_{q_i} \log \frac{g(l_i)}{q(l_i)} \]</span></p>
+<p>I drop the subscripts <span class="math inline">\(i\)</span>. Write <span class="math display">\[ g \sim \pi_0 \delta_0 + (1 - \pi_0) N(0, 1/a) \]</span> and <span class="math display">\[ q \sim (1 - \tilde{w}) \delta_0 + \tilde{w} N(\tilde{\mu}, \tilde{\sigma}^2) \]</span> (I use different parametrizations to make the derivation cleaner and to follow the code more closely.)</p>
 <p>Then <span class="math display">\[\begin{aligned}
 E_q \log \frac{g(l)}{q(l)}
-&amp;= \tilde{\pi_0} \log \frac{\pi_0}{\tilde{\pi}_0}
-+ \int (1 - \tilde{\pi}_0) \text{dnorm}(x; \tilde{\mu}, \tilde{\sigma}^2)
+&amp;= (1 - \tilde{w}) \log \frac{\pi_0}{1 - \tilde{w}}
++ \int \tilde{w}\ \text{dnorm}(x; \tilde{\mu}, \tilde{\sigma}^2)
 \log \frac{(1 - \pi_0)\text{dnorm}(x; 0, 1/a)}
-{(1 - \tilde{\pi}_0)\text{dnorm}(x; \tilde{\mu}, \tilde{\sigma}^2)}\ dx \\
-&amp;= \tilde{\pi_0} \log \frac{\pi_0}{\tilde{\pi}_0}
-+ (1 - \tilde{\pi_0}) \log \frac{1 - \pi_0}{1 - \tilde{\pi}_0} \\
+{\tilde{w}\ \text{dnorm}(x; \tilde{\mu}, \tilde{\sigma}^2)}\ dx \\
+&amp;= (1 - \tilde{w}) \log \frac{\pi_0}{1 - \tilde{w}}
++ \tilde{w} \log \frac{1 - \pi_0}{\tilde{w}} \\
 &amp;\ 
-+ \int (1 - \tilde{\pi}_0) \text{dnorm}(x; \tilde{\mu}, \tilde{\sigma}^2)
++ \int \tilde{w}\ \text{dnorm}(x; \tilde{\mu}, \tilde{\sigma}^2)
 \log \left( \sqrt{a \tilde{\sigma}^2} 
 \exp \left( -\frac{ax^2}{2} + \frac{(x - \tilde{\mu})^2}{2 \tilde{\sigma}^2} \right) \right)
-\ dx \\
-&amp;= \tilde{\pi_0} \log \frac{\pi_0}{\tilde{\pi}_0}
-+ (1 - \tilde{\pi_0}) \log \frac{1 - \pi_0}{1 - \tilde{\pi}_0} 
-+ \frac{1 - \tilde{\pi_0}}{2} \log (a \tilde{\sigma}^2) \\
-&amp;\ 
-- \frac{(1 - \tilde{\pi}_0)a}{2} E_{N(x; \tilde{\mu}, \tilde{\sigma}^2)} x^2 + \frac{1 - \tilde{\pi}_0}{2 \tilde{\sigma}^2} E_{N(x; \tilde{\mu}, \tilde{\sigma}^2)} (x - \tilde{\mu})^2 \\
-&amp;= \tilde{\pi_0} \log \frac{\pi_0}{\tilde{\pi}_0}
-+ (1 - \tilde{\pi_0}) \log \frac{1 - \pi_0}{1 - \tilde{\pi}_0} 
-+ \frac{1 - \tilde{\pi_0}}{2} \log (a \tilde{\sigma}^2)
-- \frac{(1 - \tilde{\pi}_0)a}{2} (\tilde{\mu}^2 + \tilde{\sigma}^2)
-+ \frac{1 - \tilde{\pi}_0}{2}
+\ dx
 \end{aligned}\]</span></p>
-<p>So we should be able to calculate <span class="math inline">\(E_q \log \frac{g(l)}{q(l)}\)</span> as follows:</p>
-<pre class="r"><code>calc_KL &lt;- function(x, s, g) {
-  pi0 &lt;- g$pi0
-  w &lt;- 1 - g$pi0
-  a &lt;- g$a
-  
-  wpost &lt;- ebnm:::wpost_normal(x, s, w, a) # 1 - \tilde{\pi}_0
-  pi0post &lt;- 1 - wpost[wpost &lt; 1] # \tilde{\pi}_0
-  pmean_cond &lt;- ebnm:::pmean_cond_normal(x, s, a) # \tilde{\mu}
-  pvar_cond &lt;- ebnm:::pvar_cond_normal(s, a) # \tilde{\sigma}^2
-
-  KLa &lt;- pi0post * log(pi0 / pi0post)
-  KLb &lt;- wpost * log(w / wpost)
-  KLc &lt;- (wpost / 2) * log(a * pvar_cond)
-  KLd &lt;- -(wpost / 2) * a * (pvar_cond + pmean_cond^2)
-  KLe &lt;- (wpost / 2)
-  sum(KLa) + sum(KLb) + sum(KLc) + sum(KLd) + sum(KLe)
-}</code></pre>
-</div>
-<div id="session-information" class="section level2">
-<h2>Session information</h2>
-<pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>R version 3.4.3 (2017-11-30)
-Platform: x86_64-apple-darwin15.6.0 (64-bit)
-Running under: macOS Sierra 10.12.6
-
-Matrix products: default
-BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
-LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
-
-locale:
-[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
-
-attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
-
-loaded via a namespace (and not attached):
- [1] workflowr_1.0.1   Rcpp_0.12.17      digest_0.6.15    
- [4] rprojroot_1.3-2   R.methodsS3_1.7.1 backports_1.1.2  
- [7] git2r_0.21.0      magrittr_1.5      evaluate_0.10.1  
-[10] stringi_1.1.6     whisker_0.3-2     R.oo_1.21.0      
-[13] R.utils_2.6.0     rmarkdown_1.8     tools_3.4.3      
-[16] stringr_1.3.0     yaml_2.1.17       compiler_3.4.3   
-[19] htmltools_0.3.6   knitr_1.20       </code></pre>
+<p>The last integral is equal to <span class="math display">\[\begin{aligned}
+\frac{\tilde{w}}{2} \log (a \tilde{\sigma}^2)
+&amp;- \frac{\tilde{w} a}{2} E_{N(x; \tilde{\mu}, \tilde{\sigma}^2)} x^2 + \frac{\tilde{w}}{2 \tilde{\sigma}^2} E_{N(x; \tilde{\mu}, \tilde{\sigma}^2)} (x - \tilde{\mu})^2 \\
+&amp;= \frac{\tilde{w}}{2} \log (a \tilde{\sigma}^2)
+- \frac{\tilde{w} a}{2} (\tilde{\mu}^2 + \tilde{\sigma}^2)
++ \frac{\tilde{w}}{2}
+\end{aligned}\]</span></p>
+<p>Thus <span class="math display">\[ E_q \log \frac{g(l)}{q(l)}
+= (1 - \tilde{w}) \log \frac{\pi_0}{1 - \tilde{w}}
++ \tilde{w} \log \frac{1 - \pi_0}{\tilde{w}}
++ \frac{\tilde{w}}{2} \left( 
+\log (a \tilde{\sigma}^2) - a(\tilde{\mu}^2 + \tilde{\sigma}^2) + 1
+\right)
+\]</span></p>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using

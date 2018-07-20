@@ -317,7 +317,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-07-19</p>
+<p><strong>Last updated:</strong> 2018-07-20</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -326,7 +326,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/fb3eab9600081c9a137889db1d698972522ecf93" target="_blank">fb3eab9</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/8911eb8f3ce534a992198cd3aecbbe5069e86e50" target="_blank">8911eb8</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -335,6 +335,9 @@ Ignored files:
     Ignored:    .Rproj.user/
     Ignored:    docs/.DS_Store
     Ignored:    docs/figure/.DS_Store
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -363,6 +366,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/8911eb8f3ce534a992198cd3aecbbe5069e86e50/analysis/flash_em.Rmd" target="_blank">8911eb8</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-20
+</td>
+<td style="text-align:left;">
+wflow_publish(c(“analysis/obj_notes.Rmd”,
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/da82b4894f86b47b63b75a184e501d4fdca1f4c4/docs/flash_em.html" target="_blank">da82b48</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-19
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -425,11 +462,11 @@ wflow_publish(“analysis/flash_em.Rmd”)
 </div>
 <div id="notation" class="section level2">
 <h2>Notation</h2>
-<p>It will simplify matters if I parametrize the posteriors for, respectively, the <span class="math inline">\(i\)</span>th element of the <span class="math inline">\(k\)</span>th loading and the <span class="math inline">\(j\)</span>th element of the <span class="math inline">\(k\)</span>th factor as <span class="math display">\[ q_{l_i} \sim (1 - w_i^{(l)}) \delta_0 + w_i^{(l)} N(\mu_i^{(l)}, \sigma_i^{2(l)}) \]</span> and <span class="math display">\[ q_{f_j} \sim (1 - w_j^{(f)}) \delta_0 + w_j^{(f)} N(\mu_j^{(f)}, \sigma_j^{2(f)}) \]</span> I parametrize the priors as <span class="math display">\[ g_{l_i} \sim \pi_0^{(l)} \delta_0 + (1 - \pi_0^{(l)}) N(0, 1/a_l) \]</span> and <span class="math display">\[ g_{f_j} \sim \pi_0^{(f)} \delta_0 + (1 - \pi_0^{(f)}) N(0, 1/a_f) \]</span></p>
+<p>I parametrize the posteriors for, respectively, the <span class="math inline">\(i\)</span>th element of the <span class="math inline">\(k\)</span>th loading and the <span class="math inline">\(j\)</span>th element of the <span class="math inline">\(k\)</span>th factor as <span class="math display">\[ q_{l_i} \sim (1 - w_i^{(l)}) \delta_0 + w_i^{(l)} N(\mu_i^{(l)}, \sigma_i^{2(l)}) \]</span> and <span class="math display">\[ q_{f_j} \sim (1 - w_j^{(f)}) \delta_0 + w_j^{(f)} N(\mu_j^{(f)}, \sigma_j^{2(f)}) \]</span> I parametrize the priors as <span class="math display">\[ g_{l_i} \sim \pi_0^{(l)} \delta_0 + (1 - \pi_0^{(l)}) N(0, 1/a_l) \]</span> and <span class="math display">\[ g_{f_j} \sim \pi_0^{(f)} \delta_0 + (1 - \pi_0^{(f)}) N(0, 1/a_f) \]</span></p>
 </div>
 <div id="objective" class="section level2">
 <h2>Objective</h2>
-<p>Using the expression for KL divergence derived in the previous note, the objective can be written: <span class="math display">\[\begin{aligned}
+<p>Using the expression for KL divergence derived in the <a href="obj_notes.html">previous note</a>, the objective can be written: <span class="math display">\[\begin{aligned}
 \sum_{i, j} \left[ \frac{1}{2} \log \frac{\tau_{ij}}{2 \pi} 
 - \frac{\tau_{ij}}{2} \left( (R_{ij}^{-k})^2 
 - 2 R_{ij}^{-k} w_i^{(l)} \mu_i^{(l)} w_j^{(f)} \mu_j^{(f)}
@@ -437,18 +474,21 @@ wflow_publish(“analysis/flash_em.Rmd”)
 w_j^{(f)} (\mu_j^{(f)2} + \sigma_j^{2(f)}) \right) \right] \\
 +\sum_i \left[ (1 - w_i^{(l)}) \log \frac{\pi_0^{(l)}}{1 - w_i^{(l)}}
 + w_i^{(l)} \log \frac{1 - \pi_0^{(l)}}{w_i^{(l)}} 
-+ \frac{w_i^{(l)}}{2} \left( \log(a_l \sigma_i^{2(l)}) + 1 \right)
-- \frac{w_i^{(l)} a_l}{2}(\mu_i^{(l)2} + \sigma_i^{2(l)}) \right] \\
-+\sum_i \left[ (1 - w_j^{(f)}) \log \frac{\pi_0^{(f)}}{1 - w_j^{(f)}}
++ \frac{w_i^{(l)}}{2} \left( \log(a_l \sigma_i^{2(l)}) 
+- a_l (\mu_i^{(l)2} + \sigma_i^{2(l)}) + 1 \right)
+ \right] \\
++ \sum_i \left[ (1 - w_j^{(f)}) \log \frac{\pi_0^{(f)}}{1 - w_j^{(f)}}
 + w_j^{(f)} \log \frac{1 - \pi_0^{(f)}}{w_j^{(f)}} 
-+ \frac{w_j^{(f)}}{2} \left( \log(a_f \sigma_j^{2(f)}) + 1 \right)
-- \frac{w_j^{(f)} a_f}{2}(\mu_j^{(f)2} + \sigma_j^{2(f)}) \right]
++ \frac{w_j^{(f)}}{2} \left( \log(a_f \sigma_j^{2(f)}) 
+- a_f (\mu_j^{(f)2} + \sigma_j^{2(f)})+ 1 \right)
+\right],
 \end{aligned} \]</span></p>
+<p>where <span class="math inline">\(R_{ij}^{-k}\)</span> denotes the matrix of residuals obtained by using all factor/loading pairs but the <span class="math inline">\(k\)</span>th.</p>
 </div>
 <div id="prior-parameter-updates" class="section level2">
 <h2>Prior parameter updates</h2>
-<p>I derive an algorithm for loadings updates by differentiating with respect to each variable (<span class="math inline">\(a_l\)</span>, <span class="math inline">\(\pi_0^{(l)}\)</span>, <span class="math inline">\(\mu_1^{(l)}, \ldots, \mu_n^{(l)}\)</span>, <span class="math inline">\(\sigma_1^{2(l)}, \ldots, \sigma_n^{2(l)}\)</span>, and <span class="math inline">\(w_1^{(l)}, \ldots, w_n^{(l)}\)</span>) and setting each result equal to zero.</p>
-<p>The updates for the prior parameters <span class="math inline">\(a_l\)</span> and <span class="math inline">\(\pi_0^{(l)}\)</span> turn out to be very simple. First, differentiating with respect to <span class="math inline">\(a_l\)</span> gives <span class="math display">\[ \sum_i \left[ \frac{w_i^{(l)}}{2a_l} - \frac{w_i^{(l)}}{2}(\mu_i^{(l)2} + \sigma_i^{2(l)}) \right] \]</span> Setting this equal to zero gives <span class="math display">\[ a_l = \frac{\sum_i w_i^{(l)}}{\sum_i w_i^{(l)} (\mu_i^{(l)2} + \sigma_i^{2(l)})} = \frac{\sum_i w_i^{(l)}}{\sum_i E_ql_i^2} \]</span></p>
+<p>I derive an algorithm for loadings updates by differentiating with respect to each variable <span class="math inline">\(a_l\)</span>, <span class="math inline">\(\pi_0^{(l)}\)</span>, <span class="math inline">\(\mu_1^{(l)}, \ldots, \mu_n^{(l)}\)</span>, <span class="math inline">\(\sigma_1^{2(l)}, \ldots, \sigma_n^{2(l)}\)</span>, and <span class="math inline">\(w_1^{(l)}, \ldots, w_n^{(l)}\)</span>, and setting each result equal to zero.</p>
+<p>The updates for the prior parameters <span class="math inline">\(a_l\)</span> and <span class="math inline">\(\pi_0^{(l)}\)</span> turn out to be very simple. First, differentiating with respect to <span class="math inline">\(a_l\)</span> gives <span class="math display">\[ \sum_i \left[ \frac{w_i^{(l)}}{2} \left( \frac{1}{a_l} - (\mu_i^{(l)2} + \sigma_i^{2(l)}) \right) \right] \]</span> Setting this equal to zero gives <span class="math display">\[ a_l = \frac{\sum_i w_i^{(l)}}{\sum_i w_i^{(l)} (\mu_i^{(l)2} + \sigma_i^{2(l)})} = \frac{\sum_i w_i^{(l)}}{\sum_i E_ql_i^2} \]</span></p>
 <p>Next, differentiating with respect to <span class="math inline">\(\pi_0^{(l)}\)</span> gives <span class="math display">\[ \sum_i \left[ \frac{1 - w_i^{(l)}}{\pi_0^{(l)}} - \frac{w_i^{(l)}}{1 - \pi_0^{(l)}} \right] \]</span> Setting this equal to zero gives <span class="math display">\[\begin{aligned}
 \pi_0^{(l)} \sum_i w_i^{(l)} &amp;= (1 - \pi_0^{(l)}) \sum_i (1 - w_i^{(l)}) \\
 \pi_0^{(l)} &amp;= \frac{1}{n} \sum_i (1 - w_i^{(l)})
@@ -467,26 +507,22 @@ w_j^{(f)} (\mu_j^{(f)2} + \sigma_j^{2(f)}) \right) \right] \\
 = \frac{1}{a_l + \sum_j \tau_{ij} w_j^{(f)} (\mu_j^{(f)2} + \sigma_j^{2(f)})}
 = \frac{1}{a_l + \sum_j \tau_{ij} Ef_j^2} \]</span></p>
 <p>It remains to derive the update for <span class="math inline">\(w_i^{(l)}\)</span>. Differentiating gives <span class="math display">\[ \begin{aligned}
-\sum_j \left[ \tau_{ij} R_{ij}^{-k} \mu_i^{(l)} w_j^{(f)} \mu_j^{(f)}
-- \frac{\tau_{ij}}{2}(\mu_i^{(l)2} + \sigma_i^{2(l)}) 
+\sum_j \tau_{ij} \left[ R_{ij}^{-k} \mu_i^{(l)} w_j^{(f)} \mu_j^{(f)}
+- \frac{1}{2}(\mu_i^{(l)2} + \sigma_i^{2(l)}) 
 w_j^{(f)} (\mu_j^{(f)2} + \sigma_j^{2(f)}) \right] \\
 - \log \frac{\pi_0^{(l)}}{1 - w_i^{(l)}}
 + \log \frac{1 - \pi_0^{(l)}}{w_i^{(l)}}
-+ \frac{1}{2} \left( \log (a_l \sigma_i^{2(l)}) + 1 \right)
-- \frac{a_l}{2} (\mu_i^{(l)2} + \sigma_i^{2(l)})
++ \frac{1}{2} \left( \log (a_l \sigma_i^{2(l)}) 
+- a_l (\mu_i^{(l)2} + \sigma_i^{2(l)}) + 1 \right)
 \end{aligned}\]</span> Setting this equal to zero gives <span class="math display">\[ \begin{aligned}
 \log \frac{w_i^{(l)}}{1 - w_i^{(l)}}
 &amp;= \log \frac{1 - \pi_0^{(l)}}{\pi_0^{(l)}} 
 + \frac{1}{2} \left( \log (a_l \sigma_i^{2(l)}) - a_l (\mu_i^{(l)2} + \sigma_i^{2(l)}) + 1 \right) \\
 &amp;+ \sum_j \tau_{ij} \left[R_{ij}^{-k} \mu_i^{(l)} w_j^{(f)} \mu_j^{(f)}
 - \frac{1}{2}(\mu_i^{(l)2} + \sigma_i^{2(l)}) 
-w_j^{(f)} (\mu_j^{(f)2} + \sigma_j^{2(f)}) \right] \\
-&amp;= \log \frac{\pi_0^{(l)}}{1 - \pi_0^{(l)}} 
-+ \frac{1}{2} \left( \log (a_l \sigma_i^{2(l)}) - a_l (\mu_i^{(l)2} + \sigma_i^{2(l)}) + 1 \right) \\
-&amp;+ \sum_j \tau_{ij} \left[R_{ij}^{-k} \mu_i^{(l)} Ef_j
-- \frac{1}{2}(\mu_i^{(l)2} + \sigma_i^{2(l)}) Ef_j^2 \right]
-\end{aligned}
- \]</span></p>
+w_j^{(f)} (\mu_j^{(f)2} + \sigma_j^{2(f)}) \right],
+\end{aligned}\]</span> where the last sum can also be written <span class="math display">\[\sum_j \tau_{ij} \left[R_{ij}^{-k} \mu_i^{(l)} Ef_j
+- \frac{1}{2}(\mu_i^{(l)2} + \sigma_i^{2(l)}) Ef_j^2 \right]\]</span></p>
 </div>
 <div id="algorithm" class="section level2">
 <h2>Algorithm</h2>
