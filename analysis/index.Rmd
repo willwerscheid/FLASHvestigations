@@ -6,14 +6,21 @@ output:
     toc: false
 ---
 
+## Current
+
+[Note 1.](obj_notes.html) Notes on computing the FLASH objective function. I derive an explicit expression for the KL divergence between prior and posterior. 
+
+[Note 2.](flash_em.html) An alternate algorithm for optimizing the FLASH objective, using the explicit expression derived in the previous note.
+
+[Investigation 4.](alt_alg.html) The alternate algorithm yields much different results from FLASH. In particular, the fits of the priors on the loadings are visibly different.
+
+
+## Archived
+
+The bug causing the problem described in Investigations 1-3 was fixed in version 0.1-13 of package `ebnm`.
+
 [Investigation 1.](objective.html) The FLASH objective function can behave very erratically.
 
 [Investigation 2.](objective2.html) This problem only occurs when using `ebnm_pn`, not `ebnm_ash`.
 
 [Investigation 3.](objective3.html) The objective can continue to get worse as loadings are repeatedly updated. Nonetheless, convergence takes place (from above!).
-
-[Notes 1.](obj_notes.html) Notes on computing the FLASH objective function. I derive an explicit expression for the KL divergence between prior and posterior. 
-
-[Notes 2.](flash_em.html) An alternate algorithm for optimizing the FLASH objective, using the explicit expression derived in the previous note.
-
-[Investigation 4.](alt_alg.html) The alternate algorithm yields much different results from FLASH. In particular, the fits of the priors on the loadings are visibly different.
