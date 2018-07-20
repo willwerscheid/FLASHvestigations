@@ -1,5 +1,5 @@
 ---
-title: "Decreases in the Objective Function"
+title: "Decreases in the FLASH objective function"
 author: "Jason Willwerscheid"
 date: "7/14/2018"
 output:
@@ -10,7 +10,7 @@ output:
 
 Here I begin to look into why the FLASH objective function can decrease after an iteration.
 
-## Illustration of problem
+## Example
 
 I'm using the "strong" tests from the MASH paper GTEx dataset. The first problem appears when fitting the fourth factor. Notice that in the final iteration, the objective decreases by a very small amount and a warning is displayed.
 
@@ -26,9 +26,9 @@ res <- flash_add_greedy(strong, Kmax=3, verbose=FALSE)
 res <- flash_add_greedy(strong, f_init=res$f, Kmax=1, verbose=TRUE)
 ```
 
-## Analysis
+## Illustration of problem
 
-A more granular tracking of the objective function reveals a larger problem. Recall that there are three steps in each iteration: updating the precision matrix, updating the factors (via the prior $g_f$), and updating the loadings (via $g_l$). Plotting the objective after each step rather than each iteration reveals a sawtooth pattern. (See branch `trackObj`, file `r1_opt.R` for the code used to obtain these results.)
+A more granular tracking of the objective function reveals a larger problem. Recall that there are three steps in each iteration: updating the precision matrix, updating the factors (via the prior $g_f$), and updating the loadings (via $g_l$). Plotting the objective after each step rather than each iteration reveals a sawtooth pattern. I discard the first 8 iterations in order to zoom in on the problem area. (See branch `trackObj`, file `r1_opt.R` for the code used to obtain these results.)
 
 ```{r plot}
 obj_data <- as.vector(rbind(res$obj[[1]]$after_tau,
@@ -40,12 +40,8 @@ iter <- 1:length(obj_data) / 3
 
 plt_xlab = "Iteration"
 plt_ylab = "Diff. from maximum obj."
-plot(iter, obj_data, type='l', xlab=plt_xlab, ylab=plt_ylab)
-```
+# plot(iter, obj_data, type='l', xlab=plt_xlab, ylab=plt_ylab)
 
-Discarding the first 8 iterations in order to zoom in on the problem area:
-
-```{r plot2}
 obj_data <- obj_data[-(1:24)]
 iter <- iter[-(1:24)]
 plt_colors <- c("indianred1", "indianred3", "indianred4")
@@ -57,43 +53,36 @@ legend("bottomright", c("after tau", "after f", "after l"),
        col=plt_colors, pch=plt_pch)
 ```
 
+## Analysis
+
 I backtrack to just before the "bad" update. 
 
 ```{r slow1}
-res2 <- flash_add_greedy(strong, Kmax=4, stopAtObj=-1297148.032)
+res2 <- flash_add_greedy(strong, Kmax=4, stopAtObj = -1297148.032)
 flash_get_objective(strong, res2$f) - flash_get_objective(strong, res$f)
 ```
 
-So at this point, the objective is indeed better than for the flash object attained above. The component parts of the objective are:
+So at this point, the objective is indeed better than for the flash fit obtained above.
+
+Now, I update the precision.
 
 ```{r slow2}
 fl <- res2$f
 data <- flash_set_data(strong)
 k <- 4
-
-KL_l <- fl$KL_l[[k]]
-KL_f <- fl$KL_f[[k]]
-loglik <- flashr:::e_loglik(data, fl)
-list(KL_l = KL_l, KL_f = KL_f, loglik = loglik)
-```
-
-First I update the precision (I follow the code in `r1_opt`). Only the "loglik" component is affected by this update:
-
-```{r slow3}
 init_fl = fl
-init_KL_l = KL_l
-init_KL_f = KL_f
-init_loglik = loglik
 
 R2 = flashr:::flash_get_R2(data, fl)
 fl$tau = flashr:::compute_precision(R2, data$missing, 
                                     "by_column", data$S)
-flashr:::e_loglik(data, fl) - init_loglik
+flash_get_objective(strong, fl) - flash_get_objective(strong, init_fl)
 ```
 
-So the overall objective indeed increases. Now I update the loadings (FLASH updates factors first, but the order of updates is not supposed to affect the monotonicity of the objective function).
+So, as expected, the overall objective increases. Next I update the loadings (FLASH updates factors first, but the order of updates is not supposed to affect the monotonicity of the objective function).
 
 ```{r slow4}
+last_fl = fl
+
 s2 = 1/(fl$EF2[, k] %*% t(fl$tau))
 s = sqrt(s2)
 Rk = flashr:::flash_get_Rk(data, fl, k)
@@ -107,18 +96,17 @@ fl$EL[, k] = ebnm_l$postmean
 fl$EL2[, k] = ebnm_l$postmean2
 fl$gl[[k]] = ebnm_l$fitted_g
 fl$KL_l[[k]] = KL_l
-flash_get_objective(data, fl) - flash_get_objective(data, init_fl)
+flash_get_objective(data, fl) - flash_get_objective(data, last_fl)
 ```
 
-So the objective has in fact gotten worse. And tightening the control parameters or changing the initialization for the `ebnm` function does not help matters. For example:
+So the objective has in fact gotten worse. And tightening the control parameters or changing the initialization for the `ebnm` function does not help matters. For example, tightening the tolerance parameter by adding `factr = 100` does not change anything:
 
 ```{r slow5}
 s2 = 1/(fl$EF2[, k] %*% t(fl$tau))
 s = sqrt(s2)
 Rk = flashr:::flash_get_Rk(data, fl, k)
 x = fl$EF[, k] %*% t(Rk * fl$tau) * s2
-ebnm_l = flashr:::ebnm_pn(x, s, list(g=list(a=100),
-                                     control=list(factr=100)))
+ebnm_l = flashr:::ebnm_pn(x, s, list(control=list(factr=100)))
 KL_l = (ebnm_l$penloglik 
         - flashr:::NM_posterior_e_loglik(x, s, ebnm_l$postmean,
                                          ebnm_l$postmean2))
@@ -127,13 +115,13 @@ fl$EL[, k] = ebnm_l$postmean
 fl$EL2[, k] = ebnm_l$postmean2
 fl$gl[[k]] = ebnm_l$fitted_g
 fl$KL_l[[k]] = KL_l
-flash_get_objective(data, fl) - flash_get_objective(data, init_fl)
+flash_get_objective(data, fl) - flash_get_objective(data, last_fl)
 ```
 
-## Conclusions and questions
+## Conclusions
 
 The decrease appears too large to be explained by numerical error. Indeed, it would be very surprising to me if `EL` and `EL2` could only be trusted to five digits or so (as would have to be the case to produce errors of the above magnitude). 
 
-More seriously, the sawtooth pattern depicted above points to a more regular feature of the optimization. Indeed, it appears that all of the triangles (objectives after updating factors) are biased upwards and all of the squares (objectives after updating loadings) are biased slightly downwards. 
+More seriously, the sawtooth pattern depicted above points to a more regular feature of the optimization. Indeed, it appears that all of the triangles (objectives after updating factors) are biased upwards and, perhaps, all of the squares (objectives after updating loadings) are biased slightly downwards. 
 
 The theory appears to be sound, so what is going on here?
