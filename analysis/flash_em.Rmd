@@ -8,7 +8,7 @@ output:
 
 ## Introduction
 
-If the expression for the KL divergence derived in the [previous note](obj_notes.html) is correct, then it seems likely that the FLASH objective can be optimized in a more direct fashion.
+If the expression for the KL divergence derived in the [previous note](obj_notes.html) is correct, then it seems likely that the FLASH objective could be optimized in a more direct fashion.
 
 ## Notation
 

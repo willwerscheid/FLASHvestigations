@@ -23,33 +23,11 @@ Click "Code" to view the implementation.
 
 # INITIALIZATION FUNCTIONS ------------------------------------------
 
-add_new_altfl <- function(data, fl, seed=1) {
-  set.seed(seed)
-  
-  altfl <- list()
-  altfl$tau <- fl$tau
-  altfl$Rk <- flashr:::flash_get_R(data, fl)
-  
-  n <- nrow(fl$tau)
-  p <- ncol(fl$tau)
-  altfl$wl <- rep(0.1, n)
-  altfl$wf <- rep(0.1, p)
-  altfl$mul <- rnorm(n)
-  altfl$muf <- rnorm(p)
-  altfl$s2l <- rep(1, n)
-  altfl$s2f <- rep(1, p)
-  altfl$al <- altfl$af <- 1
-  altfl$pi0l <- altfl$pi0f <- 0.9
-  
-  altfl$KL <- sum(unlist(fl$KL_l) + unlist(fl$KL_f))
-  
-  return(altfl)
-}
-
 fl_to_altfl <- function(data, fl, k) {
   altfl <- list()
   altfl$tau <- fl$tau
-  altfl$Rk <- flashr:::flash_get_R(data, fl)
+  altfl$Rk <- flashr:::flash_get_Rk(data, fl, k)
+  altfl$R2k <- flashr:::flash_get_R2k(data, fl, k)
   
   altfl$al <- fl$gl[[k]]$a
   altfl$pi0l <- fl$gl[[k]]$pi0
@@ -108,27 +86,28 @@ compute_obj <- function(altfl) {
     EF <- compute_EX(wf, muf)
     EF2 <- compute_EX2(wf, muf, s2f)
 
-    obj <- rep(0, 8)
+    obj <- rep(0, 4)
     
     obj[1] <- sum(0.5 * log(tau / (2 * pi)))
-    obj[2] <- sum(-0.5 * (tau * (Rk^2 - 2 * Rk * outer(EL, EF) + outer(EL2, EF2))))
+    obj[2] <- sum(-0.5 * (tau * (R2k - 2 * Rk * outer(EL, EF) + outer(EL2, EF2))))
     
-    tmp <- (1 - wl) * (log(pi0l) - log(1 - wl)) 
-    obj[3] <- sum(tmp[!is.nan(tmp)])
-    tmp <- wl * (log(1 - pi0l) - log(wl))
-    obj[4] <- sum(tmp[!is.nan(tmp)])
-    
-    obj[5] <- sum(0.5 * wl * (log(al) + log(s2l) + 1 - al * (mul^2 + s2l)))
-    
-    tmp <- (1 - wf) * (log(pi0f) - log(1 - wf))
-    obj[6] <- sum(tmp[!is.nan(tmp)])
-    tmp <- wf * (log(1 - pi0f) - log(wf))
-    obj[7] <- sum(tmp[!is.nan(tmp)])
-    
-    obj[8] <- sum(0.5 * wf * (log(af) + log(s2f) + 1 - af * (muf^2 + s2f)))
+    obj[3] <- compute_KL(wl, mul, s2l, pi0l, al)
+    obj[4] <- compute_KL(wf, muf, s2f, pi0f, af)
   
     return(sum(obj) + KL)
   })
+}
+
+compute_KL <- function(w, mu, s2, pi0, a) {
+  obj <- rep(0, 3)
+  
+  tmp <- (1 - w) * (log(pi0) - log(1 - w)) 
+  obj[1] <- sum(tmp[!is.nan(tmp)])
+  tmp <- w * (log(1 - pi0) - log(w))
+  obj[2] <- sum(tmp[!is.nan(tmp)])
+  obj[3] <- sum(0.5 * w * (log(a) + log(s2) + 1 - a * (mu^2 + s2)))
+  
+  return(sum(obj))
 }
 
 compute_EX <- function(w, mu) {
@@ -202,7 +181,7 @@ update_tau <- function(altfl) {
     EF <- compute_EX(wf, muf)
     EF2 <- compute_EX2(wf, muf, s2f)
     
-    R2 <- Rk^2 - 2 * Rk * outer(EL, EF) + outer(EL2, EF2)
+    R2 <- R2k - 2 * Rk * outer(EL, EF) + outer(EL2, EF2)
     tau <- matrix(1 / colMeans(R2), nrow=nrow(tau), ncol=ncol(tau),
                   byrow=TRUE)
   })
@@ -290,7 +269,7 @@ optimize_alt_fl <- function(altfl, tol = .01, verbose = FALSE) {
 
 ## Fit
 
-Using the same dataset as in previous investigations, I fit a FLASH object with four factors (recall that it's the fourth factor that has been causing problems during loadings updates):
+Using the same dataset as in previous investigations, I fit a FLASH object with four factors (recall that it's the fourth factor that was causing problems during loadings updates):
 
 ```{r flfit}
 load("./data/before_bad.Rdata")
@@ -310,68 +289,22 @@ flash_get_objective(data, fl)
 ```
 
 I now convert the fourth factor to an "altfl" object. The objective as computed by the alternate method is:
-
 ```{r altfl}
 altfl <- fl_to_altfl(data, fl, 4)
 compute_obj(altfl)
 ```
 
-Next, I optimize the altfl object:
+So the objective functions agree. This is a good thing.
 
+Next, I attempt to optimize the altfl object:
 ```{r opt_altfl}
 altfl <- optimize_alt_fl(altfl, verbose=TRUE)
 ```
 
-Finally, I put the altfl object back into the fourth factor of the flash object.
+Nothing happens. This is also a good thing!
 
-```{r altfl_to_fl}
-fl2 <- altfl_to_fl(altfl, fl, 4)
-```
+## Conclusion
 
-## Comparison
+That I get the same values in both cases confirms that a) the expressions in the [previous note](flash_em.html) are correct; b) the `KL_l` and `KL_f` values obtained using FLASH are in fact reliable.
 
-The fits are very different. For priors on both factors and loadings, the altfl fit favors less sparsity (smaller spikes, i.e., smaller `pi0`) and more shrinkage (narrower slabs, i.e., greater `a`).  
-
-```{r comp_priors}
-list(loadings = fl$gl[[4]], alt_loadings = fl2$gl[[4]])
-list(factors = fl$gf[[4]], alt_factors = fl2$gf[[4]])
-```
-
-A scatterplot comparing the fitted fourth factor/loading appears as follows:
-
-```{r comp_fitted}
-fitted <- flash_get_fitted_values(fl)
-fitted2 <- flash_get_fitted_values(fl2)
-
-minval <- min(c(fitted, fitted2))
-maxval <- max(c(fitted, fitted2))
-
-plot(fitted, fitted2, pch='.',
-     xlab="FLASH fit", ylab="Alternate fit",
-     xlim=c(minval, maxval), ylim=c(minval, maxval),
-     main="Fitted values")
-```
-
-To see what's going on, I fit the estimated loadings against the estimated prior on the loadings. For the FLASH fit:
-
-```{r density1}
-plot(density(fl$EL[, 4]), xlim=c(-15, 15), ylim=c(0, 0.1),
-     main="FLASH loadings")
-grid <- seq(-15, 15, by=.05)
-y <- (1 - fl$gl[[4]]$pi0) * dnorm(grid, 0, 1/sqrt(fl$gl[[4]]$a))
-lines(grid, y, lty=2)
-legend("topright", legend = c("fitted", "prior"), lty = c(1, 2))
-```
-
-For the alternate approach:
-
-```{r density2}
-plot(density(fl2$EL[, 4]), xlim=c(-15, 15), ylim=c(0, 0.1),
-     main="Alternate approach")
-grid <- seq(-15, 15, by=.05)
-y <- (1 - fl2$gl[[4]]$pi0) * dnorm(grid, 0, 1/sqrt(fl2$gl[[4]]$a))
-lines(grid, y, lty=2)
-legend("topright", legend = c("fitted", "prior"), lty = c(1, 2))
-```
-
-This doesn't seem right!
+The algorithm implemented here is, however, very prone to getting stuck in local maxima, and does not appear to be a suitable substitute for the existing FLASH algorithm.

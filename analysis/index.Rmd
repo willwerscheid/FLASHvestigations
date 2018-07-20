@@ -6,13 +6,13 @@ output:
     toc: false
 ---
 
-## In Progress
+## Current
 
 [Note 1.](obj_notes.html) Notes on computing the FLASH objective function. I derive an explicit expression for the KL divergence between prior and posterior. 
 
 [Note 2.](flash_em.html) An alternate algorithm for optimizing the FLASH objective, using the explicit expression derived in the previous note.
 
-[Investigation 4.](alt_alg.html) The alternate algorithm yields much different results from FLASH. In particular, the fits of the priors on the loadings are visibly different.
+[Investigation 4.](alt_alg.html) The alternate algorithm agrees with FLASH with respect to both the objective and fit obtained.
 
 
 ## Archived
