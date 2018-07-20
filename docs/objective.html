@@ -12,7 +12,7 @@
 <meta name="author" content="Jason Willwerscheid" />
 
 
-<title>Decreases in the Objective Function</title>
+<title>Decreases in the FLASH objective function</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -310,14 +310,14 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Decreases in the Objective Function</h1>
+<h1 class="title toc-ignore">Decreases in the FLASH objective function</h1>
 <h4 class="author"><em>Jason Willwerscheid</em></h4>
 <h4 class="date"><em>7/14/2018</em></h4>
 
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-07-16</p>
+<p><strong>Last updated:</strong> 2018-07-20</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -341,7 +341,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/055d5723d07ea68bc92863c501b728048beb0aed" target="_blank">055d572</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/7a2c0bada83c8f232dd58ee3f0217a98cca87154" target="_blank">7a2c0ba</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -350,6 +350,9 @@ Ignored files:
     Ignored:    .Rproj.user/
     Ignored:    docs/.DS_Store
     Ignored:    docs/figure/.DS_Store
+
+Unstaged changes:
+    Modified:   analysis/flash_em.Rmd
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -378,6 +381,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/7a2c0bada83c8f232dd58ee3f0217a98cca87154/analysis/objective.Rmd" target="_blank">7a2c0ba</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-20
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/objective.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/456972ed5490a92bcc8af1a9916cdbf3f32d9711/docs/objective.html" target="_blank">456972e</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-16
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -506,8 +543,8 @@ wflow_publish(“analysis/objective.Rmd”)
 <h2>Introduction</h2>
 <p>Here I begin to look into why the FLASH objective function can decrease after an iteration.</p>
 </div>
-<div id="illustration-of-problem" class="section level2">
-<h2>Illustration of problem</h2>
+<div id="example" class="section level2">
+<h2>Example</h2>
 <p>I’m using the “strong” tests from the MASH paper GTEx dataset. The first problem appears when fitting the fourth factor. Notice that in the final iteration, the objective decreases by a very small amount and a warning is displayed.</p>
 <pre class="r"><code># devtools::install_github(&quot;stephenslab/flashr&quot;, ref=&quot;trackObj&quot;)
 devtools::load_all(&quot;/Users/willwerscheid/GitHub/flashr&quot;)</code></pre>
@@ -557,9 +594,9 @@ more details.</code></pre>
 <pre><code>objective from keeping factor:-1297148.033256</code></pre>
 <pre><code>nullcheck complete, objective:-1297148.033256</code></pre>
 </div>
-<div id="analysis" class="section level2">
-<h2>Analysis</h2>
-<p>A more granular tracking of the objective function reveals a larger problem. Recall that there are three steps in each iteration: updating the precision matrix, updating the factors (via the prior <span class="math inline">\(g_f\)</span>), and updating the loadings (via <span class="math inline">\(g_l\)</span>). Plotting the objective after each step rather than each iteration reveals a sawtooth pattern. (See branch <code>trackObj</code>, file <code>r1_opt.R</code> for the code used to obtain these results.)</p>
+<div id="illustration-of-problem" class="section level2">
+<h2>Illustration of problem</h2>
+<p>A more granular tracking of the objective function reveals a larger problem. Recall that there are three steps in each iteration: updating the precision matrix, updating the factors (via the prior <span class="math inline">\(g_f\)</span>), and updating the loadings (via <span class="math inline">\(g_l\)</span>). Plotting the objective after each step rather than each iteration reveals a sawtooth pattern. I discard the first 8 iterations in order to zoom in on the problem area. (See branch <code>trackObj</code>, file <code>r1_opt.R</code> for the code used to obtain these results.)</p>
 <pre class="r"><code>obj_data &lt;- as.vector(rbind(res$obj[[1]]$after_tau,
                             res$obj[[1]]$after_f,
                             res$obj[[1]]$after_l))
@@ -569,7 +606,17 @@ iter &lt;- 1:length(obj_data) / 3
 
 plt_xlab = &quot;Iteration&quot;
 plt_ylab = &quot;Diff. from maximum obj.&quot;
-plot(iter, obj_data, type=&#39;l&#39;, xlab=plt_xlab, ylab=plt_ylab)</code></pre>
+# plot(iter, obj_data, type=&#39;l&#39;, xlab=plt_xlab, ylab=plt_ylab)
+
+obj_data &lt;- obj_data[-(1:24)]
+iter &lt;- iter[-(1:24)]
+plt_colors &lt;- c(&quot;indianred1&quot;, &quot;indianred3&quot;, &quot;indianred4&quot;)
+plt_pch &lt;- c(16, 17, 15)
+
+plot(iter, obj_data, col=plt_colors, pch=plt_pch,
+     xlab=plt_xlab, ylab=plt_ylab)
+legend(&quot;bottomright&quot;, c(&quot;after tau&quot;, &quot;after f&quot;, &quot;after l&quot;),
+       col=plt_colors, pch=plt_pch)</code></pre>
 <p><img src="figure/objective.Rmd/plot-1.png" width="672" style="display: block; margin: auto;" /></p>
 <details> <summary><em>Expand here to see past versions of plot-1.png:</em></summary>
 <table style="border-collapse:separate; border-spacing:5px;">
@@ -612,96 +659,33 @@ Jason Willwerscheid
 </tbody>
 </table>
 <p></details></p>
-<p>Discarding the first 8 iterations in order to zoom in on the problem area:</p>
-<pre class="r"><code>obj_data &lt;- obj_data[-(1:24)]
-iter &lt;- iter[-(1:24)]
-plt_colors &lt;- c(&quot;indianred1&quot;, &quot;indianred3&quot;, &quot;indianred4&quot;)
-plt_pch &lt;- c(16, 17, 15)
-
-plot(iter, obj_data, col=plt_colors, pch=plt_pch,
-     xlab=plt_xlab, ylab=plt_ylab)
-legend(&quot;bottomright&quot;, c(&quot;after tau&quot;, &quot;after f&quot;, &quot;after l&quot;),
-       col=plt_colors, pch=plt_pch)</code></pre>
-<p><img src="figure/objective.Rmd/plot2-1.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of plot2-1.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/willwerscheid/FLASHvestigations/blob/7db12a1efed12474ff15a3cf6c111dbf946d7107/docs/figure/objective.Rmd/plot2-1.png" target="_blank">7db12a1</a>
-</td>
-<td style="text-align:left;">
-Jason Willwerscheid
-</td>
-<td style="text-align:left;">
-2018-07-16
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/willwerscheid/FLASHvestigations/blob/0b30bef854ef3b0dbd073845cd63e93ca75cef56/docs/figure/objective.Rmd/plot2-1.png" target="_blank">0b30bef</a>
-</td>
-<td style="text-align:left;">
-Jason Willwerscheid
-</td>
-<td style="text-align:left;">
-2018-07-15
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
+</div>
+<div id="analysis" class="section level2">
+<h2>Analysis</h2>
 <p>I backtrack to just before the “bad” update.</p>
-<pre class="r"><code>res2 &lt;- flash_add_greedy(strong, Kmax=4, stopAtObj=-1297148.032)</code></pre>
+<pre class="r"><code>res2 &lt;- flash_add_greedy(strong, Kmax=4, stopAtObj = -1297148.032)</code></pre>
 <pre><code>fitting factor/loading 1</code></pre>
 <pre><code>fitting factor/loading 2</code></pre>
 <pre><code>fitting factor/loading 3</code></pre>
 <pre><code>fitting factor/loading 4</code></pre>
 <pre class="r"><code>flash_get_objective(strong, res2$f) - flash_get_objective(strong, res$f)</code></pre>
 <pre><code>[1] 0.002265139</code></pre>
-<p>So at this point, the objective is indeed better than for the flash object attained above. The component parts of the objective are:</p>
+<p>So at this point, the objective is indeed better than for the flash fit obtained above.</p>
+<p>Now, I update the precision.</p>
 <pre class="r"><code>fl &lt;- res2$f
 data &lt;- flash_set_data(strong)
 k &lt;- 4
-
-KL_l &lt;- fl$KL_l[[k]]
-KL_f &lt;- fl$KL_f[[k]]
-loglik &lt;- flashr:::e_loglik(data, fl)
-list(KL_l = KL_l, KL_f = KL_f, loglik = loglik)</code></pre>
-<pre><code>$KL_l
-[1] -8324.404
-
-$KL_f
-[1] -128.9907
-
-$loglik
-[1] -1227371</code></pre>
-<p>First I update the precision (I follow the code in <code>r1_opt</code>). Only the “loglik” component is affected by this update:</p>
-<pre class="r"><code>init_fl = fl
-init_KL_l = KL_l
-init_KL_f = KL_f
-init_loglik = loglik
+init_fl = fl
 
 R2 = flashr:::flash_get_R2(data, fl)
 fl$tau = flashr:::compute_precision(R2, data$missing, 
                                     &quot;by_column&quot;, data$S)
-flashr:::e_loglik(data, fl) - init_loglik</code></pre>
+flash_get_objective(strong, fl) - flash_get_objective(strong, init_fl)</code></pre>
 <pre><code>[1] 0.04306088</code></pre>
-<p>So the overall objective indeed increases. Now I update the loadings (FLASH updates factors first, but the order of updates is not supposed to affect the monotonicity of the objective function).</p>
-<pre class="r"><code>s2 = 1/(fl$EF2[, k] %*% t(fl$tau))
+<p>So, as expected, the overall objective increases. Next I update the loadings (FLASH updates factors first, but the order of updates is not supposed to affect the monotonicity of the objective function).</p>
+<pre class="r"><code>last_fl = fl
+
+s2 = 1/(fl$EF2[, k] %*% t(fl$tau))
 s = sqrt(s2)
 Rk = flashr:::flash_get_Rk(data, fl, k)
 x = fl$EF[, k] %*% t(Rk * fl$tau) * s2
@@ -714,15 +698,14 @@ fl$EL[, k] = ebnm_l$postmean
 fl$EL2[, k] = ebnm_l$postmean2
 fl$gl[[k]] = ebnm_l$fitted_g
 fl$KL_l[[k]] = KL_l
-flash_get_objective(data, fl) - flash_get_objective(data, init_fl)</code></pre>
-<pre><code>[1] -0.1154427</code></pre>
-<p>So the objective has in fact gotten worse. And tightening the control parameters or changing the initialization for the <code>ebnm</code> function does not help matters. For example:</p>
+flash_get_objective(data, fl) - flash_get_objective(data, last_fl)</code></pre>
+<pre><code>[1] -0.1585035</code></pre>
+<p>So the objective has in fact gotten worse. And tightening the control parameters or changing the initialization for the <code>ebnm</code> function does not help matters. For example, tightening the tolerance parameter by adding <code>factr = 100</code> does not change anything:</p>
 <pre class="r"><code>s2 = 1/(fl$EF2[, k] %*% t(fl$tau))
 s = sqrt(s2)
 Rk = flashr:::flash_get_Rk(data, fl, k)
 x = fl$EF[, k] %*% t(Rk * fl$tau) * s2
-ebnm_l = flashr:::ebnm_pn(x, s, list(g=list(a=100),
-                                     control=list(factr=100)))
+ebnm_l = flashr:::ebnm_pn(x, s, list(control=list(factr=100)))
 KL_l = (ebnm_l$penloglik 
         - flashr:::NM_posterior_e_loglik(x, s, ebnm_l$postmean,
                                          ebnm_l$postmean2))
@@ -731,13 +714,13 @@ fl$EL[, k] = ebnm_l$postmean
 fl$EL2[, k] = ebnm_l$postmean2
 fl$gl[[k]] = ebnm_l$fitted_g
 fl$KL_l[[k]] = KL_l
-flash_get_objective(data, fl) - flash_get_objective(data, init_fl)</code></pre>
-<pre><code>[1] -0.1154426</code></pre>
+flash_get_objective(data, fl) - flash_get_objective(data, last_fl)</code></pre>
+<pre><code>[1] -0.1585035</code></pre>
 </div>
-<div id="conclusions-and-questions" class="section level2">
-<h2>Conclusions and questions</h2>
+<div id="conclusions" class="section level2">
+<h2>Conclusions</h2>
 <p>The decrease appears too large to be explained by numerical error. Indeed, it would be very surprising to me if <code>EL</code> and <code>EL2</code> could only be trusted to five digits or so (as would have to be the case to produce errors of the above magnitude).</p>
-<p>More seriously, the sawtooth pattern depicted above points to a more regular feature of the optimization. Indeed, it appears that all of the triangles (objectives after updating factors) are biased upwards and all of the squares (objectives after updating loadings) are biased slightly downwards.</p>
+<p>More seriously, the sawtooth pattern depicted above points to a more regular feature of the optimization. Indeed, it appears that all of the triangles (objectives after updating factors) are biased upwards and, perhaps, all of the squares (objectives after updating loadings) are biased slightly downwards.</p>
 <p>The theory appears to be sound, so what is going on here?</p>
 </div>
 <div id="session-information" class="section level2">
