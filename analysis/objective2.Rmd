@@ -45,13 +45,14 @@ plot_obj <- function(res, k, niters) {
     iter <- iter[idx]
   }
   
-  plt_xlab = "Iteration"
-  plt_ylab = "Diff. from maximum obj."
+  plt_xlab <- "Iteration"
+  plt_ylab <- "Diff. from maximum obj."
   plt_colors <- c("indianred1", "indianred3", "indianred4")
   plt_pch <- c(16, 17, 15)
+  main <- paste("Factor/loading", k)
   
   plot(iter, obj_data, col=plt_colors, pch=plt_pch,
-       xlab=plt_xlab, ylab=plt_ylab)
+       xlab=plt_xlab, ylab=plt_ylab, main=main)
   legend("bottomright", c("after tau", "after f", "after l"),
          col=plt_colors, pch=plt_pch)
 }

@@ -122,6 +122,4 @@ flash_get_objective(data, fl) - flash_get_objective(data, last_fl)
 
 The decrease appears too large to be explained by numerical error. Indeed, it would be very surprising to me if `EL` and `EL2` could only be trusted to five digits or so (as would have to be the case to produce errors of the above magnitude). 
 
-More seriously, the sawtooth pattern depicted above points to a more regular feature of the optimization. Indeed, it appears that all of the triangles (objectives after updating factors) are biased upwards and, perhaps, all of the squares (objectives after updating loadings) are biased slightly downwards. 
-
-The theory appears to be sound, so what is going on here?
+More seriously, the sawtooth pattern depicted above points to a more regular feature of the optimization. The theory appears to be sound, so what is going on here?
