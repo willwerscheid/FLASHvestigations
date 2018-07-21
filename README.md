@@ -1,5 +1,3 @@
 # FLASHvestigations
 
-A [workflowr][] project.
-
-[workflowr]: https://github.com/jdblischak/workflowr
+Here I collect various investigations into the mysteries of FLASH.
