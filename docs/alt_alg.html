@@ -355,7 +355,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/c23f41c789d7a6e4906bd341fdf68860e4f461cc" target="_blank">c23f41c</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/032edd6bab4628d200863b6c50aa54a8da204ece" target="_blank">032edd6</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -392,6 +392,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/032edd6bab4628d200863b6c50aa54a8da204ece/analysis/alt_alg.Rmd" target="_blank">032edd6</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-20
+</td>
+<td style="text-align:left;">
+wflow_publish(c(“analysis/index.Rmd”, “analysis/flash_em.Rmd”,
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/1822e9555367dd25d023eb81f0298cdb4eb69495/docs/alt_alg.html" target="_blank">1822e95</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-20
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -457,33 +491,11 @@ wflow_publish(“analysis/alt_alg.Rmd”)
 <p>Click “Code” to view the implementation.</p>
 <pre class="r"><code># INITIALIZATION FUNCTIONS ------------------------------------------
 
-add_new_altfl &lt;- function(data, fl, seed=1) {
-  set.seed(seed)
-  
-  altfl &lt;- list()
-  altfl$tau &lt;- fl$tau
-  altfl$Rk &lt;- flashr:::flash_get_R(data, fl)
-  
-  n &lt;- nrow(fl$tau)
-  p &lt;- ncol(fl$tau)
-  altfl$wl &lt;- rep(0.1, n)
-  altfl$wf &lt;- rep(0.1, p)
-  altfl$mul &lt;- rnorm(n)
-  altfl$muf &lt;- rnorm(p)
-  altfl$s2l &lt;- rep(1, n)
-  altfl$s2f &lt;- rep(1, p)
-  altfl$al &lt;- altfl$af &lt;- 1
-  altfl$pi0l &lt;- altfl$pi0f &lt;- 0.9
-  
-  altfl$KL &lt;- sum(unlist(fl$KL_l) + unlist(fl$KL_f))
-  
-  return(altfl)
-}
-
 fl_to_altfl &lt;- function(data, fl, k) {
   altfl &lt;- list()
   altfl$tau &lt;- fl$tau
-  altfl$Rk &lt;- flashr:::flash_get_R(data, fl)
+  altfl$Rk &lt;- flashr:::flash_get_Rk(data, fl, k)
+  altfl$R2k &lt;- flashr:::flash_get_R2k(data, fl, k)
   
   altfl$al &lt;- fl$gl[[k]]$a
   altfl$pi0l &lt;- fl$gl[[k]]$pi0
@@ -542,27 +554,28 @@ compute_obj &lt;- function(altfl) {
     EF &lt;- compute_EX(wf, muf)
     EF2 &lt;- compute_EX2(wf, muf, s2f)
 
-    obj &lt;- rep(0, 8)
+    obj &lt;- rep(0, 4)
     
     obj[1] &lt;- sum(0.5 * log(tau / (2 * pi)))
-    obj[2] &lt;- sum(-0.5 * (tau * (Rk^2 - 2 * Rk * outer(EL, EF) + outer(EL2, EF2))))
+    obj[2] &lt;- sum(-0.5 * (tau * (R2k - 2 * Rk * outer(EL, EF) + outer(EL2, EF2))))
     
-    tmp &lt;- (1 - wl) * (log(pi0l) - log(1 - wl)) 
-    obj[3] &lt;- sum(tmp[!is.nan(tmp)])
-    tmp &lt;- wl * (log(1 - pi0l) - log(wl))
-    obj[4] &lt;- sum(tmp[!is.nan(tmp)])
-    
-    obj[5] &lt;- sum(0.5 * wl * (log(al) + log(s2l) + 1 - al * (mul^2 + s2l)))
-    
-    tmp &lt;- (1 - wf) * (log(pi0f) - log(1 - wf))
-    obj[6] &lt;- sum(tmp[!is.nan(tmp)])
-    tmp &lt;- wf * (log(1 - pi0f) - log(wf))
-    obj[7] &lt;- sum(tmp[!is.nan(tmp)])
-    
-    obj[8] &lt;- sum(0.5 * wf * (log(af) + log(s2f) + 1 - af * (muf^2 + s2f)))
+    obj[3] &lt;- compute_KL(wl, mul, s2l, pi0l, al)
+    obj[4] &lt;- compute_KL(wf, muf, s2f, pi0f, af)
   
     return(sum(obj) + KL)
   })
+}
+
+compute_KL &lt;- function(w, mu, s2, pi0, a) {
+  obj &lt;- rep(0, 3)
+  
+  tmp &lt;- (1 - w) * (log(pi0) - log(1 - w)) 
+  obj[1] &lt;- sum(tmp[!is.nan(tmp)])
+  tmp &lt;- w * (log(1 - pi0) - log(w))
+  obj[2] &lt;- sum(tmp[!is.nan(tmp)])
+  obj[3] &lt;- sum(0.5 * w * (log(a) + log(s2) + 1 - a * (mu^2 + s2)))
+  
+  return(sum(obj))
 }
 
 compute_EX &lt;- function(w, mu) {
@@ -636,7 +649,7 @@ update_tau &lt;- function(altfl) {
     EF &lt;- compute_EX(wf, muf)
     EF2 &lt;- compute_EX2(wf, muf, s2f)
     
-    R2 &lt;- Rk^2 - 2 * Rk * outer(EL, EF) + outer(EL2, EF2)
+    R2 &lt;- R2k - 2 * Rk * outer(EL, EF) + outer(EL2, EF2)
     tau &lt;- matrix(1 / colMeans(R2), nrow=nrow(tau), ncol=ncol(tau),
                   byrow=TRUE)
   })
@@ -723,7 +736,7 @@ optimize_alt_fl &lt;- function(altfl, tol = .01, verbose = FALSE) {
 </div>
 <div id="fit" class="section level2">
 <h2>Fit</h2>
-<p>Using the same dataset as in previous investigations, I fit a FLASH object with four factors (recall that it’s the fourth factor that has been causing problems during loadings updates):</p>
+<p>Using the same dataset as in previous investigations, I fit a FLASH object with four factors (recall that it’s the fourth factor that was causing problems during loadings updates):</p>
 <pre class="r"><code>load(&quot;./data/before_bad.Rdata&quot;)
 
 # devtools::install_github(&quot;stephenslab/flashr&quot;)
@@ -743,202 +756,17 @@ devtools::load_all(&quot;/Users/willwerscheid/GitHub/ebnm&quot;)</code></pre>
 <p>I now convert the fourth factor to an “altfl” object. The objective as computed by the alternate method is:</p>
 <pre class="r"><code>altfl &lt;- fl_to_altfl(data, fl, 4)
 compute_obj(altfl)</code></pre>
-<pre><code>[1] -1287925</code></pre>
-<p>Next, I optimize the altfl object:</p>
+<pre><code>[1] -1297135</code></pre>
+<p>So the objective functions agree. This is a good thing.</p>
+<p>Next, I attempt to optimize the altfl object:</p>
 <pre class="r"><code>altfl &lt;- optimize_alt_fl(altfl, verbose=TRUE)</code></pre>
-<pre><code>Objective: -1266527.52893897</code></pre>
-<pre><code>Objective: -1259591.41880171</code></pre>
-<pre><code>Objective: -1256717.73280192</code></pre>
-<pre><code>Objective: -1256092.73281445</code></pre>
-<pre><code>Objective: -1255909.73574933</code></pre>
-<pre><code>Objective: -1255818.46915015</code></pre>
-<pre><code>Objective: -1255766.3647692</code></pre>
-<pre><code>Objective: -1255735.3950312</code></pre>
-<pre><code>Objective: -1255716.97331457</code></pre>
-<pre><code>Objective: -1255705.43249546</code></pre>
-<pre><code>Objective: -1255697.71996832</code></pre>
-<pre><code>Objective: -1255692.31493727</code></pre>
-<pre><code>Objective: -1255688.43367143</code></pre>
-<pre><code>Objective: -1255685.61158832</code></pre>
-<pre><code>Objective: -1255683.53045841</code></pre>
-<pre><code>Objective: -1255681.97109968</code></pre>
-<pre><code>Objective: -1255680.78688195</code></pre>
-<pre><code>Objective: -1255679.87854253</code></pre>
-<pre><code>Objective: -1255679.17674322</code></pre>
-<pre><code>Objective: -1255678.63159121</code></pre>
-<pre><code>Objective: -1255678.20636055</code></pre>
-<pre><code>Objective: -1255677.87357066</code></pre>
-<pre><code>Objective: -1255677.61241567</code></pre>
-<pre><code>Objective: -1255677.40700628</code></pre>
-<pre><code>Objective: -1255677.24512755</code></pre>
-<pre><code>Objective: -1255677.11733974</code></pre>
-<pre><code>Objective: -1255677.01631629</code></pre>
-<pre><code>Objective: -1255676.93635016</code></pre>
-<pre><code>Objective: -1255676.87298197</code></pre>
-<pre><code>Objective: -1255676.82271789</code></pre>
-<pre><code>Objective: -1255676.78281419</code></pre>
-<pre><code>Objective: -1255676.75111177</code></pre>
-<pre><code>Objective: -1255676.72590854</code></pre>
-<pre><code>Objective: -1255676.7058606</code></pre>
-<pre><code>Objective: -1255676.68990533</code></pre>
-<pre><code>Objective: -1255676.67720158</code></pre>
-<pre><code>Objective: -1255676.66708273</code></pre>
-<pre><code>Objective: -1255676.65902003</code></pre>
-<p>Finally, I put the altfl object back into the fourth factor of the flash object.</p>
-<pre class="r"><code>fl2 &lt;- altfl_to_fl(altfl, fl, 4)</code></pre>
+<pre><code>Objective: -1297135.42237706</code></pre>
+<p>Nothing happens. This is also a good thing!</p>
 </div>
-<div id="comparison" class="section level2">
-<h2>Comparison</h2>
-<p>The fits are very different. For priors on both factors and loadings, the altfl fit favors less sparsity (smaller spikes, i.e., smaller <code>pi0</code>) and more shrinkage (narrower slabs, i.e., greater <code>a</code>).</p>
-<pre class="r"><code>list(loadings = fl$gl[[4]], alt_loadings = fl2$gl[[4]])</code></pre>
-<pre><code>$loadings
-$loadings$pi0
-[1] 0.72317
-
-$loadings$a
-[1] 0.04110932
-
-
-$alt_loadings
-$alt_loadings$pi0
-[1] 0.6009072
-
-$alt_loadings$a
-[1] 0.09951342</code></pre>
-<pre class="r"><code>list(factors = fl$gf[[4]], alt_factors = fl2$gf[[4]])</code></pre>
-<pre><code>$factors
-$factors$pi0
-[1] 0.3616584
-
-$factors$a
-[1] 29.84806
-
-
-$alt_factors
-$alt_factors$pi0
-[1] 0.1264111
-
-$alt_factors$a
-[1] 46.48745</code></pre>
-<p>A scatterplot comparing the fitted fourth factor/loading appears as follows:</p>
-<pre class="r"><code>fitted &lt;- flash_get_fitted_values(fl)
-fitted2 &lt;- flash_get_fitted_values(fl2)
-
-minval &lt;- min(c(fitted, fitted2))
-maxval &lt;- max(c(fitted, fitted2))
-
-plot(fitted, fitted2, pch=&#39;.&#39;,
-     xlab=&quot;FLASH fit&quot;, ylab=&quot;Alternate fit&quot;,
-     xlim=c(minval, maxval), ylim=c(minval, maxval),
-     main=&quot;Fitted values&quot;)</code></pre>
-<p><img src="figure/alt_alg.Rmd/comp_fitted-1.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of comp_fitted-1.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/willwerscheid/FLASHvestigations/blob/2cbe7dd2bd145f6ecf2508dbf659131b807265b9/docs/figure/alt_alg.Rmd/comp_fitted-1.png" target="_blank">2cbe7dd</a>
-</td>
-<td style="text-align:left;">
-Jason Willwerscheid
-</td>
-<td style="text-align:left;">
-2018-07-19
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
-<p>To see what’s going on, I fit the estimated loadings against the estimated prior on the loadings. For the FLASH fit:</p>
-<pre class="r"><code>plot(density(fl$EL[, 4]), xlim=c(-15, 15), ylim=c(0, 0.1),
-     main=&quot;FLASH loadings&quot;)
-grid &lt;- seq(-15, 15, by=.05)
-y &lt;- (1 - fl$gl[[4]]$pi0) * dnorm(grid, 0, 1/sqrt(fl$gl[[4]]$a))
-lines(grid, y, lty=2)
-legend(&quot;topright&quot;, legend = c(&quot;fitted&quot;, &quot;prior&quot;), lty = c(1, 2))</code></pre>
-<p><img src="figure/alt_alg.Rmd/density1-1.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of density1-1.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/willwerscheid/FLASHvestigations/blob/2cbe7dd2bd145f6ecf2508dbf659131b807265b9/docs/figure/alt_alg.Rmd/density1-1.png" target="_blank">2cbe7dd</a>
-</td>
-<td style="text-align:left;">
-Jason Willwerscheid
-</td>
-<td style="text-align:left;">
-2018-07-19
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
-<p>For the alternate approach:</p>
-<pre class="r"><code>plot(density(fl2$EL[, 4]), xlim=c(-15, 15), ylim=c(0, 0.1),
-     main=&quot;Alternate approach&quot;)
-grid &lt;- seq(-15, 15, by=.05)
-y &lt;- (1 - fl2$gl[[4]]$pi0) * dnorm(grid, 0, 1/sqrt(fl2$gl[[4]]$a))
-lines(grid, y, lty=2)
-legend(&quot;topright&quot;, legend = c(&quot;fitted&quot;, &quot;prior&quot;), lty = c(1, 2))</code></pre>
-<p><img src="figure/alt_alg.Rmd/density2-1.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of density2-1.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/willwerscheid/FLASHvestigations/blob/2cbe7dd2bd145f6ecf2508dbf659131b807265b9/docs/figure/alt_alg.Rmd/density2-1.png" target="_blank">2cbe7dd</a>
-</td>
-<td style="text-align:left;">
-Jason Willwerscheid
-</td>
-<td style="text-align:left;">
-2018-07-19
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
-<p>This doesn’t seem right!</p>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>That I get the same values in both cases confirms that a) the expressions in the <a href="flash_em.html">previous note</a> are correct; b) the <code>KL_l</code> and <code>KL_f</code> values obtained using FLASH are in fact reliable.</p>
+<p>The algorithm implemented here is, however, very prone to getting stuck in local maxima, and does not appear to be a suitable substitute for the existing FLASH algorithm.</p>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
