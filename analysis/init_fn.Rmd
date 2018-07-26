@@ -165,28 +165,59 @@ There is some variation in the final objective. `softImpute(type = "als")` can d
 lapply(all_res, function(res) {flash_get_objective(strong, res$f)})
 ```
 
-The improvement in the objective function per factor is as follows. (Again, I suppress results for `udv_si_svd` because they are identical to `udv_svd`.) 
+The difference in objective function after adding each factor/loading pair is as follows. (Again, I suppress results for `udv_si_svd` because they are identical to `udv_svd`.) 
 
 ```{r nomissing_objeach}
-par(mfrow=c(2, 2))
 final.obj <- lapply(all_res, 
                     function(res) {
                       sapply(res$obj, function(obj) {
                         max(unlist(obj))
                       })
                     })
-final.obj$udv_si_svd <- NULL
-diff.by.factor <- lapply(final.obj,
-                         function(obj) {
-                           obj[2:length(obj)] - obj[1:(length(obj) - 1)]
-                         })
-for (k in 1:length(diff.by.factor[[1]])) {
-  data = sapply(diff.by.factor, function(diff) { diff[k] })
-  barplot(data, 
-          main=paste("After adding factor", k + 1),
-          col=c("blue", "blue", "red"))
+si.diff <- final.obj$udv_si - final.obj$udv_svd
+si666.diff <- final.obj$udv_si666 - final.obj$udv_svd
+plot(si.diff, type='l', col="darkblue",
+     xlab="Factor/loading index",
+     ylab="Diff. in obj. from udv_svd",
+     main="Diff. in obj. using udv_si rather than udv_svd")
+lines(si666.diff, col="lightblue")
+legend("topright", c("seed = 123", "seed = 666"), 
+       lty=c(1, 1), col=c("darkblue", "lightblue"))
+abline(0, 0, lty=2)
+```
+
+Note that `udv_svd` is doing much worse at factor/loading 6, but catches up at factor/loading 7. In fact, both methods are actually adding the "same" factor/loading pairs here, but they do so in a different order:
+
+```{r plot_factors}
+par(mfrow=c(2, 2))
+missing.tissues <- c(7, 8, 19, 20, 24, 25, 31, 34, 37)
+gtex.colors <- read.table("https://github.com/stephenslab/gtexresults/blob/master/data/GTExColors.txt?raw=TRUE", 
+                          sep = '\t', 
+                          comment.char = '')[-missing.tissues, 2]
+ls <- list(all_res$udv_si$f$EL[, 6], all_res$udv_si$f$EL[, 7],
+        all_res$udv_svd$f$EL[, 6], all_res$udv_svd$f$EL[, 7])
+mains <- list("udv_si loading 6", "udv_si loading 7",
+           "udv_svd loading 6", "udv_svd loading 7")
+for (i in 1:4) {
+  barplot(ls[[i]], main=mains[[i]], las=2, cex.names = 0.4, 
+          col=as.character(gtex.colors), names="")
 }
 ```
+
+Next, I zoom in on the last ten factor/loading pairs: 
+
+```{r nomissing_objeach2}
+plot(10:19, si.diff[10:19], type='l', col="darkblue",
+     xlab="Factor/loading index",
+     ylab="Diff. in obj. from udv_svd")
+lines(10:19, si666.diff[10:19], col="lightblue")
+legend("bottomleft", c("seed = 123", "seed = 666"), 
+       lty=c(1, 1), col=c("darkblue", "lightblue"))
+abline(0, 0, lty=2)
+```
+
+While there are differences, there is no clear pattern here.
+
 
 ## Results: missing data
 
@@ -269,23 +300,22 @@ lapply(all_missing, function(res) {flash_get_objective(fl_data, res$f)})
 ```
 
 ```{r missing_objeach, eval=FALSE}
-par(mfrow=c(2, 2))
 final.obj <- lapply(all_missing, 
                     function(res) {
                       sapply(res$obj, function(obj) {
                         max(unlist(obj))
                       })
                     })
-diff.by.factor <- lapply(final.obj,
-                         function(obj) {
-                           obj[2:length(obj)] - obj[1:(length(obj) - 1)]
-                         })
-for (k in 1:length(diff.by.factor[[1]])) {
-  data = sapply(diff.by.factor, function(diff) { diff[k] })
-  barplot(data, 
-          main=paste("Improvement after adding factor", k + 1),
-          col=c("blue", "blue", "red"))
-}
+si.diff <- final.obj$udv_si - final.obj$udv_si_svd
+si666.diff <- final.obj$udv_si666 - final.obj$udv_si_svd
+plot(si.diff, type='l', col="darkblue",
+     xlab="Factor/loading index",
+     ylab="Diff. in obj. from udv_si_svd",
+     main="Diff. in obj. using udv_si rather than udv_si_svd")
+lines(si666.diff, col="lightblue")
+legend("topright", c("seed = 123", "seed = 666"), 
+       lty=c(1, 1), col=c("darkblue", "lightblue"))
+abline(0, 0, lty=2)
 ```
 
 ## Conclusions
