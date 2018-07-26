@@ -1,0 +1,206 @@
+---
+title: "Warmstarts"
+author: "Jason Willwerscheid"
+date: "7/26/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+Here I turn to the occasional large decreases in the FLASH objective function, an example of which was given in the [previous investigation](init_fn.html). I trace the problem to the call to `optim` in `ebnm_pn`.
+
+## Example
+
+I use the same dataset as previously. However, since the example given in the previous investigation is not easily reproducible (due to randomness in `udv_si`), I re-fit the dataset using `udv_svd`. A large decrease in the objective function occurs while adding the 23rd factor. The last few lines of verbose output are as follows.
+
+```{}
+(...)
+Objective:-1256928.81965425
+Objective:-1256922.94001901
+Objective:-1256917.09583091
+Objective:-1256911.02417405
+Objective:-1256904.83389783
+Objective:-1256920.05096899
+An iteration decreased the objective. This happens occasionally, perhaps due to numeric reasons. You could ignore this warning, but you might like to check out https://github.com/stephenslab/flashr/issues/26 for more details.performing nullcheck
+objective from deleting factor:-1256871.38066608
+objective from keeping factor:-1256920.05096899
+factor zeroed out
+```
+
+## Analysis of problem 
+
+The problem, as I will show, is that `optim` fails to find a good solution to the EBNM problem.
+
+I backtrack to just before the bad update using parameter `stopAtObj` (to reproduce this example, make sure to load branch `trackObj`).
+
+Since the fits take some time, I pre-run the following code and then load the results from file.
+
+```{r load_data}
+# devtools::install_github("stephenslab/flashr", ref="trackObj")
+devtools::load_all("/Users/willwerscheid/GitHub/flashr")
+# devtools::install_github("stephenslab/ebnm")
+devtools::load_all("/Users/willwerscheid/GitHub/ebnm")
+
+gtex <- readRDS(gzcon(url("https://github.com/stephenslab/gtexresults/blob/master/data/MatrixEQTLSumStats.Portable.Z.rds?raw=TRUE")))
+strong <- t(gtex$strong.z)
+```
+
+```{r problem, eval=FALSE}
+# This block was run in advance.
+
+res <- flash_add_greedy(strong, Kmax=50, init_fn="udv_svd", verbose=TRUE)
+
+res <- flash_add_greedy(strong, Kmax=22, init_fn="udv_svd", verbose=TRUE)
+res <- flash_add_greedy(strong, Kmax=1, f_init=res$f, init_fn="udv_svd",
+                       verbose=TRUE, nullcheck=FALSE, stopAtObj=-1256905)
+saveRDS(res, "../data/warmstart/greedy23.rds")
+```
+
+I now step through the factor update code.
+
+```{r update_factor}
+res <- readRDS("./data/warmstart/greedy23.rds")
+
+fl <- res$f
+data <- flash_set_data(strong)
+k <- 23
+subset <- 1:(flashr:::flash_get_p(fl))
+
+fl <- flash_update_precision(data, fl)
+
+# Get results for factor update:
+ebnm_args <- calc_ebnm_f_args(data, fl, k, subset)
+a <- do.call("ebnm_pn", list(ebnm_args$x, ebnm_args$s, list()))
+
+# Store results:
+fl.before.update <- fl
+fl$EF[subset, k] = a$postmean
+fl$EF2[subset, k] = a$postmean2
+fl$gf[[k]] = a$fitted_g
+fl$KL_f[[k]] = a$penloglik - NM_posterior_e_loglik(ebnm_args$x,
+                                                   ebnm_args$s,
+                                                   a$postmean,
+                                                   a$postmean2)
+
+flash_get_objective(data, fl)
+```
+
+So the objective is indeed worse at this point. I inspect the update to $g_f$:
+
+```{r g_update}
+list(before.update = fl.before.update$gf[[k]], 
+     after.update = fl$gf[[k]])
+```
+
+This is a huge change to $g_f$, much larger than one should reasonably expect from a single update. Indeed, if I initialize `ebnm_pn` using the current value of `gf`, I get a much different result.
+
+```{r warmstart_update}
+fl2 <- fl.before.update
+
+a <- do.call("ebnm_pn", list(ebnm_args$x, ebnm_args$s, 
+                             list(g=fl2$gf[[k]])))
+
+fl2$EF[subset, k] = a$postmean
+fl2$EF2[subset, k] = a$postmean2
+fl2$gf[[k]] = a$fitted_g
+fl2$KL_f[[k]] = a$penloglik - NM_posterior_e_loglik(ebnm_args$x,
+                                                    ebnm_args$s,
+                                                    a$postmean,
+                                                    a$postmean2)
+flash_get_objective(data, fl2)
+```
+
+So the objective improves, as is guaranteed by the theory. The updated value of $g_f$ is:
+
+```{r g_update2}
+fl2$gf[[k]]
+```
+
+## Questions for investigation
+
+This suggests that decreases in the objective function can be avoided by using warmstarts. I see two possible ways forward: 1. use a warmstart every time (rather than the current default initialization); 2. only use a warmstart if a first attempt at optimization has failed. The first option would be simpler to implement, but could cause FLASH to get stuck in local maxima more easily. 
+
+## Results
+
+To determine whether it would be viable to use a warmstart every time, I refit the first 22 factors and compare the time required to optimize and the objective attained.
+
+```{r results, eval=FALSE}
+# This block was run in advance.
+
+res.no.warmstart <- flash_add_greedy(strong, Kmax=22, init_fn="udv_svd",
+                                     verbose=TRUE)
+res.warmstart <- flash_add_greedy(strong, Kmax=22, init_fn="udv_svd",
+                                  warmstart=TRUE, verbose=TRUE)
+
+saveRDS(res.no.warmstart, "../data/warmstart/nowarmstart.rds")
+saveRDS(res.warmstart, "../data/warmstart/warmstart.rds")
+```
+
+```{r load_results}
+res.no.warmstart <- readRDS("./data/warmstart/nowarmstart.rds")
+res.warmstart <- readRDS("./data/warmstart/warmstart.rds")
+```
+
+### Optimization time
+
+The total time (in seconds) needed to optimize factors is:
+
+```{r total_time}
+x1 <- unlist(res.no.warmstart$opt_time)
+x2 <- unlist(res.warmstart$opt_time)
+list(no.warmstart = sum(x1), warmstart = sum(x2))
+```
+
+The time required per factor/loading is as follows.
+
+```{r time_per_factor}
+plot(x1, ylim=c(0, max(x1) + 1), pch=19, col="blue",
+     xlab="Factor/loading index", ylab="Optimization time (s)")
+points(x2, pch=17, col="red")
+legend("topleft", c("No warmstart", "Warmstart"),
+       pch=c(19, 17), col=c("blue", "red"))
+```
+
+So using a warmstart yields a small (but reliable) speed-up. 
+
+### Objective attained
+
+Using a warmstart yields a slightly worse overall objective. 
+
+```{r obj}
+list(no.warmstart = flash_get_objective(data, res.no.warmstart$f),
+     warmstart = flash_get_objective(data, res.warmstart$f))
+```
+
+The 11th factor is the culprit:
+
+```{r obj_diff}
+o1 <- sapply(res.no.warmstart$obj, 
+             function(obj) {max(unlist(obj))})
+o2 <- sapply(res.warmstart$obj, 
+             function(obj) {max(unlist(obj))})
+
+plot(o2 - o1, type='l',
+     xlab="Factor/loading index",
+     ylab="Diff. in obj. using warmstart",
+     main="Difference in overall objective after adding each factor")
+```
+
+## Conclusions
+
+Using warmstarts prevents the large decreases in the objective function that I have described here and [previously](init_fn.html). Using a warmstart for all iterations yields a small speed-up, but can give slightly worse results (as measured by the objective function). However, using a warmstart only when the default initialization fails would be complicated to implement. For this reason, I recommend that we use a warmstart for all iterations.
+
+## Coda
+
+Out of curiosity, I continued running `flash_add_greedy` using warmstarts to see how many factor/loading pairs it ended up adding. 25 factor/loading pairs were included in the final FLASH fit, which attained an objective of -1255910.7. This is an improvement of 3 factor/loading pairs and 994 log likelihood units over the inital (problematic) fit obtained without using any warmstarts. To verify these results, run the following:
+
+```{r coda, eval=FALSE}
+res.final <- flash_add_greedy(strong, Kmax=50, init_fn="udv_svd",
+                              warmstart=TRUE, verbose=TRUE)
+flash_get_nfactors(res.final$f)
+flash_get_objective(data, res.final$f) - flash_get_objective(data, res$f)
+```
