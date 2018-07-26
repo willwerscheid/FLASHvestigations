@@ -6,7 +6,12 @@ output:
     toc: false
 ---
 
-## Current
+## In Progress
+
+[Investigation 5](init_fn.html) We should change the default `init_fn` to `udv_si_svd` when there is missing data and `udv_svd` otherwise.
+
+
+## Still Relevant
 
 [Note 1.](obj_notes.html) Notes on computing the FLASH objective function. I derive an explicit expression for the KL divergence between prior and posterior. 
 
