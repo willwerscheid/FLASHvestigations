@@ -213,7 +213,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-07-20</p>
+<p><strong>Last updated:</strong> 2018-07-25</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -222,7 +222,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/032edd6bab4628d200863b6c50aa54a8da204ece" target="_blank">032edd6</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/566c2028d736e8ca0d7786a5b3b17b5c46932675" target="_blank">566c202</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -231,6 +231,11 @@ Ignored files:
     Ignored:    .Rproj.user/
     Ignored:    docs/.DS_Store
     Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  data/greedy19.rds
+    Untracked:  data/greedy22.rds
+    Untracked:  data/init_fn/
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -259,6 +264,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/566c2028d736e8ca0d7786a5b3b17b5c46932675/analysis/index.Rmd" target="_blank">566c202</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/index.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/dd91b193f497cdabfcd05b18003620c4e8aa00fe/docs/index.html" target="_blank">dd91b19</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-20
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -689,8 +728,12 @@ Start workflowr project.
 </ul>
 <p></details></p>
 <hr />
-<div id="current" class="section level2">
-<h2>Current</h2>
+<div id="in-progress" class="section level2">
+<h2>In Progress</h2>
+<p><a href="init_fn.html">Investigation 5</a> We should change the default <code>init_fn</code> to <code>udv_si_svd</code> when there is missing data and <code>udv_svd</code> otherwise.</p>
+</div>
+<div id="still-relevant" class="section level2">
+<h2>Still Relevant</h2>
 <p><a href="obj_notes.html">Note 1.</a> Notes on computing the FLASH objective function. I derive an explicit expression for the KL divergence between prior and posterior.</p>
 <p><a href="flash_em.html">Note 2.</a> An alternate algorithm for optimizing the FLASH objective, using the explicit expression derived in the previous note.</p>
 <p><a href="alt_alg.html">Investigation 4.</a> The alternate algorithm agrees with FLASH with respect to both the objective and fit obtained.</p>
