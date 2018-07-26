@@ -10,6 +10,8 @@ output:
 
 [Investigation 5.](init_fn.html) We should change the default `init_fn` to `udv_si_svd` when there is missing data and `udv_svd` otherwise.
 
+[Investigation 6.](warmstart.html) Poor `optim` results can still produce large decreases in the objective function. We should use warmstarts when optimizing.
+
 
 ## Still Relevant
 

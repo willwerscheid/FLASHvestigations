@@ -1,5 +1,5 @@
 ---
-title: "Warmstarts"
+title: "Using warmstarts to improve optimization"
 author: "Jason Willwerscheid"
 date: "7/26/2018"
 output: html_document
