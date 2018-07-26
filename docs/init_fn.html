@@ -12,7 +12,7 @@
 <meta name="author" content="Jason Willwerscheid" />
 
 
-<title>Effect of init_fn on speed and objective</title>
+<title>Comparing initialization functions</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -307,7 +307,7 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Effect of init_fn on speed and objective</h1>
+<h1 class="title toc-ignore">Comparing initialization functions</h1>
 <h4 class="author"><em>Jason Willwerscheid</em></h4>
 <h4 class="date"><em>7/25/2018</em></h4>
 
@@ -338,7 +338,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/06676b5085b953c637220c8f8bd4f9ad572f05a3" target="_blank">06676b5</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/6417d4e9ca3d658552b99b7953213af0612c7bd9" target="_blank">6417d4e</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -351,7 +351,6 @@ Ignored files:
 Untracked files:
     Untracked:  data/greedy19.rds
     Untracked:  data/greedy22.rds
-    Untracked:  data/init_fn/
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -380,6 +379,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/6417d4e9ca3d658552b99b7953213af0612c7bd9/analysis/init_fn.Rmd" target="_blank">6417d4e</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+<td style="text-align:left;">
+wflow_publish(c(“analysis/index.Rmd”, “analysis/init_fn.Rmd”))
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/131dd854cc8baa76ae6a5eee47d032180a67a6c5/docs/init_fn.html" target="_blank">131dd85</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -510,6 +543,36 @@ data$init_fn &lt;- factor(data$init_fn)
 boxplot(t ~ init_fn, data, ylim=c(0, 2), 
         main=&quot;Initialization time (s)&quot;)</code></pre>
 <p><img src="figure/init_fn.Rmd/nomissing_time-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of nomissing_time-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/131dd854cc8baa76ae6a5eee47d032180a67a6c5/docs/figure/init_fn.Rmd/nomissing_time-1.png" target="_blank">131dd85</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 <div id="number-of-iterations" class="section level3">
 <h3>Number of iterations</h3>
@@ -528,7 +591,38 @@ data$init_fn &lt;- factor(data$init_fn)
 
 boxplot(niter ~ init_fn, data, ylim=c(0, 120),
         main=&quot;Number of iterations per factor&quot;)</code></pre>
-<p><img src="figure/init_fn.Rmd/nomissing_niter-1.png" width="672" style="display: block; margin: auto;" /> These two plots look very similar to me.</p>
+<p><img src="figure/init_fn.Rmd/nomissing_niter-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of nomissing_niter-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/131dd854cc8baa76ae6a5eee47d032180a67a6c5/docs/figure/init_fn.Rmd/nomissing_niter-1.png" target="_blank">131dd85</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
+<p>These two plots look very similar to me.</p>
 </div>
 <div id="objective-attained" class="section level3">
 <h3>Objective attained</h3>
@@ -564,7 +658,157 @@ for (k in 1:length(diff.by.factor[[1]])) {
           main=paste(&quot;After adding factor&quot;, k + 1),
           col=c(&quot;blue&quot;, &quot;blue&quot;, &quot;red&quot;))
 }</code></pre>
-<p><img src="figure/init_fn.Rmd/nomissing_objeach-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/init_fn.Rmd/nomissing_objeach-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/init_fn.Rmd/nomissing_objeach-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/init_fn.Rmd/nomissing_objeach-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/init_fn.Rmd/nomissing_objeach-5.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/init_fn.Rmd/nomissing_objeach-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of nomissing_objeach-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/131dd854cc8baa76ae6a5eee47d032180a67a6c5/docs/figure/init_fn.Rmd/nomissing_objeach-1.png" target="_blank">131dd85</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> <img src="figure/init_fn.Rmd/nomissing_objeach-2.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of nomissing_objeach-2.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/131dd854cc8baa76ae6a5eee47d032180a67a6c5/docs/figure/init_fn.Rmd/nomissing_objeach-2.png" target="_blank">131dd85</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> <img src="figure/init_fn.Rmd/nomissing_objeach-3.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of nomissing_objeach-3.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/131dd854cc8baa76ae6a5eee47d032180a67a6c5/docs/figure/init_fn.Rmd/nomissing_objeach-3.png" target="_blank">131dd85</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> <img src="figure/init_fn.Rmd/nomissing_objeach-4.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of nomissing_objeach-4.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/131dd854cc8baa76ae6a5eee47d032180a67a6c5/docs/figure/init_fn.Rmd/nomissing_objeach-4.png" target="_blank">131dd85</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> <img src="figure/init_fn.Rmd/nomissing_objeach-5.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of nomissing_objeach-5.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/131dd854cc8baa76ae6a5eee47d032180a67a6c5/docs/figure/init_fn.Rmd/nomissing_objeach-5.png" target="_blank">131dd85</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 </div>
 <div id="results-missing-data" class="section level2">
@@ -610,6 +854,36 @@ data$init_fn &lt;- factor(data$init_fn)
 boxplot(t ~ init_fn, data, ylim=c(0, 2),
         main=&quot;Initialization time (s)&quot;)</code></pre>
 <p><img src="figure/init_fn.Rmd/missing_time-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of missing_time-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/131dd854cc8baa76ae6a5eee47d032180a67a6c5/docs/figure/init_fn.Rmd/missing_time-1.png" target="_blank">131dd85</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>Interestingly, <code>udv_si_svd</code> seems to be reliably faster. This result contradicts our earlier results showing that using option <code>type = &quot;als&quot;</code> with <code>softImpute</code> was faster than using option <code>type = &quot;svd&quot;</code>. I’m not sure whether any code has changed in the meantime, or whether our preliminary investigations were simply faulty.</p>
 </div>
 <div id="number-of-iterations-objective-attained" class="section level3">
