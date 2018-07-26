@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Warmstarts</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Warmstarts</h1>
+<h4 class="author"><em>Jason Willwerscheid</em></h4>
+<h4 class="date"><em>7/26/2018</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-07-26</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/3ad9c750d476bc2ef2d07b360ef0b1c7b501ccc5" target="_blank">3ad9c75</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  data/greedy19.rds
+    Untracked:  data/warmstart/
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/3ad9c750d476bc2ef2d07b360ef0b1c7b501ccc5/analysis/warmstart.Rmd" target="_blank">3ad9c75</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-26
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/warmstart.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Here I turn to the occasional large decreases in the FLASH objective function, an example of which was given in the <a href="init_fn.html">previous investigation</a>. I trace the problem to the call to <code>optim</code> in <code>ebnm_pn</code>.</p>
+</div>
+<div id="example" class="section level2">
+<h2>Example</h2>
+<p>I use the same dataset as previously. However, since the example given in the previous investigation is not easily reproducible (due to randomness in <code>udv_si</code>), I re-fit the dataset using <code>udv_svd</code>. A large decrease in the objective function occurs while adding the 23rd factor. The last few lines of verbose output are as follows.</p>
+<pre><code>(...)
+Objective:-1256928.81965425
+Objective:-1256922.94001901
+Objective:-1256917.09583091
+Objective:-1256911.02417405
+Objective:-1256904.83389783
+Objective:-1256920.05096899
+An iteration decreased the objective. This happens occasionally, perhaps due to numeric reasons. You could ignore this warning, but you might like to check out https://github.com/stephenslab/flashr/issues/26 for more details.performing nullcheck
+objective from deleting factor:-1256871.38066608
+objective from keeping factor:-1256920.05096899
+factor zeroed out</code></pre>
+</div>
+<div id="analysis-of-problem" class="section level2">
+<h2>Analysis of problem</h2>
+<p>The problem, as I will show, is that <code>optim</code> fails to find a good solution to the EBNM problem.</p>
+<p>I backtrack to just before the bad update using parameter <code>stopAtObj</code> (to reproduce this example, make sure to load branch <code>trackObj</code>).</p>
+<p>Since the fits take some time, I pre-run the following code and then load the results from file.</p>
+<pre class="r"><code># devtools::install_github(&quot;stephenslab/flashr&quot;, ref=&quot;trackObj&quot;)
+devtools::load_all(&quot;/Users/willwerscheid/GitHub/flashr&quot;)</code></pre>
+<pre><code>Loading flashr</code></pre>
+<pre class="r"><code># devtools::install_github(&quot;stephenslab/ebnm&quot;)
+devtools::load_all(&quot;/Users/willwerscheid/GitHub/ebnm&quot;)</code></pre>
+<pre><code>Loading ebnm</code></pre>
+<pre class="r"><code>gtex &lt;- readRDS(gzcon(url(&quot;https://github.com/stephenslab/gtexresults/blob/master/data/MatrixEQTLSumStats.Portable.Z.rds?raw=TRUE&quot;)))
+strong &lt;- t(gtex$strong.z)</code></pre>
+<pre class="r"><code># This block was run in advance.
+
+res &lt;- flash_add_greedy(strong, Kmax=50, init_fn=&quot;udv_svd&quot;, verbose=TRUE)
+
+res &lt;- flash_add_greedy(strong, Kmax=22, init_fn=&quot;udv_svd&quot;, verbose=TRUE)
+res &lt;- flash_add_greedy(strong, Kmax=1, f_init=res$f, init_fn=&quot;udv_svd&quot;,
+                       verbose=TRUE, nullcheck=FALSE, stopAtObj=-1256905)
+saveRDS(res, &quot;../data/warmstart/greedy23.rds&quot;)</code></pre>
+<p>I now step through the factor update code.</p>
+<pre class="r"><code>res &lt;- readRDS(&quot;./data/warmstart/greedy23.rds&quot;)
+
+fl &lt;- res$f
+data &lt;- flash_set_data(strong)
+k &lt;- 23
+subset &lt;- 1:(flashr:::flash_get_p(fl))
+
+fl &lt;- flash_update_precision(data, fl)
+
+# Get results for factor update:
+ebnm_args &lt;- calc_ebnm_f_args(data, fl, k, subset)
+a &lt;- do.call(&quot;ebnm_pn&quot;, list(ebnm_args$x, ebnm_args$s, list()))
+
+# Store results:
+fl.before.update &lt;- fl
+fl$EF[subset, k] = a$postmean
+fl$EF2[subset, k] = a$postmean2
+fl$gf[[k]] = a$fitted_g
+fl$KL_f[[k]] = a$penloglik - NM_posterior_e_loglik(ebnm_args$x,
+                                                   ebnm_args$s,
+                                                   a$postmean,
+                                                   a$postmean2)
+
+flash_get_objective(data, fl)</code></pre>
+<pre><code>[1] -1256923</code></pre>
+<p>So the objective is indeed worse at this point. I inspect the update to <span class="math inline">\(g_f\)</span>:</p>
+<pre class="r"><code>list(before.update = fl.before.update$gf[[k]], 
+     after.update = fl$gf[[k]])</code></pre>
+<pre><code>$before.update
+$before.update$pi0
+[1] 0.914959
+
+$before.update$a
+[1] 21625.71
+
+
+$after.update
+$after.update$pi0
+[1] 0.3275043
+
+$after.update$a
+[1] 167827.8</code></pre>
+<p>This is a huge change to <span class="math inline">\(g_f\)</span>, much larger than one should reasonably expect from a single update. Indeed, if I initialize <code>ebnm_pn</code> using the current value of <code>gf</code>, I get a much different result.</p>
+<pre class="r"><code>fl2 &lt;- fl.before.update
+
+a &lt;- do.call(&quot;ebnm_pn&quot;, list(ebnm_args$x, ebnm_args$s, 
+                             list(g=fl2$gf[[k]])))
+
+fl2$EF[subset, k] = a$postmean
+fl2$EF2[subset, k] = a$postmean2
+fl2$gf[[k]] = a$fitted_g
+fl2$KL_f[[k]] = a$penloglik - NM_posterior_e_loglik(ebnm_args$x,
+                                                    ebnm_args$s,
+                                                    a$postmean,
+                                                    a$postmean2)
+flash_get_objective(data, fl2)</code></pre>
+<pre><code>[1] -1256901</code></pre>
+<p>So the objective improves, as is guaranteed by the theory. The updated value of <span class="math inline">\(g_f\)</span> is:</p>
+<pre class="r"><code>fl2$gf[[k]]</code></pre>
+<pre><code>$pi0
+[1] 0.9213986
+
+$a
+[1] 19187.07</code></pre>
+</div>
+<div id="questions-for-investigation" class="section level2">
+<h2>Questions for investigation</h2>
+<p>This suggests that decreases in the objective function can be avoided by using warmstarts. I see two possible ways forward: 1. use a warmstart every time (rather than the current default initialization); 2. only use a warmstart if a first attempt at optimization has failed. The first option would be simpler to implement, but could cause FLASH to get stuck in local maxima more easily.</p>
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<p>To determine whether it would be viable to use a warmstart every time, I refit the first 22 factors and compare the time required to optimize and the objective attained.</p>
+<pre class="r"><code># This block was run in advance.
+
+res.no.warmstart &lt;- flash_add_greedy(strong, Kmax=22, init_fn=&quot;udv_svd&quot;,
+                                     verbose=TRUE)
+res.warmstart &lt;- flash_add_greedy(strong, Kmax=22, init_fn=&quot;udv_svd&quot;,
+                                  warmstart=TRUE, verbose=TRUE)
+
+saveRDS(res.no.warmstart, &quot;../data/warmstart/nowarmstart.rds&quot;)
+saveRDS(res.warmstart, &quot;../data/warmstart/warmstart.rds&quot;)</code></pre>
+<pre class="r"><code>res.no.warmstart &lt;- readRDS(&quot;./data/warmstart/nowarmstart.rds&quot;)
+res.warmstart &lt;- readRDS(&quot;./data/warmstart/warmstart.rds&quot;)</code></pre>
+<div id="optimization-time" class="section level3">
+<h3>Optimization time</h3>
+<p>The total time (in seconds) needed to optimize factors is:</p>
+<pre class="r"><code>x1 &lt;- unlist(res.no.warmstart$opt_time)
+x2 &lt;- unlist(res.warmstart$opt_time)
+list(no.warmstart = sum(x1), warmstart = sum(x2))</code></pre>
+<pre><code>$no.warmstart
+[1] 327.7671
+
+$warmstart
+[1] 259.5182</code></pre>
+<p>The time required per factor/loading is as follows.</p>
+<pre class="r"><code>plot(x1, ylim=c(0, max(x1) + 1), pch=19, col=&quot;blue&quot;,
+     xlab=&quot;Factor/loading index&quot;, ylab=&quot;Optimization time (s)&quot;)
+points(x2, pch=17, col=&quot;red&quot;)
+legend(&quot;topleft&quot;, c(&quot;No warmstart&quot;, &quot;Warmstart&quot;),
+       pch=c(19, 17), col=c(&quot;blue&quot;, &quot;red&quot;))</code></pre>
+<p><img src="figure/warmstart.Rmd/time_per_factor-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>So using a warmstart yields a small (but reliable) speed-up.</p>
+</div>
+<div id="objective-attained" class="section level3">
+<h3>Objective attained</h3>
+<p>Using a warmstart yields a slightly worse overall objective.</p>
+<pre class="r"><code>list(no.warmstart = flash_get_objective(data, res.no.warmstart$f),
+     warmstart = flash_get_objective(data, res.warmstart$f))</code></pre>
+<pre><code>$no.warmstart
+[1] -1256871
+
+$warmstart
+[1] -1256873</code></pre>
+<p>The 11th factor is the culprit:</p>
+<pre class="r"><code>o1 &lt;- sapply(res.no.warmstart$obj, 
+             function(obj) {max(unlist(obj))})
+o2 &lt;- sapply(res.warmstart$obj, 
+             function(obj) {max(unlist(obj))})
+
+plot(o2 - o1, type=&#39;l&#39;,
+     xlab=&quot;Factor/loading index&quot;,
+     ylab=&quot;Diff. in obj. using warmstart&quot;,
+     main=&quot;Difference in overall objective after adding each factor&quot;)</code></pre>
+<p><img src="figure/warmstart.Rmd/obj_diff-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="conclusions" class="section level2">
+<h2>Conclusions</h2>
+<p>Using warmstarts prevents the large decreases in the objective function that I have described here and <a href="init_fn.html">previously</a>. Using a warmstart for all iterations yields a small speed-up, but can give slightly worse results (as measured by the objective function). However, using a warmstart only when the default initialization fails would be complicated to implement. For this reason, I recommend that we use a warmstart for all iterations.</p>
+</div>
+<div id="coda" class="section level2">
+<h2>Coda</h2>
+<p>Out of curiosity, I continued running <code>flash_add_greedy</code> using warmstarts to see how many factor/loading pairs it ended up adding. 25 factor/loading pairs were included in the final FLASH fit, which attained an objective of -1255910.7. This is an improvement of 3 factor/loading pairs and 994 log likelihood units over the inital (problematic) fit obtained without using any warmstarts. To verify these results, run the following:</p>
+<pre class="r"><code>res.final &lt;- flash_add_greedy(strong, Kmax=50, init_fn=&quot;udv_svd&quot;,
+                              warmstart=TRUE, verbose=TRUE)
+flash_get_nfactors(res.final$f)
+flash_get_objective(data, res.final$f) - flash_get_objective(data, res$f)</code></pre>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS High Sierra 10.13.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ebnm_0.1-13   flashr_0.5-12
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.17        pillar_1.2.1        plyr_1.8.4         
+ [4] compiler_3.4.3      git2r_0.21.0        workflowr_1.0.1    
+ [7] R.methodsS3_1.7.1   R.utils_2.6.0       iterators_1.0.9    
+[10] tools_3.4.3         testthat_2.0.0      digest_0.6.15      
+[13] tibble_1.4.2        evaluate_0.10.1     memoise_1.1.0      
+[16] gtable_0.2.0        lattice_0.20-35     rlang_0.2.0        
+[19] Matrix_1.2-12       foreach_1.4.4       commonmark_1.4     
+[22] yaml_2.1.17         parallel_3.4.3      withr_2.1.1.9000   
+[25] stringr_1.3.0       roxygen2_6.0.1.9000 xml2_1.2.0         
+[28] knitr_1.20          devtools_1.13.4     rprojroot_1.3-2    
+[31] grid_3.4.3          R6_2.2.2            rmarkdown_1.8      
+[34] ggplot2_2.2.1       ashr_2.2-10         magrittr_1.5       
+[37] whisker_0.3-2       backports_1.1.2     scales_0.5.0       
+[40] codetools_0.2-15    htmltools_0.3.6     MASS_7.3-48        
+[43] assertthat_0.2.0    softImpute_1.4      colorspace_1.3-2   
+[46] stringi_1.1.6       lazyeval_0.2.1      munsell_0.4.3      
+[49] doParallel_1.0.11   pscl_1.5.2          truncnorm_1.0-8    
+[52] SQUAREM_2017.10-1   R.oo_1.21.0        </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
