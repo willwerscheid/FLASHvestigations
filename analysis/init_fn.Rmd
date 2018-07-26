@@ -204,7 +204,7 @@ for (i in 1:4) {
 }
 ```
 
-Next, I zoom in on the last ten factor/loading pairs: 
+I zoom in on the last ten factor/loading pairs: 
 
 ```{r nomissing_objeach2}
 plot(10:19, si.diff[10:19], type='l', col="darkblue",
