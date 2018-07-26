@@ -1,5 +1,5 @@
 ---
-title: "Effect of init_fn on speed and objective"
+title: "Comparing initialization functions"
 author: "Jason Willwerscheid"
 date: "7/25/2018"
 output:

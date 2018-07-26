@@ -8,7 +8,7 @@ output:
 
 ## In Progress
 
-[Investigation 5](init_fn.html) We should change the default `init_fn` to `udv_si_svd` when there is missing data and `udv_svd` otherwise.
+[Investigation 5.](init_fn.html) We should change the default `init_fn` to `udv_si_svd` when there is missing data and `udv_svd` otherwise.
 
 
 ## Still Relevant
