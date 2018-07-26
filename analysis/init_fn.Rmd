@@ -1,0 +1,295 @@
+---
+title: "Effect of init_fn on speed and objective"
+author: "Jason Willwerscheid"
+date: "7/25/2018"
+output:
+  workflowr::wflow_html
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Introduction
+
+The default function used to initialize a new factor/loading is `udv_si`, which is a simple wrapper to `softImpute` with option `type = "als"`. We previously chose to use `type = "als"` rather than `type = "svd"` because initial results showed the former to be much faster. Here I investigate further, using a large GTEx dataset as an example.
+
+## Problem with type = "als"
+
+I discovered an issue when investigating occasional large decreases in the FLASH objective. The dataset I use here is taken from MASH's analysis of GTEx data. `flash_add_greedy` successfully adds 19 factors, then adds  a 20th factor that improves the objective until a bad update occurs. This update increases the objective to such an extent that `nullcheck` erroneously removes the factor and FLASH terminates prematurely.
+
+The last few lines of verbose output are as follows:
+```{}
+(...)
+Objective:-1258100.51191229
+Objective:-1258097.28313664
+Objective:-1258093.37994353
+Objective:-1258088.30966224
+Objective:-1258081.1984392
+Objective:-1258219.32382352
+An iteration decreased the objective. This happens occasionally, perhaps due to numeric reasons. You could ignore this warning, but you might like to check out https://github.com/stephenslab/flashr/issues/26 for more details.performing nullcheck
+objective from deleting factor:-1258152.21114343
+objective from keeping factor:-1258219.32382352
+factor zeroed out
+```
+
+But if I add 19 factors, then add the 20th separately, I get a much different result:
+```{}
+(...)
+Objective:-1257665.05089993
+Objective:-1257664.93935874
+Objective:-1257664.72526429
+Objective:-1257664.56199637
+Objective:-1257664.52184646
+Objective:-1257664.51611008
+performing nullcheck
+objective from deleting factor:-1258152.21114343
+objective from keeping factor:-1257664.51611008
+nullcheck complete, objective:-1257664.51611008
+```
+
+The reason for the difference is that `softImpute` randomly initializes `u` when option `type = "als"` is used. On the second try, I simply got luckier with the initialization.
+
+To reproduce the above results, run the following (it will take some time):
+
+```{r problem, eval=FALSE}
+# devtools::install_github("stephenslab/flashr")
+devtools::load_all("/Users/willwerscheid/GitHub/flashr")
+# devtools::install_github("stephenslab/ebnm")
+devtools::load_all("/Users/willwerscheid/GitHub/ebnm")
+
+gtex <- readRDS(gzcon(url("https://github.com/stephenslab/gtexresults/blob/master/data/MatrixEQTLSumStats.Portable.Z.rds?raw=TRUE")))
+strong <- t(gtex$strong.z)
+
+# 20th factor zeroed out:
+fl <- flash_add_greedy(strong, Kmax=50, verbose=TRUE)
+
+# 20th factor successfully added:
+fl2 <- flash_add_greedy(strong, Kmax=19, verbose=TRUE)
+fl3 <- flash_add_greedy(strong, Kmax=1, f_init=fl2, verbose=TRUE)
+```
+
+## Questions for investigation
+
+The above increase in the objective function points to a larger problem, which I will turn to in a subsequent investigation. Here, I want to revisit the choice of default `init_fn`. In particular, should we instead default to `udv_svd` (a simple wrapper to `svd`) when there is no missing data? Since `softImpute(type = "svd")` gives the same result as `svd`, and `softImpute(type = "als")` begins by calling `svd` on a random matrix anyway, using `udv_svd` can only speed things up (in addition to eliminating an annoying source of randomness). Next, when there is missing data, what are the differences between `"svd"` and `"als"` in terms of speed and the final objective attained? Preliminary results suggested that `"als"` would be much faster, but it would be useful to verify those results on the GTEx dataset.
+
+## Results: no missing data
+
+Since the 20th factor causes a problem for `udv_si`, I fit 19 factors greedily. I run it once with `udv_si_svd` and `udv_svd` and I run it twice with `udv_si` (using a different seed for the second run).
+
+To reproduce the results in this section, run the following (make sure to load the `trackObj` branch of `flashr`). Since the fits take several minutes each, I pre-run the code and then load the results from file.
+
+```{r nomissing, eval=FALSE}
+# This block was run in advance.
+
+# devtools::install_github("stephenslab/flashr", ref="trackObj")
+devtools::load_all("/Users/willwerscheid/GitHub/flashr")
+
+res.udv_si <- flash_add_greedy(strong, Kmax=19, verbose=TRUE)
+res.udv_si_svd <- flash_add_greedy(strong, Kmax=19, init_fn="udv_si_svd", verbose=TRUE)
+res.udv_svd <- flash_add_greedy(strong, Kmax=19, init_fn="udv_svd", verbose=TRUE)
+
+# Change seed
+res.udv_si666 <- flash_add_greedy(strong, Kmax=19, verbose=TRUE, seed=666)
+
+all_res <- list(udv_si = res.udv_si,
+                udv_si666 = res.udv_si666,
+                udv_si_svd = res.udv_si_svd,
+                udv_svd = res.udv_svd)
+
+saveRDS(all_res, "../data/init_fn/all_res.rds")
+```
+
+```{r load_data}
+# devtools::install_github("stephenslab/flashr", ref="trackObj")
+devtools::load_all("/Users/willwerscheid/GitHub/flashr")
+
+gtex <- readRDS(gzcon(url("https://github.com/stephenslab/gtexresults/blob/master/data/MatrixEQTLSumStats.Portable.Z.rds?raw=TRUE")))
+strong <- t(gtex$strong.z)
+
+all_res <- readRDS("./data/init_fn/all_res.rds")
+```
+
+### Initialization time
+
+The total time (in seconds) spent initializing factors is as follows.
+
+```{r nomissing_init_time}
+init_t <- lapply(all_res, function(res) {unlist(res$init_t)})
+lapply(init_t, sum)
+```
+
+As expected, `udv_svd` is fastest, but there is only about 10 seconds difference between `udv_svd` and `udv_si` (the slowest method). This difference is not hugely important given that the overall fit takes several minutes.
+
+The initialization time per factor is as follows. 
+
+```{r nomissing_time}
+K <- length(init_t[[1]])
+data <- data.frame(t = unlist(init_t), 
+                   init_fn = rep(names(init_t), each=K))
+data$init_fn[data$init_fn == "udv_si666"] <- "udv_si"
+data$init_fn <- factor(data$init_fn)
+
+boxplot(t ~ init_fn, data, ylim=c(0, 2), 
+        main="Initialization time (s)")
+```
+
+### Number of iterations
+
+Since the optimization step takes much more time than the initialization step, I check to see whether any initialization method is "better" in the sense that it requires less iterations to optimize. (I suppress results for `udv_si_svd` because they are identical to `udv_svd`.) 
+
+```{r nomissing_niter}
+niter <- lapply(all_res, 
+                function(res) {
+                  sapply(res$obj, function(i) {length(i$after_tau)})
+                })
+niter$udv_si_svd <- NULL
+
+K <- length(niter[[1]])
+data <- data.frame(niter = unlist(niter), 
+                   init_fn = rep(names(niter), each=K))
+data$init_fn[data$init_fn == "udv_si666"] <- "udv_si"
+data$init_fn <- factor(data$init_fn)
+
+boxplot(niter ~ init_fn, data, ylim=c(0, 120),
+        main="Number of iterations per factor")
+```
+These two plots look very similar to me.
+
+### Objective attained
+
+There is some variation in the final objective. `softImpute(type = "als")` can do better than `svd`, but it can also do worse.
+
+```{r nomissing_finalobj}
+lapply(all_res, function(res) {flash_get_objective(strong, res$f)})
+```
+
+The improvement in the objective function per factor is as follows. (Again, I suppress results for `udv_si_svd` because they are identical to `udv_svd`.) 
+
+```{r nomissing_objeach}
+par(mfrow=c(2, 2))
+final.obj <- lapply(all_res, 
+                    function(res) {
+                      sapply(res$obj, function(obj) {
+                        max(unlist(obj))
+                      })
+                    })
+final.obj$udv_si_svd <- NULL
+diff.by.factor <- lapply(final.obj,
+                         function(obj) {
+                           obj[2:length(obj)] - obj[1:(length(obj) - 1)]
+                         })
+for (k in 1:length(diff.by.factor[[1]])) {
+  data = sapply(diff.by.factor, function(diff) { diff[k] })
+  barplot(data, 
+          main=paste("After adding factor", k + 1),
+          col=c("blue", "blue", "red"))
+}
+```
+
+## Results: missing data
+
+I delete 5% of the entries in the dataset and repeat the experiment. Since `svd` cannot handle missing data, I only compare `udv_si` and `udv_si_svd`.
+
+```{r missing}
+set.seed(1)
+missing <- rbinom(length(strong), 1, prob=0.05)
+strong.missing <- strong
+strong.missing[missing] <- NA
+fl_data <- flash_set_data(strong.missing)
+```
+
+```{r missing_fits, eval=FALSE}
+# This block was run in advance.
+
+res.missing.udv_si <- flash_add_greedy(fl_data, Kmax=19, verbose=TRUE)
+res.missing.udv_si666 <- flash_add_greedy(fl_data, Kmax=19, verbose=TRUE, seed=666)
+res.missing.udv_si_svd <- flash_add_greedy(fl_data, Kmax=19, init_fn="udv_si_svd", verbose=TRUE)
+
+all_missing <- list(udv_si = res.missing.udv_si,
+                    udv_si666 = res.missing.udv_si666,
+                    udv_si_svd = res.missing.udv_si_svd)
+
+saveRDS(all_missing, "../data/init_fn/all_missing.rds")
+```
+
+```{r load_missing}
+all_missing <- readRDS("./data/init_fn/all_missing.rds")
+```
+
+### Initialization time
+
+The total time (in seconds) spent initializing factors is as follows.
+
+```{r missing_init_time}
+init_t <- lapply(all_missing, function(res) {unlist(res$init_t)})
+lapply(init_t, sum)
+```
+
+The time per factor is as follows.
+
+```{r missing_time}
+K <- length(init_t[[1]])
+data <- data.frame(t = unlist(init_t), 
+                   init_fn = rep(names(init_t), each=K))
+data$init_fn[data$init_fn == "udv_si666"] <- "udv_si"
+data$init_fn <- factor(data$init_fn)
+
+boxplot(t ~ init_fn, data, ylim=c(0, 2),
+        main="Initialization time (s)")
+```
+
+Interestingly, `udv_si_svd` seems to be reliably faster. This result contradicts our earlier results showing that using option `type = "als"` with `softImpute` was faster than using option `type = "svd"`. I'm not sure whether any code has changed in the meantime, or whether our preliminary investigations were simply faulty.
+
+### Number of iterations, objective attained
+
+With only 5% of data missing, the number of iterations per factor and the increase in objective per factor were nearly identical to the above, so I have suppressed them here.
+
+To verify for yourself, run the following lines.
+
+```{r missing_niter, eval=FALSE}
+niter <- lapply(all_missing, 
+                function(res) {
+                  sapply(res$obj, function(i) {length(i$after_tau)})
+                })
+
+K <- length(niter[[1]])
+data <- data.frame(niter = unlist(niter), 
+                   init_fn = rep(names(niter), each=K))
+data$init_fn[data$init_fn == "udv_si666"] <- "udv_si"
+data$init_fn <- factor(data$init_fn)
+
+boxplot(niter ~ init_fn, data, ylim=c(0, 120),
+        main="Number of iterations per factor")
+```
+
+```{r missing_finalobj, eval=FALSE}
+lapply(all_missing, function(res) {flash_get_objective(fl_data, res$f)})
+```
+
+```{r missing_objeach, eval=FALSE}
+par(mfrow=c(2, 2))
+final.obj <- lapply(all_missing, 
+                    function(res) {
+                      sapply(res$obj, function(obj) {
+                        max(unlist(obj))
+                      })
+                    })
+diff.by.factor <- lapply(final.obj,
+                         function(obj) {
+                           obj[2:length(obj)] - obj[1:(length(obj) - 1)]
+                         })
+for (k in 1:length(diff.by.factor[[1]])) {
+  data = sapply(diff.by.factor, function(diff) { diff[k] })
+  barplot(data, 
+          main=paste("Improvement after adding factor", k + 1),
+          col=c("blue", "blue", "red"))
+}
+```
+
+## Conclusions
+
+There does not seem to be any advantage to using `softImpute` when there is no missing data. Indeed, `udv_si` is relatively slow and has the additional disadvantage that results depend upon a random initialization. For this reason, I recommend changing the default `init_fn` to `udv_svd` when there is no missing data.
+
+More surprisingly, I was unable to verify earlier results that concluded that `udv_si` (that is, `softImpute` with option `type = "als"`) is faster than `udv_si_svd` (`softImpute` with option `type = "svd"`). On the contrary, `udv_si_svd` appears to be slightly faster, and again has the advantage that it is not random. Further, the algorithm is somewhat simpler to understand. Thus I recommend setting the default `init_fn` to `udv_si_svd` when data is missing.
