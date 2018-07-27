@@ -1,0 +1,79 @@
+---
+title: "Effect of initialization function on final objective"
+author: "Jason Willwerscheid"
+date: "7/26/2018"
+output:
+  workflowr::wflow_html
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+Here, I return to a question I asked in a [previous investigation](init_fn.html): does the choice of `init_fn` affect the final objective attained?
+
+I perform a very simple (if time-consuming) experiment. I fit FLASH to the GTEx dataset from  previous investigations using `init_fn = udv_si` with ten different seeds, and compare the final objective in each case to the objective I get using `init_fn = udv_svd`.
+
+## Results
+
+I pre-run the code and load the results from file. I am using warmstarts to avoid the problem described [here](warmstart.html) (at present, this functionality is only available in branch `trackObj`).
+
+```{r results, eval=FALSE}
+# devtools::install_github("stephenslab/flashr", ref="trackObj")
+devtools::load_all("/Users/willwerscheid/GitHub/flashr")
+# devtools::install_github("stephenslab/ebnm")
+devtools::load_all("/Users/willwerscheid/GitHub/ebnm")
+
+gtex <- readRDS(gzcon(url("https://github.com/stephenslab/gtexresults/blob/master/data/MatrixEQTLSumStats.Portable.Z.rds?raw=TRUE")))
+strong <- t(gtex$strong.z)
+
+niter <- 10
+
+obj.udv_si <- rep(0, niter)
+nfactor.udv_si <- rep(0, niter)
+for (i in 1:niter) {
+  res <- flash_add_greedy(strong, Kmax=50, init_fn="udv_si",
+                                warmstart=TRUE, verbose=TRUE, seed=i)
+  obj.udv_si[i] <- flash_get_objective(strong, res$f)
+  nfactor.udv_si[i] <- flash_get_nfactors(res$f)
+}
+
+res2 <- flash_add_greedy(strong, Kmax=50, init_fn="udv_svd",
+                                warmstart=TRUE, verbose=TRUE, seed=i)
+obj.udv_svd <- flash_get_objective(strong, res2$f)
+nfactor.udv_svd <- flash_get_nfactors(res2$f)
+
+all_res <- list(obj.udv_si = obj.udv_si,
+                obj.udv_svd = obj.udv_svd,
+                nfactor.udv_si = nfactor.udv_si)
+                nfactor.udv_svd = nfactor.udv_svd)
+saveRDS(all_res, "../data/init_fn2/res.rds")
+```
+
+```{r load_results}
+all_res <- readRDS("./data/init_fn2/res.rds")
+```
+
+Results are as follows.
+
+```{r show_results}
+obj.diff <- all_res$obj.udv_si - all_res$obj.udv_svd
+col <- c("lightgreen", "skyblue", "royalblue", "purple4")
+plot.col <- col[all_res$nfactor.udv_si - 22]
+plot(1:10, obj.diff, 
+     xlab="seed", ylab="difference in objective", 
+     xlim=c(1, 11), ylim=c(-1200, 200),
+     pch=19, col=plot.col,
+     main="Obj. attained for udv_si (relative to udv_svd)")
+abline(0, 0, lty=2)
+legend("topright", as.character(23:26), pch=19, col=col,
+       title="# factors")
+```
+
+So, six seeds yield an objective that is much worse than the objective attained using `udv_svd`, and four seeds yield an objective that is as good or slightly better. The latter all include 25 factor/loading pairs, which is also the number of factor/loading pairs given by `udv_svd`.
+
+## Conclusions
+
+These results lend further support to my [previous conclusion](init_fn) that we should make `udv_si_svd` the default initialization function when there is missing data.
