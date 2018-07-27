@@ -10,9 +10,11 @@ output:
 
 [Investigation 5a.](init_fn.html) We should change the default `init_fn` to `udv_si_svd` when there is missing data and `udv_svd` otherwise.
 
-[Investigation 5b.](init_fn2.html) More evidence supporting a change in the default initialization function. 
+[Investigation 5b.](init_fn2.html) More evidence supporting a change to the default initialization function. 
 
-[Investigation 6.](warmstart.html) Poor `optim` results can produce large decreases in the objective function. We should use warmstarts when optimizing.
+[Investigation 6.](warmstart.html) Poor `optim` results can produce large decreases in the objective function. We should use warmstarts when `ebnm_fn = ebnm_pn`.
+
+[Investigation 7.](warmstart2.html) The advantages of warmstarts are not nearly as compelling when `ebnm_fn = ebnm_ash`.
 
 
 ## Still Relevant

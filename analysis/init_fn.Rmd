@@ -72,7 +72,7 @@ fl3 <- flash_add_greedy(strong, Kmax=1, f_init=fl2, verbose=TRUE)
 
 ## Questions for investigation
 
-The above increase in the objective function points to a larger problem, which I will turn to in a subsequent investigation. Here, I want to revisit the choice of default `init_fn`. In particular, should we instead default to `udv_svd` (a simple wrapper to `svd`) when there is no missing data? Since `softImpute(type = "svd")` gives the same result as `svd`, and `softImpute(type = "als")` begins by calling `svd` on a random matrix anyway, using `udv_svd` can only speed things up (in addition to eliminating an annoying source of randomness). Next, when there is missing data, what are the differences between `"svd"` and `"als"` in terms of speed and the final objective attained? Preliminary results suggested that `"als"` would be much faster, but it would be useful to verify those results on the GTEx dataset.
+The above increase in the objective function points to a larger problem, which I will turn to in a [subsequent investigation](warmstart.html). Here, I want to revisit the choice of default `init_fn`. In particular, should we instead default to `udv_svd` (a simple wrapper to `svd`) when there is no missing data? Since `softImpute(type = "svd")` gives the same result as `svd`, and `softImpute(type = "als")` begins by calling `svd` on a random matrix anyway, using `udv_svd` can only speed things up (in addition to eliminating an annoying source of randomness). Next, when there is missing data, what are the differences between `"svd"` and `"als"` in terms of speed and the final objective attained? Preliminary results suggested that `"als"` would be much faster, but it would be useful to verify those results on the GTEx dataset.
 
 ## Results: no missing data
 
@@ -216,7 +216,7 @@ legend("bottomleft", c("seed = 123", "seed = 666"),
 abline(0, 0, lty=2)
 ```
 
-While there are differences, there is no clear pattern here.
+While there are differences, there is no clear pattern here. It might be the case that, as above, factor/loading pairs are simply being added in a different order. I will revisit this question in a [subsequent investigation](init_fn2.html).
 
 
 ## Results: missing data

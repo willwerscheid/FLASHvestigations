@@ -91,5 +91,4 @@ plot(o2 - o1, type='l',
 
 ## Conclusions
 
-The advantages of using warmstarts are not nearly as compelling as they were with `ebnm_pn`. The speed-up is not as reliable, and the sacrifice in the final objective attained is greater. Further, I have not seen `Rmosek` fail for `ebnm_ash` in the same way that `optim` fails for `ebnm_pn`. 
-
+The advantages of using warmstarts are not nearly as compelling as they were with `ebnm_pn`. The speed-up is not as reliable, and the sacrifice in the final objective attained is greater. Further, I have not seen `Rmosek` fail for `ebnm_ash` in the same way that `optim` fails for `ebnm_pn`. I am not convinced that we should automatically use warmstarts for every iteration when `ebnm_fn = ebnm_ash`. Perhaps we could add a parameter `use_warmstarts` to the main FLASH functions.

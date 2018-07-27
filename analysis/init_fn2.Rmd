@@ -76,4 +76,4 @@ So, six seeds yield an objective that is much worse than the objective attained 
 
 ## Conclusions
 
-These results lend further support to my [previous conclusion](init_fn) that we should make `udv_si_svd` the default initialization function when there is missing data.
+These results lend further support to my [previous conclusion](init_fn) that we should make `udv_svd` the default initialization function when there is no missing data.
