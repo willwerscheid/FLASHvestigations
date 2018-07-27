@@ -1,0 +1,95 @@
+---
+title: "Using warmstarts with ebnm_ash"
+author: "Jason Willwerscheid"
+date: "7/26/2018"
+output:
+  workflowr::wflow_html
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+I [previously](warmstart.html) concluded that using warmstarts is more advantageous than not when `ebnm_fn = ebnm_pn`. Here I repeat the experiment with `ebnm_fn = ebnm_ash`.
+
+## Results
+
+```{r load_data}
+# devtools::install_github("stephenslab/flashr", ref="trackObj")
+devtools::load_all("/Users/willwerscheid/GitHub/flashr")
+# devtools::install_github("stephenslab/ebnm")
+devtools::load_all("/Users/willwerscheid/GitHub/ebnm")
+
+gtex <- readRDS(gzcon(url("https://github.com/stephenslab/gtexresults/blob/master/data/MatrixEQTLSumStats.Portable.Z.rds?raw=TRUE")))
+strong <- t(gtex$strong.z)
+```
+
+```{r fits, eval=FALSE}
+# This block was run in advance.
+
+res.no.warmstart <- flash_add_greedy(strong, Kmax=50, init_fn="udv_svd",
+                                     ebnm_fn="ebnm_ash", verbose=TRUE)
+res.warmstart <- flash_add_greedy(strong, Kmax=50, init_fn="udv_svd",
+                                  ebnm_fn="ebnm_ash", warmstart=TRUE, 
+                                  verbose=TRUE)
+
+saveRDS(res.no.warmstart, "../data/warmstart2/nowarmstart.rds")
+saveRDS(res.warmstart, "../data/warmstart2/warmstart.rds")
+```
+
+```{r load_results}
+res.no.warmstart <- readRDS("./data/warmstart2/nowarmstart.rds")
+res.warmstart <- readRDS("./data/warmstart2/warmstart.rds")
+```
+
+### Optimization time
+
+The total time (in seconds) needed to optimize factors is:
+
+```{r total_time}
+x1 <- unlist(res.no.warmstart$opt_time)
+x2 <- unlist(res.warmstart$opt_time)
+list(no.warmstart = sum(x1), warmstart = sum(x2))
+```
+
+The time required per factor/loading is as follows.
+
+```{r time_per_factor}
+plot(x1, ylim=c(0, max(x1) + 1), pch=19, col="blue",
+     xlab="Factor/loading index", ylab="Optimization time (s)")
+points(x2, pch=17, col="red")
+legend("topright", c("No warmstart", "Warmstart"),
+       pch=c(19, 17), col=c("blue", "red"))
+```
+
+So using a warmstart often provides a speed-up, but not nearly as reliably as with `ebnm_pn`. Indeed, for several factor/loading pairs (17, 19, 22, 24, 26), the warmstart considerably slows things down.
+
+### Objective attained
+
+As with `ebnm_pn`, using warmstarts yields a slightly worse overall objective. 
+
+```{r obj}
+list(no.warmstart = flash_get_objective(strong, res.no.warmstart$f),
+     warmstart = flash_get_objective(strong, res.warmstart$f))
+```
+
+The per-factor difference in objective is as follows.
+
+```{r obj_diff}
+o1 <- sapply(res.no.warmstart$obj, 
+             function(obj) {max(unlist(obj))})
+o2 <- sapply(res.warmstart$obj, 
+             function(obj) {max(unlist(obj))})
+
+plot(o2 - o1, type='l',
+     xlab="Factor/loading index",
+     ylab="Diff. in obj. using warmstart",
+     main="Difference in overall objective after adding each factor")
+```
+
+## Conclusions
+
+The advantages of using warmstarts are not nearly as compelling as they were with `ebnm_pn`. The speed-up is not as reliable, and the sacrifice in the final objective attained is greater. Further, I have not seen `Rmosek` fail for `ebnm_ash` in the same way that `optim` fails for `ebnm_pn`. 
+
