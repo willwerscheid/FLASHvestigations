@@ -338,7 +338,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/09d18885d356892e73364efcfb2f996dbae2545f" target="_blank">09d1888</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/f497f36b336da9df75073fe017053b5e3795dd6f" target="_blank">f497f36</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -350,13 +350,6 @@ Ignored files:
 
 Untracked files:
     Untracked:  data/greedy19.rds
-    Untracked:  data/warmstart2/
-
-Unstaged changes:
-    Modified:   analysis/index.Rmd
-    Modified:   analysis/init_fn.Rmd
-    Modified:   analysis/init_fn2.Rmd
-    Modified:   analysis/warmstart.Rmd
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -385,6 +378,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/f497f36b336da9df75073fe017053b5e3795dd6f/analysis/warmstart2.Rmd" target="_blank">f497f36</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-27
+</td>
+<td style="text-align:left;">
+wflow_publish(c(“analysis/warmstart2.Rmd”,
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/85127b9c6bab4c3566bdc0762ae312b06c49129f/docs/warmstart2.html" target="_blank">85127b9</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-27
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -451,6 +478,36 @@ points(x2, pch=17, col=&quot;red&quot;)
 legend(&quot;topright&quot;, c(&quot;No warmstart&quot;, &quot;Warmstart&quot;),
        pch=c(19, 17), col=c(&quot;blue&quot;, &quot;red&quot;))</code></pre>
 <p><img src="figure/warmstart2.Rmd/time_per_factor-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of time_per_factor-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/85127b9c6bab4c3566bdc0762ae312b06c49129f/docs/figure/warmstart2.Rmd/time_per_factor-1.png" target="_blank">85127b9</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-27
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>So using a warmstart often provides a speed-up, but not nearly as reliably as with <code>ebnm_pn</code>. Indeed, for several factor/loading pairs (17, 19, 22, 24, 26), the warmstart considerably slows things down.</p>
 </div>
 <div id="objective-attained" class="section level3">
@@ -474,11 +531,41 @@ plot(o2 - o1, type=&#39;l&#39;,
      ylab=&quot;Diff. in obj. using warmstart&quot;,
      main=&quot;Difference in overall objective after adding each factor&quot;)</code></pre>
 <p><img src="figure/warmstart2.Rmd/obj_diff-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of obj_diff-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/85127b9c6bab4c3566bdc0762ae312b06c49129f/docs/figure/warmstart2.Rmd/obj_diff-1.png" target="_blank">85127b9</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-27
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 </div>
 <div id="conclusions" class="section level2">
 <h2>Conclusions</h2>
-<p>The advantages of using warmstarts are not nearly as compelling as they were with <code>ebnm_pn</code>. The speed-up is not as reliable, and the sacrifice in the final objective attained is greater. Further, I have not seen <code>Rmosek</code> fail for <code>ebnm_ash</code> in the same way that <code>optim</code> fails for <code>ebnm_pn</code>.</p>
+<p>The advantages of using warmstarts are not nearly as compelling as they were with <code>ebnm_pn</code>. The speed-up is not as reliable, and the sacrifice in the final objective attained is greater. Further, I have not seen <code>Rmosek</code> fail for <code>ebnm_ash</code> in the same way that <code>optim</code> fails for <code>ebnm_pn</code>. I am not convinced that we should automatically use warmstarts for every iteration when <code>ebnm_fn = ebnm_ash</code>. Perhaps we could add a parameter <code>use_warmstarts</code> to the main FLASH functions.</p>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>

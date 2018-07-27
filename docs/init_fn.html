@@ -314,7 +314,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-07-26</p>
+<p><strong>Last updated:</strong> 2018-07-27</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -338,7 +338,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/cbae7ec4f41491f8fcb3baa7fe6ac1c7a280a2fa" target="_blank">cbae7ec</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/f497f36b336da9df75073fe017053b5e3795dd6f" target="_blank">f497f36</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -378,6 +378,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/f497f36b336da9df75073fe017053b5e3795dd6f/analysis/init_fn.Rmd" target="_blank">f497f36</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-27
+</td>
+<td style="text-align:left;">
+wflow_publish(c(“analysis/warmstart2.Rmd”,
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/c035b828280cccbe5fb4ac4def24aa6893d382a2/docs/init_fn.html" target="_blank">c035b82</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-07-26
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -552,7 +586,7 @@ fl3 &lt;- flash_add_greedy(strong, Kmax=1, f_init=fl2, verbose=TRUE)</code></pre
 </div>
 <div id="questions-for-investigation" class="section level2">
 <h2>Questions for investigation</h2>
-<p>The above increase in the objective function points to a larger problem, which I will turn to in a subsequent investigation. Here, I want to revisit the choice of default <code>init_fn</code>. In particular, should we instead default to <code>udv_svd</code> (a simple wrapper to <code>svd</code>) when there is no missing data? Since <code>softImpute(type = &quot;svd&quot;)</code> gives the same result as <code>svd</code>, and <code>softImpute(type = &quot;als&quot;)</code> begins by calling <code>svd</code> on a random matrix anyway, using <code>udv_svd</code> can only speed things up (in addition to eliminating an annoying source of randomness). Next, when there is missing data, what are the differences between <code>&quot;svd&quot;</code> and <code>&quot;als&quot;</code> in terms of speed and the final objective attained? Preliminary results suggested that <code>&quot;als&quot;</code> would be much faster, but it would be useful to verify those results on the GTEx dataset.</p>
+<p>The above increase in the objective function points to a larger problem, which I will turn to in a <a href="warmstart.html">subsequent investigation</a>. Here, I want to revisit the choice of default <code>init_fn</code>. In particular, should we instead default to <code>udv_svd</code> (a simple wrapper to <code>svd</code>) when there is no missing data? Since <code>softImpute(type = &quot;svd&quot;)</code> gives the same result as <code>svd</code>, and <code>softImpute(type = &quot;als&quot;)</code> begins by calling <code>svd</code> on a random matrix anyway, using <code>udv_svd</code> can only speed things up (in addition to eliminating an annoying source of randomness). Next, when there is missing data, what are the differences between <code>&quot;svd&quot;</code> and <code>&quot;als&quot;</code> in terms of speed and the final objective attained? Preliminary results suggested that <code>&quot;als&quot;</code> would be much faster, but it would be useful to verify those results on the GTEx dataset.</p>
 </div>
 <div id="results-no-missing-data" class="section level2">
 <h2>Results: no missing data</h2>
@@ -871,7 +905,7 @@ Jason Willwerscheid
 </tbody>
 </table>
 <p></details></p>
-<p>While there are differences, there is no clear pattern here.</p>
+<p>While there are differences, there is no clear pattern here. It might be the case that, as above, factor/loading pairs are simply being added in a different order. I will revisit this question in a <a href="init_fn2.html">subsequent investigation</a>.</p>
 </div>
 </div>
 <div id="results-missing-data" class="section level2">
