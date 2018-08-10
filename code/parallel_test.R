@@ -54,6 +54,12 @@ for (i in 1:niter) {
   parallel_obj[i] <- flash_get_objective(strong_data, fl)
 }
 
+res <- list(backfit_t = backfit_t,
+            parallel_t = parallel_t,
+            backfit_obj = backfit_obj,
+            parallel_obj = parallel_obj)
+saveRDS(res, "./data/parallel/nfactor20niter40.rds")
+
 plot(backfit_obj, pch=1)
 points(parallel_obj, pch=2)
 plot(backfit_obj - parallel_obj, type = "l")
