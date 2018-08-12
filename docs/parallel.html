@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Parallel updates</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Parallel updates</h1>
+<h4 class="author"><em>Jason Willwerscheid</em></h4>
+<h4 class="date"><em>8/12/2018</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-08-12</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/eaba09b9681df28c1319325ecf9f96d390be6a39" target="_blank">eaba09b</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  data/greedy19.rds
+    Untracked:  data/parallel/greedy20niter100.rds
+    Untracked:  data/parallel/svd20niter100.rds
+
+Unstaged changes:
+    Modified:   code/parallel.R
+    Modified:   code/parallel_test.R
+    Deleted:    data/parallel/nfactor20niter40.rds
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/eaba09b9681df28c1319325ecf9f96d390be6a39/analysis/parallel.Rmd" target="_blank">eaba09b</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-12
+</td>
+<td style="text-align:left;">
+wflow_publish(c(“analysis/index.Rmd”, “analysis/parallel.Rmd”))
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>At present, backfitting is done serially. That is, factor 1 is updated using the current residuals, then factor 2 is updated using the new values of factor 1 to calculate residuals, and so on.</p>
+<p>Here I implement parallel updates, where all factors are updated using the same residuals. Parallelization could provide a significant speedup, but the objective is no longer guaranteed to increase after each iteration.</p>
+<p>For the code used in this investigation, see <a href="#code">below</a>.</p>
+</div>
+<div id="experiments" class="section level2">
+<h2>Experiments</h2>
+<p>I carry out two experiments, using the same GTEx dataset that I use <a href="https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHgtex.html">here</a>. The first experiment adds 20 factors to a flash object using <code>flash_add_greedy</code> and then backfits for 100 iterations. The second adds 20 factors using <code>flash_add_factors_from_data</code> (with <code>init_fn = udv_svd</code>) and then backfits (again, for 100 iterations).</p>
+<p>In each case, I use three methods to backfit:</p>
+<ol style="list-style-type: decimal">
+<li><p>The standard method implemented in <code>flash_backfit</code>, which serially updates each factor by calling <code>flash_update_single_fl</code>.</p></li>
+<li><p>A “parallelized” method that peforms simultaneous updates via <code>lapply</code>.</p></li>
+<li><p>A multi-core method that performs simultaneous updates using function <code>mclapply</code> in package <code>parallel</code> (I am using 4 cores).</p></li>
+</ol>
+<p>I compare objectives attained after each update and time required to carry out each update.</p>
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<p>I pre-run the experiments and load the results from file.</p>
+<pre class="r"><code>res_greedy &lt;- readRDS(&quot;./data/parallel/greedy20niter100.rds&quot;)
+res_svd &lt;- readRDS(&quot;./data/parallel/svd20niter100.rds&quot;)</code></pre>
+<div id="greedy" class="section level3">
+<h3>Greedy</h3>
+<p>First I give results for backfitting the 20 factors obtained using <code>flash_add_greedy</code>.</p>
+<p>The objectives attained using each backfitting method are very similar (the objectives for the <code>lapply</code> and <code>mclapply</code> methods are of course identical, so I only give “standard” and “parallel” results below):</p>
+<pre class="r"><code>plot(res_greedy$backfit_obj, pch=19, col=&quot;blue&quot;,
+     xlim=c(1, 100), xlab=&quot;Update&quot;, ylab=&quot;Objective&quot;)
+points(res_greedy$parallel_obj, pch=19, col=&quot;red&quot;)
+legend(&quot;bottomright&quot;, legend=c(&quot;standard&quot;, &quot;parallel&quot;), 
+       pch=c(19, 19), col=c(&quot;blue&quot;, &quot;red&quot;))</code></pre>
+<p><img src="figure/parallel.Rmd/greedy_obj1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Plotting the same results as the difference in objective attained (i.e., the improvement in the objective if one uses the standard method rather than a parallel method):</p>
+<pre class="r"><code>y &lt;- res_greedy$backfit_obj - res_greedy$parallel_obj
+plot(1:length(y), y, type=&quot;l&quot;, xlim=c(1, 100), ylim=c(0, max(y)),
+     xlab=&quot;Update&quot;, ylab=&quot;Difference&quot;)</code></pre>
+<p><img src="figure/parallel.Rmd/greedy_obj2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The time required for each update is as follows. Interestingly, simply using <code>lapply</code> achieves a minor speedup. Using a multi-core approach cuts the time required to backfit in half.</p>
+<pre class="r"><code>data &lt;- data.frame(standard = res_greedy$backfit_t, 
+                   lapply = res_greedy$parallel_t, 
+                   mclapply = res_greedy$multicore_t)
+boxplot(data, ylim=c(0, max(data)), ylab=&quot;Time per iter (s)&quot;)</code></pre>
+<p><img src="figure/parallel.Rmd/greedy_t1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The total time required (in seconds) is:</p>
+<pre class="r"><code>colSums(data)</code></pre>
+<pre><code>standard   lapply mclapply 
+ 877.827  704.547  494.516 </code></pre>
+</div>
+<div id="svd" class="section level3">
+<h3>SVD</h3>
+<p>Next I give results for the 20 factors obtained using <code>flash_add_factors_from_data</code>. In this case, the parallel updates attain a better objective than the standard updates after 80 iterations or so:</p>
+<pre class="r"><code>plot(res_svd$backfit_obj, pch=19, col=&quot;blue&quot;,
+     xlim=c(1, 100), xlab=&quot;Update&quot;, ylab=&quot;Objective&quot;)
+points(res_svd$parallel_obj, pch=19, col=&quot;red&quot;)
+legend(&quot;bottomright&quot;, legend=c(&quot;standard&quot;, &quot;parallel&quot;), 
+       pch=c(19, 19), col=c(&quot;blue&quot;, &quot;red&quot;))</code></pre>
+<p><img src="figure/parallel.Rmd/svd_obj1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>y &lt;- res_svd$backfit_obj - res_svd$parallel_obj
+plot(1:length(y), y, type=&quot;l&quot;, xlim=c(1, 100), ylim=c(min(y), max(y)),
+     xlab=&quot;Update&quot;, ylab=&quot;Difference&quot;)</code></pre>
+<p><img src="figure/parallel.Rmd/svd_obj2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>data &lt;- data.frame(standard = res_svd$backfit_t, 
+                   lapply = res_svd$parallel_t, 
+                   mclapply = res_svd$multicore_t)
+boxplot(data, ylim=c(0, max(data)), ylab=&quot;Time per iter (s)&quot;)</code></pre>
+<p><img src="figure/parallel.Rmd/svd_t1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The total time required (in seconds) is:</p>
+<pre class="r"><code>colSums(data)</code></pre>
+<pre><code>standard   lapply mclapply 
+ 983.967  754.552  398.323 </code></pre>
+</div>
+</div>
+<div id="code" class="section level2">
+<h2>Code</h2>
+<p>…for the parallel updates…</p>
+<pre class="r"><code>flash_update_fl_parallel = function(data,
+                                    f,
+                                    kset,
+                                    var_type,
+                                    ebnm_fn_l,
+                                    ebnm_param_l,
+                                    ebnm_fn_f,
+                                    ebnm_param_f,
+                                    parallel_fn) {
+  f = flash_update_precision(data, f, var_type)
+  f = flash_update_loadings_parallel(data,
+                                     f,
+                                     kset,
+                                     ebnm_fn_l,
+                                     ebnm_param_l,
+                                     parallel_fn)
+  f = flash_update_factors_parallel(data,
+                                    f,
+                                    kset,
+                                    ebnm_fn_f,
+                                    ebnm_param_f,
+                                    parallel_fn)
+}
+
+
+flash_update_loadings_parallel = function(data,
+                                          f,
+                                          kset,
+                                          ebnm_fn,
+                                          ebnm_param,
+                                          parallel_fn) {
+  R = flash_get_R(data, f)
+  subset = !f$fixl
+
+  update_fn = function(k) {
+    Rk = R + outer(f$EL[, k], f$EF[, k])
+    calc_update_vals(data,
+                     f,
+                     k,
+                     which(subset[, k]),
+                     ebnm_fn[[k]],
+                     ebnm_param[[k]],
+                     loadings = TRUE,
+                     Rk)
+  }
+  res = parallel_fn(as.list(kset), update_fn)
+
+  # Deal with &quot;failed&quot; updates:
+  null_idx = which(sapply(res, is.null))
+  if (length(null_idx) &gt; 0) {
+    res = res[-null_idx]
+    kset = kset[-null_idx]
+  }
+  subset[, -kset] = FALSE
+
+  f$EL[subset] = unlist(lapply(res, function(k) {k$EX}))
+  f$EL2[subset] = unlist(lapply(res, function(k) {k$EX2}))
+  f$ebnm_fn_l[kset] = ebnm_fn[kset]
+  f$ebnm_param_l[kset] = ebnm_param[kset]
+  f$gl[kset] = lapply(res, function(k) {k$g})
+  f$KL_l[kset] = lapply(res, function(k) {k$KL})
+
+  return(f)
+}
+
+
+flash_update_factors_parallel = function(data,
+                                         f,
+                                         kset,
+                                         ebnm_fn,
+                                         ebnm_param,
+                                         parallel_fn) {
+  R = flash_get_R(data, f)
+  subset = !f$fixf
+
+  update_fn = function(k) {
+    Rk = R + outer(f$EL[, k], f$EF[, k])
+    calc_update_vals(data,
+                     f,
+                     k,
+                     which(subset[, k]),
+                     ebnm_fn[[k]],
+                     ebnm_param[[k]],
+                     loadings = FALSE,
+                     Rk)
+  }
+  res = parallel_fn(as.list(kset), update_fn)
+
+  # Deal with &quot;failed&quot; updates:
+  null_idx = which(sapply(res, is.null))
+  if (length(null_idx) &gt; 0) {
+    res = res[-null_idx]
+    kset = kset[-null_idx]
+  }
+
+  subset[, -kset] = FALSE
+  f$EF[subset] = unlist(lapply(res, function(k) {k$EX}))
+  f$EF2[subset] = unlist(lapply(res, function(k) {k$EX2}))
+  f$ebnm_fn_f[kset] = ebnm_fn[kset]
+  f$ebnm_param_f[kset] = ebnm_param[kset]
+  f$gf[kset] = lapply(res, function(k) {k$g})
+  f$KL_f[kset] = lapply(res, function(k) {k$KL})
+
+  return(f)
+}</code></pre>
+<p>…and for the experiments.</p>
+<pre class="r"><code># devtools::install_github(&quot;stephenslab/flashr&quot;)
+devtools::load_all(&quot;/Users/willwerscheid/GitHub/flashr/&quot;)
+# devtools::install_github(&quot;stephenslab/ebnm&quot;)
+devtools::load_all(&quot;/Users/willwerscheid/GitHub/ebnm/&quot;)
+
+library(parallel)
+source(&quot;./code/parallel.R&quot;)
+
+gtex &lt;- readRDS(gzcon(url(&quot;https://github.com/stephenslab/gtexresults/blob/master/data/MatrixEQTLSumStats.Portable.Z.rds?raw=TRUE&quot;)))
+
+strong &lt;- t(gtex$strong.z)
+strong_data &lt;- flash_set_data(strong, S = 1)
+
+run_test &lt;- function(fl_init, niter) {
+  nfactors &lt;- flash_get_k(fl_init)
+
+  message(&quot;Usual backfit...&quot;)
+  fl &lt;- fl_init
+  backfit_t &lt;- rep(0, niter)
+  backfit_obj &lt;- rep(0, niter)
+  for (i in 1:niter) {
+    message(&quot;  Iteration &quot;, i)
+    t &lt;- system.time(
+      for (k in 1:nfactors) {
+        fl &lt;- flashr:::flash_update_single_fl(strong_data,
+                                              fl,
+                                              k,
+                                              &quot;zero&quot;,
+                                              &quot;ebnm_pn&quot;, list(),
+                                              &quot;ebnm_pn&quot;, list())
+      }
+    )
+    backfit_t[i] &lt;- t[3] # elapsed time
+    backfit_obj[i] &lt;- flash_get_objective(strong_data, fl)
+  }
+
+  message(&quot;Parallel updates with lapply...&quot;)
+  fl &lt;- fl_init
+  parallel_t &lt;- rep(0, niter)
+  parallel_obj &lt;- rep(0, niter)
+  ebnm_param &lt;- vector(&quot;list&quot;, nfactors)
+  for (k in 1:nfactors) {ebnm_param[[k]] &lt;- list()}
+  for (i in 1:niter) {
+    message(&quot;  Iteration &quot;, i)
+    t &lt;- system.time(
+      fl &lt;- flash_update_fl_parallel(strong_data,
+                                     fl,
+                                     1:nfactors,
+                                     &quot;zero&quot;,
+                                     as.list(rep(&quot;ebnm_pn&quot;, nfactors)),
+                                     ebnm_param,
+                                     as.list(rep(&quot;ebnm_pn&quot;, nfactors)),
+                                     ebnm_param,
+                                     lapply)
+    )
+    parallel_t[i] &lt;- t[3]
+    parallel_obj[i] &lt;- flash_get_objective(strong_data, fl)
+  }
+
+  message(&quot;Parallel updates with mclapply...&quot;)
+  fl &lt;- fl_init
+  multicore_t &lt;- rep(0, niter)
+  for (i in 1:niter) {
+    message(&quot;  Iteration &quot;, i)
+    t &lt;- system.time(
+      fl &lt;- flash_update_fl_parallel(strong_data,
+                                     fl,
+                                     1:nfactors,
+                                     &quot;zero&quot;,
+                                     as.list(rep(&quot;ebnm_pn&quot;, nfactors)),
+                                     ebnm_param,
+                                     as.list(rep(&quot;ebnm_pn&quot;, nfactors)),
+                                     ebnm_param,
+                                     mclapply)
+    )
+    multicore_t[i] &lt;- t[3]
+  }
+
+  res &lt;- list(backfit_t = backfit_t,
+              parallel_t = parallel_t,
+              multicore_t = multicore_t,
+              backfit_obj = backfit_obj,
+              parallel_obj = parallel_obj)
+}
+
+fl_greedy &lt;- flash_add_greedy(strong_data, 20, var_type = &quot;zero&quot;)
+res_greedy &lt;- run_test(fl_greedy, 100)
+saveRDS(res_greedy, &quot;./data/parallel/greedy20niter100.rds&quot;)
+
+fl_svd &lt;- flash_add_factors_from_data(strong_data, 20, init_fn = &quot;udv_svd&quot;)
+res_svd &lt;- run_test(fl_svd, 100)
+saveRDS(res_svd, &quot;./data/parallel/svd20niter100.rds&quot;)</code></pre>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS High Sierra 10.13.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+ [1] workflowr_1.0.1   Rcpp_0.12.17      digest_0.6.15    
+ [4] rprojroot_1.3-2   R.methodsS3_1.7.1 backports_1.1.2  
+ [7] git2r_0.21.0      magrittr_1.5      evaluate_0.10.1  
+[10] stringi_1.1.6     whisker_0.3-2     R.oo_1.21.0      
+[13] R.utils_2.6.0     rmarkdown_1.8     tools_3.4.3      
+[16] stringr_1.3.0     yaml_2.1.17       compiler_3.4.3   
+[19] htmltools_0.3.6   knitr_1.20       </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
