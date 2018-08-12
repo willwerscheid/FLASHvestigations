@@ -12,7 +12,7 @@ output:
 
 [Investigation 5b.](init_fn2.html) More evidence supporting a change to the default initialization function. 
 
-[Investigation 8.](parallel.html) Parallelizing backfitting updates shows some promise.
+[Investigation 8.](parallel.html) Parallelizing backfitting updates shows  promise.
 
 
 ## Still Relevant

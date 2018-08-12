@@ -1,5 +1,5 @@
 ---
-title: "Parallel updates"
+title: "Parallel backfitting updates"
 author: "Jason Willwerscheid"
 date: "8/12/2018"
 output: 
@@ -62,7 +62,7 @@ plot(1:length(y), y, type="l", xlim=c(1, 100), ylim=c(0, max(y)),
      xlab="Update", ylab="Difference")
 ```
 
-The time required for each update is as follows. Interestingly, simply using `lapply` achieves a minor speedup. Using a multi-core approach cuts the time required to backfit in half.
+The time required for each update is as follows. Interestingly, simply using `lapply` achieves a minor speedup. Using 4 cores cuts the time required to backfit approximately in half.
 
 ```{r greedy_t1}
 data <- data.frame(standard = res_greedy$backfit_t, 
