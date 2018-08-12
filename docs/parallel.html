@@ -12,7 +12,7 @@
 <meta name="author" content="Jason Willwerscheid" />
 
 
-<title>Parallel updates</title>
+<title>Parallel backfitting updates</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -324,7 +324,7 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Parallel updates</h1>
+<h1 class="title toc-ignore">Parallel backfitting updates</h1>
 <h4 class="author"><em>Jason Willwerscheid</em></h4>
 <h4 class="date"><em>8/12/2018</em></h4>
 
@@ -355,7 +355,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/eaba09b9681df28c1319325ecf9f96d390be6a39" target="_blank">eaba09b</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/6a9bf1c4cb55f106ec6bfa8279041df485958868" target="_blank">6a9bf1c</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -367,13 +367,6 @@ Ignored files:
 
 Untracked files:
     Untracked:  data/greedy19.rds
-    Untracked:  data/parallel/greedy20niter100.rds
-    Untracked:  data/parallel/svd20niter100.rds
-
-Unstaged changes:
-    Modified:   code/parallel.R
-    Modified:   code/parallel_test.R
-    Deleted:    data/parallel/nfactor20niter40.rds
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -402,6 +395,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/6a9bf1c4cb55f106ec6bfa8279041df485958868/analysis/parallel.Rmd" target="_blank">6a9bf1c</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-12
+</td>
+<td style="text-align:left;">
+wflow_publish(c(“analysis/index.Rmd”, “analysis/parallel.Rmd”))
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/9246c68c81509a23ff8bad9053af3bab2feb9e41/docs/parallel.html" target="_blank">9246c68</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-12
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -456,17 +483,107 @@ points(res_greedy$parallel_obj, pch=19, col=&quot;red&quot;)
 legend(&quot;bottomright&quot;, legend=c(&quot;standard&quot;, &quot;parallel&quot;), 
        pch=c(19, 19), col=c(&quot;blue&quot;, &quot;red&quot;))</code></pre>
 <p><img src="figure/parallel.Rmd/greedy_obj1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of greedy_obj1-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/9246c68c81509a23ff8bad9053af3bab2feb9e41/docs/figure/parallel.Rmd/greedy_obj1-1.png" target="_blank">9246c68</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-12
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>Plotting the same results as the difference in objective attained (i.e., the improvement in the objective if one uses the standard method rather than a parallel method):</p>
 <pre class="r"><code>y &lt;- res_greedy$backfit_obj - res_greedy$parallel_obj
 plot(1:length(y), y, type=&quot;l&quot;, xlim=c(1, 100), ylim=c(0, max(y)),
      xlab=&quot;Update&quot;, ylab=&quot;Difference&quot;)</code></pre>
 <p><img src="figure/parallel.Rmd/greedy_obj2-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>The time required for each update is as follows. Interestingly, simply using <code>lapply</code> achieves a minor speedup. Using a multi-core approach cuts the time required to backfit in half.</p>
+<details> <summary><em>Expand here to see past versions of greedy_obj2-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/9246c68c81509a23ff8bad9053af3bab2feb9e41/docs/figure/parallel.Rmd/greedy_obj2-1.png" target="_blank">9246c68</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-12
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
+<p>The time required for each update is as follows. Interestingly, simply using <code>lapply</code> achieves a minor speedup. Using 4 cores cuts the time required to backfit approximately in half.</p>
 <pre class="r"><code>data &lt;- data.frame(standard = res_greedy$backfit_t, 
                    lapply = res_greedy$parallel_t, 
                    mclapply = res_greedy$multicore_t)
 boxplot(data, ylim=c(0, max(data)), ylab=&quot;Time per iter (s)&quot;)</code></pre>
 <p><img src="figure/parallel.Rmd/greedy_t1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of greedy_t1-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/9246c68c81509a23ff8bad9053af3bab2feb9e41/docs/figure/parallel.Rmd/greedy_t1-1.png" target="_blank">9246c68</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-12
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>The total time required (in seconds) is:</p>
 <pre class="r"><code>colSums(data)</code></pre>
 <pre><code>standard   lapply mclapply 
@@ -481,15 +598,105 @@ points(res_svd$parallel_obj, pch=19, col=&quot;red&quot;)
 legend(&quot;bottomright&quot;, legend=c(&quot;standard&quot;, &quot;parallel&quot;), 
        pch=c(19, 19), col=c(&quot;blue&quot;, &quot;red&quot;))</code></pre>
 <p><img src="figure/parallel.Rmd/svd_obj1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of svd_obj1-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/9246c68c81509a23ff8bad9053af3bab2feb9e41/docs/figure/parallel.Rmd/svd_obj1-1.png" target="_blank">9246c68</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-12
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code>y &lt;- res_svd$backfit_obj - res_svd$parallel_obj
 plot(1:length(y), y, type=&quot;l&quot;, xlim=c(1, 100), ylim=c(min(y), max(y)),
      xlab=&quot;Update&quot;, ylab=&quot;Difference&quot;)</code></pre>
 <p><img src="figure/parallel.Rmd/svd_obj2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of svd_obj2-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/9246c68c81509a23ff8bad9053af3bab2feb9e41/docs/figure/parallel.Rmd/svd_obj2-1.png" target="_blank">9246c68</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-12
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code>data &lt;- data.frame(standard = res_svd$backfit_t, 
                    lapply = res_svd$parallel_t, 
                    mclapply = res_svd$multicore_t)
 boxplot(data, ylim=c(0, max(data)), ylab=&quot;Time per iter (s)&quot;)</code></pre>
 <p><img src="figure/parallel.Rmd/svd_t1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of svd_t1-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/9246c68c81509a23ff8bad9053af3bab2feb9e41/docs/figure/parallel.Rmd/svd_t1-1.png" target="_blank">9246c68</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-12
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>The total time required (in seconds) is:</p>
 <pre class="r"><code>colSums(data)</code></pre>
 <pre><code>standard   lapply mclapply 
