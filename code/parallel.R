@@ -5,18 +5,21 @@ flash_update_fl_parallel = function(data,
                                     ebnm_fn_l,
                                     ebnm_param_l,
                                     ebnm_fn_f,
-                                    ebnm_param_f) {
+                                    ebnm_param_f,
+                                    parallel_fn) {
   f = flash_update_precision(data, f, var_type)
   f = flash_update_loadings_parallel(data,
                                      f,
                                      kset,
                                      ebnm_fn_l,
-                                     ebnm_param_l)
+                                     ebnm_param_l,
+                                     parallel_fn)
   f = flash_update_factors_parallel(data,
                                     f,
                                     kset,
                                     ebnm_fn_f,
-                                    ebnm_param_f)
+                                    ebnm_param_f,
+                                    parallel_fn)
 }
 
 
@@ -24,7 +27,8 @@ flash_update_loadings_parallel = function(data,
                                           f,
                                           kset,
                                           ebnm_fn,
-                                          ebnm_param) {
+                                          ebnm_param,
+                                          parallel_fn) {
   R = flash_get_R(data, f)
   subset = !f$fixl
 
@@ -39,7 +43,7 @@ flash_update_loadings_parallel = function(data,
                      loadings = TRUE,
                      Rk)
   }
-  res = lapply(as.list(kset), update_fn)
+  res = parallel_fn(as.list(kset), update_fn)
 
   # Deal with "failed" updates:
   null_idx = which(sapply(res, is.null))
@@ -64,7 +68,8 @@ flash_update_factors_parallel = function(data,
                                          f,
                                          kset,
                                          ebnm_fn,
-                                         ebnm_param) {
+                                         ebnm_param,
+                                         parallel_fn) {
   R = flash_get_R(data, f)
   subset = !f$fixf
 
@@ -79,7 +84,7 @@ flash_update_factors_parallel = function(data,
                      loadings = FALSE,
                      Rk)
   }
-  res = lapply(as.list(kset), update_fn)
+  res = parallel_fn(as.list(kset), update_fn)
 
   # Deal with "failed" updates:
   null_idx = which(sapply(res, is.null))
