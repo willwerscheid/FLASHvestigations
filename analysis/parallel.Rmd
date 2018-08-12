@@ -1,0 +1,121 @@
+---
+title: "Parallel updates"
+author: "Jason Willwerscheid"
+date: "8/12/2018"
+output: 
+  workflowr::wflow_html:
+    code_folding: hide
+---
+
+## Introduction
+
+At present, backfitting is done serially. That is, factor 1 is updated using the current residuals, then factor 2 is updated using the new values of factor 1 to calculate residuals, and so on.
+
+Here I implement parallel updates, where all factors are updated using the same residuals. Parallelization could provide a significant speedup, but the objective is no longer guaranteed to increase after each iteration.
+
+For the code used in this investigation, see [below](#code).
+
+
+## Experiments
+
+I carry out two experiments, using the same GTEx dataset that I use [here](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHgtex.html). The first experiment adds 20 factors to a flash object using `flash_add_greedy` and then backfits for 100 iterations. The second adds 20 factors using `flash_add_factors_from_data` (with `init_fn = udv_svd`) and then backfits (again, for 100 iterations).
+
+In each case, I use three methods to backfit:
+
+1. The standard method implemented in `flash_backfit`, which serially updates each factor by calling `flash_update_single_fl`.
+
+2. A "parallelized" method that peforms simultaneous updates via `lapply`.
+
+3. A multi-core method that performs simultaneous updates using function `mclapply` in package `parallel` (I am using 4 cores).
+
+I compare objectives attained after each update and time required to carry out each update.
+
+
+## Results
+
+I pre-run the experiments and load the results from file.
+
+```{r results}
+res_greedy <- readRDS("./data/parallel/greedy20niter100.rds")
+res_svd <- readRDS("./data/parallel/svd20niter100.rds")
+```
+
+### Greedy
+
+First I give results for backfitting the 20 factors obtained using `flash_add_greedy`.
+
+The objectives attained using each backfitting method are very similar (the objectives for the `lapply` and `mclapply` methods are of course identical, so I only give "standard" and "parallel" results below):
+
+```{r greedy_obj1}
+plot(res_greedy$backfit_obj, pch=19, col="blue",
+     xlim=c(1, 100), xlab="Update", ylab="Objective")
+points(res_greedy$parallel_obj, pch=19, col="red")
+legend("bottomright", legend=c("standard", "parallel"), 
+       pch=c(19, 19), col=c("blue", "red"))
+```
+
+Plotting the same results as the difference in objective attained (i.e., the improvement in the objective if one uses the standard method rather than a parallel method):
+
+```{r greedy_obj2}
+y <- res_greedy$backfit_obj - res_greedy$parallel_obj
+plot(1:length(y), y, type="l", xlim=c(1, 100), ylim=c(0, max(y)),
+     xlab="Update", ylab="Difference")
+```
+
+The time required for each update is as follows. Interestingly, simply using `lapply` achieves a minor speedup. Using a multi-core approach cuts the time required to backfit in half.
+
+```{r greedy_t1}
+data <- data.frame(standard = res_greedy$backfit_t, 
+                   lapply = res_greedy$parallel_t, 
+                   mclapply = res_greedy$multicore_t)
+boxplot(data, ylim=c(0, max(data)), ylab="Time per iter (s)")
+```
+
+The total time required (in seconds) is:
+
+```{r greedy_t2}
+colSums(data)
+```
+
+### SVD
+
+Next I give results for the 20 factors obtained using `flash_add_factors_from_data`. In this case, the parallel updates attain a better objective than the standard updates after 80 iterations or so:
+
+```{r svd_obj1}
+plot(res_svd$backfit_obj, pch=19, col="blue",
+     xlim=c(1, 100), xlab="Update", ylab="Objective")
+points(res_svd$parallel_obj, pch=19, col="red")
+legend("bottomright", legend=c("standard", "parallel"), 
+       pch=c(19, 19), col=c("blue", "red"))
+```
+
+```{r svd_obj2}
+y <- res_svd$backfit_obj - res_svd$parallel_obj
+plot(1:length(y), y, type="l", xlim=c(1, 100), ylim=c(min(y), max(y)),
+     xlab="Update", ylab="Difference")
+```
+
+
+```{r svd_t1}
+data <- data.frame(standard = res_svd$backfit_t, 
+                   lapply = res_svd$parallel_t, 
+                   mclapply = res_svd$multicore_t)
+boxplot(data, ylim=c(0, max(data)), ylab="Time per iter (s)")
+```
+
+The total time required (in seconds) is:
+
+```{r svd_t2}
+colSums(data)
+```
+
+
+## Code
+
+...for the parallel updates...
+```{r code1, code=readLines("../code/parallel.R"), eval=FALSE}
+```
+
+...and for the experiments. 
+```{r code2, code=readLines("../code/parallel_test.R"), eval=FALSE}
+```

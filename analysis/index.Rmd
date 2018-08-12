@@ -12,9 +12,7 @@ output:
 
 [Investigation 5b.](init_fn2.html) More evidence supporting a change to the default initialization function. 
 
-[Investigation 6.](warmstart.html) Poor `optim` results can produce large decreases in the objective function. We should use warmstarts when `ebnm_fn = ebnm_pn`.
-
-[Investigation 7.](warmstart2.html) The advantages of warmstarts are not nearly as compelling when `ebnm_fn = ebnm_ash`.
+[Investigation 8.](parallel.html) Parallelizing backfitting updates shows some promise.
 
 
 ## Still Relevant
@@ -35,3 +33,10 @@ The bug causing the problem described in Investigations 1-3 was fixed in version
 [Investigation 2.](objective2.html) This problem only occurs when using `ebnm_pn`, not `ebnm_ash`.
 
 [Investigation 3.](objective3.html) The objective can continue to get worse as loadings are repeatedly updated. Nonetheless, convergence takes place (from above!).
+
+Investigations 6 and 7 are concerned with warmstarts, which were implemented in version 0.5-14 of `flashr`.
+
+[Investigation 6.](warmstart.html) Poor `optim` results can produce large decreases in the objective function. We should use warmstarts when `ebnm_fn = ebnm_pn`.
+
+[Investigation 7.](warmstart2.html) The advantages of warmstarts are not nearly as compelling when `ebnm_fn = ebnm_ash`.
+
