@@ -14,7 +14,11 @@ Investigations 5a and 5b attempt to determine the best default initialization fu
 
 * [Investigation 5b.](init_fn2.html) More evidence supporting a change to the default initialization function. 
 
-[Investigation 8.](parallel.html) Parallelizing the backfitting alogrithm shows promise.
+Investigations 8 and 9 implement parallel backfitting updates.
+
+* [Investigation 8.](parallel.html) Parallelizing the backfitting algorithm shows promise.
+
+* [Investigation 9.](parallel2.html) An additional trick is needed to parallelize the backfitting updates performed in this [MASH v FLASH GTEx analysis](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHnn.html/MASHvFLASHgtex3.html).
 
 
 ## Still Relevant
