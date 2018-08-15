@@ -331,7 +331,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-08-12</p>
+<p><strong>Last updated:</strong> 2018-08-15</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -355,7 +355,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/6a9bf1c4cb55f106ec6bfa8279041df485958868" target="_blank">6a9bf1c</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/86ef31aa8de2c09ba247351608e776c485ea708f" target="_blank">86ef31a</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -366,7 +366,18 @@ Ignored files:
     Ignored:    docs/figure/.DS_Store
 
 Untracked files:
+    Untracked:  analysis/parallel2.Rmd
     Untracked:  data/greedy19.rds
+    Untracked:  data/parallel/MASHvFLASHbad.rds
+    Untracked:  data/parallel/MASHvFLASHfinal.rds
+    Untracked:  data/parallel/MASHvFLASHfinal_bad.rds
+    Untracked:  data/parallel/MASHvFLASHrandom.rds
+    Untracked:  data/parallel/MASHvFLASHrandom_bad.rds
+
+Unstaged changes:
+    Modified:   code/parallel_test.R
+    Modified:   data/parallel/greedy20niter100.rds
+    Modified:   data/parallel/svd20niter100.rds
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -395,6 +406,23 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/5a2e2a9601fa2c67d7858623a8f1a021b7bd6774/docs/parallel.html" target="_blank">5a2e2a9</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-12
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -587,7 +615,7 @@ Jason Willwerscheid
 <p>The total time required (in seconds) is:</p>
 <pre class="r"><code>colSums(data)</code></pre>
 <pre><code>standard   lapply mclapply 
- 877.827  704.547  494.516 </code></pre>
+ 657.796  447.641  318.600 </code></pre>
 </div>
 <div id="svd" class="section level3">
 <h3>SVD</h3>
@@ -700,7 +728,7 @@ Jason Willwerscheid
 <p>The total time required (in seconds) is:</p>
 <pre class="r"><code>colSums(data)</code></pre>
 <pre><code>standard   lapply mclapply 
- 983.967  754.552  398.323 </code></pre>
+ 584.846  446.226  328.599 </code></pre>
 </div>
 </div>
 <div id="code" class="section level2">
@@ -825,8 +853,26 @@ gtex &lt;- readRDS(gzcon(url(&quot;https://github.com/stephenslab/gtexresults/bl
 strong &lt;- t(gtex$strong.z)
 strong_data &lt;- flash_set_data(strong, S = 1)
 
-run_test &lt;- function(fl_init, niter) {
+run_test &lt;- function(data, fl_init, niter,
+                     ebnm_fn_l = &quot;ebnm_pn&quot;, ebnm_fn_f = &quot;ebnm_pn&quot;,
+                     ebnm_param_l = NULL, ebnm_param_f = NULL,
+                     ksets = NULL) {
   nfactors &lt;- flash_get_k(fl_init)
+
+  if (is.null(ebnm_param_l)) {
+    ebnm_param_l &lt;- vector(&quot;list&quot;, nfactors)
+    for (k in 1:nfactors) {ebnm_param_l[[k]] &lt;- list(warmstart = TRUE)}
+  }
+
+  if (is.null(ebnm_param_f)) {
+    ebnm_param_f &lt;- vector(&quot;list&quot;, nfactors)
+    for (k in 1:nfactors) {ebnm_param_f[[k]] &lt;- list(warmstart = TRUE)}
+  }
+
+  if (is.null(ksets)) {
+    ksets = list()
+    ksets[[1]] = 1:nfactors
+  }
 
   message(&quot;Usual backfit...&quot;)
   fl &lt;- fl_init
@@ -836,39 +882,41 @@ run_test &lt;- function(fl_init, niter) {
     message(&quot;  Iteration &quot;, i)
     t &lt;- system.time(
       for (k in 1:nfactors) {
-        fl &lt;- flashr:::flash_update_single_fl(strong_data,
+        fl &lt;- flashr:::flash_update_single_fl(data,
                                               fl,
                                               k,
                                               &quot;zero&quot;,
-                                              &quot;ebnm_pn&quot;, list(),
-                                              &quot;ebnm_pn&quot;, list())
+                                              ebnm_fn_l,
+                                              ebnm_param_l[[k]],
+                                              ebnm_fn_f,
+                                              ebnm_param_f[[k]])
       }
     )
     backfit_t[i] &lt;- t[3] # elapsed time
-    backfit_obj[i] &lt;- flash_get_objective(strong_data, fl)
+    backfit_obj[i] &lt;- flash_get_objective(data, fl)
   }
 
   message(&quot;Parallel updates with lapply...&quot;)
   fl &lt;- fl_init
   parallel_t &lt;- rep(0, niter)
   parallel_obj &lt;- rep(0, niter)
-  ebnm_param &lt;- vector(&quot;list&quot;, nfactors)
-  for (k in 1:nfactors) {ebnm_param[[k]] &lt;- list()}
   for (i in 1:niter) {
     message(&quot;  Iteration &quot;, i)
-    t &lt;- system.time(
-      fl &lt;- flash_update_fl_parallel(strong_data,
-                                     fl,
-                                     1:nfactors,
-                                     &quot;zero&quot;,
-                                     as.list(rep(&quot;ebnm_pn&quot;, nfactors)),
-                                     ebnm_param,
-                                     as.list(rep(&quot;ebnm_pn&quot;, nfactors)),
-                                     ebnm_param,
-                                     lapply)
-    )
+    t &lt;- system.time({
+      for (kset in ksets) {
+        fl &lt;- flash_update_fl_parallel(data,
+                                       fl,
+                                       kset,
+                                       &quot;zero&quot;,
+                                       as.list(rep(ebnm_fn_l, nfactors)),
+                                       ebnm_param_l,
+                                       as.list(rep(ebnm_fn_f, nfactors)),
+                                       ebnm_param_f,
+                                       lapply)
+      }
+    })
     parallel_t[i] &lt;- t[3]
-    parallel_obj[i] &lt;- flash_get_objective(strong_data, fl)
+    parallel_obj[i] &lt;- flash_get_objective(data, fl)
   }
 
   message(&quot;Parallel updates with mclapply...&quot;)
@@ -876,17 +924,19 @@ run_test &lt;- function(fl_init, niter) {
   multicore_t &lt;- rep(0, niter)
   for (i in 1:niter) {
     message(&quot;  Iteration &quot;, i)
-    t &lt;- system.time(
-      fl &lt;- flash_update_fl_parallel(strong_data,
-                                     fl,
-                                     1:nfactors,
-                                     &quot;zero&quot;,
-                                     as.list(rep(&quot;ebnm_pn&quot;, nfactors)),
-                                     ebnm_param,
-                                     as.list(rep(&quot;ebnm_pn&quot;, nfactors)),
-                                     ebnm_param,
-                                     mclapply)
-    )
+    t &lt;- system.time({
+      for (kset in ksets) {
+        fl &lt;- flash_update_fl_parallel(data,
+                                       fl,
+                                       kset,
+                                       &quot;zero&quot;,
+                                       as.list(rep(ebnm_fn_l, nfactors)),
+                                       ebnm_param_l,
+                                       as.list(rep(ebnm_fn_f, nfactors)),
+                                       ebnm_param_f,
+                                       mclapply)
+      }
+    })
     multicore_t[i] &lt;- t[3]
   }
 
@@ -898,12 +948,48 @@ run_test &lt;- function(fl_init, niter) {
 }
 
 fl_greedy &lt;- flash_add_greedy(strong_data, 20, var_type = &quot;zero&quot;)
-res_greedy &lt;- run_test(fl_greedy, 100)
+res_greedy &lt;- run_test(strong_data, fl_greedy, 100)
 saveRDS(res_greedy, &quot;./data/parallel/greedy20niter100.rds&quot;)
 
 fl_svd &lt;- flash_add_factors_from_data(strong_data, 20, init_fn = &quot;udv_svd&quot;)
-res_svd &lt;- run_test(fl_svd, 100)
-saveRDS(res_svd, &quot;./data/parallel/svd20niter100.rds&quot;)</code></pre>
+res_svd &lt;- run_test(strong_data, fl_svd, 100)
+saveRDS(res_svd, &quot;./data/parallel/svd20niter100.rds&quot;)
+
+
+## Test MASH v FLASH backfits:
+
+random &lt;- t(gtex$random.z)
+random_data &lt;- flash_set_data(random, S = 1)
+
+fpath &lt;- &quot;/Users/willwerscheid/GitHub/MASHvFLASH/output/&quot;
+nn &lt;- readRDS(paste0(fpath, &quot;MASHvFLASHnn/fl.rds&quot;))
+multi &lt;- c(2, 5, 6, 8, 11:13, 17, 22:25, 31)
+n &lt;- nrow(strong)
+dd &lt;- nn$EL[, multi]
+dd &lt;- dd / rep(apply(dd, 2, max), each=n) # normalize
+canonical &lt;- cbind(rep(1, n), diag(rep(1, n)))
+LL &lt;- cbind(canonical, dd)
+
+fl_random &lt;- flash_add_fixed_loadings(random_data, LL)
+res_random &lt;- run_test(random_data, fl_random, 5)
+saveRDS(res_random, &quot;./data/parallel/MASHvFLASHrandom_bad.rds&quot;)
+
+ksets=list(1, 2:45, 46:flash_get_k(fl_random))
+res_random &lt;- run_test(random_data, fl_random, 20,
+                       ksets=list(c(1, 46:flash_get_k(fl_random)), 2:45))
+saveRDS(res_random, &quot;./data/parallel/MASHvFLASHrandom.rds&quot;)
+
+fl_final &lt;- flash_add_fixed_loadings(strong_data, LL)
+gf &lt;- readRDS(paste0(fpath, &quot;MASHvFLASHgtex3/flgf.rds&quot;))
+ebnm_param_f = lapply(gf, function(g) {list(g=g, fixg=TRUE)})
+res_final &lt;- run_test(strong_data, fl_final, 5,
+                      ebnm_param_f = ebnm_param_f, ksets=ksets)
+saveRDS(res_final, &quot;./data/parallel/MASHvFLASHfinal_bad.rds&quot;)
+
+ksets=list(1, 2:45, c(46, 50), c(47:49, 51:flash_get_k(fl_final)))
+res_final &lt;- run_test(strong_data, fl_final, 20,
+                      ebnm_param_f = ebnm_param_f, ksets=ksets)
+saveRDS(res_final, &quot;./data/parallel/MASHvFLASHfinal.rds&quot;)</code></pre>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
