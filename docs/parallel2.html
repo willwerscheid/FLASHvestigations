@@ -331,7 +331,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-08-15</p>
+<p><strong>Last updated:</strong> 2018-08-16</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -355,7 +355,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/bf441076172436f6b48a223baf52268926f686d3" target="_blank">bf44107</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/c972927eeeb4e8ab1f01b6bb563a8f63826a35e4" target="_blank">c972927</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -366,15 +366,9 @@ Ignored files:
     Ignored:    docs/figure/.DS_Store
 
 Untracked files:
+    Untracked:  code/parallel_accel.R
+    Untracked:  code/track_gf.R
     Untracked:  data/greedy19.rds
-    Untracked:  data/parallel/MASHvFLASHfinal.rds
-    Untracked:  data/parallel/MASHvFLASHrandom.rds
-    Untracked:  data/parallel/MASHvFLASHrandom_bad.rds
-
-Unstaged changes:
-    Modified:   code/parallel_test.R
-    Modified:   data/parallel/greedy20niter100.rds
-    Modified:   data/parallel/svd20niter100.rds
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -408,6 +402,40 @@ Message
 Rmd
 </td>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/c972927eeeb4e8ab1f01b6bb563a8f63826a35e4/analysis/parallel2.Rmd" target="_blank">c972927</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-16
+</td>
+<td style="text-align:left;">
+wflow_publish(c(“analysis/index.Rmd”, “analysis/parallel2.Rmd”))
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/312981fac71aa857f0259637fd0bfd2ac1309429/docs/parallel2.html" target="_blank">312981f</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-15
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/bf441076172436f6b48a223baf52268926f686d3/analysis/parallel2.Rmd" target="_blank">bf44107</a>
 </td>
 <td style="text-align:left;">
@@ -427,12 +455,12 @@ wflow_publish(c(“analysis/parallel.Rmd”,
 <hr />
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>To further explore the parallel updates implemented in the <a href="parallel.html">previous analysis</a>, I attempt to parallelize the backfits performed in my <a href="https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHnn.html/MASHvFLASHgtex3.html">MASH v FLASH GTEx analysis</a>.</p>
+<p>To further explore the parallel updates implemented in the <a href="parallel.html">previous analysis</a>, I attempt to parallelize the backfits performed in my <a href="https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHgtex3.html">MASH v FLASH GTEx analysis</a>.</p>
 <p>While <code>flash_add_greedy</code> and <code>flash_add_factors_from_data</code> both yield factor/loading pairs that are already relatively close to optimal, MASH v FLASH poses more difficult optimization problems in that its “canonical” loadings can be far from optimal, and the data-driven loadings obtained from the “strong” dataset do not necessarily fit the “random” dataset very well. Further, the full set of loadings forms an overcomplete basis for <span class="math inline">\(\mathbb{R}^{44}\)</span>, so that many of the loadings are, in a sense, redundant.</p>
 </div>
 <div id="experiments" class="section level2">
 <h2>Experiments</h2>
-<p>I use the three backfitting methods described in the <a href="parallel.html">previous analysis</a> to perform the two backfits described <a href="https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHnn.html/MASHvFLASHgtex3.html">here</a>. The code used in this analysis is included in the previous analysis (see <a href="parallel.html#code">here</a>).</p>
+<p>I use the three backfitting methods described in the <a href="parallel.html">previous analysis</a> to perform the two backfits described <a href="https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHgtex3.html">here</a>. The code used in this analysis is included in the previous analysis (see <a href="parallel.html#code">here</a>).</p>
 </div>
 <div id="results" class="section level2">
 <h2>Results</h2>
@@ -473,7 +501,7 @@ knitr::kable(data.frame(&quot;Iteration&quot; = 1:5, &quot;Objective&quot; = res
 </tbody>
 </table>
 <p>The problem, I think, is that since (as mentioned above) the loadings form an overcomplete basis, an update to the equal effects factor could also be achieved (roughly speaking) by updates to each of the unique effects factors. When all are updated simultaneously, the updates overshoot their goal, causing the objective to spiral out of control.</p>
-<p>If this reasoning is correct, then better results might be obtained by splitting up the loadings into subsets of loadings that are mutually orthogonal (or nearly so), and then parallelizing the updates to the loadings within each subset. To test this hypothesis, I divided the loadings into an equal effects loading, 44 unique effects loadings (which are of course mutually orthogonal), two data-driven loadings that are distributed across several tissues (loadings 2 and 11 shown <a href="https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHnn.html">here</a>), and the remaining 11 data-driven loadings (each of which is primarily loaded on two or three tissues).</p>
+<p>If this reasoning is correct, then better results might be obtained by splitting up the loadings into subsets of loadings that are mutually orthogonal (or nearly so), and then parallelizing the updates to the loadings within each subset. To test this hypothesis, I divided the loadings into an equal effects loading, 44 unique effects loadings (which are of course mutually orthogonal), two data-driven loadings that are distributed across several tissues (loadings 2 and 11 shown <a href="https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHnn.html#multi-tissue_effects">here</a>), and the remaining 11 data-driven loadings (each of which is primarily loaded on two or three tissues).</p>
 <p>To update the loadings, then, I updated the equal effects loading, then I updated the unique effects loadings in parallel, then I updated data-driven loadings 2 and 11, and finally I updated the remaining data-driven loadings in parallel. Surprisingly, I was able to achieve a better objective than I achieved using a serial backfit.</p>
 <pre class="r"><code>res_random &lt;- readRDS(&quot;./data/parallel/MASHvFLASHrandom.rds&quot;)
 
@@ -485,17 +513,107 @@ points(res_random$parallel_obj, pch=19, col=&quot;red&quot;)
 legend(&quot;bottomright&quot;, legend=c(&quot;standard&quot;, &quot;parallel&quot;), 
        pch=c(19, 19), col=c(&quot;blue&quot;, &quot;red&quot;))</code></pre>
 <p><img src="figure/parallel2.Rmd/random_obj-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of random_obj-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/312981fac71aa857f0259637fd0bfd2ac1309429/docs/figure/parallel2.Rmd/random_obj-1.png" target="_blank">312981f</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-15
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>The difference in objective attained (that is, the serial objective minus the parallel objective) is as follows:</p>
 <pre class="r"><code>y &lt;- res_random$backfit_obj - res_random$parallel_obj
 plot(1:length(y), y, type=&quot;l&quot;, xlim=c(1, 20), ylim=c(min(y), max(y)),
      xlab=&quot;Update&quot;, ylab=&quot;Difference&quot;)</code></pre>
 <p><img src="figure/parallel2.Rmd/random_diff-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of random_diff-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/312981fac71aa857f0259637fd0bfd2ac1309429/docs/figure/parallel2.Rmd/random_diff-1.png" target="_blank">312981f</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-15
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>As expected, the parallel updates are much faster (even after dividing the loadings into four subsets).</p>
 <pre class="r"><code>data &lt;- data.frame(standard = res_random$backfit_t, 
                    lapply = res_random$parallel_t, 
                    mclapply = res_random$multicore_t)
 boxplot(data, ylim=c(0, max(data)), ylab=&quot;Time per iter (s)&quot;)</code></pre>
 <p><img src="figure/parallel2.Rmd/random_t1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of random_t1-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/312981fac71aa857f0259637fd0bfd2ac1309429/docs/figure/parallel2.Rmd/random_t1-1.png" target="_blank">312981f</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-15
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>The total time (in seconds) required for 20 backfitting iterations is:</p>
 <pre class="r"><code>colSums(data)</code></pre>
 <pre><code>standard   lapply mclapply 
@@ -514,17 +632,107 @@ points(res_final$parallel_obj, pch=19, col=&quot;red&quot;)
 legend(&quot;bottomright&quot;, legend=c(&quot;standard&quot;, &quot;parallel&quot;), 
        pch=c(19, 19), col=c(&quot;blue&quot;, &quot;red&quot;))</code></pre>
 <p><img src="figure/parallel2.Rmd/final_obj-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of final_obj-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/312981fac71aa857f0259637fd0bfd2ac1309429/docs/figure/parallel2.Rmd/final_obj-1.png" target="_blank">312981f</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-15
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>The difference in objective attained is as follows:</p>
 <pre class="r"><code>y &lt;- res_final$backfit_obj - res_final$parallel_obj
 plot(1:length(y), y, type=&quot;l&quot;, xlim=c(1, 20), ylim=c(min(y), max(y)),
      xlab=&quot;Update&quot;, ylab=&quot;Difference&quot;)</code></pre>
 <p><img src="figure/parallel2.Rmd/final_diff-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of final_diff-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/312981fac71aa857f0259637fd0bfd2ac1309429/docs/figure/parallel2.Rmd/final_diff-1.png" target="_blank">312981f</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-15
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>The difference in elapsed time is especially dramatic here. The parallel updates take less than a third of the time required by the serial updates:</p>
 <pre class="r"><code>data &lt;- data.frame(standard = res_final$backfit_t, 
                    lapply = res_final$parallel_t, 
                    mclapply = res_final$multicore_t)
 boxplot(data, ylim=c(0, max(data)), ylab=&quot;Time per iter (s)&quot;)</code></pre>
 <p><img src="figure/parallel2.Rmd/final_t1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of final_t1-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/312981fac71aa857f0259637fd0bfd2ac1309429/docs/figure/parallel2.Rmd/final_t1-1.png" target="_blank">312981f</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-15
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>The total time (in seconds) required is:</p>
 <pre class="r"><code>colSums(data)</code></pre>
 <pre><code>standard   lapply mclapply 
