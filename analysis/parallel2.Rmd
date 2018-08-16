@@ -13,14 +13,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-To further explore the parallel updates implemented in the [previous analysis](parallel.html), I attempt to parallelize the backfits performed in my [MASH v FLASH GTEx analysis](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHnn.html/MASHvFLASHgtex3.html).
+To further explore the parallel updates implemented in the [previous analysis](parallel.html), I attempt to parallelize the backfits performed in my [MASH v FLASH GTEx analysis](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHgtex3.html).
 
 While `flash_add_greedy` and `flash_add_factors_from_data` both yield factor/loading pairs that are already relatively close to optimal, MASH v FLASH poses more difficult optimization problems in that its "canonical" loadings can be far from optimal, and the data-driven loadings obtained from the "strong" dataset do not necessarily fit the "random" dataset very well. Further, the full set of loadings forms an overcomplete basis for $\mathbb{R}^{44}$, so that many of the loadings are, in a sense, redundant.
 
 
 ## Experiments
 
-I use the three backfitting methods described in the [previous analysis](parallel.html) to perform the two backfits described [here](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHnn.html/MASHvFLASHgtex3.html). The code used in this analysis is included in the previous analysis (see [here](parallel.html#code)).
+I use the three backfitting methods described in the [previous analysis](parallel.html) to perform the two backfits described [here](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHgtex3.html). The code used in this analysis is included in the previous analysis (see [here](parallel.html#code)).
 
 
 ## Results
@@ -36,7 +36,7 @@ knitr::kable(data.frame("Iteration" = 1:5, "Objective" = res_random_bad$parallel
 
 The problem, I think, is that since (as mentioned above) the loadings form an overcomplete basis, an update to the equal effects factor could also be achieved (roughly speaking) by updates to each of the unique effects factors. When all are updated simultaneously, the updates overshoot their goal, causing the objective to spiral out of control.
 
-If this reasoning is correct, then better results might be obtained by splitting up the loadings into subsets of loadings that are mutually orthogonal (or nearly so), and then parallelizing the updates to the loadings within each subset. To test this hypothesis, I divided the loadings into an equal effects loading, 44 unique effects loadings (which are of course mutually orthogonal), two data-driven loadings that are distributed across several tissues (loadings 2 and 11 shown [here](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHnn.html)), and the remaining 11 data-driven loadings (each of which is primarily loaded on two or three tissues). 
+If this reasoning is correct, then better results might be obtained by splitting up the loadings into subsets of loadings that are mutually orthogonal (or nearly so), and then parallelizing the updates to the loadings within each subset. To test this hypothesis, I divided the loadings into an equal effects loading, 44 unique effects loadings (which are of course mutually orthogonal), two data-driven loadings that are distributed across several tissues (loadings 2 and 11 shown [here](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHnn.html#multi-tissue_effects)), and the remaining 11 data-driven loadings (each of which is primarily loaded on two or three tissues). 
 
 To update the loadings, then, I updated the equal effects loading, then I updated the unique effects loadings in parallel, then I updated data-driven loadings 2 and 11, and finally I updated the remaining data-driven loadings in parallel. Surprisingly, I was able to achieve a better objective than I achieved using a serial backfit.
 
