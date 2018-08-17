@@ -1,0 +1,129 @@
+---
+title: "Accelerating backfits with SQUAREM and DAAREM"
+author: "Jason Willwerscheid"
+date: "8/17/2018"
+output: 
+  workflowr::wflow_html:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This analysis is complementary to my investigations into parallelization (see [here](parallel.html) and [here](parallel2.html)) in that I further explore ways to speed up FLASH backfits.
+
+I use two off-the-shelf EM (and MM) accelerators, SQUAREM and DAAREM. For SQUAREM details, see [Varadhan and Roland (2008)](https://www.jstor.org/stable/41548597). For DAAREM, see [Henderson and Varadhan (2018)](https://arxiv.org/abs/1803.06673).
+
+## Experiments
+
+I use the same GTEx dataset that I use [here](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHgtex.html) and in [Investigation 8](parallel.html).
+
+I use `flash_add_greedy` to create three flash fit objects with, respectively, 5, 10, and 20 factor/loading pairs. I then refine each fit using `flash_backfit` with: 1. no acceleration; 2. acceleration via SQUAREM; and 3. acceleration via DAAREM. 
+
+## Results
+
+Since the experiments take a long time to run, I pre-run the code [below](#code) and load the results from file.
+
+```{r load_all}
+res5 <- readRDS("./data/squarem/res5.rds")
+res10 <- readRDS("./data/squarem/res10.rds")
+res20 <- readRDS("./data/squarem/res20.rds")
+```
+
+### Convergence behavior
+
+In every case, DAAREM takes the fewest iterations to converge and convergence is nearly monotonic. In constrast, SQUAREM evinces highly non-monotonic behavior and tends to take more iterations than backfitting with no acceleration at all.
+
+```{r conv}
+plot_obj <- function(res, main) {
+  data <- c(res$backfit_obj, res$squarem_obj$V1, res$daarem_obj)
+  plot(1:length(res$backfit_obj), res$backfit_obj,
+       type='l', col='red', ylim=c(min(data), max(data)),
+       xlab="Iteration", ylab="Objective", main=main)
+  lines(1:length(res$squarem_obj$V1), res$squarem_obj$V1,
+        col='blue')
+  lines(1:length(res$daarem_obj), res$daarem_obj,
+        col='green')
+  legend("bottomright", legend=c("DAAREM", "No acceleration", "SQUAREM"),
+         lty=1, col=c('green', 'red', 'blue'))
+}
+
+plot_obj(res5, "5 factor model")
+plot_obj(res10, "10 factor model")
+plot_obj(res20, "20 factor model")
+```
+
+### Final objective 
+
+Since the final objectives attained are difficult to see in the plots above, I list the differences in the table below. In every case, DAAREM beats the final objective attained with no acceleration. SQUAREM does much worse on the 5- and 10-factor models, but better on the 20-factor model.
+
+```{r final_obj}
+final_obj <- function(res) {
+  backfit = res$backfit_obj[length(res$backfit_obj)]
+  return(c(res$daarem_obj[length(res$daarem_obj)] - backfit,
+           res$squarem_obj$V1[length(res$squarem_obj$V1)] - backfit))
+}
+table_data <- cbind("5_factors" = final_obj(res5), 
+                    "10_factors" = final_obj(res10), 
+                    "20_factors" = final_obj(res20))
+rownames(table_data) = c("DAAREM (diff from backfit)", 
+                         "SQUAREM (diff from backfit)")
+knitr::kable(table_data, digits=1)
+```
+
+### Time per iteration
+
+The acceleration methods add a bit of overhead in terms of time required per iteration, but not much. The following are seconds required per iteration:
+
+```{r t}
+t <- function(res) {
+  return(c(res$backfit_t[3] / length(res$backfit_obj),
+           res$daarem_t[3] / length(res$daarem_obj),
+           res$squarem_t[3] / length(res$squarem_obj$V1)))
+}
+table_data <- cbind("5_factors" = t(res5), 
+                    "10_factors" = t(res10), 
+                    "20_factors" = t(res20))
+rownames(table_data) <- c("backfit", "DAAREM", "SQUAREM")
+knitr::kable(table_data, digits = 2)
+```
+
+### Total iterations to convergence
+
+Perhaps the most important consideration is how quickly we can obtain an estimate that is reasonable close to convergence, where "reasonably close" is defined by some stopping rule. Below I give the number of iterations required given different tolerance parameters (i.e., the number of iterations required before the difference in objective from one iteration to the next is less than `tol`). (I omit results for SQUAREM since it does so poorly in other respects.)
+
+```{r niter}
+niter <- function(res, tols) {
+  backfit_diff <- (res$backfit_obj[2:length(res$backfit_obj)] -
+                     res$backfit_obj[1:(length(res$backfit_obj) - 1)])
+  daarem_diff <- (res$daarem_obj[2:length(res$daarem_obj)] -
+                     res$daarem_obj[1:(length(res$daarem_obj) - 1)])
+  res <- matrix(NA, nrow = length(tols), ncol = 2)
+  for (i in 1:length(tols)) {
+    res[i, 1] <- min(which(backfit_diff < tols[i])) + 1
+    res[i, 2] <- min(which(abs(daarem_diff) < tols[i])) + 1
+  }
+  rownames(res) = paste("tol =", as.character(tols))
+  colnames(res) = c("backfit", "DAAREM")
+  return(res)
+}
+
+table_data <- niter(res5, c(0.5, 0.1, 0.05))
+knitr::kable(table_data, caption = "5 factors")
+
+table_data <- niter(res10, c(0.5, 0.1, 0.05))
+knitr::kable(table_data, caption = "10 factors")
+
+table_data <- niter(res20, c(0.5, 0.1, 0.05))
+knitr::kable(table_data, caption = "20 factors")
+```
+
+## Code
+
+Click "Code" to view the code used to produce the above results.
+
+```{r code, code=readLines("../code/squarem.R"), eval=FALSE}
+```
