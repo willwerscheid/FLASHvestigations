@@ -79,14 +79,14 @@ knitr::kable(table_data, digits=1)
 The acceleration methods add a bit of overhead in terms of time required per iteration, but not much. The following are seconds required per iteration:
 
 ```{r t}
-t <- function(res) {
+times <- function(res) {
   return(c(res$backfit_t[3] / length(res$backfit_obj),
            res$daarem_t[3] / length(res$daarem_obj),
            res$squarem_t[3] / length(res$squarem_obj$V1)))
 }
-table_data <- cbind("5_factors" = t(res5), 
-                    "10_factors" = t(res10), 
-                    "20_factors" = t(res20))
+table_data <- cbind("5_factors" = times(res5), 
+                    "10_factors" = times(res10), 
+                    "20_factors" = times(res20))
 rownames(table_data) <- c("backfit", "DAAREM", "SQUAREM")
 knitr::kable(table_data, digits = 2)
 ```
@@ -108,7 +108,7 @@ niter <- function(res, tols) {
   }
   rownames(res) = paste("tol =", as.character(tols))
   colnames(res) = c("backfit", "DAAREM")
-  return(res)
+  return(t(res))
 }
 
 table_data <- niter(res5, c(0.5, 0.1, 0.05))
