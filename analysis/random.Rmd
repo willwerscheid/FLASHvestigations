@@ -1,0 +1,93 @@
+---
+title: "Randomizing the order of backfits"
+author: "Jason Willwerscheid"
+date: "8/19/2018"
+output: 
+  workflowr::wflow_html:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+When trying to coax sparse nonnegative factors out of the "strong" GTEx dataset (see [here](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHnn.html)), I noticed that later-added factor/loading pairs are in general much sparser than earlier-added pairs. Here I'd like to determine whether the order of backfitting makes any difference to the factors obtained (and the final objective).
+
+## Experiment
+
+I begin with the 34 factor/loading pairs that are added via a single call to `flash_add_greedy` and backfit using three methods: 1. updating factor/loading pairs sequentially from #1 to #34; 2. updating sequentially in backwards order (from #34 to #1); and 3. updating in a random order.
+
+## Results
+
+I pre-run the code [below](#code) and load the results from file.
+
+```{r load_res}
+devtools::load_all("/Users/willwerscheid/GitHub/flashr/")
+gtex <- readRDS(gzcon(url("https://github.com/stephenslab/gtexresults/blob/master/data/MatrixEQTLSumStats.Portable.Z.rds?raw=TRUE")))
+strong <- t(gtex$strong.z)
+strong_data <- flash_set_data(strong, S = 1)
+
+fl_seq <- readRDS("./data/random/fl1.rds")
+fl_rev <- readRDS("./data/random/fl2.rds")
+fl_rand <- readRDS("./data/random/fl3.rds")
+```
+
+The final objective for each method is:
+
+```{r obj}
+c(sequential = flash_get_objective(strong_data, fl_seq),
+  reverse = flash_get_objective(strong_data, fl_rev),
+  random = flash_get_objective(strong_data, fl_rand))
+```
+
+Most of the factor/loading pairs are nearly indistinguishable to the eye. Below I plot the seven factor/loadings with the largest differences:
+
+```{r plot_factors}
+normalize_EL <- function(fl) {
+  norms <- apply(abs(fl$EL), 2, max)
+  return(sweep(fl$EL, 2, norms, `/`))
+}
+
+norm_EL_seq <- normalize_EL(fl_seq)
+norm_EL_rev <- normalize_EL(fl_rev)
+norm_EL_rand <- normalize_EL(fl_rand)
+
+# Find factor/loading pairs with largest differences
+max_diff <- pmax(abs(norm_EL_seq - norm_EL_rev),
+                 abs(norm_EL_seq - norm_EL_rand),
+                 abs(norm_EL_rev - norm_EL_rand))
+factors_to_show <- which(apply(max_diff, 2, max) > .05)
+
+missing.tissues <- c(7, 8, 19, 20, 24, 25, 31, 34, 37)
+gtex.colors <- read.table("https://github.com/stephenslab/gtexresults/blob/master/data/GTExColors.txt?raw=TRUE", sep = '\t', comment.char = '')[-missing.tissues, 2]
+
+par(mfrow = c(2, 3))
+for (i in factors_to_show) {
+  barplot(fl_seq$EL[, i], main=paste0('Loading ', i, ' (sequential)'), 
+          las=2, cex.names=0.4, yaxt='n', col=as.character(gtex.colors), 
+          names="")
+  barplot(fl_rev$EL[, i], main=paste0('Loading ', i, ' (reverse)'), 
+          las=2, cex.names=0.4, yaxt='n', col=as.character(gtex.colors), 
+          names="")
+  barplot(fl_rand$EL[, i], main=paste0('Loading ', i, ' (random)'), 
+          las=2, cex.names=0.4, yaxt='n', col=as.character(gtex.colors), 
+          names="")
+}
+
+```
+
+## Conclusions
+
+Results are somewhat inconclusive. There are clearly some differences, but even the largest differences seem to be relatively minor (in a qualitative sense). On the other hand, a difference in objective of 300 is perhaps not to be sneered at.
+
+It might be worthwhile to investigate more systematically with simulated data. Here, the usual sequential method is both slowest and attains the worst final objective. It would be interesting to determine whether this is regularly the case.
+
+## Code
+
+Click "Code" to view the code used to obtain the above results.
+
+```{r code, code=readLines("../code/random.R"), eval=FALSE}
+```
+
