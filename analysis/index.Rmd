@@ -22,6 +22,8 @@ Investigations 8 and 9 implement parallel backfitting updates.
 
 [Investigation 10.](squarem.html) SQUAREM does poorly on FLASH backfits. DAAREM (a more recent algorithm by one of the authors of SQUAREM) does better, but offers smaller performance gains than parallelization.
 
+[Investigation 11.](random.html) The order in which factor/loading pairs are updated makes some difference, but not much.
+
 ## Still Relevant
 
 Notes 1 and 2 and Investigation 4 describe a way to compute the FLASH objective directly (rather than using the indirect method implemented in `flashr`).
