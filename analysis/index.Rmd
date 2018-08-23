@@ -24,6 +24,9 @@ Investigations 8 and 9 implement parallel backfitting updates.
 
 [Investigation 11.](random.html) The order in which factor/loading pairs are updated (during backfitting) makes some difference, but not much.
 
+[Investigation 12.](arbitraryV.html) To fit a FLASH model with an arbitrary error covariance matrix, I follow up on a [suggestion](https://github.com/stephenslab/flashr/issues/17) by Matthew Stephens.
+
+
 ## Still Relevant
 
 Notes 1 and 2 and Investigation 4 describe a way to compute the FLASH objective directly (rather than using the indirect method implemented in `flashr`).
