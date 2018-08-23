@@ -1,0 +1,252 @@
+---
+title: "Fitting FLASH with an arbitrary error covariance matrix"
+author: "Jason Willwerscheid"
+date: "8/22/2018"
+output: 
+  workflowr::wflow_html:
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Introduction
+
+Here I examine whether it is possible to fit a FLASH model with an arbitrary error covariance matrix using an idea suggested [here](https://github.com/stephenslab/flashr/issues/17) by Matthew Stephens. 
+
+That is, I want to fit the model
+$$ Y = LF' + E,$$
+where the columns of $E$ are distributed i.i.d.
+$$ E_{\bullet j} \sim N(0, V). $$
+Equivalently, letting $\lambda_{min}$ be the smallest eigenvalue of $V$ and letting $W = V - \lambda_{min} I_n$ (so that, in particular, $W$ is positive semi-definite), write
+$$ Y = LF' + E^{(1)} + E^{(2)}, $$
+with the columns of $E^{(1)}$ distributed i.i.d. 
+$$ E^{(1)}_{\bullet j} \sim N(0, W) $$
+and the elements of $E^{(2)}$ distributed i.i.d. 
+$$ E^{(2)}_{i j} \sim N(0, \lambda_{min}) $$
+Notice that by taking the eigendecomposition of $W$
+$$ W = \sum_{k = 1}^n \lambda_k w_k w_k' $$
+and letting
+$$ f_i \sim N(0, \lambda_i), $$
+one can write
+$$ E^{(1)}_{\bullet j} = w_1 f_1' + \ldots + w_n f_n'. $$
+
+Thus, one should be able to fit the desired model by adding fixed loadings $w_1, \ldots, w_n$, by fixing the priors on the corresponding factors at $N(0, \lambda_1), \ldots, N(0, \lambda_n)$, and by taking $\tau = 1 / \lambda_{min}$ (with `var_type = "zero"`).
+
+
+## Rank-zero FLASH model
+
+### Code
+
+First I need a function that will generate random covariance matrices. I normalize the matrices so that the largest eigenvalue is equal to one. Further, I  ensure that the smallest eigenvalue is bounded below by some constant. (If the covariance matrix is poorly conditioned, then the final backfit can be very slow, and in practice, we would not expect these eigenvalues to be terribly small.)
+
+```{r rand.V}
+rand.V <- function(n, lambda.min=0.25) {
+  A <- matrix(rnorm(n^2), nrow=n, ncol=n)
+  V <- A %*% t(A)
+  max.eigen <- max(eigen(V, symmetric=TRUE, only.values=TRUE)$values)
+  d <- max.eigen * lambda.min / (1 - lambda.min)
+  # Add diagonal matrix to improve conditioning and then normalize:
+  V <- (V + diag(rep(d, n))) / (max.eigen + d)
+  return(V)
+}
+```
+
+The next function simulates data from the rank-zero FLASH model $Y = E$, with $E_{\bullet j} \sim^{i.i.d.} N(0, V)$.
+
+```{r sim.E}
+sim.E <- function(V, p) {
+  n <- nrow(V)
+  return(t(MASS::mvrnorm(p, rep(0, n), V)))
+}
+```
+
+The following function fits a FLASH model using the approach outlined above.
+
+```{r fit.fixed.V}
+fit.fixed.V <- function(Y, V, verbose=TRUE, backfit=FALSE, tol=1e-2) {
+  n <- nrow(V)
+  lambda.min <- min(eigen(V, symmetric=TRUE, only.values=TRUE)$values)
+  
+  data <- flash_set_data(Y, S = sqrt(lambda.min))
+  
+  W.eigen <- eigen(V - diag(rep(lambda.min, n)), symmetric=TRUE)
+  # The rank of W is at most n - 1, so we can drop the last eigenval/vec:
+  W.eigen$values <- W.eigen$values[-n]
+  W.eigen$vectors <- W.eigen$vectors[, -n, drop=FALSE]
+  
+  fl <- flash_add_fixed_loadings(data, LL=W.eigen$vectors, init_fn="udv_svd")
+  
+  ebnm_param_f <- lapply(as.list(W.eigen$values), 
+                         function(eigenval) {
+                           list(g = list(a=1/eigenval, pi0=0), fixg = TRUE)
+                         })
+  ebnm_param_l <- lapply(vector("list", n - 1), 
+                         function(k) {list()})
+  fl <- flash_backfit(data, fl, var_type="zero", ebnm_fn="ebnm_pn",
+                      ebnm_param=(list(f = ebnm_param_f, l = ebnm_param_l)),
+                      nullcheck=FALSE, verbose=verbose, tol=tol)
+  
+  fl <- flash_add_greedy(data, Kmax=50, f_init=fl, var_type="zero",
+                         init_fn="udv_svd", ebnm_fn="ebnm_pn", 
+                         verbose=verbose, tol=tol)
+  
+  if (backfit) {
+    n.added <- flash_get_k(fl) - (n - 1)
+    
+    ebnm_param_f <- c(ebnm_param_f, 
+                      lapply(vector("list", n.added), 
+                             function(k) {list(warmstart=TRUE)}))
+    ebnm_param_l <- c(ebnm_param_l, 
+                      lapply(vector("list", n.added), 
+                             function(k) {list(warmstart=TRUE)}))
+    fl <- flash_backfit(data, fl, var_type="zero", ebnm_fn="ebnm_pn",
+                      ebnm_param=(list(f = ebnm_param_f, l = ebnm_param_l)),
+                      nullcheck=FALSE, verbose=verbose, tol=tol)
+  }
+  
+  return(fl)
+}
+```
+
+### Example
+
+```{r ex1}
+devtools::load_all("/Users/willwerscheid/GitHub/flashr/")
+devtools::load_all("/Users/willwerscheid/GitHub/ebnm/")
+
+n <- 20
+p <- 500
+
+set.seed(666)
+V = rand.V(n=n)
+Y <- sim.E(V, p=p)
+fl <- fit.fixed.V(Y, V)
+```
+
+Here, after backfitting the fixed loadings corresponding to the eigenvectors of $W$, FLASH (correctly) fails to find any additional structure in the data. In contrast, fitting FLASH without paying attention to the fact that $V \ne I$ gives misleading results:
+
+```{r ex1.bad}
+bad.fl <- flash_add_greedy(Y, Kmax=50)
+```
+
+## Rank-one FLASH model
+
+### Code
+
+The following function simulates data from the rank-one FLASH model $Y = \ell d f' + E$. `pi0.l` and `pi0.f` give the expected proportion of null entries in $\ell$ and $f$. Since $\ell$ and $f$ are normalized to have length one, $d$ measures how large the factor/loading pair is, and thus, how easy it is to find (recall that $V$ is normalized so that its largest eigenvalue is equal to one).
+
+```{r sim1.rank}
+sim.rank1 <- function(V, p, pi0.l=0.5, pi0.f=0.8, d=5^2) {
+  E <- sim.E(V, p)
+  
+  n <- nrow(V)
+  # Nonnull entries of l and f are normally distributed:
+  l <- rnorm(n) * rbinom(n, 1, 1 - pi0.l)
+  # Nonnull entries of f are all equal:
+  f <- rnorm(p) * rbinom(p, 1, 1 - pi0.f)
+  # Normalize l and f:
+  l <- l / sqrt(sum(l^2))
+  f <- f / sqrt(sum(f^2))
+  
+  LF <- outer(l, f) * d
+  
+  return(list(Y = LF + E, l = l, f = f))
+}
+```
+
+### Example
+
+Here, the procedure outlined above correctly finds the additional rank-one structure. Running FLASH as is, however, yields structure of higher rank:
+
+```{r ex2}
+set.seed(999)
+V = rand.V(n=n)
+data <- sim.rank1(V, p=p)
+fl <- fit.fixed.V(data$Y, V)
+```
+
+```{r ex2.bad}
+bad.fl <- flash_add_greedy(data$Y, Kmax=50)
+```
+
+To check that the new approach gives reasonable results, one can calculate the angle between the estimated $l$ and the true $l$ (and likewise for $f$):
+
+```{r ex2.angle}
+ldf <- flash_get_ldf(fl, drop_zero_factors=FALSE)
+l.angle <- acos(abs(sum(ldf$l[, n] * data$l)))
+f.angle <- acos(abs(sum(ldf$f[, n] * data$f)))
+round(c(l.angle, f.angle), digits=2)
+```
+
+These results are not terrible, but an additional backfit can improve upon them:
+
+```{r ex2.backfit}
+fl.b <- fit.fixed.V(data$Y, V, verbose=FALSE, backfit=TRUE)
+ldf <- flash_get_ldf(fl.b, drop_zero_factors=FALSE)
+l.angle <- acos(abs(sum(ldf$l[, n] * data$l)))
+f.angle <- acos(abs(sum(ldf$f[, n] * data$f)))
+round(c(l.angle, f.angle), digits=2)
+```
+
+## Code for experiments
+
+I include code below that can be used to verify that the above results are typical. Since they can take a long time, I do not run them here.
+
+```{r exp}
+rank0.experiment <-function(ntests, n, p, lambda.min=0.25, seeds=1:ntests) {
+  est.rank <- bad.rank <- rep(NA, ntests)
+  
+  for (i in 1:length(seeds)) {
+    set.seed(i)
+    V <- rand.V(n, lambda.min)
+    Y <- sim.E(V, p)
+    fl <- fit.fixed.V(Y, V, verbose=FALSE)
+    
+    k <- flash_get_k(fl)
+    est.rank[i] <- k - (n - 1)
+    
+    bad.fl <- flash_add_greedy(Y, Kmax=50, verbose=FALSE)
+    bad.rank[i] <- flash_get_nfactors(bad.fl)
+  }
+  
+  return(list(est.rank = est.rank, bad.rank = bad.rank))
+}
+
+rank1.experiment <-function(ntests, n, p, lambda.min=0.25, d=5^2, 
+                            seeds=1:ntests) {
+  est.rank <- bad.rank <- rep(NA, ntests)
+  l.angle <- f.angle <- rep(NA, ntests)
+  
+  for (i in 1:length(seeds)) {
+    set.seed(i)
+    V = rand.V(n, lambda.min)
+    data <- sim.rank1(V, p, d=d)
+    fl <- fit.fixed.V(data$Y, V, verbose=FALSE, backfit=TRUE)
+
+    k <- flash_get_k(fl)
+    est.rank[i] <- k - (n - 1)
+    
+    ldf <- flash_get_ldf(fl, drop_zero_factors=FALSE)
+    if (est.rank[i] >= 1) {
+      l.angle[i] <- acos(abs(sum(ldf$l[, n] * data$l)))
+      f.angle[i] <- acos(abs(sum(ldf$f[, n] * data$f)))
+    }
+    
+    bad.fl <- flash_add_greedy(data$Y, Kmax=50, verbose=FALSE)
+    bad.rank[i] <- flash_get_nfactors(bad.fl)
+  }
+  return(list(est.rank = est.rank, bad.rank = bad.rank, 
+              l.angle = l.angle, f.angle = f.angle))
+}
+```
+
+## Questions for further investigation
+
+I have set parameters `lambda.min` and `d` favorably for this investigation. If `lambda.min` is closer to 1, then errors will be more nearly independent, and the usual FLASH model will not fare so poorly. It would be worthwhile to investigate whether the approach detailed here beats the usual FLASH fit in such cases.
+
+Further, I have set `d` to be quite large. In the above simulations, the true loading and factor are each five times larger (in terms of Euclidean length) than the largest eigenvalue of the error covariance matrix. It would be interesting to see what the detection threshold is as a function of `n`, `p`, and `lambda.min`. 
+
+Finally, notice that when $\lambda_{min} = 1$, the approach detailed above is just the usual FLASH fit, so both of these proposed investigations would help to establish some continuity between the two.
