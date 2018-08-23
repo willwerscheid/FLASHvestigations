@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Fitting FLASH with an arbitrary error covariance matrix</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("show" === "show");
+});
+</script>
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Fitting FLASH with an arbitrary error covariance matrix</h1>
+<h4 class="author"><em>Jason Willwerscheid</em></h4>
+<h4 class="date"><em>8/22/2018</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-08-23</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/977876999aa60cc65cb84e139aa1cb90f3d551df" target="_blank">9778769</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  data/greedy19.rds
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/977876999aa60cc65cb84e139aa1cb90f3d551df/analysis/arbitraryV.Rmd" target="_blank">9778769</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-23
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/arbitraryV.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Here I examine whether it is possible to fit a FLASH model with an arbitrary error covariance matrix using an idea suggested <a href="https://github.com/stephenslab/flashr/issues/17">here</a> by Matthew Stephens.</p>
+<p>That is, I want to fit the model <span class="math display">\[ Y = LF&#39; + E,\]</span> where the columns of <span class="math inline">\(E\)</span> are distributed i.i.d. <span class="math display">\[ E_{\bullet j} \sim N(0, V). \]</span> Equivalently, letting <span class="math inline">\(\lambda_{min}\)</span> be the smallest eigenvalue of <span class="math inline">\(V\)</span> and letting <span class="math inline">\(W = V - \lambda_{min} I_n\)</span> (so that, in particular, <span class="math inline">\(W\)</span> is positive semi-definite), write <span class="math display">\[ Y = LF&#39; + E^{(1)} + E^{(2)}, \]</span> with the columns of <span class="math inline">\(E^{(1)}\)</span> distributed i.i.d. <span class="math display">\[ E^{(1)}_{\bullet j} \sim N(0, W) \]</span> and the elements of <span class="math inline">\(E^{(2)}\)</span> distributed i.i.d. <span class="math display">\[ E^{(2)}_{i j} \sim N(0, \lambda_{min}) \]</span> Notice that by taking the eigendecomposition of <span class="math inline">\(W\)</span> <span class="math display">\[ W = \sum_{k = 1}^n \lambda_k w_k w_k&#39; \]</span> and letting <span class="math display">\[ f_i \sim N(0, \lambda_i), \]</span> one can write <span class="math display">\[ E^{(1)}_{\bullet j} = w_1 f_1&#39; + \ldots + w_n f_n&#39;. \]</span></p>
+<p>Thus, one should be able to fit the desired model by adding fixed loadings <span class="math inline">\(w_1, \ldots, w_n\)</span>, by fixing the priors on the corresponding factors at <span class="math inline">\(N(0, \lambda_1), \ldots, N(0, \lambda_n)\)</span>, and by taking <span class="math inline">\(\tau = 1 / \lambda_{min}\)</span> (with <code>var_type = &quot;zero&quot;</code>).</p>
+</div>
+<div id="rank-zero-flash-model" class="section level2">
+<h2>Rank-zero FLASH model</h2>
+<div id="code" class="section level3">
+<h3>Code</h3>
+<p>First I need a function that will generate random covariance matrices. I normalize the matrices so that the largest eigenvalue is equal to one. Further, I ensure that the smallest eigenvalue is bounded below by some constant. (If the covariance matrix is poorly conditioned, then the final backfit can be very slow, and in practice, we would not expect these eigenvalues to be terribly small.)</p>
+<pre class="r"><code>rand.V &lt;- function(n, lambda.min=0.25) {
+  A &lt;- matrix(rnorm(n^2), nrow=n, ncol=n)
+  V &lt;- A %*% t(A)
+  max.eigen &lt;- max(eigen(V, symmetric=TRUE, only.values=TRUE)$values)
+  d &lt;- max.eigen * lambda.min / (1 - lambda.min)
+  # Add diagonal matrix to improve conditioning and then normalize:
+  V &lt;- (V + diag(rep(d, n))) / (max.eigen + d)
+  return(V)
+}</code></pre>
+<p>The next function simulates data from the rank-zero FLASH model <span class="math inline">\(Y = E\)</span>, with <span class="math inline">\(E_{\bullet j} \sim^{i.i.d.} N(0, V)\)</span>.</p>
+<pre class="r"><code>sim.E &lt;- function(V, p) {
+  n &lt;- nrow(V)
+  return(t(MASS::mvrnorm(p, rep(0, n), V)))
+}</code></pre>
+<p>The following function fits a FLASH model using the approach outlined above.</p>
+<pre class="r"><code>fit.fixed.V &lt;- function(Y, V, verbose=TRUE, backfit=FALSE, tol=1e-2) {
+  n &lt;- nrow(V)
+  lambda.min &lt;- min(eigen(V, symmetric=TRUE, only.values=TRUE)$values)
+  
+  data &lt;- flash_set_data(Y, S = sqrt(lambda.min))
+  
+  W.eigen &lt;- eigen(V - diag(rep(lambda.min, n)), symmetric=TRUE)
+  # The rank of W is at most n - 1, so we can drop the last eigenval/vec:
+  W.eigen$values &lt;- W.eigen$values[-n]
+  W.eigen$vectors &lt;- W.eigen$vectors[, -n, drop=FALSE]
+  
+  fl &lt;- flash_add_fixed_loadings(data, LL=W.eigen$vectors, init_fn=&quot;udv_svd&quot;)
+  
+  ebnm_param_f &lt;- lapply(as.list(W.eigen$values), 
+                         function(eigenval) {
+                           list(g = list(a=1/eigenval, pi0=0), fixg = TRUE)
+                         })
+  ebnm_param_l &lt;- lapply(vector(&quot;list&quot;, n - 1), 
+                         function(k) {list()})
+  fl &lt;- flash_backfit(data, fl, var_type=&quot;zero&quot;, ebnm_fn=&quot;ebnm_pn&quot;,
+                      ebnm_param=(list(f = ebnm_param_f, l = ebnm_param_l)),
+                      nullcheck=FALSE, verbose=verbose, tol=tol)
+  
+  fl &lt;- flash_add_greedy(data, Kmax=50, f_init=fl, var_type=&quot;zero&quot;,
+                         init_fn=&quot;udv_svd&quot;, ebnm_fn=&quot;ebnm_pn&quot;, 
+                         verbose=verbose, tol=tol)
+  
+  if (backfit) {
+    n.added &lt;- flash_get_k(fl) - (n - 1)
+    
+    ebnm_param_f &lt;- c(ebnm_param_f, 
+                      lapply(vector(&quot;list&quot;, n.added), 
+                             function(k) {list(warmstart=TRUE)}))
+    ebnm_param_l &lt;- c(ebnm_param_l, 
+                      lapply(vector(&quot;list&quot;, n.added), 
+                             function(k) {list(warmstart=TRUE)}))
+    fl &lt;- flash_backfit(data, fl, var_type=&quot;zero&quot;, ebnm_fn=&quot;ebnm_pn&quot;,
+                      ebnm_param=(list(f = ebnm_param_f, l = ebnm_param_l)),
+                      nullcheck=FALSE, verbose=verbose, tol=tol)
+  }
+  
+  return(fl)
+}</code></pre>
+</div>
+<div id="example" class="section level3">
+<h3>Example</h3>
+<pre class="r"><code>devtools::load_all(&quot;/Users/willwerscheid/GitHub/flashr/&quot;)</code></pre>
+<pre><code>Loading flashr</code></pre>
+<pre class="r"><code>devtools::load_all(&quot;/Users/willwerscheid/GitHub/ebnm/&quot;)</code></pre>
+<pre><code>Loading ebnm</code></pre>
+<pre class="r"><code>n &lt;- 20
+p &lt;- 500
+
+set.seed(666)
+V = rand.V(n=n)
+Y &lt;- sim.E(V, p=p)
+fl &lt;- fit.fixed.V(Y, V)</code></pre>
+<pre><code>Backfitting 19 factor/loading(s) (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1       -9917.69        Inf</code></pre>
+<pre><code>          2       -9917.69   0.00e+00</code></pre>
+<pre><code>Fitting factor/loading 20 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1       -9948.16        Inf</code></pre>
+<pre><code>          2       -9932.50   1.57e+01</code></pre>
+<pre><code>          3       -9917.69   1.48e+01</code></pre>
+<pre><code>          4       -9917.69   0.00e+00</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 20 increases objective by 4.66e-03. Factor zeroed out.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -9917.69</code></pre>
+<p>Here, after backfitting the fixed loadings corresponding to the eigenvectors of <span class="math inline">\(W\)</span>, FLASH (correctly) fails to find any additional structure in the data. In contrast, fitting FLASH without paying attention to the fact that <span class="math inline">\(V \ne I\)</span> gives misleading results:</p>
+<pre class="r"><code>bad.fl &lt;- flash_add_greedy(Y, Kmax=50)</code></pre>
+<pre><code>Fitting factor/loading 1 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      -10046.63        Inf</code></pre>
+<pre><code>          2      -10034.53   1.21e+01</code></pre>
+<pre><code>          3      -10033.07   1.46e+00</code></pre>
+<pre><code>          4      -10032.20   8.68e-01</code></pre>
+<pre><code>          5      -10031.47   7.23e-01</code></pre>
+<pre><code>          6      -10030.91   5.61e-01</code></pre>
+<pre><code>          7      -10030.58   3.38e-01</code></pre>
+<pre><code>          8      -10030.30   2.79e-01</code></pre>
+<pre><code>          9      -10029.90   4.00e-01</code></pre>
+<pre><code>         10      -10029.34   5.58e-01</code></pre>
+<pre><code>         11      -10028.99   3.52e-01</code></pre>
+<pre><code>         12      -10028.89   9.62e-02</code></pre>
+<pre><code>         13      -10028.86   2.89e-02</code></pre>
+<pre><code>         14      -10028.85   1.47e-02</code></pre>
+<pre><code>         15      -10028.84   9.14e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 1 decreases objective by 3.89e+01. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -10028.84</code></pre>
+<pre><code>Fitting factor/loading 2 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      -10000.11        Inf</code></pre>
+<pre><code>          2       -9988.22   1.19e+01</code></pre>
+<pre><code>          3       -9986.88   1.33e+00</code></pre>
+<pre><code>          4       -9986.23   6.52e-01</code></pre>
+<pre><code>          5       -9985.81   4.21e-01</code></pre>
+<pre><code>          6       -9985.49   3.16e-01</code></pre>
+<pre><code>          7       -9985.23   2.58e-01</code></pre>
+<pre><code>          8       -9985.01   2.21e-01</code></pre>
+<pre><code>          9       -9984.82   1.93e-01</code></pre>
+<pre><code>         10       -9984.65   1.68e-01</code></pre>
+<pre><code>         11       -9984.51   1.47e-01</code></pre>
+<pre><code>         12       -9984.37   1.32e-01</code></pre>
+<pre><code>         13       -9984.25   1.23e-01</code></pre>
+<pre><code>         14       -9984.13   1.21e-01</code></pre>
+<pre><code>         15       -9984.01   1.20e-01</code></pre>
+<pre><code>         16       -9983.89   1.16e-01</code></pre>
+<pre><code>         17       -9983.79   1.00e-01</code></pre>
+<pre><code>         18       -9983.72   7.57e-02</code></pre>
+<pre><code>         19       -9983.67   5.04e-02</code></pre>
+<pre><code>         20       -9983.64   3.13e-02</code></pre>
+<pre><code>         21       -9983.62   1.89e-02</code></pre>
+<pre><code>         22       -9983.61   1.14e-02</code></pre>
+<pre><code>         23       -9983.60   6.88e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 2 decreases objective by 4.52e+01. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -9983.6</code></pre>
+<pre><code>Fitting factor/loading 3 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1       -9976.87        Inf</code></pre>
+<pre><code>          2       -9963.19   1.37e+01</code></pre>
+<pre><code>          3       -9961.15   2.03e+00</code></pre>
+<pre><code>          4       -9960.17   9.81e-01</code></pre>
+<pre><code>          5       -9959.64   5.28e-01</code></pre>
+<pre><code>          6       -9959.14   5.03e-01</code></pre>
+<pre><code>          7       -9958.78   3.65e-01</code></pre>
+<pre><code>          8       -9958.62   1.57e-01</code></pre>
+<pre><code>          9       -9958.55   6.56e-02</code></pre>
+<pre><code>         10       -9958.52   3.34e-02</code></pre>
+<pre><code>         11       -9958.50   1.97e-02</code></pre>
+<pre><code>         12       -9958.49   1.26e-02</code></pre>
+<pre><code>         13       -9958.48   8.11e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 3 decreases objective by 2.51e+01. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -9958.48</code></pre>
+<pre><code>Fitting factor/loading 4 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1       -9981.09        Inf</code></pre>
+<pre><code>          2       -9965.90   1.52e+01</code></pre>
+<pre><code>          3       -9964.03   1.87e+00</code></pre>
+<pre><code>          4       -9963.31   7.24e-01</code></pre>
+<pre><code>          5       -9962.84   4.67e-01</code></pre>
+<pre><code>          6       -9962.46   3.87e-01</code></pre>
+<pre><code>          7       -9962.12   3.38e-01</code></pre>
+<pre><code>          8       -9961.82   2.97e-01</code></pre>
+<pre><code>          9       -9961.56   2.59e-01</code></pre>
+<pre><code>         10       -9961.34   2.24e-01</code></pre>
+<pre><code>         11       -9961.15   1.91e-01</code></pre>
+<pre><code>         12       -9960.99   1.60e-01</code></pre>
+<pre><code>         13       -9960.86   1.32e-01</code></pre>
+<pre><code>         14       -9960.75   1.08e-01</code></pre>
+<pre><code>         15       -9960.66   8.79e-02</code></pre>
+<pre><code>         16       -9960.59   7.14e-02</code></pre>
+<pre><code>         17       -9960.53   5.80e-02</code></pre>
+<pre><code>         18       -9960.48   4.72e-02</code></pre>
+<pre><code>         19       -9960.44   3.86e-02</code></pre>
+<pre><code>         20       -9960.41   3.16e-02</code></pre>
+<pre><code>         21       -9960.39   2.59e-02</code></pre>
+<pre><code>         22       -9960.37   2.13e-02</code></pre>
+<pre><code>         23       -9960.35   1.76e-02</code></pre>
+<pre><code>         24       -9960.33   1.46e-02</code></pre>
+<pre><code>         25       -9960.32   1.21e-02</code></pre>
+<pre><code>         26       -9960.31   1.00e-02</code></pre>
+<pre><code>         27       -9960.30   8.33e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 4 increases objective by 1.82e+00. Factor zeroed out.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -9958.48</code></pre>
+</div>
+</div>
+<div id="rank-one-flash-model" class="section level2">
+<h2>Rank-one FLASH model</h2>
+<div id="code-1" class="section level3">
+<h3>Code</h3>
+<p>The following function simulates data from the rank-one FLASH model <span class="math inline">\(Y = \ell d f&#39; + E\)</span>. <code>pi0.l</code> and <code>pi0.f</code> give the expected proportion of null entries in <span class="math inline">\(\ell\)</span> and <span class="math inline">\(f\)</span>. Since <span class="math inline">\(\ell\)</span> and <span class="math inline">\(f\)</span> are normalized to have length one, <span class="math inline">\(d\)</span> measures how large the factor/loading pair is, and thus, how easy it is to find (recall that <span class="math inline">\(V\)</span> is normalized so that its largest eigenvalue is equal to one).</p>
+<pre class="r"><code>sim.rank1 &lt;- function(V, p, pi0.l=0.5, pi0.f=0.8, d=5^2) {
+  E &lt;- sim.E(V, p)
+  
+  n &lt;- nrow(V)
+  # Nonnull entries of l and f are normally distributed:
+  l &lt;- rnorm(n) * rbinom(n, 1, 1 - pi0.l)
+  # Nonnull entries of f are all equal:
+  f &lt;- rnorm(p) * rbinom(p, 1, 1 - pi0.f)
+  # Normalize l and f:
+  l &lt;- l / sqrt(sum(l^2))
+  f &lt;- f / sqrt(sum(f^2))
+  
+  LF &lt;- outer(l, f) * d
+  
+  return(list(Y = LF + E, l = l, f = f))
+}</code></pre>
+</div>
+<div id="example-1" class="section level3">
+<h3>Example</h3>
+<p>Here, the procedure outlined above correctly finds the additional rank-one structure. Running FLASH as is, however, yields structure of higher rank:</p>
+<pre class="r"><code>set.seed(999)
+V = rand.V(n=n)
+data &lt;- sim.rank1(V, p=p)
+fl &lt;- fit.fixed.V(data$Y, V)</code></pre>
+<pre><code>Backfitting 19 factor/loading(s) (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      -10626.81        Inf</code></pre>
+<pre><code>          2      -10626.81   0.00e+00</code></pre>
+<pre><code>Fitting factor/loading 20 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      -10296.26        Inf</code></pre>
+<pre><code>          2      -10294.19   2.07e+00</code></pre>
+<pre><code>          3      -10294.15   4.51e-02</code></pre>
+<pre><code>          4      -10294.14   1.80e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 20 decreases objective by 3.33e+02. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -10294.14</code></pre>
+<pre><code>Fitting factor/loading 21 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      -10326.73        Inf</code></pre>
+<pre><code>          2      -10299.97   2.68e+01</code></pre>
+<pre><code>          3      -10294.15   5.82e+00</code></pre>
+<pre><code>          4      -10294.15   0.00e+00</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 21 increases objective by 2.53e-03. Factor zeroed out.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -10294.14</code></pre>
+<pre class="r"><code>bad.fl &lt;- flash_add_greedy(data$Y, Kmax=50)</code></pre>
+<pre><code>Fitting factor/loading 1 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      -10290.91        Inf</code></pre>
+<pre><code>          2      -10276.06   1.48e+01</code></pre>
+<pre><code>          3      -10274.56   1.49e+00</code></pre>
+<pre><code>          4      -10274.09   4.75e-01</code></pre>
+<pre><code>          5      -10273.93   1.55e-01</code></pre>
+<pre><code>          6      -10273.88   4.93e-02</code></pre>
+<pre><code>          7      -10273.87   1.58e-02</code></pre>
+<pre><code>          8      -10273.86   5.21e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 1 decreases objective by 1.71e+02. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -10273.86</code></pre>
+<pre><code>Fitting factor/loading 2 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      -10229.69        Inf</code></pre>
+<pre><code>          2      -10218.30   1.14e+01</code></pre>
+<pre><code>          3      -10217.19   1.11e+00</code></pre>
+<pre><code>          4      -10216.49   6.96e-01</code></pre>
+<pre><code>          5      -10215.86   6.26e-01</code></pre>
+<pre><code>          6      -10215.26   6.00e-01</code></pre>
+<pre><code>          7      -10214.68   5.81e-01</code></pre>
+<pre><code>          8      -10214.12   5.61e-01</code></pre>
+<pre><code>          9      -10213.59   5.35e-01</code></pre>
+<pre><code>         10      -10213.08   5.03e-01</code></pre>
+<pre><code>         11      -10212.62   4.66e-01</code></pre>
+<pre><code>         12      -10212.19   4.26e-01</code></pre>
+<pre><code>         13      -10211.81   3.84e-01</code></pre>
+<pre><code>         14      -10211.47   3.41e-01</code></pre>
+<pre><code>         15      -10211.17   3.01e-01</code></pre>
+<pre><code>         16      -10210.90   2.63e-01</code></pre>
+<pre><code>         17      -10210.68   2.28e-01</code></pre>
+<pre><code>         18      -10210.48   1.97e-01</code></pre>
+<pre><code>         19      -10210.31   1.69e-01</code></pre>
+<pre><code>         20      -10210.16   1.46e-01</code></pre>
+<pre><code>         21      -10210.04   1.25e-01</code></pre>
+<pre><code>         22      -10209.93   1.08e-01</code></pre>
+<pre><code>         23      -10209.84   9.37e-02</code></pre>
+<pre><code>         24      -10209.75   8.13e-02</code></pre>
+<pre><code>         25      -10209.68   7.09e-02</code></pre>
+<pre><code>         26      -10209.62   6.21e-02</code></pre>
+<pre><code>         27      -10209.57   5.47e-02</code></pre>
+<pre><code>         28      -10209.52   4.84e-02</code></pre>
+<pre><code>         29      -10209.48   4.30e-02</code></pre>
+<pre><code>         30      -10209.44   3.83e-02</code></pre>
+<pre><code>         31      -10209.40   3.43e-02</code></pre>
+<pre><code>         32      -10209.37   3.09e-02</code></pre>
+<pre><code>         33      -10209.34   2.78e-02</code></pre>
+<pre><code>         34      -10209.32   2.51e-02</code></pre>
+<pre><code>         35      -10209.30   2.28e-02</code></pre>
+<pre><code>         36      -10209.28   2.06e-02</code></pre>
+<pre><code>         37      -10209.26   1.87e-02</code></pre>
+<pre><code>         38      -10209.24   1.70e-02</code></pre>
+<pre><code>         39      -10209.22   1.55e-02</code></pre>
+<pre><code>         40      -10209.21   1.41e-02</code></pre>
+<pre><code>         41      -10209.20   1.28e-02</code></pre>
+<pre><code>         42      -10209.19   1.16e-02</code></pre>
+<pre><code>         43      -10209.18   1.06e-02</code></pre>
+<pre><code>         44      -10209.17   9.59e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 2 decreases objective by 6.47e+01. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -10209.17</code></pre>
+<pre><code>Fitting factor/loading 3 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      -10173.09        Inf</code></pre>
+<pre><code>          2      -10161.29   1.18e+01</code></pre>
+<pre><code>          3      -10160.15   1.15e+00</code></pre>
+<pre><code>          4      -10159.47   6.78e-01</code></pre>
+<pre><code>          5      -10158.92   5.47e-01</code></pre>
+<pre><code>          6      -10158.46   4.61e-01</code></pre>
+<pre><code>          7      -10158.07   3.89e-01</code></pre>
+<pre><code>          8      -10157.75   3.25e-01</code></pre>
+<pre><code>          9      -10157.48   2.68e-01</code></pre>
+<pre><code>         10      -10157.26   2.17e-01</code></pre>
+<pre><code>         11      -10157.09   1.75e-01</code></pre>
+<pre><code>         12      -10156.95   1.39e-01</code></pre>
+<pre><code>         13      -10156.84   1.10e-01</code></pre>
+<pre><code>         14      -10156.75   8.74e-02</code></pre>
+<pre><code>         15      -10156.68   6.92e-02</code></pre>
+<pre><code>         16      -10156.63   5.47e-02</code></pre>
+<pre><code>         17      -10156.58   4.32e-02</code></pre>
+<pre><code>         18      -10156.55   3.50e-02</code></pre>
+<pre><code>         19      -10156.52   2.99e-02</code></pre>
+<pre><code>         20      -10156.49   2.66e-02</code></pre>
+<pre><code>         21      -10156.47   2.43e-02</code></pre>
+<pre><code>         22      -10156.44   2.25e-02</code></pre>
+<pre><code>         23      -10156.42   2.08e-02</code></pre>
+<pre><code>         24      -10156.40   1.89e-02</code></pre>
+<pre><code>         25      -10156.39   1.68e-02</code></pre>
+<pre><code>         26      -10156.37   1.43e-02</code></pre>
+<pre><code>         27      -10156.36   1.17e-02</code></pre>
+<pre><code>         28      -10156.35   9.28e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 3 decreases objective by 5.28e+01. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -10156.35</code></pre>
+<pre><code>Fitting factor/loading 4 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      -10146.50        Inf</code></pre>
+<pre><code>          2      -10134.17   1.23e+01</code></pre>
+<pre><code>          3      -10133.44   7.32e-01</code></pre>
+<pre><code>          4      -10133.29   1.47e-01</code></pre>
+<pre><code>          5      -10133.24   5.09e-02</code></pre>
+<pre><code>          6      -10133.22   2.32e-02</code></pre>
+<pre><code>          7      -10133.21   1.20e-02</code></pre>
+<pre><code>          8      -10133.20   6.59e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 4 decreases objective by 2.31e+01. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -10133.2</code></pre>
+<pre><code>Fitting factor/loading 5 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      -10156.31        Inf</code></pre>
+<pre><code>          2      -10142.29   1.40e+01</code></pre>
+<pre><code>          3      -10141.41   8.88e-01</code></pre>
+<pre><code>          4      -10141.26   1.48e-01</code></pre>
+<pre><code>          5      -10141.22   4.25e-02</code></pre>
+<pre><code>          6      -10141.20   1.89e-02</code></pre>
+<pre><code>          7      -10141.19   1.09e-02</code></pre>
+<pre><code>          8      -10141.18   7.15e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 5 increases objective by 7.98e+00. Factor zeroed out.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -10133.2</code></pre>
+<p>To check that the new approach gives reasonable results, one can calculate the angle between the estimated <span class="math inline">\(l\)</span> and the true <span class="math inline">\(l\)</span> (and likewise for <span class="math inline">\(f\)</span>):</p>
+<pre class="r"><code>ldf &lt;- flash_get_ldf(fl, drop_zero_factors=FALSE)
+l.angle &lt;- acos(abs(sum(ldf$l[, n] * data$l)))
+f.angle &lt;- acos(abs(sum(ldf$f[, n] * data$f)))
+round(c(l.angle, f.angle), digits=2)</code></pre>
+<pre><code>[1] 0.43 0.37</code></pre>
+<p>These results are not terrible, but an additional backfit can improve upon them:</p>
+<pre class="r"><code>fl.b &lt;- fit.fixed.V(data$Y, V, verbose=FALSE, backfit=TRUE)
+ldf &lt;- flash_get_ldf(fl.b, drop_zero_factors=FALSE)
+l.angle &lt;- acos(abs(sum(ldf$l[, n] * data$l)))
+f.angle &lt;- acos(abs(sum(ldf$f[, n] * data$f)))
+round(c(l.angle, f.angle), digits=2)</code></pre>
+<pre><code>[1] 0.16 0.33</code></pre>
+</div>
+</div>
+<div id="code-for-experiments" class="section level2">
+<h2>Code for experiments</h2>
+<p>I include code below that can be used to verify that the above results are typical. Since they can take a long time, I do not run them here.</p>
+<pre class="r"><code>rank0.experiment &lt;-function(ntests, n, p, lambda.min=0.25, seeds=1:ntests) {
+  est.rank &lt;- bad.rank &lt;- rep(NA, ntests)
+  
+  for (i in 1:length(seeds)) {
+    set.seed(i)
+    V &lt;- rand.V(n, lambda.min)
+    Y &lt;- sim.E(V, p)
+    fl &lt;- fit.fixed.V(Y, V, verbose=FALSE)
+    
+    k &lt;- flash_get_k(fl)
+    est.rank[i] &lt;- k - (n - 1)
+    
+    bad.fl &lt;- flash_add_greedy(Y, Kmax=50, verbose=FALSE)
+    bad.rank[i] &lt;- flash_get_nfactors(bad.fl)
+  }
+  
+  return(list(est.rank = est.rank, bad.rank = bad.rank))
+}
+
+rank1.experiment &lt;-function(ntests, n, p, lambda.min=0.25, d=5^2, 
+                            seeds=1:ntests) {
+  est.rank &lt;- bad.rank &lt;- rep(NA, ntests)
+  l.angle &lt;- f.angle &lt;- rep(NA, ntests)
+  
+  for (i in 1:length(seeds)) {
+    set.seed(i)
+    V = rand.V(n, lambda.min)
+    data &lt;- sim.rank1(V, p, d=d)
+    fl &lt;- fit.fixed.V(data$Y, V, verbose=FALSE, backfit=TRUE)
+
+    k &lt;- flash_get_k(fl)
+    est.rank[i] &lt;- k - (n - 1)
+    
+    ldf &lt;- flash_get_ldf(fl, drop_zero_factors=FALSE)
+    if (est.rank[i] &gt;= 1) {
+      l.angle[i] &lt;- acos(abs(sum(ldf$l[, n] * data$l)))
+      f.angle[i] &lt;- acos(abs(sum(ldf$f[, n] * data$f)))
+    }
+    
+    bad.fl &lt;- flash_add_greedy(data$Y, Kmax=50, verbose=FALSE)
+    bad.rank[i] &lt;- flash_get_nfactors(bad.fl)
+  }
+  return(list(est.rank = est.rank, bad.rank = bad.rank, 
+              l.angle = l.angle, f.angle = f.angle))
+}</code></pre>
+</div>
+<div id="questions-for-further-investigation" class="section level2">
+<h2>Questions for further investigation</h2>
+<p>I have set parameters <code>lambda.min</code> and <code>d</code> favorably for this investigation. If <code>lambda.min</code> is closer to 1, then errors will be more nearly independent, and the usual FLASH model will not fare so poorly. It would be worthwhile to investigate whether the approach detailed here beats the usual FLASH fit in such cases.</p>
+<p>Further, I have set <code>d</code> to be quite large. In the above simulations, the true loading and factor are each five times larger (in terms of Euclidean length) than the largest eigenvalue of the error covariance matrix. It would be interesting to see what the detection threshold is as a function of <code>n</code>, <code>p</code>, and <code>lambda.min</code>.</p>
+<p>Finally, notice that when <span class="math inline">\(\lambda_{min} = 1\)</span>, the approach detailed above is just the usual FLASH fit, so both of these proposed investigations would help to establish some continuity between the two.</p>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS High Sierra 10.13.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ebnm_0.1-13   flashr_0.5-14
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.17        pillar_1.2.1        plyr_1.8.4         
+ [4] compiler_3.4.3      git2r_0.21.0        workflowr_1.0.1    
+ [7] R.methodsS3_1.7.1   R.utils_2.6.0       iterators_1.0.9    
+[10] tools_3.4.3         testthat_2.0.0      digest_0.6.15      
+[13] tibble_1.4.2        evaluate_0.10.1     memoise_1.1.0      
+[16] gtable_0.2.0        lattice_0.20-35     rlang_0.2.0        
+[19] Matrix_1.2-12       foreach_1.4.4       commonmark_1.4     
+[22] yaml_2.1.17         parallel_3.4.3      withr_2.1.1.9000   
+[25] stringr_1.3.0       roxygen2_6.0.1.9000 xml2_1.2.0         
+[28] knitr_1.20          devtools_1.13.4     rprojroot_1.3-2    
+[31] grid_3.4.3          R6_2.2.2            rmarkdown_1.8      
+[34] ggplot2_2.2.1       ashr_2.2-10         magrittr_1.5       
+[37] whisker_0.3-2       backports_1.1.2     scales_0.5.0       
+[40] codetools_0.2-15    htmltools_0.3.6     MASS_7.3-48        
+[43] assertthat_0.2.0    softImpute_1.4      colorspace_1.3-2   
+[46] stringi_1.1.6       lazyeval_0.2.1      munsell_0.4.3      
+[49] doParallel_1.0.11   pscl_1.5.2          truncnorm_1.0-8    
+[52] SQUAREM_2017.10-1   R.oo_1.21.0        </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
