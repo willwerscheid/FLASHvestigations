@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Comparing initialization functions (part II)</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Comparing initialization functions (part II)</h1>
+<h4 class="author"><em>Jason Willwerscheid</em></h4>
+<h4 class="date"><em>8/28/2018</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-08-29</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/237072b28f322233c744e4ffc2c4f88b75a33e81" target="_blank">237072b</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  code/init_fn3.R
+    Untracked:  data/greedy19.rds
+    Untracked:  data/init_fn3/
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/237072b28f322233c744e4ffc2c4f88b75a33e81/analysis/init_fn3.Rmd" target="_blank">237072b</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-08-29
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/init_fn3.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Here I return to the question of which initialization function is best, and in which cases. I run some simple experiments on simulated datasets of various dimensions and with or without missing data.</p>
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<p>I simulate data from both a null model and a rank-one model with <span class="math inline">\(p \in \{1000, 10000\}\)</span> and with <span class="math inline">\(n\)</span> ranging from 10 to 1000. I either retain all of the data or I delete 20% of entries. I initialize using <code>&quot;udv_si&quot;</code>, <code>&quot;udv_si_svd&quot;</code>, and, when there is no missing data, <code>&quot;udv_svd&quot;</code>.</p>
+<p>I pre-run the code <a href="#code">below</a> and load the results from file.</p>
+<pre class="r"><code>all_res &lt;- readRDS(&quot;./data/init_fn3/all_res.rds&quot;)
+ 
+plot_results &lt;- function(res, n, main, colors) {
+  colors = colors[c(&quot;udv_si_svd&quot;, &quot;udv_si&quot;, &quot;udv_svd&quot;)]
+  plot(log10(n), log10(res[[&quot;udv_si_svd&quot;]]), type=&#39;l&#39;, col=colors[1],
+       xlab = &quot;log10(n)&quot;, ylab = &quot;time elapsed (log10 s)&quot;,
+       ylim = log10(c(min(unlist(res)), max(unlist(res)))),
+       main = main)
+  lines(log10(n), log10(res[[&quot;udv_si&quot;]]), col=colors[2])
+  if (length(res) == 3) {
+    lines(log10(n), log10(res[[&quot;udv_svd&quot;]]), col=colors[3])
+  }
+  
+  legend.txt &lt;- c(&quot;udv_si_svd&quot;, &quot;udv_si&quot;, &quot;udv_svd&quot;)
+  legend(&quot;bottomright&quot;, legend.txt[1:length(res)], lty=1,
+         col=colors[1:length(res)])
+}
+
+ns &lt;- c(10, 25, 50, 100, 250, 500, 1000)
+colors = RColorBrewer::brewer.pal(3, &quot;Dark2&quot;)[1:3]
+names(colors) = c(&quot;udv_svd&quot;, &quot;udv_si&quot;, &quot;udv_si_svd&quot;)
+
+plot_results(all_res$null_noNA_p1000, ns, 
+             &quot;Null data (no missing), p = 1000&quot;, colors)</code></pre>
+<p><img src="figure/init_fn3.Rmd/results-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_results(all_res$null_noNA_p10000, ns, 
+             &quot;Null data (no missing), p = 10000&quot;, colors)</code></pre>
+<p><img src="figure/init_fn3.Rmd/results-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_results(all_res$r1_noNA_p1000, ns, 
+             &quot;Rank-one data (no missing), p = 1000&quot;, colors)</code></pre>
+<p><img src="figure/init_fn3.Rmd/results-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_results(all_res$r1_noNA_p10000, ns, 
+             &quot;Rank-one data (no missing), p = 10000&quot;, colors)</code></pre>
+<p><img src="figure/init_fn3.Rmd/results-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_results(all_res$null_missing_p1000, ns, 
+             &quot;Null data (with missing), p = 1000&quot;, colors)</code></pre>
+<p><img src="figure/init_fn3.Rmd/results-5.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_results(all_res$null_missing_p10000, ns, 
+             &quot;Null data (with missing), p = 10000&quot;, colors)</code></pre>
+<p><img src="figure/init_fn3.Rmd/results-6.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_results(all_res$r1_missing_p1000, ns, 
+             &quot;Rank-one data (with missing), p = 1000&quot;, colors)</code></pre>
+<p><img src="figure/init_fn3.Rmd/results-7.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_results(all_res$r1_missing_p10000, ns, 
+             &quot;Rank-one data (with missing), p = 10000&quot;, colors)</code></pre>
+<p><img src="figure/init_fn3.Rmd/results-8.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="conclusions" class="section level2">
+<h2>Conclusions</h2>
+<p>The current default <code>init_fn = &quot;udv_si&quot;</code> is sensible. In cases with missing data, <code>&quot;udv_si&quot;</code> almost always beats <code>&quot;udv_si_svd&quot;</code>; the only exceptions are for small <span class="math inline">\(n\)</span>, but in such cases initialization is very fast anyway.</p>
+<p>When there is no missing data, then <code>&quot;udv_svd&quot;</code> is the fastest method for small <span class="math inline">\(n\)</span>, but <code>&quot;udv_si&quot;</code> is again the fastest method when <span class="math inline">\(n\)</span> becomes large. (Interestingly, the relative speeds do not seem to depend on the larger dimension <span class="math inline">\(p\)</span>.)</p>
+<p>It would be possible to programmatically set <code>init_fn</code> based on <span class="math inline">\(n\)</span> (or more precisely, based on the smaller of <span class="math inline">\(n\)</span> and <span class="math inline">\(p\)</span>), but I don’t think it’s worth the trouble, since <code>&quot;udv_si_svd&quot;</code> seems to consistently be the fastest (or nearly fastest) method when the speed of initialization actually becomes an issue.</p>
+</div>
+<div id="code" class="section level2">
+<h2>Code</h2>
+<pre class="r"><code>devtools::load_all(&quot;/Users/willwerscheid/GitHub/flashr&quot;)
+
+sim_mat &lt;- function(n, p, type, missing) {
+  if (type == 1) {
+    out &lt;- matrix(rnorm(n * p), nrow=n, ncol=p)
+  } else if (type == 2) {
+    out &lt;- (outer(rep(1, n), rep(1, p))
+            + matrix(rnorm(n * p), nrow=n, ncol=p))
+  }
+  if (missing) {
+    out[rbinom(n * p, 1, 0.2) == 1] &lt;- NA
+  }
+  return(out)
+}
+
+do_experiment &lt;- function(nreps, ns, p, type, missing, verbose=TRUE) {
+  res &lt;- list()
+  if (missing) {
+    init_fns &lt;- c(&quot;udv_si&quot;, &quot;udv_si_svd&quot;)
+  } else {
+    init_fns &lt;- c(&quot;udv_svd&quot;, &quot;udv_si&quot;, &quot;udv_si_svd&quot;)
+  }
+
+  for (init_fn in init_fns) {
+    res[[init_fn]] &lt;- rep(NA, nrow=length(ns))
+  }
+
+  for (i in 1:length(ns)) {
+    if (verbose) {
+      message(&quot;n = &quot;, ns[i])
+    }
+
+    data &lt;- list()
+    for (rep in 1:nreps) {
+      data[[rep]] &lt;- sim_mat(ns[i], p, type, missing)
+    }
+
+    for (init_fn in init_fns) {
+      t &lt;- system.time({
+        for (rep in 1:nreps) {
+          fl &lt;- flash_add_factors_from_data(data[[rep]],
+                                            K=5,
+                                            init_fn=init_fn,
+                                            backfit=FALSE,
+                                            verbose=FALSE)
+        }
+      })
+      res[[init_fn]][i] &lt;- t[&quot;elapsed&quot;]
+    }
+
+  }
+
+  return(res)
+}
+
+set.seed(666)
+all_res &lt;- list()
+
+nreps &lt;- 5
+ns &lt;- c(10, 25, 50, 100, 250, 500, 1000)
+p &lt;- 1000
+
+all_res$null_noNA_p1000 &lt;- do_experiment(nreps, ns, p, type=1,
+                                         missing=FALSE)
+all_res$r1_noNA_p1000 &lt;- do_experiment(nreps, ns, p, type=2,
+                                       missing=FALSE)
+all_res$null_missing_p1000 &lt;- do_experiment(nreps, ns, p, type=1,
+                                            missing=TRUE)
+all_res$r1_missing_p1000 &lt;- do_experiment(nreps, ns, p, type=2,
+                                          missing=TRUE)
+
+nreps &lt;- 1
+ns &lt;- c(10, 25, 50, 100, 250, 500, 1000)
+p &lt;- 10000
+
+all_res$null_noNA_p10000 &lt;- do_experiment(nreps, ns, p, type=1,
+                                          missing=FALSE)
+all_res$r1_noNA_p10000 &lt;- do_experiment(nreps, ns, p, type=2,
+                                        missing=FALSE)
+all_res$null_missing_p10000 &lt;- do_experiment(nreps, ns, p, type=1,
+                                             missing=TRUE)
+all_res$r1_missing_p10000 &lt;- do_experiment(nreps, ns, p, type=2,
+                                           missing=TRUE)
+
+saveRDS(all_res, &quot;./data/init_fn3/all_res.rds&quot;)</code></pre>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS High Sierra 10.13.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+ [1] workflowr_1.0.1    Rcpp_0.12.17       digest_0.6.15     
+ [4] rprojroot_1.3-2    R.methodsS3_1.7.1  backports_1.1.2   
+ [7] git2r_0.21.0       magrittr_1.5       evaluate_0.10.1   
+[10] stringi_1.1.6      whisker_0.3-2      R.oo_1.21.0       
+[13] R.utils_2.6.0      rmarkdown_1.8      RColorBrewer_1.1-2
+[16] tools_3.4.3        stringr_1.3.0      yaml_2.1.17       
+[19] compiler_3.4.3     htmltools_0.3.6    knitr_1.20        </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
