@@ -1,0 +1,79 @@
+---
+title: "Comparing initialization functions (part II)"
+author: "Jason Willwerscheid"
+date: "8/28/2018"
+output:
+  workflowr::wflow_html
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Introduction
+
+Here I return to the question of which initialization function is best, and in which cases. I run some simple experiments on simulated datasets of various dimensions and with or without missing data.
+
+## Results
+
+I simulate data from both a null model and a rank-one model with $p \in \{1000, 10000\}$ and with $n$ ranging from 10 to 1000. I either retain all of the data or I delete 20% of entries. I initialize using `"udv_si"`, `"udv_si_svd"`, and, when there is no missing data, `"udv_svd"`.
+
+I pre-run the code [below](#code) and load the results from file.
+
+```{r results}
+all_res <- readRDS("./data/init_fn3/all_res.rds")
+ 
+plot_results <- function(res, n, main, colors) {
+  colors = colors[c("udv_si_svd", "udv_si", "udv_svd")]
+  plot(log10(n), log10(res[["udv_si_svd"]]), type='l', col=colors[1],
+       xlab = "log10(n)", ylab = "time elapsed (log10 s)",
+       ylim = log10(c(min(unlist(res)), max(unlist(res)))),
+       main = main)
+  lines(log10(n), log10(res[["udv_si"]]), col=colors[2])
+  if (length(res) == 3) {
+    lines(log10(n), log10(res[["udv_svd"]]), col=colors[3])
+  }
+  
+  legend.txt <- c("udv_si_svd", "udv_si", "udv_svd")
+  legend("bottomright", legend.txt[1:length(res)], lty=1,
+         col=colors[1:length(res)])
+}
+
+ns <- c(10, 25, 50, 100, 250, 500, 1000)
+colors = RColorBrewer::brewer.pal(3, "Dark2")[1:3]
+names(colors) = c("udv_svd", "udv_si", "udv_si_svd")
+
+plot_results(all_res$null_noNA_p1000, ns, 
+             "Null data (no missing), p = 1000", colors)
+plot_results(all_res$null_noNA_p10000, ns, 
+             "Null data (no missing), p = 10000", colors)
+
+plot_results(all_res$r1_noNA_p1000, ns, 
+             "Rank-one data (no missing), p = 1000", colors)
+plot_results(all_res$r1_noNA_p10000, ns, 
+             "Rank-one data (no missing), p = 10000", colors)
+
+plot_results(all_res$null_missing_p1000, ns, 
+             "Null data (with missing), p = 1000", colors)
+plot_results(all_res$null_missing_p10000, ns, 
+             "Null data (with missing), p = 10000", colors)
+
+plot_results(all_res$r1_missing_p1000, ns, 
+             "Rank-one data (with missing), p = 1000", colors)
+plot_results(all_res$r1_missing_p10000, ns, 
+             "Rank-one data (with missing), p = 10000", colors)
+```
+
+## Conclusions
+
+The current default `init_fn = "udv_si"` is sensible. In cases with missing data, `"udv_si"` almost always beats `"udv_si_svd"`; the only exceptions are for small $n$, but in such cases initialization is very fast anyway. 
+
+When there is no missing data, then `"udv_svd"` is the fastest method for small $n$, but `"udv_si"` is again the fastest method when $n$ becomes large. (Interestingly, the relative speeds do not seem to depend on the larger dimension $p$.)
+
+It would be possible to programmatically set `init_fn` based on $n$ (or more precisely, based on the smaller of $n$ and $p$), but I don't think it's worth the trouble, since `"udv_si_svd"` seems to consistently be the fastest (or nearly fastest) method when the speed of initialization actually becomes an issue.
+
+## Code
+
+```{r code, code=readLines("../code/init_fn3.R"), eval=FALSE}
+```
