@@ -8,11 +8,13 @@ output:
 
 ## In Progress
 
-Investigations 5a and 5b attempt to determine the best default initialization function.
+Investigations 5a-b and 13 attempt to determine the best default initialization function.
 
-* [Investigation 5a.](init_fn.html) We should change the default `init_fn` to `udv_si_svd` when there is missing data and `udv_svd` otherwise.
+* [Investigation 5a.](init_fn.html) An argument for changing the default `init_fn` to `udv_si_svd` when there is missing data and `udv_svd` otherwise. Based on an analysis of GTEx data.
 
-* [Investigation 5b.](init_fn2.html) More evidence supporting a change to the default initialization function. 
+* [Investigation 5b.](init_fn2.html) More evidence supporting the recommendations in Investigation 5a. 
+
+* [Investigation 13.](init_fn3.html) A counterargument. Results in Investigations 5a-b probably depend on the fact that $n$ is small ($n = 44$). For large $n$, setting `init_fn` to `udv_si` is best.
 
 Investigations 8 and 9 implement parallel backfitting updates.
 
