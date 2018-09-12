@@ -20,7 +20,7 @@ Investigations 8 and 9 implement parallel backfitting updates.
 
 [Investigation 12.](arbitraryV.html) To fit a FLASH model with an arbitrary error covariance matrix, I follow up on a [suggestion](https://github.com/stephenslab/flashr/issues/17) by Matthew Stephens.
 
-[Investigation 13.](nonnegative.html) I use nonnegative priors to obtain a factorization of the GTEx donation matrix. Loadings are not substantially different from those obtained using `NNLM`.
+[Investigation 13.](nonnegative.html) I use nonnegative priors to obtain a factorization of the GTEx donation matrix.
 
 
 ## Still Relevant
