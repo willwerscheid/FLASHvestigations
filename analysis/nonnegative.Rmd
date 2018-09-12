@@ -27,8 +27,8 @@ raw <- read.csv("https://storage.googleapis.com/gtex_analysis_v6/annotations/GTE
                 header=TRUE, sep='\t')
 
 data <- raw[, c("SAMPID", "SMTSD")] # sample ID, tissue type
-tmp <- strsplit(as.character(data$SAMPID), "-")
 # Extract donor ID:
+tmp <- strsplit(as.character(data$SAMPID), "-")
 data$SAMPID <- as.factor(sapply(tmp, function(x) {x[[2]]})) 
 names(data) <- c("DonorID", "TissueType")
 
@@ -43,10 +43,19 @@ gtex.colors <- gtex.colors[-c(7, 8, 19, 20, 24, 25, 31, 34, 37), 2]
 gtex.colors <- as.character(gtex.colors)
 ```
 
+As a preliminary step, it is useful to visualize the correlation matrix. I use Kushal Dey's `CorShrink` package, which outputs the empirical correlation matrix and shrunken estimates of the "true" correlations.
+
+```{r corr}
+tmp <- capture.output(
+  CorShrink::CorShrinkData(t(data), sd_boot = TRUE, image = "both",
+                           image.control = list(tl.cex = 0.25))
+)
+```
+
 
 ## Initialization function
 
-We can likely do better than using the default SVD-type initialization. Here I use the nonnegative matrix factorization implemented in package `NNLM`.
+To obtain nonnegative factor/loading pairs using FLASH, we can likely do better than to use the default SVD-type initialization. Here I use the nonnegative matrix factorization implemented in package `NNLM`.
 
 ```{r init}
 udv_nn = function(Y, K = 1) {
@@ -80,14 +89,14 @@ fl_g <- run_flash_once(f_init = fl_g)
 fl_g$objective
 
 plot(fl_g, plot_loadings = TRUE, loading_colors = gtex.colors,
-     loading_legend_size = 4, 
+     loading_legend_size = 3, 
      plot_grid_nrow = 4, plot_grid_ncol = 3)
 ```
 
 
 ## Backfitted loadings
 
-Next I add 12 factors at once using `NNLM` and then backfit. Note that the objective obtained using this method is significantly better than the above.
+Next I add 12 factors at once using `NNLM` and then backfit. Note that the objective obtained using this method is much better than the above (by approximately 500).
 
 ```{r backfit}
 fl_nnmf <- flash_add_factors_from_data(data, 12,
@@ -102,17 +111,26 @@ fl_b <- flash_backfit(data, fl_nnmf,
 fl_b$objective
 
 plot(fl_b, plot_loadings = TRUE, loading_colors = gtex.colors,
-     loading_legend_size = 4, 
+     loading_legend_size = 3, 
      plot_grid_nrow = 4, plot_grid_ncol = 3)
 ```
 
 
 ## NNLM loadings
 
-The backfitted loadings can be compared with the loadings that are obtained by simply running `NNLM`. Results are very similar; I'm not sure there's much benefit to using FLASH in this case.
+The backfitted loadings can be compared with the loadings that are obtained by simply running `NNLM`. Results are quite similar.
 
 ```{r nnmf}
 plot(fl_nnmf, plot_loadings=TRUE, loading_colors = gtex.colors,
-     loading_legend_size = 4, 
+     loading_legend_size = 3, 
      plot_grid_nrow = 4, plot_grid_ncol = 3)
 ```
+
+
+## Discussion
+
+The loading that accounts for the largest PVE (backfitted loading 3) puts a large weight on whole blood and a smaller weight on fibroblasts. In effect, there are many more whole blood samples than samples from any other tissue (1822 versus, on average, 224). 
+
+The loading with the second-largest PVE (loading 1) shares weights among brain tissues, with a smaller weight on pituitary tissues. FLASH finds a very similar loading in the GTEx summary data (loading 2 [here](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHnn.html#multi-tissue_effects), for example).
+
+It is also worth noting that loading 5 puts large weights on female reproductive tissues (ovary, uterus, and vagina), so it is most likely a sex-specific loading. Similarly, loading 4 puts its largest weights on testicular and prostate tissues. Both of these loadings put very similar weights on non-reproductive tissues (observe, in particular, the similarity of weights among gastro-intestinal tissues), so we should not make too much of correlations between reproductive and non-reproductive tissues. It is probably the case that the two sex-specific loadings are entangled with a third loading that is more properly weighted on gastro-intestinal tissues alone.
