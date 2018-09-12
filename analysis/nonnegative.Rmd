@@ -1,0 +1,118 @@
+---
+title: "Nonnegative FLASH example"
+author: "Jason Willwerscheid"
+date: "9/11/2018"
+output:
+  workflowr::wflow_html
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Introduction
+
+Nonnegative matrix factorization is straightforward in FLASH; we need only put a class of nonnegative priors on the factors and loadings. In ASH, the `+uniform` priors constitute such a class (and, at present, this is the only such class in ASH).
+
+As an example of nonnegative matrix factorization via FLASH, I analyze the GTEx donation matrix.
+
+
+## Data
+
+First I set up the donation matrix. As in previous analyses, I use GTEx v6 data rather than the more recent v7 data. 
+
+```{r data}
+raw <- read.csv("https://storage.googleapis.com/gtex_analysis_v6/annotations/GTEx_Data_V6_Annotations_SampleAttributesDS.txt",
+                header=TRUE, sep='\t')
+
+data <- raw[, c("SAMPID", "SMTSD")] # sample ID, tissue type
+tmp <- strsplit(as.character(data$SAMPID), "-")
+# Extract donor ID:
+data$SAMPID <- as.factor(sapply(tmp, function(x) {x[[2]]})) 
+names(data) <- c("DonorID", "TissueType")
+
+data <- suppressMessages(reshape2::acast(data, TissueType ~ DonorID))
+
+missing.tissues <- c(1, 8, 9, 20, 21, 24, 26, 27, 33, 36, 39)
+data <- data[-missing.tissues, ]
+
+gtex.colors <- read.table("https://github.com/stephenslab/gtexresults/blob/master/data/GTExColors.txt?raw=TRUE",
+                          sep = '\t', comment.char = '')
+gtex.colors <- gtex.colors[-c(7, 8, 19, 20, 24, 25, 31, 34, 37), 2]
+gtex.colors <- as.character(gtex.colors)
+```
+
+
+## Initialization function
+
+We can likely do better than using the default SVD-type initialization. Here I use the nonnegative matrix factorization implemented in package `NNLM`.
+
+```{r init}
+udv_nn = function(Y, K = 1) {
+  tmp = NNLM::nnmf(Y, K, verbose = FALSE)
+  return(list(d = rep(1, K), u = tmp$W, v = t(tmp$H)))
+}
+```
+
+
+## Greedy loadings
+
+One round of greedily adding factors and then backfitting produces five factor/loading pairs, but repeated rounds yield additional factor/loadings. Here I do three rounds of fitting. I obtain the following loadings:
+
+```{r greedy}
+devtools::load_all("~/GitHub/flashr")
+devtools::load_all("~/GitHub/ebnm")
+
+ebnm_fn = "ebnm_ash"
+ebnm_param = list(mixcompdist = "+uniform", warmstart = TRUE)
+
+run_flash_once <- function(f_init) {
+  flash(data, f_init = f_init, 
+        ebnm_fn = ebnm_fn, ebnm_param = ebnm_param,
+        var_type="constant", init_fn = udv_nn, 
+        backfit = TRUE, verbose = FALSE)
+}
+
+fl_g <- run_flash_once(f_init = NULL)
+fl_g <- run_flash_once(f_init = fl_g)
+fl_g <- run_flash_once(f_init = fl_g)
+fl_g$objective
+
+plot(fl_g, plot_loadings = TRUE, loading_colors = gtex.colors,
+     loading_legend_size = 4, 
+     plot_grid_nrow = 4, plot_grid_ncol = 3)
+```
+
+
+## Backfitted loadings
+
+Next I add 12 factors at once using `NNLM` and then backfit. Note that the objective obtained using this method is significantly better than the above.
+
+```{r backfit}
+fl_nnmf <- flash_add_factors_from_data(data, 12,
+                                       init_fn = udv_nn, 
+                                       backfit = FALSE)
+
+fl_b <- flash_backfit(data, fl_nnmf,
+                      ebnm_fn = ebnm_fn,
+                      ebnm_param = ebnm_param,
+                      var_type = "constant",
+                      verbose = FALSE)
+fl_b$objective
+
+plot(fl_b, plot_loadings = TRUE, loading_colors = gtex.colors,
+     loading_legend_size = 4, 
+     plot_grid_nrow = 4, plot_grid_ncol = 3)
+```
+
+
+## NNLM loadings
+
+The backfitted loadings can be compared with the loadings that are obtained by simply running `NNLM`. Results are very similar; I'm not sure there's much benefit to using FLASH in this case.
+
+```{r nnmf}
+plot(fl_nnmf, plot_loadings=TRUE, loading_colors = gtex.colors,
+     loading_legend_size = 4, 
+     plot_grid_nrow = 4, plot_grid_ncol = 3)
+```
