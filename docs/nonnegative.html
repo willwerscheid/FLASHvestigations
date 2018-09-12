@@ -314,7 +314,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-09-11</p>
+<p><strong>Last updated:</strong> 2018-09-12</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -338,7 +338,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/89b711c369f3ba026873c9b9b2438f8667f5f58c" target="_blank">89b711c</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/25f8ad57f558198a765b7f91f5ba7113c1456926" target="_blank">25f8ad5</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -350,6 +350,9 @@ Ignored files:
 
 Untracked files:
     Untracked:  data/greedy19.rds
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -378,6 +381,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/25f8ad57f558198a765b7f91f5ba7113c1456926/analysis/nonnegative.Rmd" target="_blank">25f8ad5</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-12
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/nonnegative.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/2825464187388e66526a31ec1b4a99a8e774032e/docs/nonnegative.html" target="_blank">2825464</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-11
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -412,8 +449,8 @@ wflow_publish(“analysis/nonnegative.Rmd”)
                 header=TRUE, sep=&#39;\t&#39;)
 
 data &lt;- raw[, c(&quot;SAMPID&quot;, &quot;SMTSD&quot;)] # sample ID, tissue type
-tmp &lt;- strsplit(as.character(data$SAMPID), &quot;-&quot;)
 # Extract donor ID:
+tmp &lt;- strsplit(as.character(data$SAMPID), &quot;-&quot;)
 data$SAMPID &lt;- as.factor(sapply(tmp, function(x) {x[[2]]})) 
 names(data) &lt;- c(&quot;DonorID&quot;, &quot;TissueType&quot;)
 
@@ -426,10 +463,17 @@ gtex.colors &lt;- read.table(&quot;https://github.com/stephenslab/gtexresults/bl
                           sep = &#39;\t&#39;, comment.char = &#39;&#39;)
 gtex.colors &lt;- gtex.colors[-c(7, 8, 19, 20, 24, 25, 31, 34, 37), 2]
 gtex.colors &lt;- as.character(gtex.colors)</code></pre>
+<p>As a preliminary step, it is useful to visualize the correlation matrix. I use Kushal Dey’s <code>CorShrink</code> package, which outputs the empirical correlation matrix and shrunken estimates of the “true” correlations.</p>
+<pre class="r"><code>tmp &lt;- capture.output(
+  CorShrink::CorShrinkData(t(data), sd_boot = TRUE, image = &quot;both&quot;,
+                           image.control = list(tl.cex = 0.25))
+)</code></pre>
+<pre><code>Using sd_boot as value column: use value.var to override.</code></pre>
+<p><img src="figure/nonnegative.Rmd/corr-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="initialization-function" class="section level2">
 <h2>Initialization function</h2>
-<p>We can likely do better than using the default SVD-type initialization. Here I use the nonnegative matrix factorization implemented in package <code>NNLM</code>.</p>
+<p>To obtain nonnegative factor/loading pairs using FLASH, we can likely do better than to use the default SVD-type initialization. Here I use the nonnegative matrix factorization implemented in package <code>NNLM</code>.</p>
 <pre class="r"><code>udv_nn = function(Y, K = 1) {
   tmp = NNLM::nnmf(Y, K, verbose = FALSE)
   return(list(d = rep(1, K), u = tmp$W, v = t(tmp$H)))
@@ -452,29 +496,79 @@ run_flash_once &lt;- function(f_init) {
         backfit = TRUE, verbose = FALSE)
 }
 
-fl_g &lt;- run_flash_once(f_init = NULL)</code></pre>
-<pre><code>Warning in REBayes::KWDual(A, rep(1, k), normalize(w), control = control): estimated mixing distribution has some negative values:
-               consider reducing rtol</code></pre>
-<pre><code>Warning in mixIP(matrix_lik = structure(c(0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, : Optimization step yields mixture weights that are either too small,
-or negative; weights have been corrected and renormalized after the
-optimization.</code></pre>
-<pre class="r"><code>fl_g &lt;- run_flash_once(f_init = fl_g)</code></pre>
-<pre><code>Warning in verbose_obj_decrease_warning(): An iteration decreased the
-objective. This happens occasionally, perhaps due to numeric reasons.
-You could ignore this warning, but you might like to check out https://
-github.com/stephenslab/flashr/issues/26 for more details.</code></pre>
-<pre class="r"><code>fl_g &lt;- run_flash_once(f_init = fl_g)
+fl_g &lt;- run_flash_once(f_init = NULL)
+fl_g &lt;- run_flash_once(f_init = fl_g)
+fl_g &lt;- run_flash_once(f_init = fl_g)
 fl_g$objective</code></pre>
 <pre><code>[1] -15156.65</code></pre>
 <pre class="r"><code>plot(fl_g, plot_loadings = TRUE, loading_colors = gtex.colors,
-     loading_legend_size = 4, 
+     loading_legend_size = 3, 
      plot_grid_nrow = 4, plot_grid_ncol = 3)</code></pre>
-<p><img src="figure/nonnegative.Rmd/greedy-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/nonnegative.Rmd/greedy-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/nonnegative.Rmd/greedy-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of greedy-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/2825464187388e66526a31ec1b4a99a8e774032e/docs/figure/nonnegative.Rmd/greedy-1.png" target="_blank">2825464</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-11
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> <img src="figure/nonnegative.Rmd/greedy-2.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of greedy-2.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/2825464187388e66526a31ec1b4a99a8e774032e/docs/figure/nonnegative.Rmd/greedy-2.png" target="_blank">2825464</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-11
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 <div id="backfitted-loadings" class="section level2">
 <h2>Backfitted loadings</h2>
-<p>Next I add 12 factors at once using <code>NNLM</code> and then backfit. Note that the objective obtained using this method is significantly better than the above.</p>
+<p>Next I add 12 factors at once using <code>NNLM</code> and then backfit. Note that the objective obtained using this method is much better than the above (by approximately 500).</p>
 <pre class="r"><code>fl_nnmf &lt;- flash_add_factors_from_data(data, 12,
                                        init_fn = udv_nn, 
                                        backfit = FALSE)
@@ -487,17 +581,143 @@ fl_b &lt;- flash_backfit(data, fl_nnmf,
 fl_b$objective</code></pre>
 <pre><code>[1] -14666.36</code></pre>
 <pre class="r"><code>plot(fl_b, plot_loadings = TRUE, loading_colors = gtex.colors,
-     loading_legend_size = 4, 
+     loading_legend_size = 3, 
      plot_grid_nrow = 4, plot_grid_ncol = 3)</code></pre>
-<p><img src="figure/nonnegative.Rmd/backfit-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/nonnegative.Rmd/backfit-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/nonnegative.Rmd/backfit-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of backfit-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/2825464187388e66526a31ec1b4a99a8e774032e/docs/figure/nonnegative.Rmd/backfit-1.png" target="_blank">2825464</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-11
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> <img src="figure/nonnegative.Rmd/backfit-2.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of backfit-2.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/2825464187388e66526a31ec1b4a99a8e774032e/docs/figure/nonnegative.Rmd/backfit-2.png" target="_blank">2825464</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-11
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 <div id="nnlm-loadings" class="section level2">
 <h2>NNLM loadings</h2>
-<p>The backfitted loadings can be compared with the loadings that are obtained by simply running <code>NNLM</code>. Results are very similar; I’m not sure there’s much benefit to using FLASH in this case.</p>
+<p>The backfitted loadings can be compared with the loadings that are obtained by simply running <code>NNLM</code>. Results are quite similar.</p>
 <pre class="r"><code>plot(fl_nnmf, plot_loadings=TRUE, loading_colors = gtex.colors,
-     loading_legend_size = 4, 
+     loading_legend_size = 3, 
      plot_grid_nrow = 4, plot_grid_ncol = 3)</code></pre>
-<p><img src="figure/nonnegative.Rmd/nnmf-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/nonnegative.Rmd/nnmf-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/nonnegative.Rmd/nnmf-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of nnmf-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/2825464187388e66526a31ec1b4a99a8e774032e/docs/figure/nonnegative.Rmd/nnmf-1.png" target="_blank">2825464</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-11
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> <img src="figure/nonnegative.Rmd/nnmf-2.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of nnmf-2.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/2825464187388e66526a31ec1b4a99a8e774032e/docs/figure/nonnegative.Rmd/nnmf-2.png" target="_blank">2825464</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-11
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
+</div>
+<div id="discussion" class="section level2">
+<h2>Discussion</h2>
+<p>The loading that accounts for the largest PVE (backfitted loading 3) puts a large weight on whole blood and a smaller weight on fibroblasts. In effect, there are many more whole blood samples than samples from any other tissue (1822 versus, on average, 224).</p>
+<p>The loading with the second-largest PVE (loading 1) shares weights among brain tissues, with a smaller weight on pituitary tissues. FLASH finds a very similar loading in the GTEx summary data (loading 2 <a href="https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHnn.html#multi-tissue_effects">here</a>, for example).</p>
+<p>It is also worth noting that loading 5 puts large weights on female reproductive tissues (ovary, uterus, and vagina), so it is most likely a sex-specific loading. Similarly, loading 4 puts its largest weights on testicular and prostate tissues. Both of these loadings put very similar weights on non-reproductive tissues (observe, in particular, the similarity of weights among gastro-intestinal tissues), so we should not make too much of correlations between reproductive and non-reproductive tissues. It is probably the case that the two sex-specific loadings are entangled with a third loading that is more properly weighted on gastro-intestinal tissues alone.</p>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
@@ -520,26 +740,27 @@ other attached packages:
 [1] ebnm_0.1-13  flashr_0.6-1
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.18        pillar_1.2.1        compiler_3.4.3     
- [4] git2r_0.21.0        plyr_1.8.4          workflowr_1.0.1    
- [7] R.methodsS3_1.7.1   R.utils_2.6.0       iterators_1.0.9    
-[10] tools_3.4.3         testthat_2.0.0      digest_0.6.15      
-[13] tibble_1.4.2        evaluate_0.10.1     memoise_1.1.0      
-[16] gtable_0.2.0        lattice_0.20-35     rlang_0.2.0        
-[19] Matrix_1.2-12       foreach_1.4.4       commonmark_1.4     
-[22] yaml_2.1.17         parallel_3.4.3      withr_2.1.1.9000   
-[25] stringr_1.3.0       roxygen2_6.0.1.9000 knitr_1.20         
-[28] xml2_1.2.0          REBayes_1.2         devtools_1.13.4    
-[31] rprojroot_1.3-2     grid_3.4.3          R6_2.2.2           
-[34] rmarkdown_1.8       reshape2_1.4.3      ggplot2_2.2.1      
-[37] ashr_2.2-13         magrittr_1.5        whisker_0.3-2      
-[40] scales_0.5.0        backports_1.1.2     codetools_0.2-15   
-[43] htmltools_0.3.6     MASS_7.3-48         assertthat_0.2.0   
-[46] softImpute_1.4      colorspace_1.3-2    labeling_0.3       
-[49] stringi_1.1.6       Rmosek_7.1.3        lazyeval_0.2.1     
-[52] munsell_0.4.3       doParallel_1.0.11   pscl_1.5.2         
-[55] NNLM_0.4.2          truncnorm_1.0-8     SQUAREM_2017.10-1  
-[58] R.oo_1.21.0        </code></pre>
+ [1] softImpute_1.4      NNLM_0.4.2          ashr_2.2-13        
+ [4] reshape2_1.4.3      corrplot_0.84       lattice_0.20-35    
+ [7] Rmosek_7.1.3        colorspace_1.3-2    testthat_2.0.0     
+[10] htmltools_0.3.6     yaml_2.1.17         rlang_0.2.0        
+[13] R.oo_1.21.0         pillar_1.2.1        withr_2.1.1.9000   
+[16] R.utils_2.6.0       REBayes_1.2         foreach_1.4.4      
+[19] plyr_1.8.4          stringr_1.3.0       munsell_0.4.3      
+[22] commonmark_1.4      gtable_0.2.0        workflowr_1.0.1    
+[25] R.methodsS3_1.7.1   devtools_1.13.4     codetools_0.2-15   
+[28] memoise_1.1.0       evaluate_0.10.1     labeling_0.3       
+[31] knitr_1.20          pscl_1.5.2          doParallel_1.0.11  
+[34] parallel_3.4.3      Rcpp_0.12.18        corpcor_1.6.9      
+[37] backports_1.1.2     scales_0.5.0        truncnorm_1.0-8    
+[40] gridExtra_2.3       ggplot2_2.2.1       digest_0.6.15      
+[43] stringi_1.1.6       grid_3.4.3          rprojroot_1.3-2    
+[46] tools_3.4.3         magrittr_1.5        lazyeval_0.2.1     
+[49] glmnet_2.0-13       CorShrink_0.1-6     tibble_1.4.2       
+[52] whisker_0.3-2       MASS_7.3-48         Matrix_1.2-12      
+[55] SQUAREM_2017.10-1   xml2_1.2.0          assertthat_0.2.0   
+[58] rmarkdown_1.8       roxygen2_6.0.1.9000 iterators_1.0.9    
+[61] R6_2.2.2            git2r_0.21.0        compiler_3.4.3     </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
