@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Storing tau as a scalar</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Storing tau as a scalar</h1>
+<h4 class="author"><em>Jason Willwerscheid</em></h4>
+<h4 class="date"><em>9/16/2018</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-09-17</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/fe526eab7cebe3af31b4a877a1a3bf20469ece35" target="_blank">fe526ea</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  data/greedy19.rds
+
+Unstaged changes:
+    Modified:   analysis/nonnegative.Rmd
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/fe526eab7cebe3af31b4a877a1a3bf20469ece35/analysis/scalar_tau.Rmd" target="_blank">fe526ea</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-17
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/scalar_tau.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>In <code>flashr</code> <a href="https://github.com/stephenslab/flashr/issues/83">Issue #83</a>, I identify some possible ways to speed up fitting when <code>var_type = &quot;constant&quot;</code> or when <code>var_type = &quot;zero&quot;</code> and <code>S</code> (the standard errors) is stored as a scalar. I also identify ways to reduce memory usage when loadings or factors are not fixed (and they will almost never both be fixed).</p>
+<p>Here I implement the suggested changes and profile the code on data from the GTEx project. I compare elapsed time and total memory used in five scenarios: 1. <code>var_type = &quot;by_column&quot;</code>; 2. <code>var_type = &quot;constant&quot;</code>; 3. <code>var_type = &quot;zero&quot;</code> (with standard errors fixed); 4. <code>var_type = &quot;constant&quot;</code> with missing data; and 5. <code>var_type = &quot;by_column&quot;</code> with fixed factors. (The fifth scenario was added to help ensure that no bugs were introduced into the code; little improvement is expected.)</p>
+</div>
+<div id="details" class="section level2">
+<h2>Details</h2>
+<p>First I load the data and generate missing entries.</p>
+<pre class="r"><code>devtools::load_all(&quot;~/GitHub/ebnm&quot;)</code></pre>
+<pre><code>Loading ebnm</code></pre>
+<pre class="r"><code>library(&quot;profmem&quot;)
+
+gtex &lt;- readRDS(gzcon(url(&quot;https://github.com/stephenslab/gtexresults/blob/master/data/MatrixEQTLSumStats.Portable.Z.rds?raw=TRUE&quot;)))
+
+set.seed(666)
+
+strong &lt;- gtex$strong.z
+strong_missing &lt;- strong
+strong_missing[sample(1:length(strong), 
+                    floor(0.1*length(strong)), 
+                    replace=FALSE)] &lt;- NA
+
+K &lt;- 3 # number of factors to greedily add in scenarios 1-4
+FF &lt;- cbind(rep(1, 44),
+            c(rep(0, 6), rep(NA, 10), rep(0, 28)),
+            c(rep(0, 43), 1)) # fixed factors for scenario 5
+
+ntrials &lt;- 5</code></pre>
+<p>Next I run the code from the <code>master</code> branch. In each case, I add three factors greedily and then backfit.</p>
+<pre class="r"><code>system(&quot;cd ~/GitHub/flashr; git checkout master&quot;)
+devtools::load_all(&quot;~/GitHub/flashr&quot;)</code></pre>
+<pre><code>Loading flashr</code></pre>
+<pre class="r"><code>data &lt;- flash_set_data(strong)
+data_fixS &lt;- flash_set_data(strong, S = 1)
+data_missing &lt;- flash_set_data(strong_missing)
+
+t_bycol_bef &lt;- system.time({
+  mem_bycol_bef &lt;- profmem::profmem({
+    for (i in 1:ntrials) {
+      fl_bycol_before &lt;- flash(data, Kmax=K,
+                               var_type=&quot;by_column&quot;,
+                               backfit=TRUE, verbose=FALSE)
+    }
+  })
+})
+
+t_const_bef &lt;- system.time({
+  mem_const_bef &lt;- profmem::profmem({
+    for (i in 1:ntrials) {
+      fl_const_before &lt;- flash(data, Kmax=K,
+                               var_type=&quot;constant&quot;,
+                               backfit=TRUE, verbose=FALSE)
+    }
+  })
+})
+
+t_zero_bef &lt;- system.time({
+  mem_zero_bef &lt;- profmem::profmem({
+    for (i in 1:ntrials) {
+      fl_zero_before &lt;- flash(data_fixS, Kmax=K, 
+                              var_type=&quot;zero&quot;,
+                              backfit=TRUE, verbose=FALSE)
+    }
+  })
+})
+
+t_miss_bef &lt;- system.time({
+  mem_miss_bef &lt;- profmem::profmem({
+    for (i in 1:ntrials) {
+      fl_miss_before &lt;- flash(data_missing, Kmax=K, 
+                              var_type=&quot;constant&quot;,
+                              backfit=TRUE, verbose=FALSE)
+    }
+  })
+})
+
+t_fixed_bef &lt;- system.time({
+  mem_fixed_bef &lt;- profmem::profmem({
+    for (i in 1:ntrials) {
+      fl_fixed_before &lt;- flash_add_fixed_factors(data_missing, FF, 
+                                                 backfit=TRUE,
+                                                 verbose=FALSE)
+    }
+  })
+})</code></pre>
+<p>Finally, I load the branch with the proposed changes and re-run the code.</p>
+<pre class="r"><code>system(&quot;cd ~/GitHub/flashr; git checkout efficient-tau2&quot;)
+devtools::load_all(&quot;~/GitHub/flashr&quot;)</code></pre>
+<pre><code>Loading flashr</code></pre>
+<pre class="r"><code>data &lt;- flash_set_data(strong)
+data_fixS &lt;- flash_set_data(strong, S = 1)
+data_missing &lt;- flash_set_data(strong_missing)
+
+t_bycol_aft &lt;- system.time({
+  mem_bycol_aft &lt;- profmem::profmem({
+    for (i in 1:ntrials) {
+      fl_bycol_after &lt;- flash(data, Kmax=K,
+                              var_type=&quot;by_column&quot;,
+                              backfit=TRUE, verbose=FALSE)
+    }
+  })
+})
+
+t_const_aft &lt;- system.time({
+  mem_const_aft &lt;- profmem::profmem({
+    for (i in 1:ntrials) {
+      fl_const_after &lt;- flash(data, Kmax=K,
+                              var_type=&quot;constant&quot;,
+                              backfit=TRUE, verbose=FALSE)
+    }
+  })
+})
+
+t_zero_aft &lt;- system.time({
+  mem_zero_aft &lt;- profmem::profmem({
+    for (i in 1:ntrials) {
+      fl_zero_after &lt;- flash(data_fixS, Kmax=K, 
+                             var_type=&quot;zero&quot;,
+                             backfit=TRUE, verbose=FALSE)
+    }
+  })
+})
+
+t_miss_aft &lt;- system.time({
+  mem_miss_aft &lt;- profmem::profmem({
+    for (i in 1:ntrials) {
+      fl_miss_after &lt;- flash(data_missing, Kmax=K, 
+                             var_type=&quot;constant&quot;,
+                             backfit=TRUE, verbose=FALSE)
+    }
+  })
+})
+
+t_fixed_aft &lt;- system.time({
+  mem_fixed_aft &lt;- profmem::profmem({
+    for (i in 1:ntrials) {
+      fl_fixed_after &lt;- flash_add_fixed_factors(data_missing, FF,
+                                                backfit=TRUE,
+                                                verbose=FALSE)
+    }
+  })
+})</code></pre>
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<p>The elapsed time per trial (in seconds) is as follows.</p>
+<pre class="r"><code>rnames &lt;- c(&quot;before&quot;, &quot;after&quot;)
+cnames &lt;- c(&quot;by_column&quot;, &quot;constant&quot;, &quot;zero&quot;, &quot;missing&quot;, &quot;fixed&quot;)
+t_table &lt;- t(matrix(c(t_bycol_bef[3], 
+                      t_const_bef[3], 
+                      t_zero_bef[3], 
+                      t_miss_bef[3],
+                      t_fixed_bef[3],
+                      t_bycol_aft[3], 
+                      t_const_aft[3],
+                      t_zero_aft[3], 
+                      t_miss_aft[3],
+                      t_fixed_aft[3]),
+                    nrow=5, ncol=2)) / ntrials
+rownames(t_table) &lt;- rnames
+colnames(t_table) &lt;- cnames
+round(t_table, digits = 1)</code></pre>
+<pre><code>       by_column constant  zero missing fixed
+before     151.4    245.8 355.0   151.0  23.9
+after      162.0    197.7 250.4   162.8  24.7</code></pre>
+<p>The memory used per trial (in GB) is as follows.</p>
+<pre class="r"><code>mem_table &lt;- t(matrix(c(sum(mem_bycol_bef$bytes, na.rm=TRUE),
+                        sum(mem_const_bef$bytes, na.rm=TRUE),
+                        sum(mem_zero_bef$bytes, na.rm=TRUE),
+                        sum(mem_miss_bef$bytes, na.rm=TRUE),
+                        sum(mem_fixed_bef$bytes, na.rm=TRUE),
+                        sum(mem_bycol_aft$bytes, na.rm=TRUE),
+                        sum(mem_const_aft$bytes, na.rm=TRUE),
+                        sum(mem_zero_aft$bytes, na.rm=TRUE),
+                        sum(mem_miss_aft$bytes, na.rm=TRUE),
+                        sum(mem_fixed_aft$bytes, na.rm=TRUE)),
+                      nrow=5, ncol=2)) / 1024^3 / ntrials
+rownames(mem_table) &lt;- rnames
+colnames(mem_table) &lt;- cnames
+round(mem_table, digits = 1)</code></pre>
+<pre><code>       by_column constant zero missing fixed
+before      35.6     51.7 67.0    36.4   6.7
+after       22.7     29.6 35.4    29.7   6.3</code></pre>
+<p>Finally, I run a quick check to verify that I am getting the same flash object in each case.</p>
+<pre class="r"><code>identical(fl_bycol_before$objective, fl_bycol_after$objective)</code></pre>
+<pre><code>[1] TRUE</code></pre>
+<pre class="r"><code>identical(fl_const_before$objective, fl_const_after$objective)</code></pre>
+<pre><code>[1] FALSE</code></pre>
+<pre class="r"><code>identical(fl_zero_before$objective, fl_zero_after$objective)</code></pre>
+<pre><code>[1] TRUE</code></pre>
+<pre class="r"><code>identical(fl_miss_before$objective, fl_miss_after$objective)</code></pre>
+<pre><code>[1] TRUE</code></pre>
+<pre class="r"><code>identical(fl_fixed_before$objective, fl_fixed_after$objective)</code></pre>
+<pre><code>[1] TRUE</code></pre>
+</div>
+<div id="discussion" class="section level2">
+<h2>Discussion</h2>
+<p>As expected, I obtain substantial speed-ups when <code>var_type = &quot;constant&quot;</code> and when <code>var_type = &quot;zero&quot;</code>. (In fact, there is an improvement in each case, even when loadings are fixed).</p>
+<p>Also as expected, memory usage is substantially reduced in all cases.</p>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS High Sierra 10.13.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] flashr_0.6-1  profmem_0.5.0 ebnm_0.1-14  
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.18        pillar_1.2.1        plyr_1.8.4         
+ [4] compiler_3.4.3      git2r_0.21.0        workflowr_1.0.1    
+ [7] R.methodsS3_1.7.1   R.utils_2.6.0       iterators_1.0.9    
+[10] tools_3.4.3         testthat_2.0.0      digest_0.6.15      
+[13] tibble_1.4.2        gtable_0.2.0        evaluate_0.10.1    
+[16] memoise_1.1.0       lattice_0.20-35     rlang_0.2.0        
+[19] Matrix_1.2-12       foreach_1.4.4       commonmark_1.4     
+[22] yaml_2.1.17         parallel_3.4.3      withr_2.1.1.9000   
+[25] stringr_1.3.0       roxygen2_6.0.1.9000 xml2_1.2.0         
+[28] knitr_1.20          devtools_1.13.4     rprojroot_1.3-2    
+[31] grid_3.4.3          R6_2.2.2            rmarkdown_1.8      
+[34] reshape2_1.4.3      ggplot2_2.2.1       ashr_2.2-13        
+[37] magrittr_1.5        whisker_0.3-2       scales_0.5.0       
+[40] backports_1.1.2     codetools_0.2-15    htmltools_0.3.6    
+[43] MASS_7.3-48         softImpute_1.4      colorspace_1.3-2   
+[46] stringi_1.1.6       lazyeval_0.2.1      munsell_0.4.3      
+[49] doParallel_1.0.11   pscl_1.5.2          truncnorm_1.0-8    
+[52] SQUAREM_2017.10-1   R.oo_1.21.0        </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
