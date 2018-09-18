@@ -22,6 +22,8 @@ Investigations 8 and 9 implement parallel backfitting updates.
 
 [Investigation 13.](nonnegative.html) I use nonnegative priors to obtain a factorization of the GTEx donation matrix.
 
+[Investigation 14.](scalar_tau.html) Tests an implementation of changes to the way `tau` is stored, as discussed  [here](https://github.com/stephenslab/flashr/issues/83).
+
 
 ## Still Relevant
 
