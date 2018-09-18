@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Nonnegative matrix factorization is straightforward in FLASH; we need only put a class of nonnegative priors on the factors and loadings. In ASH, the `+uniform` priors constitute such a class (and, at present, this is the only such class in ASH).
 
-As an example of nonnegative matrix factorization via FLASH, I analyze the GTEx donation matrix.
+As an example of nonnegative matrix factorization via FLASH, I analyze the GTEx donation matrix. (I ignore the fact that "errors" are not, as FLASH assumes, Gaussian.) 
 
 
 ## Data
@@ -133,4 +133,4 @@ The loading that accounts for the largest PVE (backfitted loading 3) puts a larg
 
 The loading with the second-largest PVE (loading 1) shares weights among brain tissues, with a smaller weight on pituitary tissues. FLASH finds a very similar loading in the GTEx summary data (loading 2 [here](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHnn.html#multi-tissue_effects), for example).
 
-It is also worth noting that loading 5 puts large weights on female reproductive tissues (ovary, uterus, and vagina), so it is most likely a sex-specific loading. Similarly, loading 4 puts its largest weights on testicular and prostate tissues. Both of these loadings put very similar weights on non-reproductive tissues (observe, in particular, the similarity of weights among gastro-intestinal tissues), so we should not make too much of correlations between reproductive and non-reproductive tissues. It is probably the case that the two sex-specific loadings are entangled with a third loading that is more properly weighted on gastro-intestinal tissues alone.
+Loading 5 puts large weights on female reproductive tissues (ovary, uterus, and vagina), so it is most likely a sex-specific loading. Similarly, loading 4 puts its largest weights on testicular and prostate tissues. Both of these loadings put very similar weights on non-reproductive tissues (observe, in particular, the similarity of weights among gastro-intestinal tissues), so we should not make too much of correlations between reproductive and non-reproductive tissues. It is probably the case that the two sex-specific loadings are entangled with a third loading that is more properly weighted on gastro-intestinal tissues alone.
