@@ -314,7 +314,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-09-12</p>
+<p><strong>Last updated:</strong> 2018-09-18</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -338,13 +338,14 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/dc193d99e37763cc16d4a3e6eccdd0abeb9f54a8" target="_blank">dc193d9</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/ae3946ce2fad08cf9d8f23fbc978bbdfe90223ed" target="_blank">ae3946c</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
     Ignored:    .DS_Store
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
+    Ignored:    analysis/figure/
     Ignored:    docs/.DS_Store
     Ignored:    docs/figure/.DS_Store
 
@@ -378,6 +379,23 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/7720e0b7a09a0afa22afe74d6ebdc147d74d8b57/docs/nonnegative.html" target="_blank">7720e0b</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-12
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 html
@@ -454,7 +472,7 @@ wflow_publish(“analysis/nonnegative.Rmd”)
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
 <p>Nonnegative matrix factorization is straightforward in FLASH; we need only put a class of nonnegative priors on the factors and loadings. In ASH, the <code>+uniform</code> priors constitute such a class (and, at present, this is the only such class in ASH).</p>
-<p>As an example of nonnegative matrix factorization via FLASH, I analyze the GTEx donation matrix.</p>
+<p>As an example of nonnegative matrix factorization via FLASH, I analyze the GTEx donation matrix. (I ignore the fact that “errors” are not, as FLASH assumes, Gaussian.)</p>
 </div>
 <div id="data" class="section level2">
 <h2>Data</h2>
@@ -794,7 +812,7 @@ Jason Willwerscheid
 <h2>Discussion</h2>
 <p>The loading that accounts for the largest PVE (backfitted loading 3) puts a large weight on whole blood and a smaller weight on fibroblasts. In effect, there are many more whole blood samples than samples from any other tissue (1822 versus, on average, 224).</p>
 <p>The loading with the second-largest PVE (loading 1) shares weights among brain tissues, with a smaller weight on pituitary tissues. FLASH finds a very similar loading in the GTEx summary data (loading 2 <a href="https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHnn.html#multi-tissue_effects">here</a>, for example).</p>
-<p>It is also worth noting that loading 5 puts large weights on female reproductive tissues (ovary, uterus, and vagina), so it is most likely a sex-specific loading. Similarly, loading 4 puts its largest weights on testicular and prostate tissues. Both of these loadings put very similar weights on non-reproductive tissues (observe, in particular, the similarity of weights among gastro-intestinal tissues), so we should not make too much of correlations between reproductive and non-reproductive tissues. It is probably the case that the two sex-specific loadings are entangled with a third loading that is more properly weighted on gastro-intestinal tissues alone.</p>
+<p>Loading 5 puts large weights on female reproductive tissues (ovary, uterus, and vagina), so it is most likely a sex-specific loading. Similarly, loading 4 puts its largest weights on testicular and prostate tissues. Both of these loadings put very similar weights on non-reproductive tissues (observe, in particular, the similarity of weights among gastro-intestinal tissues), so we should not make too much of correlations between reproductive and non-reproductive tissues. It is probably the case that the two sex-specific loadings are entangled with a third loading that is more properly weighted on gastro-intestinal tissues alone.</p>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
@@ -814,7 +832,7 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] ebnm_0.1-13  flashr_0.6-1
+[1] ebnm_0.1-14  flashr_0.6-1
 
 loaded via a namespace (and not attached):
  [1] softImpute_1.4      NNLM_0.4.2          ashr_2.2-13        
