@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-In `flashr` [Issue #83](https://github.com/stephenslab/flashr/issues/83), I identify some possible ways to speed up fitting when `var_type = "constant"` or when `var_type = "zero"` and `S` (the standard errors) is stored as a scalar. I also identify ways to reduce memory usage when loadings or factors are not fixed (and they will almost never both be fixed).
+In `flashr` [Issue #83](https://github.com/stephenslab/flashr/issues/83), I identify some possible ways to speed up fitting when `var_type = "constant"` or when `var_type = "zero"` and `S` (the standard errors) is stored as a scalar. I also identify ways to reduce memory usage when loadings or factors are not fixed (and they will almost never both have fixed elements).
 
 Here I implement the suggested changes and profile the code on data from the GTEx project. I compare elapsed time and total memory used in five scenarios: 1. `var_type = "by_column"`; 2. `var_type = "constant"`; 3. `var_type = "zero"` (with standard errors fixed); 4. `var_type = "constant"` with missing data; and 5. `var_type = "by_column"` with fixed factors. (The fifth scenario was added to help ensure that no bugs were introduced into the code; little improvement is expected.)
 
@@ -35,75 +35,13 @@ strong_missing[sample(1:length(strong),
                     replace=FALSE)] <- NA
 
 K <- 3 # number of factors to greedily add in scenarios 1-4
+# fixed factors for scenario 5:
 FF <- cbind(rep(1, 44),
             c(rep(0, 6), rep(NA, 10), rep(0, 28)),
-            c(rep(0, 43), 1)) # fixed factors for scenario 5
-
-ntrials <- 5
+            c(rep(0, 43), 1))
 ```
 
-Next I run the code from the `master` branch. In each case, I add three factors greedily and then backfit.
-
-```{r before}
-system("cd ~/GitHub/flashr; git checkout master")
-devtools::load_all("~/GitHub/flashr")
-
-data <- flash_set_data(strong)
-data_fixS <- flash_set_data(strong, S = 1)
-data_missing <- flash_set_data(strong_missing)
-
-t_bycol_bef <- system.time({
-  mem_bycol_bef <- profmem::profmem({
-    for (i in 1:ntrials) {
-      fl_bycol_before <- flash(data, Kmax=K,
-                               var_type="by_column",
-                               backfit=TRUE, verbose=FALSE)
-    }
-  })
-})
-
-t_const_bef <- system.time({
-  mem_const_bef <- profmem::profmem({
-    for (i in 1:ntrials) {
-      fl_const_before <- flash(data, Kmax=K,
-                               var_type="constant",
-                               backfit=TRUE, verbose=FALSE)
-    }
-  })
-})
-
-t_zero_bef <- system.time({
-  mem_zero_bef <- profmem::profmem({
-    for (i in 1:ntrials) {
-      fl_zero_before <- flash(data_fixS, Kmax=K, 
-                              var_type="zero",
-                              backfit=TRUE, verbose=FALSE)
-    }
-  })
-})
-
-t_miss_bef <- system.time({
-  mem_miss_bef <- profmem::profmem({
-    for (i in 1:ntrials) {
-      fl_miss_before <- flash(data_missing, Kmax=K, 
-                              var_type="constant",
-                              backfit=TRUE, verbose=FALSE)
-    }
-  })
-})
-
-t_fixed_bef <- system.time({
-  mem_fixed_bef <- profmem::profmem({
-    for (i in 1:ntrials) {
-      fl_fixed_before <- flash_add_fixed_factors(data_missing, FF, 
-                                                 backfit=TRUE,
-                                                 verbose=FALSE)
-    }
-  })
-})
-```
-
-Finally, I load the branch with the proposed changes and re-run the code.
+Next I load the branch with the proposed changes. For each scenario (except the fifth), I add three factors greedily and then backfit.
 
 ```{r after}
 system("cd ~/GitHub/flashr; git checkout efficient-tau2")
@@ -115,54 +53,96 @@ data_missing <- flash_set_data(strong_missing)
 
 t_bycol_aft <- system.time({
   mem_bycol_aft <- profmem::profmem({
-    for (i in 1:ntrials) {
-      fl_bycol_after <- flash(data, Kmax=K,
-                              var_type="by_column",
-                              backfit=TRUE, verbose=FALSE)
-    }
+    fl_bycol_after <- flash(data, Kmax=K,
+                            var_type="by_column",
+                            backfit=TRUE, verbose=FALSE)
   })
 })
 
 t_const_aft <- system.time({
   mem_const_aft <- profmem::profmem({
-    for (i in 1:ntrials) {
-      fl_const_after <- flash(data, Kmax=K,
-                              var_type="constant",
-                              backfit=TRUE, verbose=FALSE)
-    }
+    fl_const_after <- flash(data, Kmax=K,
+                            var_type="constant",
+                            backfit=TRUE, verbose=FALSE)
   })
 })
 
 t_zero_aft <- system.time({
   mem_zero_aft <- profmem::profmem({
-    for (i in 1:ntrials) {
-      fl_zero_after <- flash(data_fixS, Kmax=K, 
-                             var_type="zero",
-                             backfit=TRUE, verbose=FALSE)
-    }
+    fl_zero_after <- flash(data_fixS, Kmax=K, 
+                           var_type="zero",
+                           backfit=TRUE, verbose=FALSE)
   })
 })
 
 t_miss_aft <- system.time({
   mem_miss_aft <- profmem::profmem({
-    for (i in 1:ntrials) {
-      fl_miss_after <- flash(data_missing, Kmax=K, 
-                             var_type="constant",
-                             backfit=TRUE, verbose=FALSE)
-    }
+    fl_miss_after <- flash(data_missing, Kmax=K, 
+                           var_type="constant",
+                           backfit=TRUE, verbose=FALSE)
   })
 })
 
 t_fixed_aft <- system.time({
   mem_fixed_aft <- profmem::profmem({
-    for (i in 1:ntrials) {
-      fl_fixed_after <- flash_add_fixed_factors(data_missing, FF,
-                                                backfit=TRUE,
-                                                verbose=FALSE)
-    }
+    fl_fixed_after <- flash_add_fixed_factors(data_missing, FF,
+                                              backfit=TRUE,
+                                              verbose=FALSE)
   })
 })
 ```
+
+Finally, I run the code from the `master` branch. (I run this code second so that none of the performance gains can be attributed to caching.)
+
+```{r before}
+system("cd ~/GitHub/flashr; git checkout master")
+devtools::load_all("~/GitHub/flashr")
+
+data <- flash_set_data(strong)
+data_fixS <- flash_set_data(strong, S = 1)
+data_missing <- flash_set_data(strong_missing)
+
+t_bycol_bef <- system.time({
+  mem_bycol_bef <- profmem::profmem({
+    fl_bycol_before <- flash(data, Kmax=K,
+                             var_type="by_column",
+                             backfit=TRUE, verbose=FALSE)
+  })
+})
+
+t_const_bef <- system.time({
+  mem_const_bef <- profmem::profmem({
+    fl_const_before <- flash(data, Kmax=K,
+                             var_type="constant",
+                             backfit=TRUE, verbose=FALSE)
+  })
+})
+
+t_zero_bef <- system.time({
+  mem_zero_bef <- profmem::profmem({
+    fl_zero_before <- flash(data_fixS, Kmax=K, 
+                            var_type="zero",
+                            backfit=TRUE, verbose=FALSE)
+  })
+})
+
+t_miss_bef <- system.time({
+  mem_miss_bef <- profmem::profmem({
+    fl_miss_before <- flash(data_missing, Kmax=K, 
+                            var_type="constant",
+                            backfit=TRUE, verbose=FALSE)
+  })
+})
+
+t_fixed_bef <- system.time({
+  mem_fixed_bef <- profmem::profmem({
+    fl_fixed_before <- flash_add_fixed_factors(data_missing, FF, 
+                                               backfit=TRUE,
+                                               verbose=FALSE)
+  })
+})
+```
+
 
 ## Results
 
@@ -181,7 +161,7 @@ t_table <- t(matrix(c(t_bycol_bef[3],
                       t_zero_aft[3], 
                       t_miss_aft[3],
                       t_fixed_aft[3]),
-                    nrow=5, ncol=2)) / ntrials
+                    nrow=5, ncol=2))
 rownames(t_table) <- rnames
 colnames(t_table) <- cnames
 round(t_table, digits = 1)
@@ -200,7 +180,7 @@ mem_table <- t(matrix(c(sum(mem_bycol_bef$bytes, na.rm=TRUE),
                         sum(mem_zero_aft$bytes, na.rm=TRUE),
                         sum(mem_miss_aft$bytes, na.rm=TRUE),
                         sum(mem_fixed_aft$bytes, na.rm=TRUE)),
-                      nrow=5, ncol=2)) / 1024^3 / ntrials
+                      nrow=5, ncol=2)) / 1024^3
 rownames(mem_table) <- rnames
 colnames(mem_table) <- cnames
 round(mem_table, digits = 1)
@@ -215,9 +195,3 @@ identical(fl_zero_before$objective, fl_zero_after$objective)
 identical(fl_miss_before$objective, fl_miss_after$objective)
 identical(fl_fixed_before$objective, fl_fixed_after$objective)
 ```
-
-## Discussion
-
-As expected, I obtain substantial speed-ups when `var_type = "constant"` and when `var_type = "zero"`. (In fact, there is an improvement in each case, even when loadings are fixed).
-
-Also as expected, memory usage is substantially reduced in all cases. 
