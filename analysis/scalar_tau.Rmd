@@ -51,40 +51,40 @@ data <- flash_set_data(strong)
 data_fixS <- flash_set_data(strong, S = 1)
 data_missing <- flash_set_data(strong_missing)
 
-t_bycol_aft <- system.time({
-  mem_bycol_aft <- profmem::profmem({
+mem_bycol_aft <- profmem::profmem({
+  t_bycol_aft <- system.time({
     fl_bycol_after <- flash(data, Kmax=K,
                             var_type="by_column",
                             backfit=TRUE, verbose=FALSE)
   })
 })
 
-t_const_aft <- system.time({
-  mem_const_aft <- profmem::profmem({
+mem_const_aft <- profmem::profmem({
+  t_const_aft <- system.time({
     fl_const_after <- flash(data, Kmax=K,
                             var_type="constant",
                             backfit=TRUE, verbose=FALSE)
   })
 })
 
-t_zero_aft <- system.time({
-  mem_zero_aft <- profmem::profmem({
+mem_zero_aft <- profmem::profmem({
+  t_zero_aft <- system.time({
     fl_zero_after <- flash(data_fixS, Kmax=K, 
                            var_type="zero",
                            backfit=TRUE, verbose=FALSE)
   })
 })
 
-t_miss_aft <- system.time({
-  mem_miss_aft <- profmem::profmem({
+mem_miss_aft <- profmem::profmem({
+  t_miss_aft <- system.time({
     fl_miss_after <- flash(data_missing, Kmax=K, 
                            var_type="constant",
                            backfit=TRUE, verbose=FALSE)
   })
 })
 
-t_fixed_aft <- system.time({
-  mem_fixed_aft <- profmem::profmem({
+mem_fixed_aft <- profmem::profmem({
+  t_fixed_aft <- system.time({
     fl_fixed_after <- flash_add_fixed_factors(data_missing, FF,
                                               backfit=TRUE,
                                               verbose=FALSE)
@@ -102,40 +102,40 @@ data <- flash_set_data(strong)
 data_fixS <- flash_set_data(strong, S = 1)
 data_missing <- flash_set_data(strong_missing)
 
-t_bycol_bef <- system.time({
-  mem_bycol_bef <- profmem::profmem({
+mem_bycol_bef <- profmem::profmem({
+  t_bycol_bef <- system.time({
     fl_bycol_before <- flash(data, Kmax=K,
                              var_type="by_column",
                              backfit=TRUE, verbose=FALSE)
   })
 })
 
-t_const_bef <- system.time({
-  mem_const_bef <- profmem::profmem({
+mem_const_bef <- profmem::profmem({
+  t_const_bef <- system.time({
     fl_const_before <- flash(data, Kmax=K,
                              var_type="constant",
                              backfit=TRUE, verbose=FALSE)
   })
 })
 
-t_zero_bef <- system.time({
-  mem_zero_bef <- profmem::profmem({
+mem_zero_bef <- profmem::profmem({
+  t_zero_bef <- system.time({
     fl_zero_before <- flash(data_fixS, Kmax=K, 
                             var_type="zero",
                             backfit=TRUE, verbose=FALSE)
   })
 })
 
-t_miss_bef <- system.time({
-  mem_miss_bef <- profmem::profmem({
+mem_miss_bef <- profmem::profmem({
+  t_miss_bef <- system.time({
     fl_miss_before <- flash(data_missing, Kmax=K, 
                             var_type="constant",
                             backfit=TRUE, verbose=FALSE)
   })
 })
 
-t_fixed_bef <- system.time({
-  mem_fixed_bef <- profmem::profmem({
+mem_fixed_bef <- profmem::profmem({
+  t_fixed_bef <- system.time({
     fl_fixed_before <- flash_add_fixed_factors(data_missing, FF, 
                                                backfit=TRUE,
                                                verbose=FALSE)
@@ -189,9 +189,9 @@ round(mem_table, digits = 1)
 Finally, I run a quick check to verify that I am getting the same flash object in each case.
 
 ```{r check}
-identical(fl_bycol_before$objective, fl_bycol_after$objective)
-identical(fl_const_before$objective, fl_const_after$objective)
-identical(fl_zero_before$objective, fl_zero_after$objective)
-identical(fl_miss_before$objective, fl_miss_after$objective)
-identical(fl_fixed_before$objective, fl_fixed_after$objective)
+all.equal(fl_bycol_before$objective, fl_bycol_after$objective)
+all.equal(fl_const_before$objective, fl_const_after$objective)
+all.equal(fl_zero_before$objective, fl_zero_after$objective)
+all.equal(fl_miss_before$objective, fl_miss_after$objective)
+all.equal(fl_fixed_before$objective, fl_fixed_after$objective)
 ```
