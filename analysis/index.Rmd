@@ -20,7 +20,11 @@ Investigations 8 and 9 implement parallel backfitting updates.
 
 [Investigation 12.](arbitraryV.html) To fit a FLASH model with an arbitrary error covariance matrix, I follow up on a [suggestion](https://github.com/stephenslab/flashr/issues/17) by Matthew Stephens.
 
-[Investigation 14.](nonnegative.html) I use nonnegative priors to obtain a factorization of the GTEx donation matrix.
+Investigations 14 and 16 illustrate two approaches to factorizing the GTEx donation matrix. The first is more naive, and is primarily intended as an illustration of how to do nonnegative matrix factorization using FLASH. The second is a more sophisticated approach that models the counts as drawn from Poisson distributions.
+
+* [Investigation 14.](nonnegative.html) An example of how to use nonnegative ASH priors to obtain a nonnegative matrix factorization.
+
+* [Investigation 16.](count_data.html) Instead of directly fitting FLASH, I fit count data via a Gaussian approximation to the Poisson log likelihood. 
 
 [Investigation 15.](scalar_tau.html) Tests an implementation of changes to the way `tau` is stored, as discussed  [here](https://github.com/stephenslab/flashr/issues/83).
 
