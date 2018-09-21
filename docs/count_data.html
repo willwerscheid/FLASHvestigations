@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Matrix factorization of count data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Matrix factorization of count data</h1>
+<h4 class="author"><em>Jason Willwerscheid</em></h4>
+<h4 class="date"><em>9/20/2018</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-09-21</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/884f8fa89b22b487814c1e2d0e77120325ac12dd" target="_blank">884f8fa</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  code/pois_lik.R
+    Untracked:  data/greedy19.rds
+    Untracked:  temp_debug.RDS
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/884f8fa89b22b487814c1e2d0e77120325ac12dd/analysis/count_data.Rmd" target="_blank">884f8fa</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-21
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/count_data.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>In a <a href="nonnegative.html">previous analysis</a>, I used FLASH to obtain a nonnegative matrix factorization of the GTEx donation matrix. There, I proceeded as if the observations were normally distributed. Here, I explore a more sophisticated approach to count data.</p>
+</div>
+<div id="model" class="section level2">
+<h2>Model</h2>
+<p>I assume that the data is generated as <span class="math display">\[ Y \sim \text{Poisson}(\mu), \]</span> where <span class="math display">\[ \mu = LF&#39; = \sum_{k = 1}^K l_k f_k&#39;, \]</span> with an ASH prior on the entries of each loading <span class="math inline">\(l_k\)</span> and each factor <span class="math inline">\(f_k\)</span> <span class="math display">\[ l_k \sim g_{l_k},\ f_k \sim g_{f_k}. \]</span></p>
+</div>
+<div id="idea" class="section level2">
+<h2>Idea</h2>
+<p>The general idea is outlined by Matthew Stephens <a href="https://stephens999.github.io/misc/wSVD.html#introduction">here</a>.</p>
+<p>To apply the idea to FLASH, I replace the part of the objective function that comes from the residuals with the Poisson log likelihood <span class="math display">\[ \ell(\mu) = \sum_{i, j} -\mu_{ij} + Y_{ij} \log \mu_{ij}. \]</span> Set <span class="math inline">\(\eta_{ij} = \log \mu_{ij}\)</span> so that <span class="math display">\[ \ell(\eta) = \sum_{i, j} -e^{\eta_{ij}} + Y_{ij} \eta_{ij}. \]</span></p>
+<p>Now do a second-order Taylor expansion of <span class="math inline">\(\ell(\eta)\)</span> around some (for now, arbitrary) point <span class="math inline">\(\eta^\star\)</span>: <span class="math display">\[ \ell(\eta) = \ell(\eta^\star) + (\eta - \eta^\star) \ell&#39;(\eta^\star) + \frac{(\eta - \eta^\star)^2}{2} \ell&#39;&#39;(\eta^\star). \]</span></p>
+<p>This is precisely the log likelihood for the distribution <span class="math display">\[ \eta \sim \text{Normal}\left(\eta^\star - \frac{\ell&#39;&#39;(\eta^\star)}{\ell&#39;(\eta^\star)}, -\frac{1}{\ell&#39;&#39;(\eta^\star)}\right). \]</span></p>
+<p>Thus, given a good enough choice of <span class="math inline">\(\eta^\star\)</span>, we should be able to run FLASH on the “pseudo-data” <span class="math display">\[ X = \eta^\star - \frac{\ell&#39;&#39;(\eta^\star)}{\ell&#39;(\eta^\star)} = \log(\mu^\star) + \frac{Y - \mu^\star}{\mu^\star}\]</span> with “standard errors” <span class="math display">\[S = -\frac{1}{\sqrt{\ell&#39;&#39;(\mu^\star)}} = \frac{1}{\sqrt{\mu^\star}}, \]</span> where <span class="math inline">\(\mu^\star = e^{\eta^\star}\)</span>.</p>
+<p>The crux, of course, is in choosing an <span class="math inline">\(\eta^\star\)</span> that is close enough to the <span class="math inline">\(\eta\)</span> that minimizes the objective function. An iterative procedure suggests itself whereby one fits FLASH to the pseudo-data generated by a given choice of <span class="math inline">\(\eta^\star\)</span>, then updates <span class="math inline">\(\eta^\star\)</span> to be the posterior mean given by the FLASH fit, then fits FLASH to the pseudo-data generated by the new <span class="math inline">\(\eta^\star\)</span>, and so on until convergence.</p>
+</div>
+<div id="code-and-example" class="section level2">
+<h2>Code and example</h2>
+<p>First I load the data:</p>
+<pre class="r"><code>devtools::load_all(&quot;~/GitHub/flashr&quot;)
+#&gt; Loading flashr
+devtools::load_all(&quot;~/GitHub/ebnm&quot;)
+#&gt; Loading ebnm
+
+raw &lt;- read.csv(&quot;https://storage.googleapis.com/gtex_analysis_v6/annotations/GTEx_Data_V6_Annotations_SampleAttributesDS.txt&quot;,
+                header=TRUE, sep=&#39;\t&#39;)
+
+data &lt;- raw[, c(&quot;SAMPID&quot;, &quot;SMTSD&quot;)] # sample ID, tissue type
+# Extract donor ID:
+tmp &lt;- strsplit(as.character(data$SAMPID), &quot;-&quot;)
+data$SAMPID &lt;- as.factor(sapply(tmp, function(x) {x[[2]]})) 
+names(data) &lt;- c(&quot;DonorID&quot;, &quot;TissueType&quot;)
+
+data &lt;- suppressMessages(reshape2::acast(data, TissueType ~ DonorID))
+
+missing.tissues &lt;- c(1, 8, 9, 20, 21, 24, 26, 27, 33, 36, 39)
+data &lt;- data[-missing.tissues, ]
+
+# Drop columns with no samples:
+data = data[, colSums(data) &gt; 0]
+
+gtex.colors &lt;- read.table(&quot;https://github.com/stephenslab/gtexresults/blob/master/data/GTExColors.txt?raw=TRUE&quot;,
+                          sep = &#39;\t&#39;, comment.char = &#39;&#39;)
+gtex.colors &lt;- gtex.colors[-c(7, 8, 19, 20, 24, 25, 31, 34, 37), 2]
+gtex.colors &lt;- as.character(gtex.colors)</code></pre>
+<p>I will use the following functions to fit the model:</p>
+<pre class="r"><code># Computing Poisson likelihood and FLASH ELBO --------------------------
+
+pois_lik &lt;- function(the_data, fl) {
+  return(sum(-exp(fl$fitted_values) + the_data * fl$fitted_values))
+}
+
+pois_obj &lt;- function(the_data, fl) {
+  return(pois_lik(the_data, fl) + sum(unlist(fl$fit$KL_l)) +
+           sum(unlist(fl$fit$KL_f)))
+}
+
+# Calculating pseudo-data ----------------------------------------------
+
+calc_X &lt;- function(the_data, mu) {
+  return(log(mu) + (the_data - mu) / mu)
+}
+
+calc_S &lt;- function(the_data, mu) {
+  return(1 / sqrt(mu))
+}
+
+set_pseudodata &lt;- function(the_data, mu) {
+  return(flash_set_data(calc_X(the_data, mu), S = calc_S(the_data, mu)))
+}
+
+# Setting FLASH parameters ---------------------------------------------
+
+# Initialization function for nonnegative loadings 
+#   (but arbitrary factors):
+my_init_fn &lt;- function(Y, K = 1) {
+  ret = udv_svd(Y, K)
+  n_pos = sum(ret$u &gt; 0)
+  n_neg = sum(ret$u &lt; 0)
+  if (n_neg &gt; n_pos) {
+    return(list(u = -ret$u, d = ret$d, v = -ret$v))
+  } else
+    return(ret)
+}
+
+get_init_fn &lt;- function(nonnegative = FALSE) {
+  if (nonnegative) {
+    return(&quot;my_init_fn&quot;)
+  } else {
+    return(&quot;udv_svd&quot;)
+  }
+}
+
+get_ebnm_fn &lt;- function(nonnegative = FALSE) {
+  if (nonnegative) {
+    return(list(l = &quot;ebnm_ash&quot;, f = &quot;ebnm_pn&quot;))
+  } else {
+    return(list(l = &quot;ebnm_pn&quot;, f = &quot;ebnm_pn&quot;))
+  }
+}
+
+get_ebnm_param &lt;- function(nonnegative = FALSE) {
+  if (nonnegative) {
+    return(list(l = list(mixcompdist = &quot;+uniform&quot;),
+                f = list(warmstart = TRUE)))
+  } else {
+    return(list(l = list(warmstart = TRUE),
+                f = list(warmstart = TRUE)))
+  }
+}
+
+# Initializing mu and running FLASH ------------------------------------
+
+init_mu &lt;- function(the_data, f_init) {
+  if (is.null(f_init)) {
+    return(matrix(colMeans(the_data),
+                  nrow = nrow(the_data), ncol = ncol(the_data),
+                  byrow = TRUE))
+  } else {
+    return(exp(f_init$fitted_values))
+  }
+}
+
+greedy_iter &lt;- function(the_data, mu, f_init, niter, 
+                        nonnegative = FALSE) {
+  suppressWarnings(
+    flash_greedy_workhorse(set_pseudodata(the_data, mu),
+                           Kmax = 1,
+                           f_init = f_init,
+                           var_type = &quot;zero&quot;,
+                           ebnm_fn = get_ebnm_fn(nonnegative),
+                           ebnm_param = get_ebnm_param(nonnegative),
+                           init_fn = get_init_fn(nonnegative),
+                           verbose_output = &quot;&quot;,
+                           nullcheck = FALSE,
+                           maxiter = niter)
+  )
+}
+
+backfit_iter &lt;- function(the_data, mu, f_init, kset, niter, 
+                         nonnegative = FALSE) {
+  suppressWarnings(
+    flash_backfit_workhorse(set_pseudodata(the_data, mu),
+                            kset = kset,
+                            f_init = f_init,
+                            var_type = &quot;zero&quot;,
+                            ebnm_fn = get_ebnm_fn(nonnegative),
+                            ebnm_param = get_ebnm_param(nonnegative),
+                            verbose_output = &quot;&quot;,
+                            nullcheck = FALSE,
+                            maxiter = niter)
+  )
+}
+
+run_one_fit &lt;- function(the_data, f_init, greedy, maxiter = 200,
+                        n_subiter = 200, nonnegative = FALSE, 
+                        verbose = TRUE, tol = .01) {
+  mu &lt;- init_mu(the_data, f_init)
+
+  if (greedy) {
+    fl &lt;- greedy_iter(the_data, mu, f_init, n_subiter, nonnegative)
+    kset &lt;- ncol(fl$fit$EL) # Only &quot;backfit&quot; the greedily added factor
+    mu &lt;- exp(fl$fitted_values)
+  } else {
+    fl &lt;- f_init
+    kset &lt;- 1:ncol(fl$fit$EL) # Backfit all factor/loadings
+  }
+
+  # The objective can get stuck oscillating between two values, so we
+  #   need to track the last two values attained:
+  old_old_obj &lt;- -Inf
+  old_obj &lt;- -Inf
+  diff &lt;- Inf
+  iter &lt;- 0
+  while (diff &gt; tol &amp;&amp; iter &lt; maxiter) {
+    iter &lt;- iter + 1
+    fl &lt;- backfit_iter(the_data, mu, fl, kset, n_subiter, nonnegative)
+    mu &lt;- exp(fl$fitted_values)
+
+    new_obj &lt;- pois_obj(the_data, fl)
+    diff &lt;- min(abs(new_obj - old_obj), abs(new_obj - old_old_obj))
+
+    old_old_obj &lt;- old_obj
+    old_obj &lt;- new_obj
+
+    if (verbose) {
+      message(&quot;Iteration &quot;, iter, &quot;: &quot;, old_obj)
+    }
+  }
+  return(fl)
+}</code></pre>
+<p>I greedily add a factor by initializing <span class="math inline">\(\mu^\star\)</span> to the column means of the data, then alternating between running FLASH on the “pseudo-data” corresponding to the current <span class="math inline">\(\mu^\star\)</span> and updating <span class="math inline">\(\mu^\star\)</span> to be the posterior mean of the current FLASH fit:</p>
+<pre class="r"><code>fl &lt;- run_one_fit(data, f_init = NULL, greedy = TRUE)
+#&gt; Iteration 1: -927714082346.181
+#&gt; Iteration 2: -341286945918.445
+#&gt; Iteration 3: -125552459516.84
+#&gt; Iteration 4: -46188177871.3924
+#&gt; Iteration 5: -16991690774.7395
+#&gt; Iteration 6: -6250903760.78647
+#&gt; Iteration 7: -2299589270.42295
+#&gt; Iteration 8: -845982056.385945
+#&gt; Iteration 9: -311229940.405073
+#&gt; Iteration 10: -114505696.365842
+#&gt; Iteration 11: -42134944.2935817
+#&gt; Iteration 12: -15511272.9754123
+#&gt; Iteration 13: -5717001.94860467
+#&gt; Iteration 14: -2113906.45466518
+#&gt; Iteration 15: -788404.890125627
+#&gt; Iteration 16: -300778.640349495
+#&gt; Iteration 17: -121382.535730719
+#&gt; Iteration 18: -55374.158506545
+#&gt; Iteration 19: -31079.0542736632
+#&gt; Iteration 20: -22130.6357421538
+#&gt; Iteration 21: -18834.2241948271
+#&gt; Iteration 22: -17631.9197964083
+#&gt; Iteration 23: -17227.1683461842
+#&gt; Iteration 24: -17120.3909758248
+#&gt; Iteration 25: -17094.2647075556
+#&gt; Iteration 26: -17091.0177410941
+#&gt; Iteration 27: -17090.5831181879
+#&gt; Iteration 28: -17090.5851822656</code></pre>
+<p>So, although the initial estimate of <span class="math inline">\(\mu^\star\)</span> is terrible, the objective seems to eventually converge.</p>
+<p>I continue to greedily add factors in the same way:</p>
+<pre class="r"><code>fl &lt;- run_one_fit(data, f_init = fl, greedy = TRUE)
+#&gt; Iteration 1: -16012.4385475068
+#&gt; Iteration 2: -15996.0987462569
+#&gt; Iteration 3: -15994.474709406
+#&gt; Iteration 4: -15994.5035110124
+#&gt; Iteration 5: -15994.522807295
+#&gt; Iteration 6: -15994.5304893364
+fl &lt;- run_one_fit(data, f_init = fl, greedy = TRUE)
+#&gt; Iteration 1: -15994.5335404488
+#&gt; Iteration 2: -15994.5347437438</code></pre>
+<p>Since the third factor no longer offers any improvement, I stop adding factors and backfit:</p>
+<pre class="r"><code>fl &lt;- run_one_fit(data, f_init = fl, greedy = FALSE)
+#&gt; Iteration 1: -15820.0913699191
+#&gt; Iteration 2: -15644.1196467394
+#&gt; Iteration 3: -15574.356156741
+#&gt; Iteration 4: -15526.9227894188
+#&gt; Iteration 5: -15503.4303568297
+#&gt; Iteration 6: -15492.9576959489
+#&gt; Iteration 7: -15488.9547268523
+#&gt; Iteration 8: -15487.6157343197
+#&gt; Iteration 9: -15487.1185250066
+#&gt; Iteration 10: -15486.8695270274
+#&gt; Iteration 11: -15486.7522169866
+#&gt; Iteration 12: -15486.7015595336
+#&gt; Iteration 13: -15486.6810231773
+#&gt; Iteration 14: -15486.6758741976</code></pre>
+<p>I now examine the resulting loadings. One loading primarily represents correlation among brain (and pituitary) tissues; the other represents correlations among the remaining tissues.</p>
+<pre class="r"><code>plot(fl, plot_loadings = TRUE, loading_colors = gtex.colors,
+     loading_legend_size = 3)</code></pre>
+<p><img src="figure/count_data.Rmd/ex4-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/count_data.Rmd/ex4-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="fitting-the-model" class="section level2">
+<h2>Fitting the model</h2>
+<p>It is not necessary to run FLASH to convergence before updating <span class="math inline">\(\mu^\star\)</span>. At the extreme, one could do a single FLASH iteration, then update <span class="math inline">\(\mu^\star\)</span>, then run a second FLASH iteration beginning from the updated <span class="math inline">\(\mu^\star\)</span>, and so on.</p>
+<p>In the following experiment, I vary the maximum number of iterations between updates of <span class="math inline">\(\mu^\star\)</span> (<code>n_subiter</code>) from 1 to 100 (which is typically enough to achieve convergence). In each case, I greedily add as many factors as possible and then backfit (as in the above example). I track the final objective attained and the time required to fit (in seconds).</p>
+<pre class="r"><code>flash_fit &lt;- function(the_data, n_subiter, nonnegative = FALSE,
+                      maxiter = 100, tol = .01) {
+  fl &lt;- run_one_fit(the_data, f_init = NULL, greedy = TRUE,
+                    maxiter = maxiter, n_subiter = n_subiter,
+                    nonnegative = nonnegative, verbose = FALSE)
+  old_obj &lt;- pois_obj(the_data, fl)
+  
+  # Keep greedily adding factors until the objective no longer improves:
+  diff &lt;- Inf
+  while (diff &gt; tol) {
+    fl &lt;- run_one_fit(the_data, fl, greedy = TRUE,
+                      maxiter = maxiter, n_subiter = n_subiter,
+                      nonnegative = nonnegative, verbose = FALSE)
+    new_obj &lt;- pois_obj(the_data, fl)
+    diff &lt;- new_obj - old_obj
+    old_obj &lt;- new_obj
+  }
+  
+  # Now backfit the whole thing:
+  fl &lt;- run_one_fit(the_data, fl, greedy = FALSE, 
+                    maxiter = maxiter, n_subiter = n_subiter,
+                    nonnegative = nonnegative, verbose = FALSE)
+  
+  return(fl)
+}
+
+n_subiters &lt;- c(1, 2, 5, 10, 25, 50, 100)
+all_t &lt;- rep(0, length(n_subiters))
+all_obj &lt;- rep(0, length(n_subiters))
+for (i in 1:length(n_subiters)) {
+  t &lt;- system.time(fl &lt;- flash_fit(data, n_subiters[i]))
+  all_t[i] &lt;- t[3]
+  all_obj[i] &lt;- pois_obj(data, fl)
+}
+
+df &lt;- data.frame(n_subiter = n_subiters, 
+                 &quot;time to fit&quot; = all_t, 
+                 &quot;final objective&quot; = all_obj)
+knitr::kable(df)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">n_subiter</th>
+<th align="right">time.to.fit</th>
+<th align="right">final.objective</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">6.776</td>
+<td align="right">-15536.72</td>
+</tr>
+<tr class="even">
+<td align="right">2</td>
+<td align="right">7.296</td>
+<td align="right">-15486.69</td>
+</tr>
+<tr class="odd">
+<td align="right">5</td>
+<td align="right">8.562</td>
+<td align="right">-15486.61</td>
+</tr>
+<tr class="even">
+<td align="right">10</td>
+<td align="right">12.067</td>
+<td align="right">-15486.67</td>
+</tr>
+<tr class="odd">
+<td align="right">25</td>
+<td align="right">12.285</td>
+<td align="right">-15486.67</td>
+</tr>
+<tr class="even">
+<td align="right">50</td>
+<td align="right">12.500</td>
+<td align="right">-15486.68</td>
+</tr>
+<tr class="odd">
+<td align="right">100</td>
+<td align="right">12.006</td>
+<td align="right">-15486.68</td>
+</tr>
+</tbody>
+</table>
+<p>Clearly, capping the number of iterations per FLASH fit reduces overall fitting time. It is possible that too few iterations produces a suboptimal fit (the objective for <code>n_subiter = 1</code> is about 50 less than the other objectives), but this could be an isolated event.</p>
+</div>
+<div id="nonnegative-loadings" class="section level2">
+<h2>Nonnegative loadings</h2>
+<p>Since, as I’ve argued in <a href="https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHnn.html">other analyses</a>, putting nonnegative constraints on the loadings helps produce more interpretable factors, I repeat the above experiment with nonnegative “+uniform” priors on the loadings.</p>
+<pre class="r"><code>for (i in 1:length(n_subiters)) {
+  t &lt;- system.time(fl &lt;- flash_fit(data, n_subiters[i], 
+                                   nonnegative = TRUE))
+  all_t[i] &lt;- t[3]
+  all_obj[i] &lt;- pois_obj(data, fl)
+}
+
+nonneg_df &lt;- data.frame(n_subiter = n_subiters, 
+                 &quot;time to fit (seconds)&quot; = all_t, 
+                 &quot;final objective&quot; = all_obj)
+knitr::kable(nonneg_df)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">n_subiter</th>
+<th align="right">time.to.fit..seconds.</th>
+<th align="right">final.objective</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">5.489</td>
+<td align="right">-15344.47</td>
+</tr>
+<tr class="even">
+<td align="right">2</td>
+<td align="right">7.974</td>
+<td align="right">-15372.43</td>
+</tr>
+<tr class="odd">
+<td align="right">5</td>
+<td align="right">9.064</td>
+<td align="right">-15372.43</td>
+</tr>
+<tr class="even">
+<td align="right">10</td>
+<td align="right">10.744</td>
+<td align="right">-15372.43</td>
+</tr>
+<tr class="odd">
+<td align="right">25</td>
+<td align="right">10.687</td>
+<td align="right">-15372.43</td>
+</tr>
+<tr class="even">
+<td align="right">50</td>
+<td align="right">11.182</td>
+<td align="right">-15372.43</td>
+</tr>
+<tr class="odd">
+<td align="right">100</td>
+<td align="right">14.260</td>
+<td align="right">-15372.43</td>
+</tr>
+</tbody>
+</table>
+<p>Again, the objective for <code>n_subiter = 1</code> is much different from other settings of <code>n_subiter</code>, but here it is almost 30 higher!</p>
+<p>Finally, I refit with <code>n_subiter = 1</code> and then do a second round of greedily adding factors and backfitting. Doing so yields a fourth factor, which is almost exclusively loaded on female reproductive tissues. (Further rounds of greedy addition and backfitting do not yield any additional factors.)</p>
+<pre class="r"><code>fl &lt;- flash_fit(data, 1, TRUE)
+# The last factor is essentially estimated at zero and can be
+#   removed:
+fl &lt;- flash_zero_out_factor(data, fl, fl$nfactors)
+
+fl &lt;- run_one_fit(data, fl, greedy = TRUE, n_subiter = 1,
+                  nonnegative = TRUE)
+#&gt; Iteration 1: -15311.1586217644
+#&gt; Iteration 2: -15310.5323444785
+#&gt; Iteration 3: -15310.4589463848
+#&gt; Iteration 4: -15310.4512300467
+fl &lt;- run_one_fit(data, fl, greedy = TRUE, n_subiter = 1,
+                  nonnegative = TRUE)
+#&gt; Iteration 1: -15310.4503445395
+#&gt; Iteration 2: -15310.4502385985
+fl &lt;- run_one_fit(data, fl, greedy = FALSE, n_subiter = 1,
+                  nonnegative = TRUE)
+#&gt; Iteration 1: -15380.2304424497
+#&gt; Iteration 2: -15295.7655804381
+#&gt; Iteration 3: -15375.9859590359
+#&gt; Iteration 4: -15296.9073559686
+#&gt; Iteration 5: -15377.713963442
+#&gt; Iteration 6: -15298.5612779106
+#&gt; Iteration 7: -15378.9404559287
+#&gt; Iteration 8: -15299.3185494194
+#&gt; Iteration 9: -15379.2021010649
+#&gt; Iteration 10: -15299.4879464561
+#&gt; Iteration 11: -15379.2647876735
+#&gt; Iteration 12: -15299.5443290732
+#&gt; Iteration 13: -15379.2881118523
+#&gt; Iteration 14: -15299.5821654482
+#&gt; Iteration 15: -15379.3057886143
+#&gt; Iteration 16: -15299.6097381597
+#&gt; Iteration 17: -15379.3185673261
+#&gt; Iteration 18: -15299.6279756113
+#&gt; Iteration 19: -15379.3266285125
+
+plot(fl, plot_loadings = TRUE, loading_colors = gtex.colors,
+     loading_legend_size = 3)</code></pre>
+<p><img src="figure/count_data.Rmd/nonneg2-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/count_data.Rmd/nonneg2-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="a-streamlined-approach" class="section level2">
+<h2>A streamlined approach</h2>
+<p>It might be worth it to try to streamline the approach by getting a good initialization point, running FLASH a single time to update <span class="math inline">\(\mu^\star\)</span>, and then forgetting about the original data entirely.</p>
+<p>I obtain an initialization point by running nonnegative FLASH on the data (recall that <span class="math inline">\(\mu^\star\)</span> must be strictly positive).</p>
+<pre class="r"><code>t_init &lt;- system.time(
+  fl &lt;- suppressWarnings(
+    flash(data, var_type = &quot;by_row&quot;, ebnm_fn = &quot;ebnm_ash&quot;, 
+          ebnm_param = list(mixcompdist = &quot;+uniform&quot;),
+          verbose = FALSE)
+  )
+)
+mu &lt;- fl$fitted_values</code></pre>
+<p>Note that this takes about as long as the entire fitting process with <code>n_subiter = 1</code> above!</p>
+<pre class="r"><code>round(t_init[3], digits = 2)
+#&gt; elapsed 
+#&gt;    7.88</code></pre>
+<p>Now I run FLASH on the pseudo-data and update <span class="math inline">\(\mu^\star\)</span>:</p>
+<pre class="r"><code>pseudodata &lt;- set_pseudodata(data, mu)
+t_update &lt;- system.time(
+  fl &lt;- suppressWarnings(
+    flash(pseudodata, var_type = &quot;zero&quot;, backfit = TRUE, 
+          verbose = FALSE)
+  )
+)
+mu &lt;- exp(fl$fitted_values)
+round(t_update[3], digits = 2)
+#&gt; elapsed 
+#&gt;    5.03</code></pre>
+<pre class="r"><code>pseudodata &lt;- set_pseudodata(data, mu)
+t_final &lt;- system.time(
+  fl &lt;- suppressWarnings(
+    flash(pseudodata, var_type = &quot;zero&quot;, backfit = TRUE, 
+          verbose = FALSE)
+  )
+)
+round(t_final[3], digits = 2)
+#&gt; elapsed 
+#&gt;    4.96</code></pre>
+<p>The objective is not much worse than the the objective attained using the more involved approach above (it is about 70 lower):</p>
+<pre class="r"><code>pois_obj(data, fl)
+#&gt; [1] -15588</code></pre>
+<p>However, the loadings tell a somewhat different story:</p>
+<pre class="r"><code>plot(fl, plot_loadings = TRUE, loading_colors = gtex.colors,
+     loading_legend_size = 3)</code></pre>
+<p><img src="figure/count_data.Rmd/two_iter5b-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/count_data.Rmd/two_iter5b-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Further, this simpler approach is slower than the above approach for all values of <code>n_subiter</code>:</p>
+<pre class="r"><code>round(t_init[3] + t_update[3] + t_final[3], digits = 2)
+#&gt; elapsed 
+#&gt;   17.87</code></pre>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()
+#&gt; R version 3.4.3 (2017-11-30)
+#&gt; Platform: x86_64-apple-darwin15.6.0 (64-bit)
+#&gt; Running under: macOS High Sierra 10.13.6
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+#&gt; 
+#&gt; locale:
+#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt; [1] ebnm_0.1-14  flashr_0.6-1
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] Rcpp_0.12.18        highr_0.6           pillar_1.2.1       
+#&gt;  [4] plyr_1.8.4          compiler_3.4.3      git2r_0.21.0       
+#&gt;  [7] workflowr_1.0.1     R.methodsS3_1.7.1   R.utils_2.6.0      
+#&gt; [10] iterators_1.0.9     tools_3.4.3         testthat_2.0.0     
+#&gt; [13] digest_0.6.15       tibble_1.4.2        evaluate_0.10.1    
+#&gt; [16] memoise_1.1.0       gtable_0.2.0        lattice_0.20-35    
+#&gt; [19] rlang_0.2.0         Matrix_1.2-12       foreach_1.4.4      
+#&gt; [22] commonmark_1.4      yaml_2.1.17         parallel_3.4.3     
+#&gt; [25] withr_2.1.1.9000    stringr_1.3.0       roxygen2_6.0.1.9000
+#&gt; [28] xml2_1.2.0          knitr_1.20          REBayes_1.2        
+#&gt; [31] devtools_1.13.4     rprojroot_1.3-2     grid_3.4.3         
+#&gt; [34] R6_2.2.2            rmarkdown_1.8       reshape2_1.4.3     
+#&gt; [37] ggplot2_2.2.1       ashr_2.2-13         magrittr_1.5       
+#&gt; [40] whisker_0.3-2       backports_1.1.2     scales_0.5.0       
+#&gt; [43] codetools_0.2-15    htmltools_0.3.6     MASS_7.3-48        
+#&gt; [46] assertthat_0.2.0    softImpute_1.4      colorspace_1.3-2   
+#&gt; [49] labeling_0.3        stringi_1.1.6       Rmosek_7.1.3       
+#&gt; [52] lazyeval_0.2.1      doParallel_1.0.11   pscl_1.5.2         
+#&gt; [55] munsell_0.4.3       truncnorm_1.0-8     SQUAREM_2017.10-1  
+#&gt; [58] R.oo_1.21.0</code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
