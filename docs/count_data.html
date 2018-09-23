@@ -314,7 +314,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-09-22</p>
+<p><strong>Last updated:</strong> 2018-09-23</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -338,7 +338,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/5bfea2c78d7ad53a3ec1d3e61804a09392e21d54" target="_blank">5bfea2c</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/de34f1450a118a4af4e16787ebd543860936058b" target="_blank">de34f14</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -379,6 +379,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/de34f1450a118a4af4e16787ebd543860936058b/analysis/count_data.Rmd" target="_blank">de34f14</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-23
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/count_data.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/410eb80ebb5d5f78bd8705794330bc8a11a0c7f8/docs/count_data.html" target="_blank">410eb80</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-22
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -449,9 +483,35 @@ wflow_publish(“analysis/count_data.Rmd”)
 <p>The general idea is outlined by Matthew Stephens <a href="https://stephens999.github.io/misc/wSVD.html#introduction">here</a>.</p>
 <p>To apply the idea to FLASH, I replace the part of the objective function that comes from the residuals with the Poisson log likelihood <span class="math display">\[ \ell(\mu) = \sum_{i, j} -\mu_{ij} + Y_{ij} \log \mu_{ij}. \]</span> Set <span class="math inline">\(\eta_{ij} = \log \mu_{ij}\)</span> so that <span class="math display">\[ \ell(\eta) = \sum_{i, j} -e^{\eta_{ij}} + Y_{ij} \eta_{ij}. \]</span></p>
 <p>Now do a second-order Taylor expansion of <span class="math inline">\(\ell(\eta)\)</span> around some (for now, arbitrary) point <span class="math inline">\(\eta^\star\)</span>: <span class="math display">\[ \ell(\eta) = \ell(\eta^\star) + (\eta - \eta^\star) \ell&#39;(\eta^\star) + \frac{(\eta - \eta^\star)^2}{2} \ell&#39;&#39;(\eta^\star). \]</span></p>
-<p>This is precisely the log likelihood for the distribution <span class="math display">\[ \eta \sim \text{Normal}\left(\eta^\star - \frac{\ell&#39;(\eta^\star)}{\ell&#39;&#39;(\eta^\star)}, -\frac{1}{\ell&#39;&#39;(\eta^\star)}\right). \]</span></p>
-<p>Thus, given a good enough choice of <span class="math inline">\(\eta^\star\)</span>, we should be able to run FLASH on the “pseudo-data” <span class="math display">\[ X = \eta^\star - \frac{\ell&#39;(\eta^\star)}{\ell&#39;&#39;(\eta^\star)} = \log(\mu^\star) + \frac{Y - \mu^\star}{\mu^\star}\]</span> with “standard errors” <span class="math display">\[S = -\frac{1}{\sqrt{\ell&#39;&#39;(\mu^\star)}} = \frac{1}{\sqrt{\mu^\star}}, \]</span> where <span class="math inline">\(\mu^\star = e^{\eta^\star}\)</span>. To fit the model <span class="math inline">\(\log(\mu) = LF&#39;\)</span>, one fixes the standard errors by setting <code>var_type = &quot;zero&quot;</code>. To fit the overdispersed model <span class="math inline">\(\log(\mu) = LF&#39; + E\)</span>, one sets <code>var_type = &quot;constant&quot;</code> so that each observation has variance <span class="math inline">\(S_{ij}^2 + \sigma^2\)</span>. For purposes of illustration, I take <code>var_type = &quot;zero&quot;</code> as the default setting. I do so because I have taken a shortcut in calculating the Poisson log likelihood by simply fixing <span class="math inline">\(\log(\mu)\)</span> at the posterior mean of <span class="math inline">\(LF&#39;\)</span>; this approximation is much worse when there is an additional “error term” <span class="math inline">\(E\)</span>.</p>
-<p>The crux in all of this is to choose an <span class="math inline">\(\eta^\star\)</span> that is as close as possible to the <span class="math inline">\(\eta\)</span> that minimizes the objective function. An iterative procedure suggests itself whereby one fits FLASH to the pseudo-data generated by a given choice of <span class="math inline">\(\eta^\star\)</span>, then updates <span class="math inline">\(\eta^\star\)</span> to be the posterior mean given by the FLASH fit, then fits FLASH to the pseudo-data generated by the new <span class="math inline">\(\eta^\star\)</span>, and so on until convergence.</p>
+<p>Up to a constant, this is the log likelihood for the distribution <span class="math display">\[ \eta \sim \text{Normal}\left(\eta^\star - \frac{\ell&#39;(\eta^\star)}{\ell&#39;&#39;(\eta^\star)}, -\frac{1}{\ell&#39;&#39;(\eta^\star)}\right). \]</span></p>
+<p>Thus, given a good enough choice of <span class="math inline">\(\eta^\star\)</span>, we should be able to run FLASH on the “pseudo-data” <span class="math display">\[ X = \eta^\star - \frac{\ell&#39;(\eta^\star)}{\ell&#39;&#39;(\eta^\star)} \]</span> with “standard errors” <span class="math display">\[ S = \frac{1}{\sqrt{-\ell&#39;&#39;(\eta^\star)}}. \]</span></p>
+<p>I calculate <span class="math display">\[ \begin{aligned}
+\ell&#39;(\eta^\star) &amp;= \sum_{i, j} -e^{\eta^\star_{ij}} + Y_{ij} \\
+&amp;= \sum_{i, j} Y_{ij} - \mu^\star_{ij} \\
+\ell&#39;&#39;(\eta^\star) &amp;= \sum_{i, j} -e^{\eta^\star_{ij}} \\
+&amp;= \sum_{i, j} -\mu^\star_{ij}, 
+\end{aligned} \]</span> which yields pseudo-data <span class="math display">\[ X = \log(\mu^\star) + \frac{Y - \mu^\star}{\mu^\star} \]</span> with standard errors <span class="math display">\[ S = \frac{1}{\sqrt{\mu^\star}}.\]</span></p>
+<p>To fit the model <span class="math inline">\(\log(\mu) = LF&#39;\)</span>, one fixes the standard errors by setting <code>var_type = &quot;zero&quot;</code>. To fit the overdispersed model <span class="math inline">\(\log(\mu) = LF&#39; + E\)</span>, one sets <code>var_type = &quot;constant&quot;</code> so that each observation has variance <span class="math inline">\(S_{ij}^2 + \sigma^2\)</span>.</p>
+<p>Now, the crux in all of this is to choose an <span class="math inline">\(\eta^\star\)</span> that is as close as possible to the <span class="math inline">\(\eta\)</span> that minimizes the objective function. An iterative procedure suggests itself whereby one fits FLASH to the pseudo-data generated by a given choice of <span class="math inline">\(\eta^\star\)</span>, then updates <span class="math inline">\(\eta^\star\)</span> to be the posterior mean given by the FLASH fit, then fits FLASH to the pseudo-data generated by the new <span class="math inline">\(\eta^\star\)</span>, and so on until convergence.</p>
+</div>
+<div id="objective-function" class="section level2">
+<h2>Objective function</h2>
+<p>I noted above that the objective I am interested in is approximately the same as the FLASH objective “up to a constant.” This constant, however, can depend on the choice of <span class="math inline">\(\eta^\star\)</span>. To monitor the progress of the fit, it will be useful to be able to calculate its (approximate) value.</p>
+<p>The log likelihood I am interested in is <span class="math display">\[ \ell(\eta) \approx \ell(\eta^\star) + (\eta - \eta^\star) \ell&#39;(\eta^\star) + \frac{(\eta - \eta^\star)^2}{2} \ell&#39;&#39;(\eta^\star). \]</span></p>
+<p>The log likelihood of the normal approximation is <span class="math display">\[ \begin{aligned}
+\ell_N(\eta) &amp;= -\frac{1}{2} \log \left( \frac{2 \pi}{-\ell&#39;&#39;(\eta^\star)} \right) 
++ \frac{\ell&#39;&#39;(\eta^\star)}{2} \left( \eta - \eta^\star + \frac{\ell&#39;(\eta^\star)}{\ell&#39;&#39;(\eta^\star)} \right)^2 \\
+&amp;= -\frac{1}{2} \log \left( \frac{2 \pi}{-\ell&#39;&#39;(\eta^\star)} \right) 
++ \frac{(\ell&#39;(\eta^\star))^2}{2 \ell&#39;&#39;(\eta^\star)}
++ (\eta - \eta^\star) \ell&#39;(\eta^\star) 
++ \frac{(\eta - \eta^\star)^2}{2} \ell&#39;&#39;(\eta^\star)
+\end{aligned} \]</span> which gives <span class="math display">\[ \ell(\eta) 
+\approx \ell_N(\eta) + \ell(\eta^\star)
++ \frac{1}{2} \log \left( \frac{2 \pi}{-\ell&#39;&#39;(\eta^\star)} \right) 
+- \frac{(\ell&#39;(\eta^\star))^2}{2 \ell&#39;&#39;(\eta^\star)}.\]</span></p>
+<p>In the Poisson case studied here, the objective can thus be calculated as the FLASH objective plus <span class="math display">\[ \sum_{i, j} -\mu^\star_{ij} + Y_{ij} \log \mu^\star_{ij} 
++ \frac{1}{2}\log \left( \frac{2 \pi}{\mu^\star_{ij}} \right)
++ \frac{(Y_{ij} - \mu^\star_{ij})^2}{2\mu^\star_{ij}}.\]</span></p>
 </div>
 <div id="code-and-example" class="section level2">
 <h2>Code and example</h2>
@@ -483,15 +543,12 @@ gtex.colors &lt;- read.table(&quot;https://github.com/stephenslab/gtexresults/bl
 gtex.colors &lt;- gtex.colors[-c(7, 8, 19, 20, 24, 25, 31, 34, 37), 2]
 gtex.colors &lt;- as.character(gtex.colors)</code></pre>
 <p>I will use the following functions to fit the model:</p>
-<pre class="r"><code># Computing Poisson likelihood and FLASH ELBO --------------------------
+<pre class="r"><code># Computing objective (ELBO) -------------------------------------------
 
-pois_lik &lt;- function(the_data, fl) {
-  return(sum(-exp(fl$fitted_values) + the_data * fl$fitted_values))
-}
-
-pois_obj &lt;- function(the_data, fl) {
-  return(pois_lik(the_data, fl) + sum(unlist(fl$fit$KL_l)) +
-           sum(unlist(fl$fit$KL_f)))
+calc_obj &lt;- function(fl, the_data, mu) {
+  return(fl$objective + 
+           sum(-mu + the_data * log(mu) + 
+                 0.5 * (log(2 * pi / mu) + (the_data - mu)^2 / mu)))
 }
 
 # Calculating pseudo-data ----------------------------------------------
@@ -617,79 +674,81 @@ run_one_fit &lt;- function(the_data, f_init, greedy, maxiter = 200,
     iter &lt;- iter + 1
     fl &lt;- backfit_iter(the_data, mu, fl, kset, n_subiter, 
                        nonnegative, var_type)
-    mu &lt;- exp(fl$fitted_values)
 
-    new_obj &lt;- pois_obj(the_data, fl)
-    diff &lt;- min(abs(new_obj - old_obj), abs(new_obj - old_old_obj))
+    fl$objective &lt;- calc_obj(fl, the_data, mu)
+    diff &lt;- min(abs(fl$objective - old_obj), 
+                abs(fl$objective - old_old_obj))
 
     old_old_obj &lt;- old_obj
-    old_obj &lt;- new_obj
+    old_obj &lt;- fl$objective
+    
+    mu &lt;- exp(fl$fitted_values)
 
     if (verbose) {
-      message(&quot;Iteration &quot;, iter, &quot;: &quot;, old_obj)
+      message(&quot;Iteration &quot;, iter, &quot;: &quot;, fl$objective)
     }
   }
   return(fl)
 }</code></pre>
 <p>I greedily add a factor by initializing <span class="math inline">\(\mu^\star\)</span> to the column means of the data, then alternating between running FLASH on the “pseudo-data” corresponding to the current <span class="math inline">\(\mu^\star\)</span> and updating <span class="math inline">\(\mu^\star\)</span> to be the posterior mean of the current FLASH fit:</p>
-<pre class="r"><code>fl &lt;- run_one_fit(data, f_init = NULL, greedy = TRUE)
-#&gt; Iteration 1: -927714082346.181
-#&gt; Iteration 2: -341286945918.445
-#&gt; Iteration 3: -125552459516.84
-#&gt; Iteration 4: -46188177871.3924
-#&gt; Iteration 5: -16991690774.7395
-#&gt; Iteration 6: -6250903760.78647
-#&gt; Iteration 7: -2299589270.42295
-#&gt; Iteration 8: -845982056.385945
-#&gt; Iteration 9: -311229940.405073
-#&gt; Iteration 10: -114505696.365842
-#&gt; Iteration 11: -42134944.2935817
-#&gt; Iteration 12: -15511272.9754123
-#&gt; Iteration 13: -5717001.94860467
-#&gt; Iteration 14: -2113906.45466518
-#&gt; Iteration 15: -788404.890125627
-#&gt; Iteration 16: -300778.640349495
-#&gt; Iteration 17: -121382.535730719
-#&gt; Iteration 18: -55374.158506545
-#&gt; Iteration 19: -31079.0542736632
-#&gt; Iteration 20: -22130.6357421538
-#&gt; Iteration 21: -18834.2241948271
-#&gt; Iteration 22: -17631.9197964083
-#&gt; Iteration 23: -17227.1683461842
-#&gt; Iteration 24: -17120.3909758248
-#&gt; Iteration 25: -17094.2647075556
-#&gt; Iteration 26: -17091.0177410941
-#&gt; Iteration 27: -17090.5831181879
-#&gt; Iteration 28: -17090.5851822656</code></pre>
-<p>So, although the initial estimate of <span class="math inline">\(\mu^\star\)</span> is terrible, the objective seems to eventually converge.</p>
+<pre class="r"><code>fl &lt;- run_one_fit(data, f_init = NULL, greedy = TRUE, var_type = &quot;zero&quot;)
+#&gt; Iteration 1: -1260894162288.67
+#&gt; Iteration 2: -463857047403.473
+#&gt; Iteration 3: -170643479882.396
+#&gt; Iteration 4: -62776237234.5249
+#&gt; Iteration 5: -23094096826.1362
+#&gt; Iteration 6: -8495853575.88706
+#&gt; Iteration 7: -3125460273.93256
+#&gt; Iteration 8: -1149803165.46822
+#&gt; Iteration 9: -422999642.579889
+#&gt; Iteration 10: -155623640.841263
+#&gt; Iteration 11: -57261563.5405482
+#&gt; Iteration 12: -21076221.7751938
+#&gt; Iteration 13: -7764412.09339289
+#&gt; Iteration 14: -2867291.88319422
+#&gt; Iteration 15: -1065747.76233328
+#&gt; Iteration 16: -402996.603236368
+#&gt; Iteration 17: -159177.534036103
+#&gt; Iteration 18: -69469.4385910787
+#&gt; Iteration 19: -36455.0120088927
+#&gt; Iteration 20: -24297.6435128183
+#&gt; Iteration 21: -19817.4081220096
+#&gt; Iteration 22: -18173.1057830217
+#&gt; Iteration 23: -17596.0378156151
+#&gt; Iteration 24: -17430.9092946137
+#&gt; Iteration 25: -17390.3239093269
+#&gt; Iteration 26: -17383.7304196358
+#&gt; Iteration 27: -17383.2088444385
+#&gt; Iteration 28: -17383.2107211963</code></pre>
+<p>Although the initial estimate of <span class="math inline">\(\mu^\star\)</span> is terrible, the objective seems to eventually converge.</p>
 <p>I continue to greedily add factors in the same way:</p>
-<pre class="r"><code>fl &lt;- run_one_fit(data, f_init = fl, greedy = TRUE)
-#&gt; Iteration 1: -16012.4385475068
-#&gt; Iteration 2: -15996.0987462569
-#&gt; Iteration 3: -15994.474709406
-#&gt; Iteration 4: -15994.5035110124
-#&gt; Iteration 5: -15994.522807295
-#&gt; Iteration 6: -15994.5304893364
-fl &lt;- run_one_fit(data, f_init = fl, greedy = TRUE)
-#&gt; Iteration 1: -15994.5335404488
-#&gt; Iteration 2: -15994.5347437438</code></pre>
+<pre class="r"><code>fl &lt;- run_one_fit(data, f_init = fl, greedy = TRUE, var_type = &quot;zero&quot;)
+#&gt; Iteration 1: -16636.2584752266
+#&gt; Iteration 2: -16585.7129718596
+#&gt; Iteration 3: -16580.7737927336
+#&gt; Iteration 4: -16580.7926674945
+#&gt; Iteration 5: -16580.8273337167
+#&gt; Iteration 6: -16580.8412000009
+#&gt; Iteration 7: -16580.8467232789
+fl &lt;- run_one_fit(data, f_init = fl, greedy = TRUE, var_type = &quot;zero&quot;)
+#&gt; Iteration 1: -16580.848902757
+#&gt; Iteration 2: -16580.8497609812</code></pre>
 <p>Since the third factor no longer offers any improvement, I stop adding factors and backfit:</p>
-<pre class="r"><code>fl &lt;- run_one_fit(data, f_init = fl, greedy = FALSE)
-#&gt; Iteration 1: -15820.0913699191
-#&gt; Iteration 2: -15644.1196467394
-#&gt; Iteration 3: -15574.356156741
-#&gt; Iteration 4: -15526.9227894188
-#&gt; Iteration 5: -15503.4303568297
-#&gt; Iteration 6: -15492.9576959489
-#&gt; Iteration 7: -15488.9547268523
-#&gt; Iteration 8: -15487.6157343197
-#&gt; Iteration 9: -15487.1185250066
-#&gt; Iteration 10: -15486.8695270274
-#&gt; Iteration 11: -15486.7522169866
-#&gt; Iteration 12: -15486.7015595336
-#&gt; Iteration 13: -15486.6810231773
-#&gt; Iteration 14: -15486.6758741976</code></pre>
-<p>I now examine the resulting loadings. One loading primarily represents correlation among brain (and pituitary) tissues; the other represents correlations among the remaining tissues.</p>
+<pre class="r"><code>fl &lt;- run_one_fit(data, f_init = fl, greedy = FALSE, var_type = &quot;zero&quot;)
+#&gt; Iteration 1: -16409.37888059
+#&gt; Iteration 2: -16181.1318746537
+#&gt; Iteration 3: -16095.2934227321
+#&gt; Iteration 4: -16042.4790068713
+#&gt; Iteration 5: -16018.4893710094
+#&gt; Iteration 6: -16008.4462444063
+#&gt; Iteration 7: -16004.7357433436
+#&gt; Iteration 8: -16003.5327873971
+#&gt; Iteration 9: -16003.1145834296
+#&gt; Iteration 10: -16002.9179080359
+#&gt; Iteration 11: -16002.8323975208
+#&gt; Iteration 12: -16002.8006825269
+#&gt; Iteration 13: -16002.7908969895</code></pre>
+<p>I now examine the resulting loadings. One loading primarily represents correlations among brain (and pituitary) tissues; the other represents correlations among the remaining tissues.</p>
 <pre class="r"><code>plot(fl, plot_loadings = TRUE, loading_colors = gtex.colors,
      loading_legend_size = 3, plot_scree = FALSE)</code></pre>
 <p><img src="figure/count_data.Rmd/ex4-1.png" width="672" style="display: block; margin: auto;" /></p>
@@ -709,6 +768,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/410eb80ebb5d5f78bd8705794330bc8a11a0c7f8/docs/figure/count_data.Rmd/ex4-1.png" target="_blank">410eb80</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-22
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/8b731598d9b702cdb6b353a34e1db6d688dca2ae/docs/figure/count_data.Rmd/ex4-1.png" target="_blank">8b73159</a>
@@ -734,7 +804,7 @@ Jason Willwerscheid
                     maxiter = maxiter, n_subiter = n_subiter,
                     nonnegative = nonnegative, var_type = var_type,
                     verbose = FALSE)
-  old_obj &lt;- pois_obj(the_data, fl)
+  old_obj &lt;- fl$objective
   
   # Keep greedily adding factors until the objective no longer improves:
   diff &lt;- Inf
@@ -743,9 +813,8 @@ Jason Willwerscheid
                       maxiter = maxiter, n_subiter = n_subiter,
                       nonnegative = nonnegative, var_type = var_type,
                       verbose = FALSE)
-    new_obj &lt;- pois_obj(the_data, fl)
-    diff &lt;- new_obj - old_obj
-    old_obj &lt;- new_obj
+    diff &lt;- fl$objective - old_obj
+    old_obj &lt;- fl$objective
   }
   
   # Now backfit the whole thing:
@@ -761,9 +830,10 @@ n_subiters &lt;- c(1, 2, 5, 10, 25, 50, 100)
 all_t &lt;- rep(0, length(n_subiters))
 all_obj &lt;- rep(0, length(n_subiters))
 for (i in 1:length(n_subiters)) {
-  t &lt;- system.time(fl &lt;- flash_fit(data, n_subiters[i]))
+  t &lt;- system.time(fl &lt;- flash_fit(data, n_subiters[i], 
+                                   var_type = &quot;zero&quot;))
   all_t[i] &lt;- t[3]
-  all_obj[i] &lt;- pois_obj(data, fl)
+  all_obj[i] &lt;- fl$objective
 }
 
 df &lt;- data.frame(n_subiter = n_subiters, 
@@ -781,51 +851,52 @@ knitr::kable(df)</code></pre>
 <tbody>
 <tr class="odd">
 <td align="right">1</td>
-<td align="right">5.342</td>
-<td align="right">-15536.72</td>
+<td align="right">5.699</td>
+<td align="right">-16067.89</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
-<td align="right">6.120</td>
-<td align="right">-15486.69</td>
+<td align="right">6.404</td>
+<td align="right">-16002.42</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
-<td align="right">5.957</td>
-<td align="right">-15486.61</td>
+<td align="right">7.432</td>
+<td align="right">-16002.74</td>
 </tr>
 <tr class="even">
 <td align="right">10</td>
-<td align="right">7.511</td>
-<td align="right">-15486.67</td>
+<td align="right">9.220</td>
+<td align="right">-16002.78</td>
 </tr>
 <tr class="odd">
 <td align="right">25</td>
-<td align="right">8.380</td>
-<td align="right">-15486.67</td>
+<td align="right">10.206</td>
+<td align="right">-16002.79</td>
 </tr>
 <tr class="even">
 <td align="right">50</td>
-<td align="right">8.816</td>
-<td align="right">-15486.68</td>
+<td align="right">10.704</td>
+<td align="right">-16002.80</td>
 </tr>
 <tr class="odd">
 <td align="right">100</td>
-<td align="right">9.276</td>
-<td align="right">-15486.68</td>
+<td align="right">11.301</td>
+<td align="right">-16002.79</td>
 </tr>
 </tbody>
 </table>
-<p>Clearly, capping the number of iterations per FLASH fit reduces overall fitting time. It is possible that too few iterations produces a suboptimal fit (the objective for <code>n_subiter = 1</code> is about 50 less than the other objectives), but this could be an isolated event.</p>
+<p>Clearly, capping the number of iterations per FLASH fit reduces overall fitting time. It is possible that too few iterations produces a suboptimal fit (the objective for <code>n_subiter = 1</code> is about 65 less than the other objectives), but this could be an isolated event.</p>
 </div>
 <div id="nonnegative-loadings" class="section level2">
 <h2>Nonnegative loadings</h2>
 <p>Since, as I’ve argued in <a href="https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHnn.html">other analyses</a>, putting nonnegative constraints on the loadings helps produce more interpretable factors, I repeat the above experiment with nonnegative “+uniform” priors on the loadings.</p>
 <pre class="r"><code>for (i in 1:length(n_subiters)) {
   t &lt;- system.time(fl &lt;- flash_fit(data, n_subiters[i], 
+                                   var_type = &quot;zero&quot;, 
                                    nonnegative = TRUE))
   all_t[i] &lt;- t[3]
-  all_obj[i] &lt;- pois_obj(data, fl)
+  all_obj[i] &lt;- fl$objective
 }
 
 nonneg_df &lt;- data.frame(n_subiter = n_subiters, 
@@ -843,47 +914,48 @@ knitr::kable(nonneg_df)</code></pre>
 <tbody>
 <tr class="odd">
 <td align="right">1</td>
-<td align="right">18.083</td>
-<td align="right">-15267.11</td>
+<td align="right">16.936</td>
+<td align="right">-16158.06</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
-<td align="right">19.358</td>
-<td align="right">-15278.50</td>
+<td align="right">18.444</td>
+<td align="right">-16154.17</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
-<td align="right">22.609</td>
-<td align="right">-15297.36</td>
+<td align="right">21.213</td>
+<td align="right">-16149.35</td>
 </tr>
 <tr class="even">
 <td align="right">10</td>
-<td align="right">23.729</td>
-<td align="right">-15297.36</td>
+<td align="right">22.375</td>
+<td align="right">-16149.35</td>
 </tr>
 <tr class="odd">
 <td align="right">25</td>
-<td align="right">24.079</td>
-<td align="right">-15297.36</td>
+<td align="right">18.195</td>
+<td align="right">-16148.65</td>
 </tr>
 <tr class="even">
 <td align="right">50</td>
-<td align="right">24.083</td>
-<td align="right">-15297.36</td>
+<td align="right">18.752</td>
+<td align="right">-16148.65</td>
 </tr>
 <tr class="odd">
 <td align="right">100</td>
-<td align="right">23.991</td>
-<td align="right">-15297.36</td>
+<td align="right">18.121</td>
+<td align="right">-16148.65</td>
 </tr>
 </tbody>
 </table>
-<p>Again, the objective for <code>n_subiter = 1</code> is much different from other settings of <code>n_subiter</code>, but here it is almost 30 higher!</p>
+<p>Here, the value of <code>n_subiter</code> doesn’t seem to matter much.</p>
 <p>Finally, I refit with <code>n_subiter = 1</code> and plot the resulting factors. Notice, in particular, that the fifth factor is almost exclusively loaded on female reproductive tissues. (Further rounds of greedy addition and backfitting do not yield any additional factors.)</p>
 <pre class="r"><code>fl &lt;- flash_fit(data, 1, TRUE)
 
 plot(fl, plot_loadings = TRUE, loading_colors = gtex.colors,
-     loading_legend_size = 3, plot_scree = FALSE)</code></pre>
+     loading_legend_size = 3, plot_scree = FALSE,
+     plot_grid_nrow = 3, plot_grid_ncol = 2)</code></pre>
 <p><img src="figure/count_data.Rmd/nonneg2-1.png" width="672" style="display: block; margin: auto;" /></p>
 <details> <summary><em>Expand here to see past versions of nonneg2-1.png:</em></summary>
 <table style="border-collapse:separate; border-spacing:5px;">
@@ -903,37 +975,18 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
-<a href="https://github.com/willwerscheid/FLASHvestigations/blob/8b731598d9b702cdb6b353a34e1db6d688dca2ae/docs/figure/count_data.Rmd/nonneg2-1.png" target="_blank">8b73159</a>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/410eb80ebb5d5f78bd8705794330bc8a11a0c7f8/docs/figure/count_data.Rmd/nonneg2-1.png" target="_blank">410eb80</a>
 </td>
 <td style="text-align:left;">
 Jason Willwerscheid
 </td>
 <td style="text-align:left;">
-2018-09-21
+2018-09-22
 </td>
 </tr>
-</tbody>
-</table>
-<p></details> <img src="figure/count_data.Rmd/nonneg2-2.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of nonneg2-2.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
 <tr>
 <td style="text-align:left;">
-<a href="https://github.com/willwerscheid/FLASHvestigations/blob/8b731598d9b702cdb6b353a34e1db6d688dca2ae/docs/figure/count_data.Rmd/nonneg2-2.png" target="_blank">8b73159</a>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/8b731598d9b702cdb6b353a34e1db6d688dca2ae/docs/figure/count_data.Rmd/nonneg2-1.png" target="_blank">8b73159</a>
 </td>
 <td style="text-align:left;">
 Jason Willwerscheid
@@ -957,11 +1010,10 @@ Jason Willwerscheid
           verbose = FALSE)
   )
 )
-mu &lt;- fl$fitted_values</code></pre>
-<p>Note that this takes about as long as the entire fitting process with <code>n_subiter = 1</code> above!</p>
-<pre class="r"><code>round(t_init[3], digits = 2)
+mu &lt;- fl$fitted_values
+round(t_init[3], digits = 2)
 #&gt; elapsed 
-#&gt;    5.33</code></pre>
+#&gt;    5.57</code></pre>
 <p>Now I run FLASH on the pseudo-data and update <span class="math inline">\(\mu^\star\)</span>:</p>
 <pre class="r"><code>pseudodata &lt;- set_pseudodata(data, mu)
 t_update &lt;- system.time(
@@ -973,7 +1025,7 @@ t_update &lt;- system.time(
 mu &lt;- exp(fl$fitted_values)
 round(t_update[3], digits = 2)
 #&gt; elapsed 
-#&gt;    3.25</code></pre>
+#&gt;     3.4</code></pre>
 <pre class="r"><code>pseudodata &lt;- set_pseudodata(data, mu)
 t_final &lt;- system.time(
   fl &lt;- suppressWarnings(
@@ -983,11 +1035,11 @@ t_final &lt;- system.time(
 )
 round(t_final[3], digits = 2)
 #&gt; elapsed 
-#&gt;    1.94</code></pre>
-<p>The objective is not much worse than the the objective attained using the more involved approach above (it is about 70 lower):</p>
-<pre class="r"><code>pois_obj(data, fl)
-#&gt; [1] -15588</code></pre>
-<p>However, the loadings tell a somewhat different story:</p>
+#&gt;    2.09</code></pre>
+<p>As expected, the objective is worse than the the objective attained using the more involved approach above (it is about 300 lower):</p>
+<pre class="r"><code>calc_obj(fl, data, mu)
+#&gt; [1] -16302.38</code></pre>
+<p>The loadings are also fairly strange:</p>
 <pre class="r"><code>plot(fl, plot_loadings = TRUE, loading_colors = gtex.colors,
      loading_legend_size = 3, plot_scree = FALSE)</code></pre>
 <p><img src="figure/count_data.Rmd/two_iter5b-1.png" width="672" style="display: block; margin: auto;" /></p>
@@ -1009,6 +1061,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/410eb80ebb5d5f78bd8705794330bc8a11a0c7f8/docs/figure/count_data.Rmd/two_iter5b-1.png" target="_blank">410eb80</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-22
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/8b731598d9b702cdb6b353a34e1db6d688dca2ae/docs/figure/count_data.Rmd/two_iter5b-1.png" target="_blank">8b73159</a>
 </td>
 <td style="text-align:left;">
@@ -1021,18 +1084,50 @@ Jason Willwerscheid
 </tbody>
 </table>
 <p></details></p>
-<p>Further, this simpler approach is slower than the above approach for all values of <code>n_subiter</code>:</p>
+<p>Further, this simpler approach is slower than the above approach, especially for small values of <code>n_subiter</code>:</p>
 <pre class="r"><code>round(t_init[3] + t_update[3] + t_final[3], digits = 2)
 #&gt; elapsed 
-#&gt;   10.52</code></pre>
+#&gt;   11.06</code></pre>
 </div>
 <div id="accounting-for-overdispersion" class="section level2">
 <h2>Accounting for overdispersion</h2>
-<p>As explained above, I chose <code>var_type = &quot;zero&quot;</code> merely for purposes of illustration. Often, it will be more appropriate to set <code>var_type = &quot;constant&quot;</code>. In the example under consideration, a “constant” variance structure yields more structure and more interpretable factors (note, in particular, the sex-specific fourth loading):</p>
+<p>In the above examples, I used <code>var_type = &quot;zero&quot;</code> (I did so because convergence is typically better behaved). Often, however, it will be more appropriate to set <code>var_type = &quot;constant&quot;</code>. In the example under consideration, a “constant” variance structure yields more structure, more interpretable factors (note, in particular, the sex-specific fourth loading), and a much better objective:</p>
 <pre class="r"><code>fl &lt;- flash_fit(data, 1, var_type = &quot;constant&quot;)
+fl$objective
+#&gt; [1] 23905.85
 plot(fl, plot_loadings = TRUE, loading_colors = gtex.colors,
      loading_legend_size = 3, plot_scree = FALSE)</code></pre>
 <p><img src="figure/count_data.Rmd/constant-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of constant-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/410eb80ebb5d5f78bd8705794330bc8a11a0c7f8/docs/figure/count_data.Rmd/constant-1.png" target="_blank">410eb80</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-22
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
