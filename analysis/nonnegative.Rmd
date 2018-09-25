@@ -15,12 +15,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Nonnegative matrix factorization is straightforward in FLASH; we need only put a class of nonnegative priors on the factors and loadings. In ASH, the `+uniform` priors constitute such a class (and, at present, this is the only such class in ASH).
 
-As an example of nonnegative matrix factorization via FLASH, I analyze the GTEx donation matrix. (I ignore the fact that "errors" are not, as FLASH assumes, Gaussian.) 
+As an example of nonnegative matrix factorization via FLASH, I analyze the GTEx donation matrix. This matrix consists of 44 rows, each of which corresponds to a tissue or cell type (liver, lung, cortex, whole blood, etc.), and 571 columns, each of which corresponds to a donor. Note that a given donor can contribute multiple samples of a given tissue. 
+
+In this analysis, I ignore the fact that "errors" are not, as FLASH assumes, Gaussian. I will address this simplification in subsequent analyses (see [here](count_data.html) and [here](binary_data.html)).
 
 
 ## Data
 
-First I set up the donation matrix. As in previous analyses, I use GTEx v6 data rather than the more recent v7 data. 
+First I set up the donation matrix. As in previous analyses, I use GTEx v6 data rather than the more recent v7 or v8 data. 
 
 ```{r data}
 raw <- read.csv("https://storage.googleapis.com/gtex_analysis_v6/annotations/GTEx_Data_V6_Annotations_SampleAttributesDS.txt",
