@@ -314,7 +314,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-09-18</p>
+<p><strong>Last updated:</strong> 2018-09-25</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -338,14 +338,13 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/ae3946ce2fad08cf9d8f23fbc978bbdfe90223ed" target="_blank">ae3946c</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/f3e1061d25e6de2fece496fdc92d93559e01a1fc" target="_blank">f3e1061</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
     Ignored:    .DS_Store
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
-    Ignored:    analysis/figure/
     Ignored:    docs/.DS_Store
     Ignored:    docs/figure/.DS_Store
 
@@ -379,6 +378,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/f3e1061d25e6de2fece496fdc92d93559e01a1fc/analysis/nonnegative.Rmd" target="_blank">f3e1061</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-25
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/nonnegative.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/f97390151bd091460f6515ceb5607a0a63b849a4/docs/nonnegative.html" target="_blank">f973901</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-18
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 html
@@ -472,11 +505,12 @@ wflow_publish(“analysis/nonnegative.Rmd”)
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
 <p>Nonnegative matrix factorization is straightforward in FLASH; we need only put a class of nonnegative priors on the factors and loadings. In ASH, the <code>+uniform</code> priors constitute such a class (and, at present, this is the only such class in ASH).</p>
-<p>As an example of nonnegative matrix factorization via FLASH, I analyze the GTEx donation matrix. (I ignore the fact that “errors” are not, as FLASH assumes, Gaussian.)</p>
+<p>As an example of nonnegative matrix factorization via FLASH, I analyze the GTEx donation matrix. This matrix consists of 44 rows, each of which corresponds to a tissue or cell type (liver, lung, cortex, whole blood, etc.), and 571 columns, each of which corresponds to a donor. Note that a given donor can contribute multiple samples of a given tissue.</p>
+<p>In this analysis, I ignore the fact that “errors” are not, as FLASH assumes, Gaussian. I will address this simplification in subsequent analyses (see <a href="count_data.html">here</a> and <a href="binary_data.html">here</a>).</p>
 </div>
 <div id="data" class="section level2">
 <h2>Data</h2>
-<p>First I set up the donation matrix. As in previous analyses, I use GTEx v6 data rather than the more recent v7 data.</p>
+<p>First I set up the donation matrix. As in previous analyses, I use GTEx v6 data rather than the more recent v7 or v8 data.</p>
 <pre class="r"><code>raw &lt;- read.csv(&quot;https://storage.googleapis.com/gtex_analysis_v6/annotations/GTEx_Data_V6_Annotations_SampleAttributesDS.txt&quot;,
                 header=TRUE, sep=&#39;\t&#39;)
 
@@ -832,7 +866,7 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] ebnm_0.1-14  flashr_0.6-1
+[1] ebnm_0.1-15  flashr_0.6-2
 
 loaded via a namespace (and not attached):
  [1] softImpute_1.4      NNLM_0.4.2          ashr_2.2-13        
