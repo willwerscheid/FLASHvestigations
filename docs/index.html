@@ -213,7 +213,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-09-21</p>
+<p><strong>Last updated:</strong> 2018-09-25</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -222,7 +222,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/382f0f7a4a2a098e2fbd86bd4fac58b4a34ec991" target="_blank">382f0f7</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/c416b560c08787fd4bd291593fde2de30df90d0c" target="_blank">c416b56</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -233,9 +233,7 @@ Ignored files:
     Ignored:    docs/figure/.DS_Store
 
 Untracked files:
-    Untracked:  code/pois_lik.R
     Untracked:  data/greedy19.rds
-    Untracked:  temp_debug.RDS
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -264,6 +262,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/c416b560c08787fd4bd291593fde2de30df90d0c/analysis/index.Rmd" target="_blank">c416b56</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-25
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/index.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/0d3e65d23f365a9b2b6c817d745e02375555ddbe/docs/index.html" target="_blank">0d3e65d</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-21
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -1452,12 +1484,12 @@ Start workflowr project.
 <p><a href="squarem.html">Investigation 10.</a> SQUAREM does poorly on FLASH backfits. DAAREM (a more recent algorithm by one of the authors of SQUAREM) does better, but offers smaller performance gains than parallelization.</p>
 <p><a href="random.html">Investigation 11.</a> The order in which factor/loading pairs are updated (during backfitting) makes some difference, but not much.</p>
 <p><a href="arbitraryV.html">Investigation 12.</a> To fit a FLASH model with an arbitrary error covariance matrix, I follow up on a <a href="https://github.com/stephenslab/flashr/issues/17">suggestion</a> by Matthew Stephens.</p>
-<p>Investigations 14 and 16 illustrate two approaches to factorizing the GTEx donation matrix. The first is more naive, and is primarily intended as an illustration of how to do nonnegative matrix factorization using FLASH. The second is a more sophisticated approach that models the counts as drawn from Poisson distributions.</p>
+<p>Investigations 14 and 16-17 illustrate three approaches to factorizing the GTEx donation matrix. The first is more naive, and is primarily intended as an illustration of how to do nonnegative matrix factorization using FLASH. The second and third are more sophisticated approaches that model the entries as count or binary data.</p>
 <ul>
 <li><p><a href="nonnegative.html">Investigation 14.</a> An example of how to use nonnegative ASH priors to obtain a nonnegative matrix factorization.</p></li>
 <li><p><a href="count_data.html">Investigation 16.</a> Instead of directly fitting FLASH, I fit count data via a Gaussian approximation to the Poisson log likelihood.</p></li>
+<li><p><a href="binary_data.html">Investigation 17.</a> Using an approach that is similar to that of the previous analysis, I fit binary data via an approximation to the binomial log likelihood.</p></li>
 </ul>
-<p><a href="scalar_tau.html">Investigation 15.</a> Tests an implementation of changes to the way <code>tau</code> is stored, as discussed <a href="https://github.com/stephenslab/flashr/issues/83">here</a>.</p>
 </div>
 <div id="still-relevant" class="section level2">
 <h2>Still Relevant</h2>
@@ -1486,6 +1518,10 @@ Start workflowr project.
 <ul>
 <li><p><a href="warmstart.html">Investigation 6.</a> Poor <code>optim</code> results can produce large decreases in the objective function. We should use warmstarts when <code>ebnm_fn = ebnm_pn</code>.</p></li>
 <li><p><a href="warmstart2.html">Investigation 7.</a> The advantages of warmstarts are not nearly as compelling when <code>ebnm_fn = ebnm_ash</code>.</p></li>
+</ul>
+<p>The changes tested in Investigation 15 were implemented in version 0.6-2 of <code>flashr</code>.</p>
+<ul>
+<li><a href="scalar_tau.html">Investigation 15.</a> Tests an implementation of changes to the way <code>tau</code> is stored, as discussed <a href="https://github.com/stephenslab/flashr/issues/83">here</a>.</li>
 </ul>
 </div>
 
