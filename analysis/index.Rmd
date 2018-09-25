@@ -20,13 +20,13 @@ Investigations 8 and 9 implement parallel backfitting updates.
 
 [Investigation 12.](arbitraryV.html) To fit a FLASH model with an arbitrary error covariance matrix, I follow up on a [suggestion](https://github.com/stephenslab/flashr/issues/17) by Matthew Stephens.
 
-Investigations 14 and 16 illustrate two approaches to factorizing the GTEx donation matrix. The first is more naive, and is primarily intended as an illustration of how to do nonnegative matrix factorization using FLASH. The second is a more sophisticated approach that models the counts as drawn from Poisson distributions.
+Investigations 14 and 16-17 illustrate three approaches to factorizing the GTEx donation matrix. The first is more naive, and is primarily intended as an illustration of how to do nonnegative matrix factorization using FLASH. The second and third are more sophisticated approaches that model the entries as count or binary data.
 
 * [Investigation 14.](nonnegative.html) An example of how to use nonnegative ASH priors to obtain a nonnegative matrix factorization.
 
-* [Investigation 16.](count_data.html) Instead of directly fitting FLASH, I fit count data via a Gaussian approximation to the Poisson log likelihood. 
+* [Investigation 16.](count_data.html) Instead of directly fitting FLASH, I fit count data via a Gaussian approximation to the Poisson log likelihood.
 
-[Investigation 15.](scalar_tau.html) Tests an implementation of changes to the way `tau` is stored, as discussed  [here](https://github.com/stephenslab/flashr/issues/83).
+* [Investigation 17.](binary_data.html) Using an approach that is similar to that of the previous analysis, I fit binary data via an approximation to the binomial log likelihood.
 
 
 ## Still Relevant
@@ -64,3 +64,6 @@ Investigations 6 and 7 deal with warmstarts, which were implemented in version 0
 
 * [Investigation 7.](warmstart2.html) The advantages of warmstarts are not nearly as compelling when `ebnm_fn = ebnm_ash`.
 
+The changes tested in Investigation 15 were implemented in version 0.6-2 of `flashr`.
+
+* [Investigation 15.](scalar_tau.html) Tests an implementation of changes to the way `tau` is stored, as discussed  [here](https://github.com/stephenslab/flashr/issues/83).
