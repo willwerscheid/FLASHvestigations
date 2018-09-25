@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Matrix factorization of binary data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Matrix factorization of binary data</h1>
+<h4 class="author"><em>Jason Willwerscheid</em></h4>
+<h4 class="date"><em>9/22/2018</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-09-25</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/2303a6c1e6a0b78f2445fe95ea37ce94a78ba2d5" target="_blank">2303a6c</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  data/greedy19.rds
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/2303a6c1e6a0b78f2445fe95ea37ce94a78ba2d5/analysis/binary_data.Rmd" target="_blank">2303a6c</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-25
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/binary_data.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>I repeat the <a href="count_data.html">previous analysis</a> but here I treat the GTEx donation matrix as binary data. (This is probably more appropriate; it is much more natural to assume that each donor will contribute a given tissue with a particular probability than that each donor will generate samples of a given tissue such that the count of samples is distributed as a Poisson random variable.)</p>
+</div>
+<div id="model" class="section level2">
+<h2>Model</h2>
+<p>Here the model is <span class="math display">\[ Y_{ij} \sim \text{Bernoulli}(p_{ij}), \]</span> with <span class="math display">\[ \log \left( \frac{p}{1 - p} \right) = LF&#39;. \]</span> As in the previous analysis, one could also put <span class="math display">\[ \log \left( \frac{p}{1 - p} \right) = LF&#39; + E, \]</span> with the “errors” <span class="math inline">\(E_{ij}\)</span> distributed i.i.d. <span class="math inline">\(N(0, \sigma^2)\)</span>.</p>
+<p>Setting <span class="math inline">\(\eta = \log (p / (1 - p))\)</span>, one has that <span class="math display">\[ \begin{aligned}
+\ell(\eta) &amp;= \sum_{i, j} - \log (1 + e^{\eta_{ij}}) + Y_{ij} \eta_{ij} \\
+\ell&#39;(\eta) &amp;= \sum_{i, j} -\frac{e^{\eta_{ij}}}{1 + e^{\eta_{ij}}} + Y_{ij} = \sum_{i, j} Y_{ij} - p_{ij} \\
+\ell&#39;&#39;(\eta) &amp;= \sum_{i, j} - \frac{e^{\eta_{ij}}}{(1 + e^{\eta_{ij}})^2} = \sum_{i, j} -p_{ij}(1 - p_{ij})
+\end{aligned}\]</span></p>
+<p>Using the same trick as before, one obtains pseudo-data <span class="math display">\[ X = \log \left( \frac{p^\star}{1 - p^\star} \right) + \frac{Y - p^\star}{p^\star(1 - p^\star)} \]</span> with standard errors <span class="math display">\[ S = \frac{1}{\sqrt{p^\star(1 - p^\star)}} \]</span></p>
+<p>The objective can be calculated as the FLASH objective plus <span class="math display">\[\sum_{i, j} Y_{ij} \log p^\star_{ij} + (1 - Y_{ij}) \log (1 - p^\star_{ij})
++ \frac{1}{2}\log \left( \frac{2 \pi}{p^\star_{ij}(1 - p^\star_{ij})} \right)
++ \frac{(Y_{ij} - p^\star_{ij})^2}{2p^\star_{ij}(1 - p^\star_{ij})}. \]</span></p>
+</div>
+<div id="code" class="section level2">
+<h2>Code</h2>
+<p>This is largely cut and pasted from the previous analysis.</p>
+<pre class="r"><code>devtools::load_all(&quot;~/GitHub/flashr&quot;)
+#&gt; Loading flashr
+devtools::load_all(&quot;~/GitHub/ebnm&quot;)
+#&gt; Loading ebnm
+
+raw &lt;- read.csv(&quot;https://storage.googleapis.com/gtex_analysis_v6/annotations/GTEx_Data_V6_Annotations_SampleAttributesDS.txt&quot;,
+                header=TRUE, sep=&#39;\t&#39;)
+
+data &lt;- raw[, c(&quot;SAMPID&quot;, &quot;SMTSD&quot;)] # sample ID, tissue type
+# Extract donor ID:
+tmp &lt;- strsplit(as.character(data$SAMPID), &quot;-&quot;)
+data$SAMPID &lt;- as.factor(sapply(tmp, function(x) {x[[2]]})) 
+names(data) &lt;- c(&quot;DonorID&quot;, &quot;TissueType&quot;)
+
+data &lt;- suppressMessages(reshape2::acast(data, TissueType ~ DonorID))
+
+missing.tissues &lt;- c(1, 8, 9, 20, 21, 24, 26, 27, 33, 36, 39)
+data &lt;- data[-missing.tissues, ]
+
+# Drop columns with no samples:
+data &lt;- data[, colSums(data) &gt; 0]
+
+# Convert to binary data:
+data[data &gt; 0] &lt;- 1
+
+gtex.colors &lt;- read.table(&quot;https://github.com/stephenslab/gtexresults/blob/master/data/GTExColors.txt?raw=TRUE&quot;,
+                          sep = &#39;\t&#39;, comment.char = &#39;&#39;)
+gtex.colors &lt;- gtex.colors[-c(7, 8, 19, 20, 24, 25, 31, 34, 37), 2]
+gtex.colors &lt;- as.character(gtex.colors)
+
+# Computing objective (ELBO) -------------------------------------------
+
+calc_obj &lt;- function(fl, the_data, p) {
+  return(fl$objective + 
+           sum(the_data * log(p) + (1 - the_data) * log(1 - p) + 
+                 0.5 * (log(2 * pi / (p * (1 - p))) + 
+                          (the_data - p)^2 / (p * (1 - p)))))
+}
+
+# Calculating pseudo-data ----------------------------------------------
+
+calc_X &lt;- function(the_data, p) {
+  return(log(p / (1 - p)) + (the_data - p) / (p * (1 - p)))
+}
+
+calc_S &lt;- function(the_data, p) {
+  return(1 / sqrt(p * (1 - p)))
+}
+
+set_pseudodata &lt;- function(the_data, p) {
+  return(flash_set_data(calc_X(the_data, p), S = calc_S(the_data, p)))
+}
+
+# Setting FLASH parameters ---------------------------------------------
+
+# Initialization function for nonnegative loadings 
+#   (but arbitrary factors):
+my_init_fn &lt;- function(Y, K = 1) {
+  ret = udv_svd(Y, K)
+  sum_pos = sum(ret$u[ret$u &gt; 0]^2)
+  sum_neg = sum(ret$u[ret$u &lt; 0]^2)
+  if (sum_neg &gt; sum_pos) {
+    return(list(u = -ret$u, d = ret$d, v = -ret$v))
+  } else
+    return(ret)
+}
+
+get_init_fn &lt;- function(nonnegative = FALSE) {
+  if (nonnegative) {
+    return(&quot;my_init_fn&quot;)
+  } else {
+    return(&quot;udv_svd&quot;)
+  }
+}
+
+get_ebnm_fn &lt;- function(nonnegative = FALSE) {
+  if (nonnegative) {
+    return(list(l = &quot;ebnm_ash&quot;, f = &quot;ebnm_pn&quot;))
+  } else {
+    return(list(l = &quot;ebnm_pn&quot;, f = &quot;ebnm_pn&quot;))
+  }
+}
+
+get_ebnm_param &lt;- function(nonnegative = FALSE) {
+  if (nonnegative) {
+    return(list(l = list(mixcompdist = &quot;+uniform&quot;),
+                f = list(warmstart = TRUE)))
+  } else {
+    return(list(l = list(warmstart = TRUE),
+                f = list(warmstart = TRUE)))
+  }
+}
+
+# Initializing p and running FLASH -------------------------------------
+
+stabilize_p &lt;- function(p) {
+  p[p &lt; 1e-6] &lt;- 1e-6
+  p[p &gt; 1 - 1e-6] &lt;- 1 - 1e-6
+  return(p)
+}
+
+init_p &lt;- function(the_data, f_init) {
+  if (is.null(f_init)) {
+    return(matrix(colMeans(the_data),
+                  nrow = nrow(the_data), ncol = ncol(the_data),
+                  byrow = TRUE))
+  } else {
+    p &lt;- 1 / (1 + exp(-f_init$fitted_values))
+    return(stabilize_p(p))
+  }
+}
+
+update_p &lt;- function(fl, pseudodata, var_type) {
+  if (var_type == &quot;constant&quot;) {
+    LF &lt;- fl$fitted_values
+    X &lt;- pseudodata$Y
+    S2 &lt;- pseudodata$S^2
+    s2 &lt;- 1 / fl$fit$tau[1, 1] - S2[1,1]
+    eta &lt;- LF + ((1 / S2) / (1 / S2 + 1 / s2)) * (X - LF)
+    p &lt;- 1 / (1 + exp(-eta))
+  } else { # var_type = &quot;zero&quot;
+    p &lt;- 1 / (1 + exp(-fl$fitted_values))
+  }
+  return(stabilize_p(p))
+}
+
+greedy_iter &lt;- function(pseudodata, f_init, niter, 
+                        nonnegative = FALSE, var_type = &quot;zero&quot;) {
+  suppressWarnings(
+    flash_greedy_workhorse(pseudodata,
+                           Kmax = 1,
+                           f_init = f_init,
+                           var_type = var_type,
+                           ebnm_fn = get_ebnm_fn(nonnegative),
+                           ebnm_param = get_ebnm_param(nonnegative),
+                           init_fn = get_init_fn(nonnegative),
+                           verbose_output = &quot;&quot;,
+                           nullcheck = FALSE,
+                           maxiter = niter)
+  )
+}
+
+backfit_iter &lt;- function(pseudodata, f_init, kset, niter, 
+                         nonnegative = FALSE, var_type = &quot;zero&quot;) {
+  suppressWarnings(
+    flash_backfit_workhorse(pseudodata,
+                            kset = kset,
+                            f_init = f_init,
+                            var_type = var_type,
+                            ebnm_fn = get_ebnm_fn(nonnegative),
+                            ebnm_param = get_ebnm_param(nonnegative),
+                            verbose_output = &quot;&quot;,
+                            nullcheck = FALSE,
+                            maxiter = niter)
+  )
+}
+
+run_one_fit &lt;- function(the_data, f_init, greedy, maxiter = 200,
+                        n_subiter = 200, nonnegative = FALSE, 
+                        var_type = &quot;zero&quot;, 
+                        verbose = TRUE, tol = .01) {
+  p &lt;- init_p(the_data, f_init)
+
+  if (greedy) {
+    pseudodata &lt;- set_pseudodata(the_data, p)
+    fl &lt;- greedy_iter(pseudodata, f_init, n_subiter, 
+                      nonnegative, var_type)
+    kset &lt;- ncol(fl$fit$EL) # Only &quot;backfit&quot; the greedily added factor
+    p &lt;- update_p(fl, pseudodata, var_type)
+  } else {
+    fl &lt;- f_init
+    kset &lt;- 1:ncol(fl$fit$EL) # Backfit all factor/loadings
+  }
+
+  # The objective can get stuck oscillating between two values, so we
+  #   need to track the last two values attained:
+  old_old_obj &lt;- -Inf
+  old_obj &lt;- -Inf
+  diff &lt;- Inf
+  iter &lt;- 0
+  while (diff &gt; tol &amp;&amp; iter &lt; maxiter) {
+    iter &lt;- iter + 1
+    pseudodata &lt;- set_pseudodata(the_data, p)
+    fl &lt;- backfit_iter(pseudodata, fl, kset, n_subiter, 
+                       nonnegative, var_type)
+
+    fl$objective &lt;- calc_obj(fl, the_data, p)
+    diff &lt;- min(abs(fl$objective - old_obj), 
+                abs(fl$objective - old_old_obj))
+
+    old_old_obj &lt;- old_obj
+    old_obj &lt;- fl$objective
+    
+    p &lt;- update_p(fl, pseudodata, var_type)
+
+    if (verbose) {
+      message(&quot;Iteration &quot;, iter, &quot;: &quot;, fl$objective)
+    }
+  }
+  return(fl)
+}
+
+flash_fit &lt;- function(the_data, n_subiter, nonnegative = FALSE,
+                      var_type = &quot;zero&quot;, maxiter = 100, tol = .01,
+                      verbose = FALSE) {
+  fl &lt;- run_one_fit(the_data, f_init = NULL, greedy = TRUE,
+                    maxiter = maxiter, n_subiter = n_subiter,
+                    nonnegative = nonnegative, var_type = var_type,
+                    verbose = verbose)
+  old_obj &lt;- fl$objective
+  
+  # Keep greedily adding factors until the objective no longer improves:
+  diff &lt;- Inf
+  while (diff &gt; tol) {
+    fl &lt;- run_one_fit(the_data, fl, greedy = TRUE,
+                      maxiter = maxiter, n_subiter = n_subiter,
+                      nonnegative = nonnegative, var_type = var_type,
+                      verbose = verbose)
+    diff &lt;- fl$objective - old_obj
+    old_obj &lt;- fl$objective
+  }
+  
+  # Now backfit the whole thing:
+  fl &lt;- run_one_fit(the_data, fl, greedy = FALSE, 
+                    maxiter = maxiter, n_subiter = n_subiter,
+                    nonnegative = nonnegative, var_type = var_type,
+                    verbose = verbose)
+  
+  return(fl)
+}</code></pre>
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<p>I fit factors using <code>var_type = &quot;zero&quot;</code> (as in the previous analysis, <code>var_type = &quot;constant&quot;</code> gives the same result):</p>
+<pre class="r"><code>fl_zero &lt;- flash_fit(data, 1, var_type = &quot;zero&quot;)
+fl_zero$objective
+#&gt; [1] -12075.66
+plot(fl_zero, plot_loadings = TRUE, loading_colors = gtex.colors,
+     loading_legend_size = 3, plot_scree = FALSE)</code></pre>
+<p><img src="figure/binary_data.Rmd/zero-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Nonnegative loadings are not as compelling (but I’m not sure that they make much sense in this scenario anyway):</p>
+<pre class="r"><code>fl_nonneg &lt;- flash_fit(data, 1, var_type = &quot;zero&quot;, nonnegative = TRUE)
+fl_nonneg$objective
+#&gt; [1] -12448.13
+plot(fl_nonneg, plot_loadings = TRUE, loading_colors = gtex.colors,
+     loading_legend_size = 3, plot_scree = FALSE)</code></pre>
+<p><img src="figure/binary_data.Rmd/nonneg-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()
+#&gt; R version 3.4.3 (2017-11-30)
+#&gt; Platform: x86_64-apple-darwin15.6.0 (64-bit)
+#&gt; Running under: macOS High Sierra 10.13.6
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+#&gt; 
+#&gt; locale:
+#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt; [1] ebnm_0.1-15  flashr_0.6-2
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] Rcpp_0.12.18        pillar_1.2.1        plyr_1.8.4         
+#&gt;  [4] compiler_3.4.3      git2r_0.21.0        workflowr_1.0.1    
+#&gt;  [7] R.methodsS3_1.7.1   R.utils_2.6.0       iterators_1.0.9    
+#&gt; [10] tools_3.4.3         testthat_2.0.0      digest_0.6.15      
+#&gt; [13] tibble_1.4.2        evaluate_0.10.1     memoise_1.1.0      
+#&gt; [16] gtable_0.2.0        lattice_0.20-35     rlang_0.2.0        
+#&gt; [19] Matrix_1.2-12       foreach_1.4.4       commonmark_1.4     
+#&gt; [22] yaml_2.1.17         parallel_3.4.3      withr_2.1.1.9000   
+#&gt; [25] stringr_1.3.0       roxygen2_6.0.1.9000 xml2_1.2.0         
+#&gt; [28] knitr_1.20          REBayes_1.2         devtools_1.13.4    
+#&gt; [31] rprojroot_1.3-2     grid_3.4.3          R6_2.2.2           
+#&gt; [34] rmarkdown_1.8       reshape2_1.4.3      ggplot2_2.2.1      
+#&gt; [37] ashr_2.2-13         magrittr_1.5        whisker_0.3-2      
+#&gt; [40] backports_1.1.2     scales_0.5.0        codetools_0.2-15   
+#&gt; [43] htmltools_0.3.6     MASS_7.3-48         assertthat_0.2.0   
+#&gt; [46] softImpute_1.4      colorspace_1.3-2    labeling_0.3       
+#&gt; [49] stringi_1.1.6       Rmosek_7.1.3        lazyeval_0.2.1     
+#&gt; [52] doParallel_1.0.11   pscl_1.5.2          munsell_0.4.3      
+#&gt; [55] truncnorm_1.0-8     SQUAREM_2017.10-1   R.oo_1.21.0</code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
