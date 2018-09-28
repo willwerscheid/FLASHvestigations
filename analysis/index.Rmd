@@ -28,6 +28,8 @@ Investigations 14 and 16-17 illustrate three approaches to factorizing the GTEx 
 
 * [Investigation 17.](binary_data.html) Using an approach that is similar to that of the previous analysis, I fit binary data via an approximation to the binomial log likelihood.
 
+[Note 3.](large_p.html) An idea for how to fit FLASH models when $n$ is manageable and $p$ is very large.
+
 
 ## Still Relevant
 
