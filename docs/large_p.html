@@ -338,7 +338,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/960e77eef240503f478fbca9858805047e046796" target="_blank">960e77e</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/73618f162ee5665431f6eb13b4055c4ed53a8489" target="_blank">73618f1</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -383,6 +383,40 @@ Message
 Rmd
 </td>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/73618f162ee5665431f6eb13b4055c4ed53a8489/analysis/large_p.Rmd" target="_blank">73618f1</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-28
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/large_p.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/f99e16ec9e8966d77ad09df2a4efb1731d6029ac/docs/large_p.html" target="_blank">f99e16e</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-09-28
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/960e77eef240503f478fbca9858805047e046796/analysis/large_p.Rmd" target="_blank">960e77e</a>
 </td>
 <td style="text-align:left;">
@@ -402,24 +436,24 @@ wflow_publish(“analysis/large_p.Rmd”)
 <hr />
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>In my MASH v FLASH application (as in the MASH analysis of the GTEx data), I use a subset of strong tests to identify loadings (i.e., covariance structures) and a random subset of tests to fit priors on these loadings. I suggest that we can instead use <em>all</em> of the tests in each step by borrowing various online optimization techniques.</p>
+<p>In my MASH v FLASH application I use a subset of strong tests to identify loadings (i.e., covariance structures) and a random subset of tests to fit priors on the corresponding factors. (My workflow is similar to the workflow for MASH described <a href="https://stephenslab.github.io/mashr/articles/eQTL_outline.html">here</a>.) I suggest that we can instead use <em>all</em> of the tests in each step by borrowing various online optimization techniques.</p>
 </div>
 <div id="idea" class="section level2">
 <h2>Idea</h2>
-<p>Fitting the “strong” and “random” datasets involves fitting a <span class="math inline">\(44 \times p\)</span> matrix, where <span class="math inline">\(p\)</span> is on the order of tens of thousands. We sample the data because there are in fact millions of tests, and it is currently not feasible to fit such a matrix of this scale.</p>
-<p>I suggest the following procedure. <a href="https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHgtex2.html">Recall</a> that we are primarily interested in obtaining a good loadings matrix and accurate priors on the factors. Then, with loadings and priors on factors fixed, estimating posteriors for individual tests is entirely straightforward.</p>
-<p>Here I outline an idea for using “all” of the tests to fit the (fixed) loadings matrix <code>LL</code> and priors on factors <span class="math inline">\(g_f\)</span>. Let <span class="math inline">\(Y \in \mathbb{R}^{n \times p}\)</span> be the complete data matrix, so that <span class="math inline">\(n = 44\)</span> and <span class="math inline">\(p\)</span> is on the order of millions.</p>
+<p>Fitting the “strong” and “random” datasets involves fitting a <span class="math inline">\(44 \times p\)</span> matrix, where <span class="math inline">\(p\)</span> is on the order of tens of thousands. We subsample the complete data because there are in fact millions of tests, and it is currently not feasible to fit a matrix of this scale.</p>
+<p>I suggest the following procedure. <a href="https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHgtex2.html">Recall</a> that we are primarily interested in obtaining a good loadings matrix and accurate priors on the factors. With loadings and priors on factors fixed, estimating posteriors for individual tests is entirely straightforward.</p>
+<p>Here I outline an idea for using <em>all</em> of the tests to fit the (fixed) loadings matrix <code>LL</code> and priors on factors <span class="math inline">\(g_f\)</span>. Let <span class="math inline">\(Y \in \mathbb{R}^{n \times p}\)</span> be the complete data matrix, so that <span class="math inline">\(n = 44\)</span> and <span class="math inline">\(p\)</span> is on the order of millions.</p>
 <ol style="list-style-type: decimal">
 <li><p>Randomly permute the columns of <span class="math inline">\(Y\)</span> and split the resulting matrix into mini-batches <span class="math inline">\(Y_1, Y_2, \ldots, Y_m\)</span>, so that each <span class="math inline">\(Y_j\)</span> is of manageable dimension (say, <span class="math inline">\(44 \times 1000\)</span> or <span class="math inline">\(44 \times 10000\)</span>).</p></li>
 <li><p>Fit a FLASH object <span class="math inline">\(f^{(1)}\)</span> to the first mini-batch <span class="math inline">\(Y_1\)</span>.</p></li>
 <li><p>For each successive mini-batch <span class="math inline">\(Y_j\)</span>:</p>
 <ol style="list-style-type: decimal">
-<li><p>Take the loadings from the previous FLASH object <span class="math inline">\(f^{(j - 1)}\)</span>. Fix them and fit a new FLASH object <span class="math inline">\(\tilde{f}^{(j)}\)</span> to the new mini-batch <span class="math inline">\(Y_j\)</span>, initializing the priors on the factors to the values obtained for the previous FLASH object <span class="math inline">\(f^{(j - 1)}\)</span> (in particular, this ensures that the ASH grid does not change from one object to another).</p></li>
+<li><p>Take the loadings from the previous FLASH object <span class="math inline">\(f^{(j - 1)}\)</span>. Fix them and fit a new FLASH object <span class="math inline">\(\tilde{f}^{(j)}\)</span> to the new mini-batch <span class="math inline">\(Y_j\)</span>, initializing the priors on the factors to the values obtained for the previous FLASH object <span class="math inline">\(f^{(j - 1)}\)</span> (in particular, this ensures that the ASH grids do not change from one iteration to the next).</p></li>
 <li><p>Greedily add as many new loadings as possible to <span class="math inline">\(\tilde{f}^{(j)}\)</span>. (This helps pick up covariance structures that weren’t seen in previous mini-batches, or that were below the threshold of detection.)</p></li>
-<li><p>Now unfix all of the loadings and backfit <span class="math inline">\(\tilde{f}^{(j)}\)</span>. (Note that this step is only reasonably fast when <span class="math inline">\(p\)</span> is small!).</p></li>
-<li><p>Finally, create a new FLASH object by taking weighted averages; in essence, set <span class="math inline">\(f^{(j)} = \frac{j - 1}{j} f^{(j - 1)} + \frac{1}{j} \tilde{f}^{(j)}\)</span>. Only the (expected value of) the loadings of <span class="math inline">\(f^{(j)}\)</span> and the priors on factors need to be calculated. One can simply take the new loadings to be <span class="math inline">\(\frac{j - 1}{j} L^{(j - 1)} + \frac{1}{j} \tilde{L}^{(j)}\)</span>, where <span class="math inline">\(L^{(j - 1)}\)</span> is the loadings matrix from <span class="math inline">\(f^{(j - 1)}\)</span> and <span class="math inline">\(\tilde{L}^{(j)}\)</span> is the (expected value of) the loadings matrix obtained during the <span class="math inline">\(j\)</span>th iteration. (Newly added loadings can simply be carried over as is.) Since the ASH grid on the priors is fixed, it is similarly straightforward to get prior on factors for <span class="math inline">\(f^{(j)}\)</span>; for example, if <span class="math inline">\(g_f^{(j - 1)} \sim \pi_0^{(j - 1)} \delta_0 + \pi_1^{(j - 1)} N(0, \sigma_1^2) + \ldots + \pi_K^{(j - 1)} N(0, \sigma_K^2)\)</span> and <span class="math inline">\(\tilde{g}_f^{(j)} \sim \tilde{\pi}_0^{(j)} \delta_0 + \tilde{\pi}_1^{(j)} N(0, \sigma_1^2) + \ldots + \tilde{\pi}_K^{(j)} N(0, \sigma_K^2)\)</span>, then set <span class="math inline">\(g_f^{(j)} \sim \left( \frac{j - 1}{j} \pi_0^{(j - 1)} + \frac{1}{j} \tilde{\pi}_0^{(j)} \right) \delta_0 + \ldots + \left( \frac{j - 1}{j} \pi_K^{(j - 1)} + \frac{1}{j} \tilde{\pi}_K^{(j)} \right) N(0, \sigma_K^2)\)</span>.</p></li>
+<li><p>Now unfix all of the loadings and backfit <span class="math inline">\(\tilde{f}^{(j)}\)</span>. (Note that this step is only reasonably fast when <span class="math inline">\(p\)</span> is small!)</p></li>
+<li><p>Finally, create a new FLASH object by taking weighted averages; in essence, set <span class="math inline">\(f^{(j)} = \frac{j - 1}{j} f^{(j - 1)} + \frac{1}{j} \tilde{f}^{(j)}\)</span>. Only the (expected value of) the loadings of <span class="math inline">\(f^{(j)}\)</span> and the priors on factors need to be calculated. One can simply take the new loadings to be <span class="math inline">\(\frac{j - 1}{j} L^{(j - 1)} + \frac{1}{j} \tilde{L}^{(j)}\)</span>, where <span class="math inline">\(L^{(j - 1)}\)</span> is the loadings matrix from <span class="math inline">\(f^{(j - 1)}\)</span> and <span class="math inline">\(\tilde{L}^{(j)}\)</span> is the (posterior mean of) the loadings matrix obtained during the <span class="math inline">\(j\)</span>th iteration. (Newly added loadings can simply be carried over as is.) Since the ASH grid on the priors is fixed, it is similarly straightforward to calculate the priors <span class="math inline">\(g_{f_k}\)</span>; for example, if <span class="math inline">\(g_f^{(j - 1)} \sim \pi_0^{(j - 1)} \delta_0 + \pi_1^{(j - 1)} N(0, \sigma_1^2) + \ldots + \pi_K^{(j - 1)} N(0, \sigma_K^2)\)</span> and <span class="math inline">\(\tilde{g}_f^{(j)} \sim \tilde{\pi}_0^{(j)} \delta_0 + \tilde{\pi}_1^{(j)} N(0, \sigma_1^2) + \ldots + \tilde{\pi}_K^{(j)} N(0, \sigma_K^2)\)</span>, then set <span class="math inline">\(g_f^{(j)} \sim \left( \frac{j - 1}{j} \pi_0^{(j - 1)} + \frac{1}{j} \tilde{\pi}_0^{(j)} \right) \delta_0 + \ldots + \left( \frac{j - 1}{j} \pi_K^{(j - 1)} + \frac{1}{j} \tilde{\pi}_K^{(j)} \right) N(0, \sigma_K^2)\)</span>.</p></li>
 </ol></li>
-<li><p>If desired, one can iterate through the complete dataset (or part of it) a second time (optionally, re-permuting the dataset). If this is done, then the weights in the above averages can be fixed at <span class="math inline">\((m - 1) / m\)</span> and <span class="math inline">\(1 / m\)</span> (recall that <span class="math inline">\(m\)</span> is the number of mini-batches).</p></li>
+<li><p>If desired, one can iterate through the complete dataset (or parts of it) multiple times (optionally, re-permuting the dataset after each iteration). If this is done, then the weights in the above averages can be fixed at <span class="math inline">\((m - 1) / m\)</span> and <span class="math inline">\(1 / m\)</span> after the first iteration (where <span class="math inline">\(m\)</span> is the number of mini-batches).</p></li>
 </ol>
 </div>
 <div id="session-information" class="section level2">
