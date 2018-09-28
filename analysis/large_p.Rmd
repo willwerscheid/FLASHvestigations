@@ -1,0 +1,40 @@
+---
+title: "Minibatch FLASH for large p"
+author: "Jason Willwerscheid"
+date: "9/28/2018"
+output:
+  workflowr::wflow_html
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>")
+```
+
+
+## Introduction
+
+In my MASH v FLASH application (as in the MASH analysis of the GTEx data), I use a subset of strong tests to identify loadings (i.e., covariance structures) and a random subset of tests to fit priors on these loadings. I suggest that we can instead use *all* of the tests in each step by borrowing various online optimization techniques. 
+
+## Idea
+
+Fitting the "strong" and "random" datasets involves fitting a $44 \times p$ matrix, where $p$ is on the order of tens of thousands. We sample the data because there are in fact millions of tests, and it is currently not feasible to fit such a matrix of this scale.
+
+I suggest the following procedure. [Recall](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHgtex2.html) that we are primarily interested in obtaining a good loadings matrix and accurate priors on the factors. Then, with loadings and priors on factors fixed, estimating posteriors for individual tests is entirely straightforward.
+
+Here I outline an idea for using "all" of the tests to fit the (fixed) loadings matrix `LL` and priors on factors $g_f$. Let $Y \in \mathbb{R}^{n \times p}$ be the complete data matrix, so that $n = 44$ and $p$ is on the order of millions.
+
+1. Randomly permute the columns of $Y$ and split the resulting matrix into mini-batches $Y_1, Y_2, \ldots, Y_m$, so that each $Y_j$ is of manageable dimension (say, $44 \times 1000$ or $44 \times 10000$).
+
+1. Fit a FLASH object $f^{(1)}$ to the first mini-batch $Y_1$.
+
+1. For each successive mini-batch $Y_j$:
+
+    1. Take the loadings from the previous FLASH object $f^{(j - 1)}$. Fix them and fit a new FLASH object $\tilde{f}^{(j)}$ to the new mini-batch $Y_j$, initializing the priors on the factors to the values obtained for the previous FLASH object $f^{(j - 1)}$ (in particular, this ensures that the ASH grid does not change from one object to another).
+  
+    1. Greedily add as many new loadings as possible to $\tilde{f}^{(j)}$. (This helps pick up covariance structures that weren't seen in previous mini-batches, or that were below the threshold of detection.)
+  
+    1. Now unfix all of the loadings and backfit $\tilde{f}^{(j)}$. (Note that this step is only reasonably fast when $p$ is small!).
+    
+    1. Finally, create a new FLASH object by taking weighted averages; in essence, set $f^{(j)} = \frac{j - 1}{j} f^{(j - 1)} + \frac{1}{j} \tilde{f}^{(j)}$. Only the (expected value of) the loadings of $f^{(j)}$ and the priors on factors need to be calculated. One can simply take the new loadings to be $\frac{j - 1}{j} L^{(j - 1)} + \frac{1}{j} \tilde{L}^{(j)}$, where $L^{(j - 1)}$ is the loadings matrix from $f^{(j - 1)}$ and $\tilde{L}^{(j)}$ is the (expected value of) the loadings matrix obtained during the $j$th iteration. (Newly added loadings can simply be carried over as is.) Since the ASH grid on the priors is fixed, it is similarly straightforward to get prior on factors for $f^{(j)}$; for example, if $g_f^{(j - 1)} \sim \pi_0^{(j - 1)} \delta_0 + \pi_1^{(j - 1)} N(0, \sigma_1^2) + \ldots + \pi_K^{(j - 1)} N(0, \sigma_K^2)$ and $\tilde{g}_f^{(j)} \sim \tilde{\pi}_0^{(j)} \delta_0 + \tilde{\pi}_1^{(j)} N(0, \sigma_1^2) + \ldots + \tilde{\pi}_K^{(j)} N(0, \sigma_K^2)$, then set $g_f^{(j)} \sim \left( \frac{j - 1}{j} \pi_0^{(j - 1)} + \frac{1}{j} \tilde{\pi}_0^{(j)} \right) \delta_0 + \ldots + \left( \frac{j - 1}{j} \pi_K^{(j - 1)} + \frac{1}{j} \tilde{\pi}_K^{(j)} \right) N(0, \sigma_K^2)$.
+    
+1. If desired, one can iterate through the complete dataset (or part of it) a second time (optionally, re-permuting the dataset). If this is done, then the weights in the above averages can be fixed at $(m - 1) / m$ and $1 / m$ (recall that $m$ is the number of mini-batches).
