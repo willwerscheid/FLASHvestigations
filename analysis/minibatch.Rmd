@@ -1,0 +1,172 @@
+---
+title: "Minibatch FLASH example"
+author: "Jason Willwerscheid"
+date: "10/2/2018"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>")
+```
+
+
+## Introduction
+
+Here I implement the "minibatch" approach described in a previous [note](large_p.html).
+
+
+## Details
+
+In my MASH v FLASH application, I am interested in obtaining fixed loadings and priors on factors that can be used to get posteriors for individual tests from the GTEx dataset. 
+
+Currently, I use a subset of 16069 "strong" tests to obtain loadings and a subset of 20000 "random" tests to obtain priors on factors. But I would like to use a stochastic approach to simultaneously fit loadings and priors on factors to *all* of the tests (or, at least, to a much larger subsample of the millions of available tests).
+
+To investigate, I've taken the "strong" dataset as a proxy for the complete GTEx data. As mentioned, it includes summary statistics for 16069 tests over 44 tissues, so it is small enough to fit all at once. Fitting the complete data yields a baseline against which I can compare results obtained using a subsampling method and a stochastic approach.
+
+The subsampling method is analogous to my current MASH v FLASH approach. Here, I subsample approximately 10% of the "strong" tests and fit a FLASH object to this smaller dataset.
+
+Next, using the stochastic technique described in the note linked above,
+I extract two sets of loadings and priors on factors. I examine the loadings and priors obtained via a single pass through the complete data, as well as those obtained after two iterations over the complete data. (To mimic the situation where the complete data has been chunked into multiple files in advance, I do not re-randomize the minibatches in between iterations.) For details, see the note linked above.
+
+
+## Results
+
+I pre-run the code [below](#code) and load the results from file.
+
+```{r load_res}
+control_fit <- readRDS("./data/minibatch/control_fit.rds")
+subsample_fit <- readRDS("./data/minibatch/subsample_fit.rds")
+oneiter_fit <- readRDS("./data/minibatch/oneiter_fit.rds")
+twoiter_fit <- readRDS("./data/minibatch/twoiter_fit.rds")
+```
+
+### Objective
+
+First, I compare the objectives attained after fitting the complete data to fixed loadings and priors on factors obtained using the methods described above. (The fitting is done in a post-processing step in the code [below](#code). Note that since scaling affects the likelihood when loadings are fixed, I have normalized all loadings to have $\ell_2$ norm equal to 1.)
+
+The stochastic approach yields a huge improvement over the subsampling approach. Interestingly, a single iteration largely suffices; there is certainly an improvement in objective (by approximately 500) after a second iteration, but most of the improvement over the subsampling approach occurs after the first iteration.
+
+```{r obj}
+library(ggplot2)
+library(reshape2)
+devtools::load_all("~/GitHub/flashr")
+
+# Objective:
+obj <- data.frame(objective = c(subsample_fit$objective,
+                                oneiter_fit$objective,
+                                twoiter_fit$objective,
+                                control_fit$objective),
+                  fit = c("subsampled data",
+                          "minibatches (one iter)",
+                          "minibatches (two iter)",
+                          "complete data"))
+ggplot(obj, aes(x = 1:4, y = objective)) + geom_point() +
+  geom_text(aes(label = fit, vjust = "center", hjust = -0.1)) +
+  xlim(c(0.5, 4.8)) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+
+### Unique effects
+
+For ease of comparison, I have split loadings into "unique" effects (which I have defined as a loading in which one element has absolute value greater than 0.9) and "shared" effects. Below, I display a heatmap of the unique effects obtained using each method. The intensity reflects the mixture density of the null component in the prior on the corresponding factor. Darker colors indicate unique effects that are common in this dataset; lighter colors indicate rarer effects; and the absence of a tile indicates that no factor was found.
+
+Observe that the stochastic approach finds many more rare effects than other methods. Intuitively, it is easier to find a rare effect when it is present in a smaller dataset. I think that this might be an advantage of the stochastic approach, even if it results in a lower objective; after all, I add unique effects as "canonical" in MASH v FLASH. In effect, if FLASH were able to pick up all of the unique effects, then it would no longer be necessary to add them as canonical.
+
+A second observation is that a second stochastic iteration generally results in rarer unique effects. Sometimes this accords with the results on the complete data; sometimes it doesn't. I don't yet understand why this happens.
+
+```{r uniq}
+# Unique effects:
+find_unique_effects <- function(fit) {
+  LL <- fit$ldf$l
+  idx <- which(colSums(abs(LL) > 0.9) == 1)
+  fx <- apply(abs(LL[, idx]), 2, which.max)
+  gf <- fit$fit$gf
+  gf <- gf[idx]
+  w <- sapply(gf, function(x) 1 - x$pi[1])
+  return(list(idx = idx, fx = fx, w = w))
+}
+
+unique_effects <- matrix(0, nrow = 44, ncol = 4)
+rownames(unique_effects) <- rownames(control_fit$ldf$l)
+colnames(unique_effects) <- c("subsample", "one.iter",
+                              "two.iter", "all.data")
+fx1 <- find_unique_effects(subsample_fit)
+unique_effects[fx1$fx, 1] <- fx1$w
+fx2 <- find_unique_effects(oneiter_fit)
+unique_effects[fx2$fx, 2] <- fx2$w
+fx3 <- find_unique_effects(twoiter_fit)
+unique_effects[fx3$fx, 3] <- fx3$w
+fx4 <- find_unique_effects(control_fit)
+unique_effects[fx4$fx, 4] <- fx4$w
+unique_effects <- melt(unique_effects)
+levels(unique_effects$Var2) <- c("Subsample", "One Iter",
+                                 "Two Iter", "All Data")
+
+unique_effects <- unique_effects[unique_effects$value > 0, ]
+ggplot(unique_effects, aes(Var2, Var1)) + geom_tile(aes(fill = value)) +
+  scale_fill_gradient(low = "white", high = "darkred") +
+  xlab("") + ylab("") + labs(fill = "Nonnull prob.")
+```
+
+### Shared effects
+
+For each approach, I sort the shared effects according to the proportion of variance explained (in decreasing order).
+
+First, I give results for the **subsampling approach**:
+
+```{r shared}
+# Shared effects:
+order_shared_effects <- function(fit) {
+  uniq <- find_unique_effects(fit)$idx
+  shared <- setdiff(1:fit$nfactors, uniq)
+  pve <- fit$pve[shared]
+  return(shared[order(pve, decreasing = TRUE)])
+}
+
+missing.tissues <- c(7, 8, 19, 20, 24, 25, 31, 34, 37)
+gtex.colors <- read.table("https://github.com/stephenslab/gtexresults/blob/master/data/GTExColors.txt?raw=TRUE", sep = '\t', comment.char = '')[-missing.tissues, 2]
+gtex.colors <- as.character(gtex.colors)
+
+plot(subsample_fit, plot_scree = FALSE, plot_loadings = TRUE,
+     loading_kset = order_shared_effects(subsample_fit),
+     loading_colors = gtex.colors, loading_legend_size = 3,
+     plot_grid_nrow = 5, plot_grid_ncol = 3)
+```
+
+Next, I give results for the **stochastic approach with a single pass** through the data. Clearly, the loadings are much cleaner here. Loading 9 has begun to separate into the more plausible combination of loadings 9 and 37, and there are two new loadings, which reflect substructure among brain and cardiac tissues.
+
+```{r shared2}
+plot(oneiter_fit, plot_scree = FALSE, plot_loadings = TRUE,
+     loading_kset = order_shared_effects(oneiter_fit),
+     loading_colors = gtex.colors, loading_legend_size = 3,
+     plot_grid_nrow = 5, plot_grid_ncol = 3)
+```
+
+The next set of loadings are obtained using the **stochastic approach with two iterations**. Results are very similar to the above, but with loading 9 noticeably cleaner.
+
+```{r shared3}
+plot(twoiter_fit, plot_scree = FALSE, plot_loadings = TRUE,
+     loading_kset = order_shared_effects(twoiter_fit),
+     loading_colors = gtex.colors, loading_legend_size = 3,
+     plot_grid_nrow = 5, plot_grid_ncol = 3)
+```
+
+Finally, I give results obtained using the **complete data**. It is worth noting that the stochastic approach finds all of the loadings found using the complete-data approach (as well as additional substructure in cardiac tissue).
+
+```{r shared4}
+plot(control_fit, plot_scree = FALSE, plot_loadings = TRUE,
+     loading_kset = order_shared_effects(control_fit),
+     loading_colors = gtex.colors, loading_legend_size = 3,
+     plot_grid_nrow = 5, plot_grid_ncol = 3)
+```
+
+## Code
+
+Click "Code" to view the code used to obtain the above results.
+
+```{r code, code = readLines("../code/minibatch.R"), eval = FALSE}
+```

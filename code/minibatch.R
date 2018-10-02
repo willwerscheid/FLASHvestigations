@@ -282,8 +282,6 @@ oneiter_fit <- flash_add_fixed_loadings(strong,
                                         tol = tol)
 saveRDS(oneiter_fit, "./data/minibatch/oneiter_fit.rds")
 
-twoiter_LL <- readRDS("./data/minibatch/LL_twoiter.rds")
-twoiter_gf <- readRDS("./data/minibatch/gf_twoiter.rds")
 twoiter_ebnm_param <- list(l = list(),
                            f = lapply(twoiter_gf, function(g) {
                              list(g = g, fixg = TRUE)
@@ -296,86 +294,3 @@ twoiter_fit <- flash_add_fixed_loadings(strong,
                                         backfit = TRUE,
                                         tol = tol)
 saveRDS(twoiter_fit, "./data/minibatch/twoiter_fit.rds")
-
-
-# Plots
-
-library(ggplot2)
-library(reshape2)
-
-# Objective:
-obj <- data.frame(objective = c(subsample_fit$objective,
-                                oneiter_fit$objective,
-                                twoiter_fit$objective,
-                                control_fit$objective),
-                  fit = c("subsampled data",
-                          "minibatches (one iter)",
-                          "minibatches (two iter)",
-                          "all data"))
-ggplot(obj, aes(x = 1:4, y = objective)) + geom_point() +
-  geom_text(aes(label = fit, vjust = "center", hjust = -0.1)) +
-  xlim(c(0.5, 4.5)) +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())
-
-# Unique effects:
-find_unique_effects <- function(fit) {
-  LL <- fit$ldf$l
-  idx <- which(colSums(abs(LL) > 0.95) == 1)
-  fx <- apply(abs(LL[, idx]), 2, which.max)
-  gf <- fit$fit$gf
-  gf <- gf[idx]
-  w <- sapply(gf, function(x) 1 - x$pi[1])
-  return(list(idx = idx, fx = fx, w = w))
-}
-
-unique_effects <- matrix(0, nrow = 44, ncol = 4)
-rownames(unique_effects) <- rownames(control_fit$ldf$l)
-colnames(unique_effects) <- c("subsample", "one.iter",
-                              "two.iter", "all.data")
-fx1 <- find_unique_effects(subsample_fit)
-unique_effects[fx1$fx, 1] <- fx1$w
-fx2 <- find_unique_effects(oneiter_fit)
-unique_effects[fx2$fx, 2] <- fx2$w
-fx3 <- find_unique_effects(twoiter_fit)
-unique_effects[fx3$fx, 3] <- fx3$w
-fx4 <- find_unique_effects(control_fit)
-unique_effects[fx4$fx, 4] <- fx4$w
-unique_effects <- melt(unique_effects)
-levels(unique_effects$Var2) <- c("Subsample", "One Iteration",
-                                 "Two Iterations", "All Data")
-
-ggplot(unique_effects, aes(Var2, Var1)) +
-  geom_tile(aes(fill = value), colour = "white") +
-  scale_fill_gradient(low = "white", high = "darkred") +
-  xlab("") + ylab("") + labs(fill = "Nonnull prob.")
-
-
-# Shared effects:
-order_shared_effects <- function(fit) {
-  uniq <- find_unique_effects(fit)$idx
-  shared <- setdiff(1:fit$nfactors, uniq)
-  pve <- fit$pve[shared]
-  return(shared[order(pve, decreasing = TRUE)])
-}
-
-plot(subsample_fit, plot_scree = FALSE, plot_loadings = TRUE,
-     loading_kset = order_shared_effects(subsample_fit),
-     loading_colors = gtex.colors,
-     plot_grid_nrow = 5, plot_grid_ncol = 3)
-
-plot(oneiter_fit, plot_scree = FALSE, plot_loadings = TRUE,
-     loading_kset = order_shared_effects(oneiter_fit),
-     loading_colors = gtex.colors,
-     plot_grid_nrow = 5, plot_grid_ncol = 3)
-
-plot(twoiter_fit, plot_scree = FALSE, plot_loadings = TRUE,
-     loading_kset = order_shared_effects(twoiter_fit),
-     loading_colors = gtex.colors,
-     plot_grid_nrow = 5, plot_grid_ncol = 3)
-
-plot(control_fit, plot_scree = FALSE, plot_loadings = TRUE,
-     loading_kset = order_shared_effects(control_fit),
-     loading_colors = gtex.colors,
-     plot_grid_nrow = 5, plot_grid_ncol = 3)
