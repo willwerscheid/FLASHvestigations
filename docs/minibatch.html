@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Minibatch FLASH example</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Minibatch FLASH example</h1>
+<h4 class="author"><em>Jason Willwerscheid</em></h4>
+<h4 class="date"><em>10/2/2018</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-10-02</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/47c28df95adaed0a85a30d6cb59f7949e4542950" target="_blank">47c28df</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  data/greedy19.rds
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/47c28df95adaed0a85a30d6cb59f7949e4542950/analysis/minibatch.Rmd" target="_blank">47c28df</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-10-02
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/minibatch.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Here I implement the “minibatch” approach described in a previous <a href="large_p.html">note</a>.</p>
+</div>
+<div id="details" class="section level2">
+<h2>Details</h2>
+<p>In my MASH v FLASH application, I am interested in obtaining fixed loadings and priors on factors that can be used to get posteriors for individual tests from the GTEx dataset.</p>
+<p>Currently, I use a subset of 16069 “strong” tests to obtain loadings and a subset of 20000 “random” tests to obtain priors on factors. But I would like to use a stochastic approach to simultaneously fit loadings and priors on factors to <em>all</em> of the tests (or, at least, to a much larger subsample of the millions of available tests).</p>
+<p>To investigate, I’ve taken the “strong” dataset as a proxy for the complete GTEx data. As mentioned, it includes summary statistics for 16069 tests over 44 tissues, so it is small enough to fit all at once. Fitting the complete data yields a baseline against which I can compare results obtained using a subsampling method and a stochastic approach.</p>
+<p>The subsampling method is analogous to my current MASH v FLASH approach. Here, I subsample approximately 10% of the “strong” tests and fit a FLASH object to this smaller dataset.</p>
+<p>Next, using the stochastic technique described in the note linked above, I extract two sets of loadings and priors on factors. I examine the loadings and priors obtained via a single pass through the complete data, as well as those obtained after two iterations over the complete data. (To mimic the situation where the complete data has been chunked into multiple files in advance, I do not re-randomize the minibatches in between iterations.) For details, see the note linked above.</p>
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<p>I pre-run the code <a href="#code">below</a> and load the results from file.</p>
+<pre class="r"><code>control_fit &lt;- readRDS(&quot;./data/minibatch/control_fit.rds&quot;)
+subsample_fit &lt;- readRDS(&quot;./data/minibatch/subsample_fit.rds&quot;)
+oneiter_fit &lt;- readRDS(&quot;./data/minibatch/oneiter_fit.rds&quot;)
+twoiter_fit &lt;- readRDS(&quot;./data/minibatch/twoiter_fit.rds&quot;)</code></pre>
+<div id="objective" class="section level3">
+<h3>Objective</h3>
+<p>First, I compare the objectives attained after fitting the complete data to fixed loadings and priors on factors obtained using the methods described above. (The fitting is done in a post-processing step in the code <a href="#code">below</a>. Note that since scaling affects the likelihood when loadings are fixed, I have normalized all loadings to have <span class="math inline">\(\ell_2\)</span> norm equal to 1.)</p>
+<p>The stochastic approach yields a huge improvement over the subsampling approach. Interestingly, a single iteration largely suffices; there is certainly an improvement in objective (by approximately 500) after a second iteration, but most of the improvement over the subsampling approach occurs after the first iteration.</p>
+<pre class="r"><code>library(ggplot2)
+library(reshape2)
+devtools::load_all(&quot;~/GitHub/flashr&quot;)
+#&gt; Loading flashr
+
+# Objective:
+obj &lt;- data.frame(objective = c(subsample_fit$objective,
+                                oneiter_fit$objective,
+                                twoiter_fit$objective,
+                                control_fit$objective),
+                  fit = c(&quot;subsampled data&quot;,
+                          &quot;minibatches (one iter)&quot;,
+                          &quot;minibatches (two iter)&quot;,
+                          &quot;complete data&quot;))
+ggplot(obj, aes(x = 1:4, y = objective)) + geom_point() +
+  geom_text(aes(label = fit, vjust = &quot;center&quot;, hjust = -0.1)) +
+  xlim(c(0.5, 4.8)) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())</code></pre>
+<p><img src="figure/minibatch.Rmd/obj-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="unique-effects" class="section level3">
+<h3>Unique effects</h3>
+<p>For ease of comparison, I have split loadings into “unique” effects (which I have defined as a loading in which one element has absolute value greater than 0.9) and “shared” effects. Below, I display a heatmap of the unique effects obtained using each method. The intensity reflects the mixture density of the null component in the prior on the corresponding factor. Darker colors indicate unique effects that are common in this dataset; lighter colors indicate rarer effects; and the absence of a tile indicates that no factor was found.</p>
+<p>Observe that the stochastic approach finds many more rare effects than other methods. Intuitively, it is easier to find a rare effect when it is present in a smaller dataset. I think that this might be an advantage of the stochastic approach, even if it results in a lower objective; after all, I add unique effects as “canonical” in MASH v FLASH. In effect, if FLASH were able to pick up all of the unique effects, then it would no longer be necessary to add them as canonical.</p>
+<p>A second observation is that a second stochastic iteration generally results in rarer unique effects. Sometimes this accords with the results on the complete data; sometimes it doesn’t. I don’t yet understand why this happens.</p>
+<pre class="r"><code># Unique effects:
+find_unique_effects &lt;- function(fit) {
+  LL &lt;- fit$ldf$l
+  idx &lt;- which(colSums(abs(LL) &gt; 0.9) == 1)
+  fx &lt;- apply(abs(LL[, idx]), 2, which.max)
+  gf &lt;- fit$fit$gf
+  gf &lt;- gf[idx]
+  w &lt;- sapply(gf, function(x) 1 - x$pi[1])
+  return(list(idx = idx, fx = fx, w = w))
+}
+
+unique_effects &lt;- matrix(0, nrow = 44, ncol = 4)
+rownames(unique_effects) &lt;- rownames(control_fit$ldf$l)
+colnames(unique_effects) &lt;- c(&quot;subsample&quot;, &quot;one.iter&quot;,
+                              &quot;two.iter&quot;, &quot;all.data&quot;)
+fx1 &lt;- find_unique_effects(subsample_fit)
+unique_effects[fx1$fx, 1] &lt;- fx1$w
+fx2 &lt;- find_unique_effects(oneiter_fit)
+unique_effects[fx2$fx, 2] &lt;- fx2$w
+fx3 &lt;- find_unique_effects(twoiter_fit)
+unique_effects[fx3$fx, 3] &lt;- fx3$w
+fx4 &lt;- find_unique_effects(control_fit)
+unique_effects[fx4$fx, 4] &lt;- fx4$w
+unique_effects &lt;- melt(unique_effects)
+levels(unique_effects$Var2) &lt;- c(&quot;Subsample&quot;, &quot;One Iter&quot;,
+                                 &quot;Two Iter&quot;, &quot;All Data&quot;)
+
+unique_effects &lt;- unique_effects[unique_effects$value &gt; 0, ]
+ggplot(unique_effects, aes(Var2, Var1)) + geom_tile(aes(fill = value)) +
+  scale_fill_gradient(low = &quot;white&quot;, high = &quot;darkred&quot;) +
+  xlab(&quot;&quot;) + ylab(&quot;&quot;) + labs(fill = &quot;Nonnull prob.&quot;)</code></pre>
+<p><img src="figure/minibatch.Rmd/uniq-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="shared-effects" class="section level3">
+<h3>Shared effects</h3>
+<p>For each approach, I sort the shared effects according to the proportion of variance explained (in decreasing order).</p>
+<p>First, I give results for the <strong>subsampling approach</strong>:</p>
+<pre class="r"><code># Shared effects:
+order_shared_effects &lt;- function(fit) {
+  uniq &lt;- find_unique_effects(fit)$idx
+  shared &lt;- setdiff(1:fit$nfactors, uniq)
+  pve &lt;- fit$pve[shared]
+  return(shared[order(pve, decreasing = TRUE)])
+}
+
+missing.tissues &lt;- c(7, 8, 19, 20, 24, 25, 31, 34, 37)
+gtex.colors &lt;- read.table(&quot;https://github.com/stephenslab/gtexresults/blob/master/data/GTExColors.txt?raw=TRUE&quot;, sep = &#39;\t&#39;, comment.char = &#39;&#39;)[-missing.tissues, 2]
+gtex.colors &lt;- as.character(gtex.colors)
+
+plot(subsample_fit, plot_scree = FALSE, plot_loadings = TRUE,
+     loading_kset = order_shared_effects(subsample_fit),
+     loading_colors = gtex.colors, loading_legend_size = 3,
+     plot_grid_nrow = 5, plot_grid_ncol = 3)</code></pre>
+<p><img src="figure/minibatch.Rmd/shared-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Next, I give results for the <strong>stochastic approach with a single pass</strong> through the data. Clearly, the loadings are much cleaner here. Loading 9 has begun to separate into the more plausible combination of loadings 9 and 37, and there are two new loadings, which reflect substructure among brain and cardiac tissues.</p>
+<pre class="r"><code>plot(oneiter_fit, plot_scree = FALSE, plot_loadings = TRUE,
+     loading_kset = order_shared_effects(oneiter_fit),
+     loading_colors = gtex.colors, loading_legend_size = 3,
+     plot_grid_nrow = 5, plot_grid_ncol = 3)</code></pre>
+<p><img src="figure/minibatch.Rmd/shared2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The next set of loadings are obtained using the <strong>stochastic approach with two iterations</strong>. Results are very similar to the above, but with loading 9 noticeably cleaner.</p>
+<pre class="r"><code>plot(twoiter_fit, plot_scree = FALSE, plot_loadings = TRUE,
+     loading_kset = order_shared_effects(twoiter_fit),
+     loading_colors = gtex.colors, loading_legend_size = 3,
+     plot_grid_nrow = 5, plot_grid_ncol = 3)</code></pre>
+<p><img src="figure/minibatch.Rmd/shared3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Finally, I give results obtained using the <strong>complete data</strong>. It is worth noting that the stochastic approach finds all of the loadings found using the complete-data approach (as well as additional substructure in cardiac tissue).</p>
+<pre class="r"><code>plot(control_fit, plot_scree = FALSE, plot_loadings = TRUE,
+     loading_kset = order_shared_effects(control_fit),
+     loading_colors = gtex.colors, loading_legend_size = 3,
+     plot_grid_nrow = 5, plot_grid_ncol = 3)</code></pre>
+<p><img src="figure/minibatch.Rmd/shared4-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="code" class="section level2">
+<h2>Code</h2>
+<p>Click “Code” to view the code used to obtain the above results.</p>
+<pre class="r"><code>devtools::load_all(&quot;~/GitHub/flashr/&quot;)
+devtools::load_all(&quot;~/GitHub/ebnm/&quot;)
+
+# Load data:
+gtex &lt;- readRDS(gzcon(url(&quot;https://github.com/stephenslab/gtexresults/blob/master/data/MatrixEQTLSumStats.Portable.Z.rds?raw=TRUE&quot;)))
+strong &lt;- t(gtex$strong.z)
+
+# Set global flash fit parameters:
+ebnm_fn &lt;- &quot;ebnm_ash&quot;
+ebnm_param &lt;- list(l = list(), f = list())
+tol &lt;- 0.1
+
+# Fit the dataset in the usual way:
+control_fl &lt;- flash(strong,
+                    var_type = &quot;constant&quot;,
+                    ebnm_fn = ebnm_fn,
+                    ebnm_param = ebnm_param,
+                    backfit = TRUE,
+                    tol = tol)
+
+# Set a seed and split the dataset into 10 minibatches:
+set.seed(666)
+p &lt;- ncol(strong)
+idx &lt;- sample(1:p)
+
+nbatch &lt;- 10
+batchsize &lt;- ceiling(p / nbatch)
+batch_idx &lt;- list()
+for (i in 1:(nbatch - 1)) {
+  batch_idx[[i]] &lt;- idx[((i - 1) * batchsize + 1):(i * batchsize)]
+}
+batch_idx[[nbatch]] &lt;- idx[((nbatch - 1) * batchsize + 1):p]
+
+# Fit an initial flash object on the first minibatch:
+fl_data &lt;- strong[, batch_idx[[1]]]
+fl &lt;- flash(fl_data,
+            var_type = &quot;constant&quot;,
+            ebnm_fn = ebnm_fn,
+            ebnm_param = ebnm_param,
+            backfit = TRUE,
+            nullcheck = TRUE,
+            tol = tol)
+# Save these results as an example of a fit using only subsampled data:
+subsample_fl &lt;- fl
+
+# Extract normalized loadings and rescaled priors on factors:
+LL &lt;- fl$fit$EL
+LL_norms &lt;- sqrt(colSums(LL^2))
+LL &lt;- scale(LL, scale = LL_norms, center = FALSE)
+gf_sds &lt;- mapply(function(x, y) x$sd * y, fl$fit$gf, as.list(LL_norms))
+
+fixgrid_param = list(l = list(),
+                     f = lapply(gf_sds, function(x) {
+                       list(mixsd = x, pi_thresh = -1)
+                     }))
+
+# Iterate over the minibatches:
+for (i in 2:nbatch) {
+  message(&quot;MINIBATCH &quot;, i)
+
+  # Fit the minibatch to the loadings we have so far:
+  fl_data &lt;- flash_set_data(strong[, batch_idx[[i]]])
+  old_fl &lt;- flash_add_fixed_loadings(fl_data,
+                                     LL,
+                                     var_type = &quot;constant&quot;,
+                                     ebnm_fn = ebnm_fn,
+                                     ebnm_param = fixgrid_param,
+                                     backfit = TRUE,
+                                     nullcheck = FALSE,
+                                     tol = tol)
+
+  # Look for new loadings in the current minibatch:
+  new_fl &lt;- flash_add_greedy(fl_data,
+                             f_init = old_fl,
+                             var_type = &quot;constant&quot;,
+                             ebnm_fn = ebnm_fn,
+                             ebnm_param = ebnm_param,
+                             nullcheck = FALSE,
+                             tol = tol)
+
+  # Unfix all loadings:
+  new_fl$fit$fixl[new_fl$fit$fixl] = FALSE
+  # Fix the grid for old factors...
+  fixgrid_param = list(l = list(),
+                       f = lapply(old_fl$fit$gf, function(g) {
+                         list(mixsd = g$sd, pi_thresh = -1)
+                       }))
+  # ...but allow the grid for new factors to change...
+  if (ncol(new_fl$fit$EL) &gt; ncol(LL)) {
+    for (k in (ncol(LL) + 1):ncol(new_fl$fit$EL)) {
+      fixgrid_param$f[[k]] &lt;- list()
+    }
+  }
+  # ...and backfit the flash object to update loadings values:
+  new_fl &lt;- flash_backfit(fl_data,
+                          new_fl,
+                          var_type = &quot;constant&quot;,
+                          ebnm_fn = ebnm_fn,
+                          ebnm_param = fixgrid_param,
+                          nullcheck = FALSE,
+                          tol = tol)
+
+  # Do a nullcheck here:
+  nullcheck_res &lt;- perform_nullcheck(fl_data,
+                                     new_fl$fit,
+                                     kset = 1:ncol(new_fl$fit$EL),
+                                     var_type = &quot;constant&quot;,
+                                     verbose = TRUE)
+
+  # Normalize loadings, fix, and refit (we can&#39;t normalize directly
+  #   because the grid is fixed)...
+  new_LL &lt;- nullcheck_res$f$EL
+  LL_norms &lt;- sqrt(colSums(new_LL^2))
+  new_LL &lt;- scale(new_LL, scale = LL_norms, center = FALSE)
+  # ...removing any newly added loadings that have been zeroed out...
+  to_remove &lt;- nullcheck_res$zeroed_out[nullcheck_res$zeroed_out &gt; ncol(LL)]
+  if (length(to_remove) &gt; 0) {
+    new_LL &lt;- new_LL[, -to_remove]
+    fixgrid_param$f &lt;- fixgrid_param$f[-to_remove]
+  }
+  # ...and setting any old loadings that have been zeroed out to zero:
+  new_LL[is.nan(new_LL)] &lt;- 0
+  new_fl &lt;- flash_add_fixed_loadings(fl_data,
+                                     new_LL,
+                                     var_type = &quot;constant&quot;,
+                                     ebnm_fn = ebnm_fn,
+                                     ebnm_param = fixgrid_param,
+                                     backfit = TRUE,
+                                     nullcheck = FALSE,
+                                     tol = tol)
+
+  # Take weighted average of old and new loadings:
+  new_LL[, 1:ncol(LL)] &lt;- ((i - 1) / i) * LL + (1 / i) * new_LL[, 1:ncol(LL)]
+  LL &lt;- scale(new_LL, scale = sqrt(colSums(new_LL^2)), center = FALSE)
+
+  # Take weighted average of old and new priors:
+  new_gf &lt;- new_fl$fit$gf
+  for (k in 1:length(old_fl$fit$gf)) {
+    old_pi &lt;- old_fl$fit$gf[[k]]$pi
+    new_pi &lt;- new_gf[[k]]$pi
+    # Deal with zeroed-out factors separately:
+    if (k %in% nullcheck_res$zeroed_out) {
+      new_gf[[k]] &lt;- old_fl$fit$gf[[k]] # copy grid, class, etc. over
+      new_pi &lt;- c(1, rep(0, length(old_pi) - 1))
+    }
+    new_gf[[k]]$pi &lt;- ((i - 1) / i) * old_pi + (1 / i) * new_pi
+  }
+  # For newly added factors, take weighted average of new prior and zero:
+  if (length(new_gf) &gt; length(old_fl$fit$gf)) {
+    for (k in (length(old_fl$fit$gf) + 1):length(new_gf)) {
+      new_pi &lt;- new_gf[[k]]$pi
+      if (length(new_pi) &gt; 1) {
+        new_pi[1] &lt;- (i - 1) / i + (1 / i) * new_pi[1]
+        new_pi[2:length(new_pi)] &lt;- (1 / i) * new_pi[2:length(new_pi)]
+      }
+      new_gf[[k]]$pi &lt;- new_pi
+    }
+  }
+
+  fixgrid_param &lt;- list(l = list(),
+                        f = lapply(new_gf, function(x) {
+                          list(mixsd = x$sd, pi_thresh = -1)
+                        }))
+}
+# Save results:
+oneiter_LL &lt;- LL
+oneiter_gf &lt;- new_gf
+
+# A second iteration over the same minibatches:
+for (i in 1:nbatch) {
+  message(&quot;MINIBATCH &quot;, i)
+
+  old_gf &lt;- new_gf
+
+  # Fit the minibatch to the loadings without fixing:
+  fl_data &lt;- flash_set_data(strong[, batch_idx[[i]]])
+  new_fl &lt;- flash_add_fixed_loadings(fl_data,
+                                     LL,
+                                     fixl = FALSE,
+                                     var_type = &quot;constant&quot;,
+                                     ebnm_fn = ebnm_fn,
+                                     ebnm_param = fixgrid_param,
+                                     backfit = TRUE,
+                                     nullcheck = FALSE,
+                                     tol = tol)
+
+  # Do nullcheck here:
+  nullcheck_res &lt;- perform_nullcheck(fl_data,
+                                     new_fl$fit,
+                                     kset = 1:ncol(new_fl$fit$EL),
+                                     var_type = &quot;constant&quot;,
+                                     verbose = TRUE)
+
+  # Normalize loadings, fix, and refit:
+  new_LL &lt;- nullcheck_res$f$EL
+  LL_norms &lt;- sqrt(colSums(new_LL^2))
+  new_LL &lt;- scale(new_LL, scale = LL_norms, center = FALSE)
+  new_LL[is.na(new_LL)] &lt;- 0
+  new_fl &lt;- flash_add_fixed_loadings(fl_data,
+                                     new_LL,
+                                     fixl = TRUE,
+                                     var_type = &quot;constant&quot;,
+                                     ebnm_fn = ebnm_fn,
+                                     ebnm_param = fixgrid_param,
+                                     backfit = TRUE,
+                                     nullcheck = FALSE,
+                                     tol = tol)
+
+  # Take weighted average of old and new loadings:
+  new_LL &lt;- ((nbatch - 1) / nbatch) * LL + (1 / nbatch) * new_LL
+  LL &lt;- scale(new_LL, scale = sqrt(colSums(new_LL^2)), center = FALSE)
+
+  # Take weighted average of old and new priors:
+  new_gf &lt;- new_fl$fit$gf
+  for (k in 1:length(old_gf)) {
+    # Deal with zeroed-out factors separately:
+    if (k %in% nullcheck_res$zeroed_out) {
+      new_gf[[k]] &lt;- old_gf[[k]] # copy grid, etc.
+      new_gf[[k]]$pi &lt;- c(1, rep(0, length(old_gf[[k]]$pi) - 1))
+    }
+    new_gf[[k]]$pi &lt;- ((nbatch - 1) / nbatch) * old_gf[[k]]$pi +
+      (1 / nbatch) * new_gf[[k]]$pi
+  }
+}
+# Save results
+twoiter_LL &lt;- LL
+twoiter_gf &lt;- new_gf
+
+# Do some postprocessing and save the results to file.
+#   &quot;Control&quot; is best case (fit all data at once):
+control_LL &lt;- control_fl$fit$EL
+control_norms &lt;- sqrt(colSums(control_LL^2))
+control_LL &lt;- scale(control_LL, scale = control_norms, center = FALSE)
+control_gf &lt;- control_fl$fit$gf
+for (i in 1:length(control_gf)) {
+  control_gf[[i]]$sd &lt;- control_gf[[i]]$sd * control_norms[i]
+}
+control_ebnm_param &lt;- list(l = list(),
+                            f = lapply(control_gf, function(g) {
+                              list(g = g, fixg = TRUE)
+                            }))
+control_fit &lt;- flash_add_fixed_loadings(strong,
+                                        LL = control_LL,
+                                        var_type = &quot;constant&quot;,
+                                        ebnm_fn = ebnm_fn,
+                                        ebnm_param = control_ebnm_param,
+                                        backfit = TRUE,
+                                        tol = tol)
+saveRDS(control_fit, &quot;./data/minibatch/control_fit.rds&quot;)
+
+#   &quot;Subsample&quot; is worst case (only use first minibatch):
+subsample_LL &lt;- subsample_fl$fit$EL
+subsample_norms &lt;- sqrt(colSums(subsample_LL^2))
+subsample_LL &lt;- scale(subsample_LL, scale = subsample_norms, center = FALSE)
+subsample_gf &lt;- subsample_fl$fit$gf
+for (i in 1:length(subsample_gf)) {
+  subsample_gf[[i]]$sd &lt;- subsample_gf[[i]]$sd * subsample_norms[i]
+}
+subsample_ebnm_param &lt;- list(l = list(),
+                             f = lapply(subsample_gf, function(g) {
+                               list(g = g, fixg = TRUE)
+                             }))
+subsample_fit &lt;- flash_add_fixed_loadings(strong,
+                                          LL = subsample_LL,
+                                          var_type = &quot;constant&quot;,
+                                          ebnm_fn = ebnm_fn,
+                                          ebnm_param = subsample_ebnm_param,
+                                          backfit = TRUE,
+                                          tol = tol)
+saveRDS(subsample_fit, &quot;./data/minibatch/subsample_fit.rds&quot;)
+
+oneiter_ebnm_param &lt;- list(l = list(),
+                           f = lapply(oneiter_gf, function(g) {
+                             list(g = g, fixg = TRUE)
+                           }))
+oneiter_fit &lt;- flash_add_fixed_loadings(strong,
+                                        LL = oneiter_LL,
+                                        var_type = &quot;constant&quot;,
+                                        ebnm_fn = ebnm_fn,
+                                        ebnm_param = oneiter_ebnm_param,
+                                        backfit = TRUE,
+                                        tol = tol)
+saveRDS(oneiter_fit, &quot;./data/minibatch/oneiter_fit.rds&quot;)
+
+twoiter_ebnm_param &lt;- list(l = list(),
+                           f = lapply(twoiter_gf, function(g) {
+                             list(g = g, fixg = TRUE)
+                           }))
+twoiter_fit &lt;- flash_add_fixed_loadings(strong,
+                                        LL = twoiter_LL,
+                                        var_type = &quot;constant&quot;,
+                                        ebnm_fn = ebnm_fn,
+                                        ebnm_param = twoiter_ebnm_param,
+                                        backfit = TRUE,
+                                        tol = tol)
+saveRDS(twoiter_fit, &quot;./data/minibatch/twoiter_fit.rds&quot;)</code></pre>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()
+#&gt; R version 3.4.3 (2017-11-30)
+#&gt; Platform: x86_64-apple-darwin15.6.0 (64-bit)
+#&gt; Running under: macOS High Sierra 10.13.6
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+#&gt; 
+#&gt; locale:
+#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt; [1] flashr_0.6-3   reshape2_1.4.3 ggplot2_2.2.1 
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] Rcpp_0.12.18        compiler_3.4.3      pillar_1.2.1       
+#&gt;  [4] git2r_0.21.0        plyr_1.8.4          workflowr_1.0.1    
+#&gt;  [7] iterators_1.0.9     R.methodsS3_1.7.1   R.utils_2.6.0      
+#&gt; [10] tools_3.4.3         testthat_2.0.0      digest_0.6.15      
+#&gt; [13] lattice_0.20-35     evaluate_0.10.1     memoise_1.1.0      
+#&gt; [16] tibble_1.4.2        gtable_0.2.0        rlang_0.2.0        
+#&gt; [19] foreach_1.4.4       Matrix_1.2-12       commonmark_1.4     
+#&gt; [22] parallel_3.4.3      yaml_2.1.17         withr_2.1.1.9000   
+#&gt; [25] stringr_1.3.0       knitr_1.20          roxygen2_6.0.1.9000
+#&gt; [28] xml2_1.2.0          devtools_1.13.4     rprojroot_1.3-2    
+#&gt; [31] grid_3.4.3          R6_2.2.2            rmarkdown_1.8      
+#&gt; [34] ashr_2.2-13         magrittr_1.5        whisker_0.3-2      
+#&gt; [37] MASS_7.3-48         codetools_0.2-15    backports_1.1.2    
+#&gt; [40] scales_0.5.0        htmltools_0.3.6     softImpute_1.4     
+#&gt; [43] colorspace_1.3-2    labeling_0.3        stringi_1.1.6      
+#&gt; [46] pscl_1.5.2          doParallel_1.0.11   lazyeval_0.2.1     
+#&gt; [49] munsell_0.4.3       truncnorm_1.0-8     SQUAREM_2017.10-1  
+#&gt; [52] R.oo_1.21.0</code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
