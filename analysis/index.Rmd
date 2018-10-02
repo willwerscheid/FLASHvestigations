@@ -24,11 +24,15 @@ Investigations 14 and 16-17 illustrate three approaches to factorizing the GTEx 
 
 * [Investigation 14.](nonnegative.html) An example of how to use nonnegative ASH priors to obtain a nonnegative matrix factorization.
 
-* [Investigation 16.](count_data.html) Instead of directly fitting FLASH, I fit count data via a Gaussian approximation to the Poisson log likelihood.
+* [Investigation 16.](count_data.html) Instead of directly fitting FLASH, I fit count data via a Gaussian approximation to the Poisson log likelihood...
 
-* [Investigation 17.](binary_data.html) Using an approach that is similar to that of the previous analysis, I fit binary data via an approximation to the binomial log likelihood.
+* [Investigation 17.](binary_data.html) ... then I fit binary data via an approximation to the binomial log likelihood.
 
-[Note 3.](large_p.html) An idea for how to fit FLASH models when $n$ is manageable and $p$ is very large.
+Note 3 and Investigation 18 explore stochastic approaches to fitting FLASH objects to very large datasets.
+
+* [Note 3.](large_p.html) An idea for how to fit FLASH models when $n$ is manageable and $p$ is very large.
+
+* [Investigation 18.](minibatch.html) I implement the idea described in Note 3 and I test it out on data from the GTEx project.
 
 
 ## Still Relevant
