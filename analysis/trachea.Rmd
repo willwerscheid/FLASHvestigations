@@ -1,0 +1,153 @@
+---
+title: "Analysis of scRNA data from Montoro et al."
+author: "Jason Willwerscheid"
+date: "10/19/2018"
+output:
+  workflowr::wflow_html
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Fit I: subsetted data
+
+First, I fit 30 nonnegative loadings (with arbitrary factors) to a subset of the data used in Montoro et al. (I selected for "highly variable genes" using the Seurat package. For the code used to do preprocessing, see [below](#Code).)
+
+```{r load_data}
+factors_df <- readRDS("~/GitHub/FLASHvestigations/data/trachea/factors_df.rds")
+top_genes <- readRDS("~/GitHub/FLASHvestigations/data/trachea/top_genes.rds")
+```
+
+To find cell-type specific factor/loadings, I use the cell types assigned by Montoro et al. The number of each cell type is as follows: 
+
+```{r table}
+table(factors_df$cell_type)
+```
+
+The following code is used to create the plots below.
+
+```{r plot_tools}
+library(ggplot2)
+do_boxplots <- function(kset, incl_top_genes = TRUE) {
+  for (k in kset) {
+    x <- paste0("X", k)
+    plot(ggplot(factors_df, aes_string(x = "cell_type", y = x)) +
+           geom_boxplot(outlier.shape = NA) +
+           labs(x = "Cell Type", y = paste("Factor", k, "value")))
+    if (incl_top_genes) {
+      print(knitr::kable(top_genes[[k]], digits = 2, row.names = FALSE))
+    }
+  }
+}
+```
+
+### Ciliated cells
+
+Three factors are very clearly associated with ciliated cells. A positive loading for factor 1 indicates the presence of a ciliated cell, whereas factors 17 and 18 delineate axes that could serve to differentiate among ciliated cells.
+
+```{r cil_plots}
+do_boxplots(c(1, 17, 18))
+```
+
+### Ionocytes
+
+One factor reliably identifies ionocytes.
+
+```{r ion_plots}
+do_boxplots(15)
+```
+
+### Neuroendocrine cells
+
+Another factor reliably identifies neuroendocrine cells. Interesting, the same genes are less expressed in tuft cells. 
+
+```{r nec_plots}
+do_boxplots(4)
+```
+
+### Tuft cells
+
+Factor 2 indicates the presence of a tuft cell, while factor 12 delineates an axis that could serve to differentiate tuft cells.
+
+```{r tuft_plots}
+do_boxplots(c(2, 12))
+```
+
+### Goblet cells
+
+Factors 14 and 27 are virtually solely expressed in goblet cells.
+
+```{r gob_plots}
+do_boxplots(c(14, 27))
+```
+
+### Club cells
+
+As might be expected, there are no factors that cleanly identify club cells. However, expression patterns are markedly different in club cells for factors 20 and 29.
+
+```{r club_plots}
+do_boxplots(c(20, 29))
+```
+
+### Basal cells
+
+I would also not expect to see clean factors for basal cells. But note that factor 5 is usually positive for basal cells, but more often negative for other cell types. 
+
+```{r basal_plots}
+do_boxplots(5)
+```
+
+## Fit II: complete data
+
+For comparison, I fit 10 factors greedily using point-normal priors (with no backfitting) and with loose convergence conditions (`tol = 10`). This took about 2 hours on the RCC cluster using 32 GB of memory.
+
+```{r fit2}
+complete_factors_df <- readRDS("~/GitHub/FLASHvestigations/data/trachea/complete_factors_df.rds")
+complete_top_genes <- readRDS("~/GitHub/FLASHvestigations/data/trachea/complete_top_genes.rds")
+```
+
+### Ciliated
+
+Factor 2 can be compared with factor 1 above.
+
+```{r ciliated_complete}
+plot(ggplot(complete_factors_df, aes_string(x = "cell_type", y = "X2")) +
+           geom_boxplot(outlier.shape = NA) +
+           labs(x = "Cell Type", y = paste("Factor 2 value")))
+print(complete_top_genes[[2]])
+```
+
+I reproduce the plot from above for comparison:
+```{r}
+do_boxplots(1)
+```
+
+### Neuroendocrine cells
+
+Factor 9 can be compared with factor 4 above.
+```{r nec_complete}
+plot(ggplot(complete_factors_df, aes_string(x = "cell_type", y = "X9")) +
+           geom_boxplot(outlier.shape = NA) +
+           labs(x = "Cell Type", y = paste("Factor 9 value")))
+print(complete_top_genes[[9]])
+do_boxplots(4)
+```
+
+### Tuft cells
+
+Finally, factor 5 can be compared with factor 2 above.
+```{r tuft_complete}
+plot(ggplot(complete_factors_df, aes_string(x = "cell_type", y = "X5")) +
+           geom_boxplot(outlier.shape = NA) +
+           labs(x = "Cell Type", y = paste("Factor 5 value")))
+print(complete_top_genes[[5]])
+do_boxplots(2)
+```
+
+
+## Code
+
+The code used to pre-process the dataset can be viewed below.
+```{r preprocess, code=readLines("~/GitHub/FLASHvestigations/code/trachea.R"), eval=FALSE}
+```
