@@ -34,6 +34,8 @@ Note 3 and Investigation 18 explore stochastic approaches to fitting FLASH objec
 
 * [Investigation 18.](minibatch.html) I implement the idea described in Note 3 and I test it out on data from the GTEx project.
 
+[Investigation 19.](trachea.html) I test out FLASH on a large single-cell RNA dataset.
+
 
 ## Still Relevant
 
