@@ -36,6 +36,7 @@ Note 3 and Investigation 18 explore stochastic approaches to fitting FLASH objec
 
 [Investigation 19.](trachea.html) I test out FLASH on a large single-cell RNA dataset.
 
+[Note 3.](matrix_ops.html) I have been experiencing some performance issues when using FLASH to fit large datasets. Here I outline an idea for reducing the memory footprint. 
 
 ## Still Relevant
 
