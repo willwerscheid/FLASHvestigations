@@ -1,0 +1,144 @@
+---
+title: "A more memory-efficient backfitting algorithm"
+author: "Jason Willwerscheid"
+date: "11/4/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Updating $\sigma^2$
+
+Let $Y$ have zeroes where data is missing and let $Z$ be an indicator matrix with ones where data is non-missing and zeroes where data is missing. Write
+
+$$ 
+\begin{aligned}
+R^2 = Y^2 
+&- 2 Y \odot (EL) (EF)' 
++ Z \odot ((EL) (EF)')^2 \\
+&+ Z \odot (EL^2) (EF^2)'
+- Z \odot (EL)^2 ((EF)^2)'
+\end{aligned}
+$$
+
+### var_type = constant
+
+Let $m$ be the number of non-missing entries in $Y$. We can write
+
+$$\begin{aligned}
+\sigma^2 
+= \frac{1}{m} (
+\text{sum}(Y^2) 
+&- 2 \cdot \text{sum}((EL) \odot Y (EF)) 
++ \text{sum}((EL) \odot Z(EF))^2 \\
+&+ \text{sum}((EL^2) \odot Z (EF^2))
+- \text{sum}((EL)^2 \odot Z (EF)^2)
+) 
+\end{aligned}$$
+
+The most expensive operations are the four multiplications of an $n \times p$ matrix by a $p \times k$ matrix. The three involving $Z$ are very cheap if there is no missing data. The old implementation required three multiplications of a $n \times k$ by a $k \times p$ matrix, so there is not likely to be any speedup unless there is missing data. Much more importantly, though, the new implementation does not require the formation of any new $n \times p$ matrices.
+
+### var_type = by_row 
+
+Now let $m$ be an $n$-vector, where $m_i$ denotes the number of non-missing entries in row $Y_{i \bullet}$. $\sigma^2$ is now an $n$-vector:
+
+$$\begin{aligned}
+\sigma^2 
+= (1 / m) \odot (\text{rowSums}(Y^2) 
+&- 2 \cdot \text{rowSums}((EL) \odot Y (EF))
++ \text{rowSums}((EL) \odot Z(EF))^2 \\
+&+ \text{rowSums}((EL^2) \odot Z (EF^2))
+- \text{rowSums}((EL)^2 \odot Z (EF)^2)) 
+\end{aligned}$$
+
+
+### var_type = by_column
+
+With $m$ a $p$-vector, where $m_j$ denotes the number of non-missing entries in column $Y_{\bullet j}$:
+
+$$\begin{aligned}
+\sigma^2 
+= (1 / m) \odot (\text{colSums}(Y^2) 
+&- 2 \cdot \text{rowSums}(t(EF) \odot (t(EL))Y) 
++ \text{rowSums}(t(EF) \odot (t(EL))Z)^2 \\
+&+ \text{rowSums}(t(EF^2) \odot (t(EL^2))Z))
+- \text{rowSums}(t(EF)^2 \odot t(EL)^2 Z)) 
+\end{aligned}$$
+
+(I write it in this form to avoid transposing $Y$.)
+
+### Greedy updates
+
+In the course of optimizing a single factor/loading pair, one can exploit the fact that only one column in each of $EL$, $EF$, $EL^2$, and $EF^2$ change.
+
+## Updating loadings
+
+Instead of updating loading 1, then factor 1, then loading 2, etc., one can much more efficiently update all loadings (potentially in parallel), then all factors.
+
+### Calculating the EBNM `s2`s
+
+The old algorithm calculates `s2 = 1/(tau %*% f$EF2[, k])`, where the entries of `tau` corresponding to missing data have been set to zero. 
+
+Let $S$ be the matrix of `s2`s, with the $i$th column giving the `s2`s for the $i$th loading. Then for `var_type = constant` or `var_type = by_row`, $S$ may be calculated as
+$$ S = \sigma^2 / Z(EF^2), $$
+where "$/$" is elementwise for `var_type = by_row`. Again the calculation is simplified if there is no missing data: here, $Z(EF^2)$ is simply a matrix where each row is the $k$-vector $\text{colSums}(EF^2)$. 
+
+For `var_type = by_column`,
+$$ S = 1 / Z(\tau \odot_b EF^2), $$
+where $\odot_b$ denotes that broadcasting is to be performed (in the sense that `R` uses it).
+
+This is essentially the same as before, but `tau` does not need to be stored as a matrix.
+
+### Calculating the EBNM `x`s
+
+The old algorithm calculates `x = ((Rk * tau) %*% f$EF[, k]) * s2`, which requires storing and updating `Rk`. For `var_type = constant` and `var_type = by_row`, one may write:
+
+$$ X_{\bullet k} = \tau \odot (Y - \sum_{i: i \ne k} Z \odot (EL)_{\bullet i}(EF)_{\bullet i}') (EF)_{\bullet k} \odot S_{\bullet k}. $$
+
+Note that $(Z \odot (EL)_{\bullet i} (EF)_{\bullet i}') (EF)_{\bullet k}$ can be written as
+$$ (EL)_{\bullet i} \odot Z ((EF)_{\bullet i} \odot (EF)_{\bullet k}) $$ 
+so
+$$\left(\sum_{i: i \ne k} Z \odot (EL)_{\bullet i}(EF)_{\bullet i}'\right) (EF)_{\bullet k}
+= \text{rowSums} \left((EL)_{\bullet -k} \odot Z((EF)_{\bullet k} \odot_b (EF)_{\bullet -k}) \right).$$
+
+Again, the performance savings are not likely to be substantial unless there is no missing data, but this method does not require the formation of any new $n \times p$ matrices.
+
+For `var_type = by_column`, write
+$$ X_{\bullet k} = (Y - \sum_{i: i \ne k} Z \odot (EL)_{\bullet i}(EF)_{\bullet i}') (\tau \odot (EF)_{\bullet k}) \odot S_{\bullet k}. $$
+
+### An idea for parallelizing the EBNM problems
+
+The above could also be implemented as follows:
+
+1. Calculate the $n \times k$ matrix $W = (Y - Z \odot (EL) (EF)')(EF)$. When there is missing data, this does require the temporary formation of a new $n \times p$ matrix, but it does not need to be stored.
+
+1. $(Z \odot (EL)_{\bullet k} (EF)_{\bullet k}') (EF)_{\bullet k}$ can be written as
+$$ (EL)_{\bullet k} \odot Z ((EF)_{\bullet k}^2). $$ 
+Form the $n \times k$ matrix $U = (EL) \odot Z(EF)^2$ in one go.
+
+1. For $k = 1$, calculate 
+$$ X_{\bullet 1} = \tau \odot (W_{\bullet 1} + U_{\bullet 1}) \odot S_{\bullet 1}$$
+and solve the EBNM problem. This changes $(EL)_{\bullet k}$, so $W$ needs to be updated:
+
+$$\begin{aligned}
+W^{\text{new}} 
+&= W^{\text{old}} 
++ \left( Z \odot ((EL)_{\bullet k}^{\text{old}} - (EL)_{\bullet k}^{\text{new}}) (EF)_{\bullet k}' \right) (EF) \\
+&= W^{\text{old}} 
++ ((EL)_{\bullet k}^{\text{old}} - (EL)_{\bullet k}^{\text{new}})
+\odot Z((EF)_{\bullet k} \odot_b (EF)),
+\end{aligned}$$
+
+Then repeat for $k = 2, 3, \ldots$
+
+But if one simply omits the update of of $W$, parallelization is simple. If the updates of $(EL)$ are small, then this omission might be justified.
+
+## Updating factors
+
+Factor updates can easily be obtained by reversing the roles of, on the one hand, $EL$ and $EF$ and, on the other, `var_type = by_row` and `var_type = by_column`. 
+
+## Summary
+
+With this implementation, the only $n \times p$ matrices that ever need to be handled are $Y$ and, if data is missing, $Z$ (and $Z$ can be stored as a matrix of integers). So it should be possible to fit a flash object using only slightly more memory than that required to store the data itself.
