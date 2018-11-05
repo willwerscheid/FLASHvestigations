@@ -15,11 +15,14 @@ Let $Y$ have zeroes where data is missing and let $Z$ be an indicator matrix wit
 
 $$ 
 \begin{aligned}
-R^2 = Y^2 
-&- 2 Y \odot (EL) (EF)' 
-+ Z \odot ((EL) (EF)')^2 \\
-&+ Z \odot (EL^2) (EF^2)'
-- Z \odot (EL)^2 ((EF)^2)'
+R^2 &= Y^2 
+- 2 Y \odot (EL) (EF)' 
++ Z \odot ((EL) (EF)')^2
++ Z \odot (EL^2) (EF^2)'
+- Z \odot (EL)^2 ((EF)^2)' \\
+&= Y^2 
+- 2 Y \odot (EL) (EF)' 
++ Z \odot (EL^2) (EF^2)'
 \end{aligned}
 $$
 
@@ -31,14 +34,10 @@ $$\begin{aligned}
 \sigma^2 
 = \frac{1}{m} (
 \text{sum}(Y^2) 
-&- 2 \cdot \text{sum}((EL) \odot Y (EF)) 
-+ \text{sum}((EL) \odot Z(EF))^2 \\
-&+ \text{sum}((EL^2) \odot Z (EF^2))
-- \text{sum}((EL)^2 \odot Z (EF)^2)
+- 2 \cdot \text{sum}((EL) \odot Y (EF)) 
++ \text{sum}((EL^2) \odot Z (EF^2))
 ) 
 \end{aligned}$$
-
-The most expensive operations are the four multiplications of an $n \times p$ matrix by a $p \times k$ matrix. The three involving $Z$ are very cheap if there is no missing data. The old implementation required three multiplications of a $n \times k$ by a $k \times p$ matrix, so there is not likely to be any speedup unless there is missing data. Much more importantly, though, the new implementation does not require the formation of any new $n \times p$ matrices.
 
 ### var_type = by_row 
 
@@ -47,10 +46,8 @@ Now let $m$ be an $n$-vector, where $m_i$ denotes the number of non-missing entr
 $$\begin{aligned}
 \sigma^2 
 = (1 / m) \odot (\text{rowSums}(Y^2) 
-&- 2 \cdot \text{rowSums}((EL) \odot Y (EF))
-+ \text{rowSums}((EL) \odot Z(EF))^2 \\
-&+ \text{rowSums}((EL^2) \odot Z (EF^2))
-- \text{rowSums}((EL)^2 \odot Z (EF)^2)) 
+- 2 \cdot \text{rowSums}((EL) \odot Y (EF))
++ \text{rowSums}((EL^2) \odot Z (EF^2))
 \end{aligned}$$
 
 
@@ -61,13 +58,15 @@ With $m$ a $p$-vector, where $m_j$ denotes the number of non-missing entries in 
 $$\begin{aligned}
 \sigma^2 
 = (1 / m) \odot (\text{colSums}(Y^2) 
-&- 2 \cdot \text{rowSums}(t(EF) \odot (t(EL))Y) 
-+ \text{rowSums}(t(EF) \odot (t(EL))Z)^2 \\
-&+ \text{rowSums}(t(EF^2) \odot (t(EL^2))Z))
-- \text{rowSums}(t(EF)^2 \odot t(EL)^2 Z)) 
+- 2 \cdot \text{colSums}(t(EF) \odot (t(EL))Y) 
++ \text{colSums}(t(EF^2) \odot (t(EL^2))Z))
 \end{aligned}$$
 
 (I write it in this form to avoid transposing $Y$.)
+
+### Comment
+
+I each case, the most expensive operations are the two multiplications of an $n \times p$ matrix by a $p \times k$ matrix. The one involving $Z$ is very cheap if there is no missing data. The old implementation required three multiplications of a $n \times k$ by a $k \times p$ matrix. More importantly, though, the new implementation does not require the formation of any new $n \times p$ matrices.
 
 ### Greedy updates
 
@@ -138,6 +137,10 @@ But if one simply omits the update of of $W$, parallelization is simple. If the 
 ## Updating factors
 
 Factor updates can easily be obtained by reversing the roles of, on the one hand, $EL$ and $EF$ and, on the other, `var_type = by_row` and `var_type = by_column`. 
+
+## Updating objective
+
+TODO
 
 ## Summary
 
