@@ -12,7 +12,7 @@
 <meta name="author" content="Jason Willwerscheid" />
 
 
-<title>A more memory-efficient backfitting algorithm</title>
+<title>More efficient FLASH algorithms</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -307,14 +307,14 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">A more memory-efficient backfitting algorithm</h1>
+<h1 class="title toc-ignore">More efficient FLASH algorithms</h1>
 <h4 class="author"><em>Jason Willwerscheid</em></h4>
 <h4 class="date"><em>11/4/2018</em></h4>
 
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-11-05</p>
+<p><strong>Last updated:</strong> 2018-11-06</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -338,7 +338,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/7e20469d85f3ac52fdeeab5ef79f3fdf6242a570" target="_blank">7e20469</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/83c6dd54a464217fa1f0ae17376a3ad89dadb331" target="_blank">83c6dd5</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -378,6 +378,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/83c6dd54a464217fa1f0ae17376a3ad89dadb331/analysis/matrix_ops.Rmd" target="_blank">83c6dd5</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-11-06
+</td>
+<td style="text-align:left;">
+wflow_publish(c(“analysis/matrix_ops.Rmd”, “analysis/index.Rmd”))
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/1f185b0186edf671ea5b2d2fe968f2eacd3d8edd/docs/matrix_ops.html" target="_blank">1f185b0</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-11-05
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -434,81 +468,62 @@ wflow_publish(“analysis/matrix_ops.Rmd”)
 </ul>
 <p></details></p>
 <hr />
-<div id="updating-sigma2" class="section level2">
-<h2>Updating <span class="math inline">\(\sigma^2\)</span></h2>
-<p>Let <span class="math inline">\(Y\)</span> have zeroes where data is missing and let <span class="math inline">\(Z\)</span> be an indicator matrix with ones where data is non-missing and zeroes where data is missing. Write</p>
-<p><span class="math display">\[ 
-\begin{aligned}
-R^2 &amp;= Y^2 
-- 2 Y \odot (EL) (EF)&#39; 
-+ Z \odot ((EL) (EF)&#39;)^2
-+ Z \odot (EL^2) (EF^2)&#39;
-- Z \odot (EL)^2 ((EF)^2)&#39; \\
-&amp;= Y^2 
-- 2 Y \odot (EL) (EF)&#39; 
-+ Z \odot (EL^2) (EF^2)&#39;
-\end{aligned}
-\]</span></p>
-<div id="var_type-constant" class="section level3">
-<h3>var_type = constant</h3>
-<p>Let <span class="math inline">\(m\)</span> be the number of non-missing entries in <span class="math inline">\(Y\)</span>. We can write</p>
-<p><span class="math display">\[\begin{aligned}
-\sigma^2 
-= \frac{1}{m} (
-\text{sum}(Y^2) 
-- 2 \cdot \text{sum}((EL) \odot Y (EF)) 
-+ \text{sum}((EL^2) \odot Z (EF^2))
-) 
-\end{aligned}\]</span></p>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Currently, FLASH does not perform well on large datasets. The reason is that it maintains and manipulates at least three matrices (<code>Rk</code>, <code>R2</code>, and <code>R2k</code>) which are each of the same size as the data matrix <code>Y</code>. When <code>var_type</code> is <code>by_row</code> or <code>by_column</code>, a fourth large matrix <code>tau</code> is maintained, and when there is missing data, still another large matrix is stored (a copy of <code>Y</code>, with missing data imputed to be zero).</p>
+<p>Let <span class="math inline">\(Y \in \mathbb{R}^{n \times p}\)</span>, and let <span class="math inline">\(k\)</span> be the rank of the flash fit. I show here that when <span class="math inline">\(k^2 &lt; \min(n, p)\)</span>, FLASH can be implemented without maintaining any matrices of the same dimensions as <code>Y</code>. Even when <span class="math inline">\(k\)</span> is large, such a matrix only needs to be created once during factor updates and once during loading updates, and it is only temporarily needed.</p>
+<p>I outline two improved implementations. In the first, the only <span class="math inline">\(n \times p\)</span> matrices that are required are the data matrix <span class="math inline">\(Y\)</span> with <code>NA</code>s set to zero and, if there is missing data, a matrix <span class="math inline">\(Z\)</span> with zeroes where data is missing and ones elsewhere. The original data matrix is not needed. I never modify or transpose <span class="math inline">\(Y\)</span> or <span class="math inline">\(Z\)</span>, so the total memory requirements should not be much larger than the memory needed to store <span class="math inline">\(Y\)</span> and <span class="math inline">\(Z\)</span>.</p>
+<p>The second assumes that one is willing to maintain a matrix of residuals <span class="math inline">\(R\)</span>, initialized at <span class="math inline">\(Y\)</span> (<span class="math inline">\(Z\)</span> is kept to ensure that <span class="math inline">\(R\)</span> has zeroes where data is missing). The primary disadvantage is that one cannot take advantage of sparsity in <span class="math inline">\(Y\)</span>, and it requires some care to update <span class="math inline">\(R\)</span> correctly and at the right time, but it is potentially much faster than the first implementation.</p>
 </div>
-<div id="var_type-by_row" class="section level3">
-<h3>var_type = by_row</h3>
-<p>Now let <span class="math inline">\(m\)</span> be an <span class="math inline">\(n\)</span>-vector, where <span class="math inline">\(m_i\)</span> denotes the number of non-missing entries in row <span class="math inline">\(Y_{i \bullet}\)</span>. <span class="math inline">\(\sigma^2\)</span> is now an <span class="math inline">\(n\)</span>-vector:</p>
-<p><span class="math display">\[\begin{aligned}
-\sigma^2 
-= (1 / m) \odot (\text{rowSums}(Y^2) 
-- 2 \cdot \text{rowSums}((EL) \odot Y (EF))
-+ \text{rowSums}((EL^2) \odot Z (EF^2))
-\end{aligned}\]</span></p>
-</div>
-<div id="var_type-by_column" class="section level3">
-<h3>var_type = by_column</h3>
-<p>With <span class="math inline">\(m\)</span> a <span class="math inline">\(p\)</span>-vector, where <span class="math inline">\(m_j\)</span> denotes the number of non-missing entries in column <span class="math inline">\(Y_{\bullet j}\)</span>:</p>
-<p><span class="math display">\[\begin{aligned}
-\sigma^2 
-= (1 / m) \odot (\text{colSums}(Y^2) 
-- 2 \cdot \text{colSums}(t(EF) \odot (t(EL))Y) 
-+ \text{colSums}(t(EF^2) \odot (t(EL^2))Z))
-\end{aligned}\]</span></p>
-<p>(I write it in this form to avoid transposing <span class="math inline">\(Y\)</span>.)</p>
-</div>
-<div id="comment" class="section level3">
-<h3>Comment</h3>
-<p>I each case, the most expensive operations are the two multiplications of an <span class="math inline">\(n \times p\)</span> matrix by a <span class="math inline">\(p \times k\)</span> matrix. The one involving <span class="math inline">\(Z\)</span> is very cheap if there is no missing data. The old implementation required three multiplications of a <span class="math inline">\(n \times k\)</span> by a <span class="math inline">\(k \times p\)</span> matrix. More importantly, though, the new implementation does not require the formation of any new <span class="math inline">\(n \times p\)</span> matrices.</p>
-</div>
-<div id="greedy-updates" class="section level3">
-<h3>Greedy updates</h3>
-<p>In the course of optimizing a single factor/loading pair, one can exploit the fact that only one column in each of <span class="math inline">\(EL\)</span>, <span class="math inline">\(EF\)</span>, <span class="math inline">\(EL^2\)</span>, and <span class="math inline">\(EF^2\)</span> change.</p>
+<div id="initializing-factors" class="section level2">
+<h2>Initializing factors</h2>
+<p>To initialize a new factor, we currently form a matrix of residuals, run an SVD-type algorithm on it, and then initialize using the leading singular vector. However, we don’t need to recourse to an external package here. Since we only require one singular vector, the minimization problem is simple. When there is no missing data, the problem is to solve: <span class="math display">\[ (l_k, f_k) 
+= {\arg \min}_{l_k, f_k} \| R_{-k} - l_k f_k&#39; \|_F^2
+= {\arg \min}_{l_k, f_k} \| Y - L_{-k}F_{-k}&#39; - l_k f_k&#39; \|_F^2 \]</span> It is easy to derive an alternating algorithm by differentiating with respect to <span class="math inline">\(l_k\)</span> and setting the result equal to zero: <span class="math display">\[ l_k 
+= \frac{R_{-k}f_k}{f_k^Tf_k} 
+= \frac{Yf_k - L_{-k}(F_{-k}&#39;f_k)}{f_k^Tf_k} \]</span> And similarly: <span class="math display">\[ f_k^T
+= \frac{l_k^TR_{-k}}{l_k^Tl_k} 
+= \frac{l_k^TY - (l_k^TL_{-k})F_{-k}&#39;}{l_k^Tl_k} \]</span></p>
+<p>Each of these updates can be performed very quickly; further, since we don’t need to solve the problem exactly, we can stop early, and the same procedure is likely sufficient to (approximately) initialize factors when there is not a lot of missing data.</p>
+<p>But we can also derive efficient updates that are exact for missing data. In this case, the problem is to solve: <span class="math display">\[ (l_k, f_k) 
+= {\arg \min}_{l_k, f_k} \| Z \odot (R_{-k} - l_k f_k&#39;) \|_F^2
+= {\arg \min}_{l_k, f_k} \| Y - Z \odot L_{-k}F_{-k}&#39; - Z \odot l_k f_k&#39; \|_F^2 \]</span></p>
+<p>The terms on the right-hand side that depend on <span class="math inline">\(l_k^{(i)}\)</span> are <span class="math display">\[\begin{aligned}
+-2 &amp;(Z \odot R_{-k})_{i \bullet}(Z_{i \bullet}^T \odot l_k^{(i)} f_k) 
++ (Z_{i \bullet}^T \odot l_k^{(i)} f_k)^T (Z_{i \bullet}^T \odot l_k^{(i)} f_k) \\
+&amp;= -2l_k^{(i)} (Z_{i \bullet} \odot (R_{-k})_{i \bullet})f_k 
++ l_k^{(i)2} (Z_{i \bullet}^T \odot f_k)^T f_k
+\end{aligned}\]</span> Differentiating and setting the result equal to zero gives (in vector form) <span class="math display">\[ l_k = (Z \odot R_{-k})f_k / Zf_k^2, \]</span> where division and squaring are elementwise. Write <span class="math display">\[ (Z \odot R_{-k})f_k = Yf_k - (Z \odot L_{-k}F_{-k}&#39;)f_k\]</span> and note that the <span class="math inline">\(i\)</span>th entry of <span class="math inline">\((Z \odot L_{-k}F_{-k}&#39;)f_k\)</span> is <span class="math display">\[\sum_j z_{ij} \sum_{\ell: \ell \ne k} l_{i \ell} f_{j \ell} f_k
+= \sum_{\ell: \ell \ne k} l_{i \ell} \sum_j z_{ij} f_{j \ell} f_k
+= \sum_{\ell: \ell \ne k} l_{i \ell} \sum_j z_{ij} \tilde{f}_{j \ell},\]</span> where <span class="math inline">\(\tilde{F} = f_k \odot_b F_{-k}\)</span>, with <span class="math inline">\(\odot_b\)</span> denoting elementwise multiplication using broadcasting (that is, the <span class="math inline">\(\ell\)</span>th column of <span class="math inline">\(\tilde{F}\)</span> is formed by taking the elementwise product of <span class="math inline">\(f_k\)</span> and the <span class="math inline">\(\ell\)</span>th column of <span class="math inline">\(F_{-k}\)</span>). Thus, <span class="math display">\[ (Z \odot R_{-k})f_k 
+= Yf_k - \text{rowSums}(L_{-k} \odot Z(f_k \odot_b F_{-k}))\]</span></p>
+<p>In sum, exact updates can be obtained for missing data by alternately setting <span class="math display">\[ l_k = (Yf_k - \text{rowSums}(L_{-k} \odot Z(f_k \odot_b F_{-k})) / Zf_k^2\]</span> and <span class="math display">\[ f_k^T = (l_k^T Y - \text{colSums}(F_{-k}^T \odot (l_k \odot_b L_{-k})^TZ)) / l_k^{2T}Z \]</span></p>
+<p>This algorithm requires three matrix multiplies involving a <span class="math inline">\(n \times p\)</span> matrix, with a flop count of <span class="math inline">\(2(k + 1)np\)</span> per update. The algorithm for no missing data only requires one, with a flop count of <span class="math inline">\(2np\)</span> per update, so we can expect this initialization to be slower by a factor of <span class="math inline">\(k + 1\)</span>. Still, note that the matrix of residuals never needs to be formed. Further, if there is a lot of missing data, then <span class="math inline">\(Y\)</span> and <span class="math inline">\(Z\)</span> can be stored as sparse matrices. In that case, the largest dense matrix that needs to be manipulated will be of dimension <span class="math inline">\(\max(n, p) \times k - 1\)</span>.</p>
+<div id="alternative-implementation" class="section level3">
+<h3>Alternative implementation</h3>
+<p>If one maintains <span class="math inline">\(R\)</span>, then the updates are extremely simple: alternate between setting <span class="math display">\[ l_k = Rf_k / f_k^T f_k\ (\text{or } l_k = Rf_k / Z f_k^2) \]</span> and <span class="math display">\[ f_k^T = l_k^T R / l_k^T l_k\ (\text{or } f_k^T = l_k^T R / l_k^{2T} Z \]</span></p>
 </div>
 </div>
 <div id="updating-loadings" class="section level2">
 <h2>Updating loadings</h2>
-<p>Instead of updating loading 1, then factor 1, then loading 2, etc., one can much more efficiently update all loadings (potentially in parallel), then all factors.</p>
 <div id="calculating-the-ebnm-s2s" class="section level3">
 <h3>Calculating the EBNM <code>s2</code>s</h3>
 <p>The old algorithm calculates <code>s2 = 1/(tau %*% f$EF2[, k])</code>, where the entries of <code>tau</code> corresponding to missing data have been set to zero.</p>
-<p>Let <span class="math inline">\(S\)</span> be the matrix of <code>s2</code>s, with the <span class="math inline">\(i\)</span>th column giving the <code>s2</code>s for the <span class="math inline">\(i\)</span>th loading. Then for <code>var_type = constant</code> or <code>var_type = by_row</code>, <span class="math inline">\(S\)</span> may be calculated as <span class="math display">\[ S = \sigma^2 / Z(EF^2), \]</span> where “<span class="math inline">\(/\)</span>” is elementwise for <code>var_type = by_row</code>. Again the calculation is simplified if there is no missing data: here, <span class="math inline">\(Z(EF^2)\)</span> is simply a matrix where each row is the <span class="math inline">\(k\)</span>-vector <span class="math inline">\(\text{colSums}(EF^2)\)</span>.</p>
-<p>For <code>var_type = by_column</code>, <span class="math display">\[ S = 1 / Z(\tau \odot_b EF^2), \]</span> where <span class="math inline">\(\odot_b\)</span> denotes that broadcasting is to be performed (in the sense that <code>R</code> uses it).</p>
-<p>This is essentially the same as before, but <code>tau</code> does not need to be stored as a matrix.</p>
+<p>For <code>var_type = constant</code> or <code>var_type = by_row</code>, <code>s2</code> may be calculated as <span class="math display">\[ 1 / (\tau \odot Z(EF^2)_{\bullet k}) \]</span> If there is no missing data, then <code>s2</code> is simply <span class="math display">\[1 / (\tau \odot \text{sum}((EF^2)_{\bullet k})) \]</span></p>
+<p>For <code>var_type = by_column</code>, <code>s2</code> is <span class="math display">\[1 / Z(\tau \odot (EF^2)_{\bullet k}) \]</span> or the scalar <span class="math display">\[ 1 / \text{sum}(\tau \odot (EF^2)_{\bullet k}) \]</span> if there is no missing data.</p>
+<p>This is essentially the same as before, but does not require storing <code>tau</code> as a matrix.</p>
 </div>
 <div id="calculating-the-ebnm-xs" class="section level3">
 <h3>Calculating the EBNM <code>x</code>s</h3>
-<p>The old algorithm calculates <code>x = ((Rk * tau) %*% f$EF[, k]) * s2</code>, which requires storing and updating <code>Rk</code>. For <code>var_type = constant</code> and <code>var_type = by_row</code>, one may write:</p>
-<p><span class="math display">\[ X_{\bullet k} = \tau \odot (Y - \sum_{i: i \ne k} Z \odot (EL)_{\bullet i}(EF)_{\bullet i}&#39;) (EF)_{\bullet k} \odot S_{\bullet k}. \]</span></p>
+<p>The old algorithm calculates <code>x = ((Rk * tau) %*% f$EF[, k]) * s2</code>, which requires storing and updating <code>Rk</code>. For <code>var_type = constant</code> and <code>var_type = by_row</code>, <code>x</code> is</p>
+<p><span class="math display">\[ \tau \odot (Y - \sum_{i: i \ne k} Z \odot (EL)_{\bullet i}(EF)_{\bullet i}&#39;) (EF)_{\bullet k} \odot \text{s2}. \]</span></p>
 <p>Note that <span class="math inline">\((Z \odot (EL)_{\bullet i} (EF)_{\bullet i}&#39;) (EF)_{\bullet k}\)</span> can be written as <span class="math display">\[ (EL)_{\bullet i} \odot Z ((EF)_{\bullet i} \odot (EF)_{\bullet k}) \]</span> so <span class="math display">\[\left(\sum_{i: i \ne k} Z \odot (EL)_{\bullet i}(EF)_{\bullet i}&#39;\right) (EF)_{\bullet k}
 = \text{rowSums} \left((EL)_{\bullet -k} \odot Z((EF)_{\bullet k} \odot_b (EF)_{\bullet -k}) \right).\]</span></p>
-<p>Again, the performance savings are not likely to be substantial unless there is no missing data, but this method does not require the formation of any new <span class="math inline">\(n \times p\)</span> matrices.</p>
-<p>For <code>var_type = by_column</code>, write <span class="math display">\[ X_{\bullet k} = (Y - \sum_{i: i \ne k} Z \odot (EL)_{\bullet i}(EF)_{\bullet i}&#39;) (\tau \odot (EF)_{\bullet k}) \odot S_{\bullet k}. \]</span></p>
+<p>The performance savings are not likely to be substantial unless there is no missing data, but this method does not require the formation of any new <span class="math inline">\(n \times p\)</span> matrices.</p>
+<p>For <code>var_type = by_column</code>, <code>x</code> is <span class="math display">\[ (Y - \sum_{i: i \ne k} Z \odot (EL)_{\bullet i}(EF)_{\bullet i}&#39;) (\tau \odot (EF)_{\bullet k}) \odot \text{s2}\]</span> or <span class="math display">\[ (Y(\tau \odot (EF)_{\bullet k}) - 
+\text{rowSums} \left((EL)_{\bullet -k} \odot Z(\tau \odot (EF)_{\bullet k} \odot_b (EF)_{\bullet -k}) \right)
+\odot \text{s2}\]</span></p>
+<p>These expressions can again be simplified when there is no missing data.</p>
 </div>
 <div id="an-idea-for-parallelizing-the-ebnm-problems" class="section level3">
 <h3>An idea for parallelizing the EBNM problems</h3>
@@ -529,18 +544,106 @@ W^{\text{new}}
 <p>Then repeat for <span class="math inline">\(k = 2, 3, \ldots\)</span></p>
 <p>But if one simply omits the update of of <span class="math inline">\(W\)</span>, parallelization is simple. If the updates of <span class="math inline">\((EL)\)</span> are small, then this omission might be justified.</p>
 </div>
+<div id="alternative-implementation-1" class="section level3">
+<h3>Alternative implementation</h3>
+<p>If <span class="math inline">\(R\)</span> is stored rather than <span class="math inline">\(Y\)</span>, then the values of <code>x</code> for <code>constant</code> and <code>by_row</code> precision types are <span class="math display">\[ \tau \odot (R + Z \odot (EL)_{\bullet k}(EF)_{\bullet k}&#39;) (EF)_{\bullet k} \odot \text{s2} 
+= \tau \odot (R(EF)_{\bullet k} + (EL)_{\bullet k} \odot Z(EF)_{\bullet k}^2) \odot \text{s2}\]</span></p>
+<p>For <code>by_column</code>, <code>x</code> can be obtained as <span class="math display">\[ (R(\tau \odot (EF)_{\bullet k}) + (EL)_{\bullet k} \odot Z(\tau \odot (EF)_{\bullet k}^2) \odot \text{s2}\]</span></p>
+<p>The above implementation requires multiplying a <span class="math inline">\(n \times p\)</span> matrix by a <span class="math inline">\(p \times 1\)</span> matrix and, when there is missing data, multiplying a <span class="math inline">\(n \times p\)</span> matrix by a <span class="math inline">\(p \times k - 1\)</span> matrix. In this implementation, both of the matrices on the right-hand side are <span class="math inline">\(p \times 1\)</span>, so the calculation should be faster by a factor of <span class="math inline">\(k / 2\)</span> when there is missing data (with no improvement when there is none).</p>
+<p>Of course, the residuals also need to be updated after updating the loadings. This requires up to <span class="math inline">\(3np\)</span> flops: <span class="math display">\[ R^{\text{new}} 
+= R^{\text{old}} - Z \odot ((EL)_{\bullet k}^{\text{new}} - (EL)_{\bullet k}^{\text{old}}) (EF)_{\bullet k}&#39; \]</span></p>
+</div>
 </div>
 <div id="updating-factors" class="section level2">
 <h2>Updating factors</h2>
 <p>Factor updates can easily be obtained by reversing the roles of, on the one hand, <span class="math inline">\(EL\)</span> and <span class="math inline">\(EF\)</span> and, on the other, <code>var_type = by_row</code> and <code>var_type = by_column</code>.</p>
 </div>
+<div id="updating-tau" class="section level2">
+<h2>Updating <span class="math inline">\(\tau\)</span></h2>
+<p><span class="math inline">\(\tau\)</span> can be updated easily and efficiently if it is done every time a single factor or loading is updated. Recall that most updates to <span class="math inline">\(\tau\)</span> involve some operation on the matrix of squared residuals: <code>var_type = constant</code> takes the overall mean, <code>by_row</code> takes row means, and <code>by_column</code> takes column means. Write <span class="math display">\[\text{R2} = R^2 + Z \odot (EL^2) (EF^2)&#39; - Z \odot (EL)^2 ((EF)^2)&#39; \]</span></p>
+<p>For <code>var_type = constant</code>, <span class="math display">\[\begin{aligned} 
+\frac{n_{\text{nonnmissing}}}{\tau} 
+= \text{sum}(\text{R2}) 
+&amp;= \text{sum}(R^2) + \text{sum} ((EL^2) \odot Z(EF^2)) - \text{sum} ((EL)^2 \odot Z((EF)^2)) \\
+&amp;= \text{sum}(R^2) + \text{sum} ((EF^2)^T \odot (EL^2)^T Z) - \text{sum} (((EF)^2)^T \odot ((EL)^2)^T Z)
+\end{aligned}\]</span></p>
+<p>Similar expressions can be derived for <code>by_row</code> (viz. <code>by_column</code>) by replacing the sums with rowSums in the first equality (viz. with colSums in the second equality) and by replacing the scalar number of non-missing values <span class="math inline">\(n_{\text{nonnmissing}}\)</span> with a vector of the number of non-missing values per row (viz. per column).</p>
+<p>Since at most one factor or loading has changed between updates of <span class="math inline">\(\tau\)</span>, one can further simplify. For example, take the case <code>var_type = constant</code>. After a single loading update, <span class="math display">\[\begin{aligned}
+n_{\text{nonmissing}} \left( \frac{1}{\tau} - \frac{1}{\tilde{\tau}} \right)
+= \Delta (\text{sum}(R^2))
++ (\Delta EL_k^2)^T Z(EF_k^2)
+- (\Delta (EL_k)^2)^T Z((EF_k)^2),
+\end{aligned}\]</span> where <span class="math inline">\(\Delta\)</span> denotes the new value minus the old value.</p>
+<p>If <span class="math inline">\(R\)</span> is stored, then <span class="math inline">\(\Delta (\text{sum}(R^2))\)</span> is probably most easily obtained by calculating and storing sum<span class="math inline">\((R^2)\)</span> every time <span class="math inline">\(R\)</span> is updated (at a cost of <span class="math inline">\(2np\)</span> flops). Alternatively, writing <span class="math display">\[ \begin{aligned}
+\Delta R^2 
+&amp;= (R_{-k} - Z \odot L_k^{\text{new}}F_k&#39;)^2 - (R_{-k} - Z \odot L_k^{\text{old}}F_k&#39;)^2 \\
+&amp;= -2R_{-k} \odot (L_k^{\text{new}} - L_k^{\text{old}}) F_k&#39; + (Z \odot L_k^{\text{new}}F_k&#39;)^2 - (Z \odot L_k^{\text{old}}F_k&#39;)^2
+\end{aligned}\]</span> and noting that <span class="math display">\[ \text{sum}((Z \odot L_k^{\text{new}}F_k&#39;)^2)
+= ((L_k^{\text{new}})^2)^T ZF_k^2, \]</span> one has that <span class="math display">\[ \Delta (\text{sum}(R^2))
+= ((L_k^{\text{new}})^2 - (L_k^{\text{old}})^2)^T ZF_k^2
+-2(L_k^{\text{new}} - L_k^{\text{old}})^T R_{-k} F_k \]</span> Finally, replacing <span class="math inline">\(R_{-k}\)</span> with <span class="math inline">\(Y - \sum_{i: i \ne k} Z \odot L_i F_i&#39;\)</span>: <span class="math display">\[\begin{aligned}
+\Delta(\text{sum}(R^2))
+&amp;= ((L_k^{\text{new}})^2 - (L_k^{\text{old}})^2)^T ZF_k^2
+- 2(L_k^{\text{new}} - L_k^{\text{old}})^T 
+(Y F_k - \text{rowSums} (L_{-k} \odot Z(F_k \odot_b F_{-k})))
+\end{aligned} \]</span> (See “Calculating the EBNM <code>x</code>s” above for a more detailed derivation of the last step.) This calculation requires approximately <span class="math inline">\(npk\)</span> flops, so I would expect it to be slower than simply calculating sum<span class="math inline">\((R^2)\)</span> after each update, especially as <span class="math inline">\(k\)</span> gets large.</p>
+<p>I omit the details for <code>by_row</code> and <code>by_column</code> and the simplifications obtained when there is no missing data; these are easy to derive from the above.</p>
+</div>
 <div id="updating-objective" class="section level2">
 <h2>Updating objective</h2>
-<p>TODO</p>
-</div>
-<div id="summary" class="section level2">
-<h2>Summary</h2>
-<p>With this implementation, the only <span class="math inline">\(n \times p\)</span> matrices that ever need to be handled are <span class="math inline">\(Y\)</span> and, if data is missing, <span class="math inline">\(Z\)</span> (and <span class="math inline">\(Z\)</span> can be stored as a matrix of integers). So it should be possible to fit a flash object using only slightly more memory than that required to store the data itself.</p>
+<p>The part of the objective that is not stored in the <code>KL</code> fields is calculated as <code>e_loglik = -0.5 * sum(log(2 * pi / tau) + tau * R2)</code> (here, <code>R2</code> has <code>NA</code>s where data is missing so that the entries do not contribute to the sum).</p>
+<p>One should observe, however, that if the objective is calculated immediately after updating <span class="math inline">\(\tau\)</span>, then this expression has a very simple form. With <code>by_constant</code>, for example, <span class="math display">\[\frac{1}{\tau} = \frac{\text{sum}(\text{R2})}{n_{\text{nonmissing}}},\]</span> so <span class="math display">\[\text{sum}(\tau \cdot \text{R2}) = \tau \cdot \text{sum}(\text{R2}) = n_{\text{nonmissing}}\]</span></p>
+<p>In effect, one can verify that for <code>constant</code>, <code>by_row</code>, and <code>by_column</code>, <code>e_loglik</code> is simply <span class="math display">\[ -\frac{1}{2} \text{sum} \left(n_{\text{nonmissing}} \odot \left(\log \left(\frac{2 \pi}{\tau} \right) + 1 \right) \right), \]</span> where <span class="math inline">\(n_{\text{nonmissing}}\)</span> is a scalar, <span class="math inline">\(n\)</span>-vector of nonmissing values per row (for <code>by_row</code>), or <span class="math inline">\(p\)</span>-vector of nonmissing values per column (for <code>by_column</code>).</p>
+<p>If <code>var_type</code> is <code>zero</code> and is a constant (say, <code>S = 1</code>), then one can maintain a scalar value of <code>tau</code> as if the precision were constant (using the above updates). Since it will still be true that, for this pseudo-<span class="math inline">\(\tau\)</span>, <span class="math inline">\(\text{sum(R2)} = n_{\text{nonmissing}} / \tau\)</span>, <code>e_loglik</code> can then be calculated as <span class="math display">\[ -\frac{1}{2} \text{sum} \left(n_{\text{nonmissing}} \odot \left(\log \left(2 \pi S^2 \right) + \frac{1}{\tau S^2} \right) \right) \]</span> This also works if <code>S</code> is a row or column vector.</p>
+<p>If <code>S</code> is a full matrix and <span class="math inline">\(R\)</span> is being stored, then still another approach is possible; one can store <span class="math inline">\(\text{sum}(\log(2 \pi S^2))\)</span> and then calculate <span class="math inline">\(\text{sum(R2} / \text{S}^2)\)</span> as <span class="math display">\[ \text{sum} \left( (1 / S^2) \odot R^2 \right) 
++ \text{sum}(EL^2 \cdot (1 / S^2) EF^2)
+- \text{sum}((EL)^2 \cdot (1 / S^2) (EF)^2),\]</span> where the matrix <span class="math inline">\((1 / S^2)\)</span> has zeroes where data is missing. This is of course similar to the formula for <span class="math inline">\(1 / \tau\)</span> when <code>var_type = constant</code>, and similar simple updates that depend only on updated factors and loadings are possible. For example, one can update the objective after a single loading update by calculating <span class="math display">\[ \Delta(\text{sum}((1 / S^2) \odot R^2)) 
++ (\Delta EL_k^2)^T (1 / S^2)(EF_k^2)
+- (\Delta (EL_k)^2)^T (1 / S^2)((EF_k)^2)\]</span> (Due to the form of these updates, I recommend storing <code>1 / S^2</code> rather than <code>S</code>, with zeroes where data is missing.)</p>
+<!-- ## Updating $\tau$ -->
+<!-- Most updates to $\tau$ involve some operation on the matrix of squared residuals: `var_type = constant` takes the overall mean, `by_row` takes row means, and `by_column` takes column means. Write -->
+<!-- $$  -->
+<!-- \begin{aligned} -->
+<!-- R2 &= Y^2  -->
+<!-- - 2 Y \odot (EL) (EF)'  -->
+<!-- + Z \odot ((EL) (EF)')^2 -->
+<!-- + Z \odot (EL^2) (EF^2)' -->
+<!-- - Z \odot (EL)^2 ((EF)^2)' -->
+<!-- \end{aligned} -->
+<!-- $$ -->
+<!-- $\text{sum}(Y^2)$, $\text{rowSums}(Y^2)$, and $\text{colSums}(Y^2)$ can be calculated once and stored in the data object. Operations on the other terms can also usually be performed efficiently. -->
+<!-- For example, -->
+<!-- $$\begin{aligned} -->
+<!-- \text{sum}(Y \odot (EL)(EF)')  -->
+<!-- &= \text{sum}(EL \odot Y(EF)) \\ -->
+<!-- &= \text{sum}((EF)^T \odot (EL)^T Y) -->
+<!-- \end{aligned}$$ -->
+<!-- (One can replace sums with rowSums in the first equality for `by_row`, and one can replace them with colSums in the second equality for `by_column`.) -->
+<!-- Identical formulae exist for the fourth and fifth terms in the expression for $R2$. For example,  -->
+<!-- $$\begin{aligned} -->
+<!-- \text{sum}(Z \odot (EL^2)(EF^2)')  -->
+<!-- &= \text{sum}(EL^2 \odot Z(EF^2)) \\ -->
+<!-- &= \text{sum}((EF^2)^T \odot (EL^2)^T Z), -->
+<!-- \end{aligned}$$ -->
+<!-- and when there is no missing data then $Z(EF^2)$ and $(EL^2)^TZ$ are simply $\text{colSums}(EF^2)$ and $\text{colSums}(EL^2)$. -->
+<!-- $Z \odot ((EL) (EF)')^2$ is less nice, but can often be calculated efficiently. First, notice that when there is no missing data then one obtains a very simple expression. Writing $L$ for $EL$ and $F$ for $EF$:  -->
+<!-- $$ \begin{aligned} -->
+<!-- \text{sum} ((LF')^2) -->
+<!-- &= \sum_{i, j} \left( \sum_k L_{ik} F_{jk} \right)^2 \\ -->
+<!-- &= \sum_{i, j, k, \ell} L_{ik} F_{jk} L_{i \ell} F_{j \ell} \\ -->
+<!-- &= \sum_{i, k, \ell} L_{ik} L_{i \ell} \sum_j F_{jk} F_{j \ell} \\ -->
+<!-- &= \text{sum}(L^T L \odot F^TF) -->
+<!-- \end{aligned}$$ -->
+<!-- With missing data, one may write -->
+<!-- $$\begin{aligned} -->
+<!-- \text{sum} (Z \odot (LF')^2) -->
+<!-- &= \sum_{i, k, \ell} L_{ik} L_{i \ell} \sum_j z_{ij} F_{jk} F_{j \ell} \\ -->
+<!-- &= \sum_{i, k, \ell} \tilde{L}_{i, (k,\ell)} \sum_j z_{ij} \tilde{F}_{j, (k, \ell)} \\ -->
+<!-- &= \text{sum}(\tilde{L} \odot Z \tilde{F}) \\ -->
+<!-- &= \text{sum}(\tilde{F}^T \odot \tilde{L}^T Z) -->
+<!-- \end{aligned}$$ -->
+<!-- where $\tilde{L}$ is a $n \times k^2$ matrix with column $(k, \ell)$ formed by taking the elementwise product of columns $L_{\bullet k}$ and $L_{\bullet \ell}$, and similarly for $\tilde{F}$. Of course, if $k^2 > n$ or $k^2 > p$, then $\tilde{F}$ or $\tilde{L}$ will be larger than the data matrix $Y$, so there is no value to using this method. And in any case, this method requires multiplying a $n \times p$ matrix by a $p \times k^2$ matrix, whereas simply calculating $(Y - LF')^2$ only requires multiplying a $n \times k$ matrix by a $k \times p$ matrix, so if memory is not an issue than this approach should be slower by approximately a factor of $k$. (And when only one factor/loading is being updated and $R_{-k}$ is stored, as with the current greedy optimization algorithm, then it could be slower by up to a factor of $k^2$.) -->
+<!-- In the equality on the second-to-last line in the most recent display, sums can be replaced by rowSums (for `by_row`). In the last equality, sums can be replaced by colSums (for `by_column`). -->
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
