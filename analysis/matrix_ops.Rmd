@@ -1,5 +1,5 @@
 ---
-title: "A more memory-efficient backfitting algorithm"
+title: "More efficient FLASH algorithms"
 author: "Jason Willwerscheid"
 date: "11/4/2018"
 output: html_document
@@ -9,92 +9,96 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Updating $\sigma^2$
+## Introduction
 
-Let $Y$ have zeroes where data is missing and let $Z$ be an indicator matrix with ones where data is non-missing and zeroes where data is missing. Write
+Currently, FLASH does not perform well on large datasets. The reason is that it maintains and manipulates at least three matrices (`Rk`, `R2`, and `R2k`) which are each of the same size as the data matrix `Y`. When `var_type` is `by_row` or `by_column`, a fourth large matrix `tau` is maintained, and when there is missing data, still another large matrix is stored (a copy of `Y`, with missing data imputed to be zero). 
 
-$$ 
-\begin{aligned}
-R^2 &= Y^2 
-- 2 Y \odot (EL) (EF)' 
-+ Z \odot ((EL) (EF)')^2
-+ Z \odot (EL^2) (EF^2)'
-- Z \odot (EL)^2 ((EF)^2)' \\
-&= Y^2 
-- 2 Y \odot (EL) (EF)' 
-+ Z \odot (EL^2) (EF^2)'
-\end{aligned}
-$$
+Let $Y \in \mathbb{R}^{n \times p}$, and let $k$ be the rank of the flash fit. I show here that when $k^2 < \min(n, p)$, FLASH can be implemented without maintaining any matrices of the same dimensions as `Y`. Even when $k$ is large, such a matrix only needs to be created once during factor updates and once during loading updates, and it is only temporarily needed. 
 
-### var_type = constant
+I outline two improved implementations. In the first, the only $n \times p$ matrices that are required are the data matrix $Y$ with `NA`s set to zero and, if there is missing data, a matrix $Z$ with zeroes where data is missing and ones elsewhere. The original data matrix is not needed. I never modify or transpose $Y$ or $Z$, so the total memory requirements should not be much larger than the memory needed to store $Y$ and $Z$.
 
-Let $m$ be the number of non-missing entries in $Y$. We can write
+The second assumes that one is willing to maintain a matrix of residuals $R$, initialized at $Y$ ($Z$ is kept to ensure that $R$ has zeroes where data is missing). The primary disadvantage is that one cannot take advantage of sparsity in $Y$, and it requires some care to update $R$ correctly and at the right time, but it is potentially much faster than the first implementation.
 
+## Initializing factors
+
+To initialize a new factor, we currently form a matrix of residuals, run an SVD-type algorithm on it, and then initialize using the leading singular vector. However, we don't need to recourse to an external package here. Since we only require one singular vector, the minimization problem is simple. When there is no missing data, the problem is to solve:
+$$ (l_k, f_k) 
+= {\arg \min}_{l_k, f_k} \| R_{-k} - l_k f_k' \|_F^2
+= {\arg \min}_{l_k, f_k} \| Y - L_{-k}F_{-k}' - l_k f_k' \|_F^2 $$
+It is easy to derive an alternating algorithm by differentiating with respect to $l_k$ and setting the result equal to zero:
+$$ l_k 
+= \frac{R_{-k}f_k}{f_k^Tf_k} 
+= \frac{Yf_k - L_{-k}(F_{-k}'f_k)}{f_k^Tf_k} $$
+And similarly:
+$$ f_k^T
+= \frac{l_k^TR_{-k}}{l_k^Tl_k} 
+= \frac{l_k^TY - (l_k^TL_{-k})F_{-k}'}{l_k^Tl_k} $$
+
+Each of these updates can be performed very quickly; further, since we don't need to solve the problem exactly, we can stop early, and the same procedure is likely sufficient to (approximately) initialize factors when there is not a lot of missing data.
+
+But we can also derive efficient updates that are exact for missing data. In this case, the problem is to solve:
+$$ (l_k, f_k) 
+= {\arg \min}_{l_k, f_k} \| Z \odot (R_{-k} - l_k f_k') \|_F^2
+= {\arg \min}_{l_k, f_k} \| Y - Z \odot L_{-k}F_{-k}' - Z \odot l_k f_k' \|_F^2 $$
+
+The terms on the right-hand side that depend on $l_k^{(i)}$ are
 $$\begin{aligned}
-\sigma^2 
-= \frac{1}{m} (
-\text{sum}(Y^2) 
-- 2 \cdot \text{sum}((EL) \odot Y (EF)) 
-+ \text{sum}((EL^2) \odot Z (EF^2))
-) 
+-2 &(Z \odot R_{-k})_{i \bullet}(Z_{i \bullet}^T \odot l_k^{(i)} f_k) 
++ (Z_{i \bullet}^T \odot l_k^{(i)} f_k)^T (Z_{i \bullet}^T \odot l_k^{(i)} f_k) \\
+&= -2l_k^{(i)} (Z_{i \bullet} \odot (R_{-k})_{i \bullet})f_k 
++ l_k^{(i)2} (Z_{i \bullet}^T \odot f_k)^T f_k
 \end{aligned}$$
+Differentiating and setting the result equal to zero gives (in vector form)
+$$ l_k = (Z \odot R_{-k})f_k / Zf_k^2, $$
+where division and squaring are elementwise. Write 
+$$ (Z \odot R_{-k})f_k = Yf_k - (Z \odot L_{-k}F_{-k}')f_k$$
+and note that the $i$th entry of $(Z \odot L_{-k}F_{-k}')f_k$ is
+$$\sum_j z_{ij} \sum_{\ell: \ell \ne k} l_{i \ell} f_{j \ell} f_k
+= \sum_{\ell: \ell \ne k} l_{i \ell} \sum_j z_{ij} f_{j \ell} f_k
+= \sum_{\ell: \ell \ne k} l_{i \ell} \sum_j z_{ij} \tilde{f}_{j \ell},$$
+where $\tilde{F} = f_k \odot_b F_{-k}$, with $\odot_b$ denoting elementwise multiplication using broadcasting (that is, the $\ell$th column of $\tilde{F}$ is formed by taking the elementwise product of $f_k$ and the $\ell$th column of $F_{-k}$). Thus,
+$$ (Z \odot R_{-k})f_k 
+= Yf_k - \text{rowSums}(L_{-k} \odot Z(f_k \odot_b F_{-k}))$$
 
-### var_type = by_row 
+In sum, exact updates can be obtained for missing data by alternately setting
+$$ l_k = (Yf_k - \text{rowSums}(L_{-k} \odot Z(f_k \odot_b F_{-k})) / Zf_k^2$$
+and
+$$ f_k^T = (l_k^T Y - \text{colSums}(F_{-k}^T \odot (l_k \odot_b L_{-k})^TZ)) / l_k^{2T}Z $$
 
-Now let $m$ be an $n$-vector, where $m_i$ denotes the number of non-missing entries in row $Y_{i \bullet}$. $\sigma^2$ is now an $n$-vector:
+This algorithm requires three matrix multiplies involving a $n \times p$ matrix, with a flop count of $2(k + 1)np$ per update. The algorithm for no missing data only requires one, with a flop count of $2np$ per update, so we can expect this initialization to be slower by a factor of $k + 1$. Still, note that the matrix of residuals never needs to be formed. Further, if there is a lot of missing data, then $Y$ and $Z$ can be stored as sparse matrices. In that case, the largest dense matrix that needs to be manipulated will be of dimension $\max(n, p) \times k - 1$.
 
-$$\begin{aligned}
-\sigma^2 
-= (1 / m) \odot (\text{rowSums}(Y^2) 
-- 2 \cdot \text{rowSums}((EL) \odot Y (EF))
-+ \text{rowSums}((EL^2) \odot Z (EF^2))
-\end{aligned}$$
+### Alternative implementation
 
+If one maintains $R$, then the updates are extremely simple: alternate between setting
+$$ l_k = Rf_k / f_k^T f_k\ (\text{or } l_k = Rf_k / Z f_k^2) $$
+and
+$$ f_k^T = l_k^T R / l_k^T l_k\ (\text{or } f_k^T = l_k^T R / l_k^{2T} Z $$
 
-### var_type = by_column
-
-With $m$ a $p$-vector, where $m_j$ denotes the number of non-missing entries in column $Y_{\bullet j}$:
-
-$$\begin{aligned}
-\sigma^2 
-= (1 / m) \odot (\text{colSums}(Y^2) 
-- 2 \cdot \text{colSums}(t(EF) \odot (t(EL))Y) 
-+ \text{colSums}(t(EF^2) \odot (t(EL^2))Z))
-\end{aligned}$$
-
-(I write it in this form to avoid transposing $Y$.)
-
-### Comment
-
-I each case, the most expensive operations are the two multiplications of an $n \times p$ matrix by a $p \times k$ matrix. The one involving $Z$ is very cheap if there is no missing data. The old implementation required three multiplications of a $n \times k$ by a $k \times p$ matrix. More importantly, though, the new implementation does not require the formation of any new $n \times p$ matrices.
-
-### Greedy updates
-
-In the course of optimizing a single factor/loading pair, one can exploit the fact that only one column in each of $EL$, $EF$, $EL^2$, and $EF^2$ change.
 
 ## Updating loadings
-
-Instead of updating loading 1, then factor 1, then loading 2, etc., one can much more efficiently update all loadings (potentially in parallel), then all factors.
 
 ### Calculating the EBNM `s2`s
 
 The old algorithm calculates `s2 = 1/(tau %*% f$EF2[, k])`, where the entries of `tau` corresponding to missing data have been set to zero. 
 
-Let $S$ be the matrix of `s2`s, with the $i$th column giving the `s2`s for the $i$th loading. Then for `var_type = constant` or `var_type = by_row`, $S$ may be calculated as
-$$ S = \sigma^2 / Z(EF^2), $$
-where "$/$" is elementwise for `var_type = by_row`. Again the calculation is simplified if there is no missing data: here, $Z(EF^2)$ is simply a matrix where each row is the $k$-vector $\text{colSums}(EF^2)$. 
+For `var_type = constant` or `var_type = by_row`, `s2` may be calculated as
+$$ 1 / (\tau \odot Z(EF^2)_{\bullet k}) $$
+If there is no missing data, then `s2` is simply 
+$$1 / (\tau \odot \text{sum}((EF^2)_{\bullet k})) $$
 
-For `var_type = by_column`,
-$$ S = 1 / Z(\tau \odot_b EF^2), $$
-where $\odot_b$ denotes that broadcasting is to be performed (in the sense that `R` uses it).
+For `var_type = by_column`, `s2` is
+$$1 / Z(\tau \odot (EF^2)_{\bullet k}) $$
+or the scalar
+$$ 1 / \text{sum}(\tau \odot (EF^2)_{\bullet k}) $$
+if there is no missing data.
 
-This is essentially the same as before, but `tau` does not need to be stored as a matrix.
+This is essentially the same as before, but does not require storing `tau`  as a matrix.
 
 ### Calculating the EBNM `x`s
 
-The old algorithm calculates `x = ((Rk * tau) %*% f$EF[, k]) * s2`, which requires storing and updating `Rk`. For `var_type = constant` and `var_type = by_row`, one may write:
+The old algorithm calculates `x = ((Rk * tau) %*% f$EF[, k]) * s2`, which requires storing and updating `Rk`. For `var_type = constant` and `var_type = by_row`, `x` is
 
-$$ X_{\bullet k} = \tau \odot (Y - \sum_{i: i \ne k} Z \odot (EL)_{\bullet i}(EF)_{\bullet i}') (EF)_{\bullet k} \odot S_{\bullet k}. $$
+$$ \tau \odot (Y - \sum_{i: i \ne k} Z \odot (EL)_{\bullet i}(EF)_{\bullet i}') (EF)_{\bullet k} \odot \text{s2}. $$
 
 Note that $(Z \odot (EL)_{\bullet i} (EF)_{\bullet i}') (EF)_{\bullet k}$ can be written as
 $$ (EL)_{\bullet i} \odot Z ((EF)_{\bullet i} \odot (EF)_{\bullet k}) $$ 
@@ -102,10 +106,16 @@ so
 $$\left(\sum_{i: i \ne k} Z \odot (EL)_{\bullet i}(EF)_{\bullet i}'\right) (EF)_{\bullet k}
 = \text{rowSums} \left((EL)_{\bullet -k} \odot Z((EF)_{\bullet k} \odot_b (EF)_{\bullet -k}) \right).$$
 
-Again, the performance savings are not likely to be substantial unless there is no missing data, but this method does not require the formation of any new $n \times p$ matrices.
+The performance savings are not likely to be substantial unless there is no missing data, but this method does not require the formation of any new $n \times p$ matrices.
 
-For `var_type = by_column`, write
-$$ X_{\bullet k} = (Y - \sum_{i: i \ne k} Z \odot (EL)_{\bullet i}(EF)_{\bullet i}') (\tau \odot (EF)_{\bullet k}) \odot S_{\bullet k}. $$
+For `var_type = by_column`, `x` is
+$$ (Y - \sum_{i: i \ne k} Z \odot (EL)_{\bullet i}(EF)_{\bullet i}') (\tau \odot (EF)_{\bullet k}) \odot \text{s2}$$
+or
+$$ (Y(\tau \odot (EF)_{\bullet k}) - 
+\text{rowSums} \left((EL)_{\bullet -k} \odot Z(\tau \odot (EF)_{\bullet k} \odot_b (EF)_{\bullet -k}) \right)
+\odot \text{s2}$$
+
+These expressions can again be simplified when there is no missing data.
 
 ### An idea for parallelizing the EBNM problems
 
@@ -134,14 +144,155 @@ Then repeat for $k = 2, 3, \ldots$
 
 But if one simply omits the update of of $W$, parallelization is simple. If the updates of $(EL)$ are small, then this omission might be justified.
 
+### Alternative implementation
+
+If $R$ is stored rather than $Y$, then the values of `x` for `constant` and `by_row` precision types are
+$$ \tau \odot (R + Z \odot (EL)_{\bullet k}(EF)_{\bullet k}') (EF)_{\bullet k} \odot \text{s2} 
+= \tau \odot (R(EF)_{\bullet k} + (EL)_{\bullet k} \odot Z(EF)_{\bullet k}^2) \odot \text{s2}$$
+
+For `by_column`, `x` can be obtained as 
+$$ (R(\tau \odot (EF)_{\bullet k}) + (EL)_{\bullet k} \odot Z(\tau \odot (EF)_{\bullet k}^2) \odot \text{s2}$$
+
+The above implementation requires multiplying a $n \times p$ matrix by a $p \times 1$ matrix and, when there is missing data, multiplying a $n \times p$ matrix by a $p \times k - 1$ matrix. In this implementation, both of the matrices on the right-hand side are $p \times 1$, so the calculation should be faster by a factor of $k / 2$ when there is missing data (with no improvement when there is none). 
+
+Of course, the residuals also need to be updated after updating the loadings. This requires up to $3np$ flops:
+$$ R^{\text{new}} 
+= R^{\text{old}} - Z \odot ((EL)_{\bullet k}^{\text{new}} - (EL)_{\bullet k}^{\text{old}}) (EF)_{\bullet k}' $$
+
+
 ## Updating factors
 
 Factor updates can easily be obtained by reversing the roles of, on the one hand, $EL$ and $EF$ and, on the other, `var_type = by_row` and `var_type = by_column`. 
 
+
+## Updating $\tau$
+
+$\tau$ can be updated easily and efficiently if it is done every time a single factor or loading is updated. Recall that most updates to $\tau$ involve some operation on the matrix of squared residuals: `var_type = constant` takes the overall mean, `by_row` takes row means, and `by_column` takes column means. Write
+$$\text{R2} = R^2 + Z \odot (EL^2) (EF^2)' - Z \odot (EL)^2 ((EF)^2)' $$
+
+For `var_type = constant`,
+$$\begin{aligned} 
+\frac{n_{\text{nonnmissing}}}{\tau} 
+= \text{sum}(\text{R2}) 
+&= \text{sum}(R^2) + \text{sum} ((EL^2) \odot Z(EF^2)) - \text{sum} ((EL)^2 \odot Z((EF)^2)) \\
+&= \text{sum}(R^2) + \text{sum} ((EF^2)^T \odot (EL^2)^T Z) - \text{sum} (((EF)^2)^T \odot ((EL)^2)^T Z)
+\end{aligned}$$
+
+Similar expressions can be derived for `by_row` (viz. `by_column`) by replacing the sums with rowSums in the first equality (viz. with colSums in the second equality) and by replacing the scalar number of non-missing values $n_{\text{nonnmissing}}$ with a vector of the number of non-missing values per row (viz. per column).
+
+Since at most one factor or loading has changed between updates of $\tau$, one can further simplify. For example, take the case `var_type = constant`. After a single loading update, 
+$$\begin{aligned}
+n_{\text{nonmissing}} \left( \frac{1}{\tau} - \frac{1}{\tilde{\tau}} \right)
+= \Delta (\text{sum}(R^2))
++ (\Delta EL_k^2)^T Z(EF_k^2)
+- (\Delta (EL_k)^2)^T Z((EF_k)^2),
+\end{aligned}$$
+where $\Delta$ denotes the new value minus the old value.
+
+If $R$ is stored, then $\Delta (\text{sum}(R^2))$ is probably most easily obtained by calculating and storing sum$(R^2)$ every time $R$ is updated (at a cost of $2np$ flops). Alternatively, writing
+$$ \begin{aligned}
+\Delta R^2 
+&= (R_{-k} - Z \odot L_k^{\text{new}}F_k')^2 - (R_{-k} - Z \odot L_k^{\text{old}}F_k')^2 \\
+&= -2R_{-k} \odot (L_k^{\text{new}} - L_k^{\text{old}}) F_k' + (Z \odot L_k^{\text{new}}F_k')^2 - (Z \odot L_k^{\text{old}}F_k')^2
+\end{aligned}$$
+and noting that 
+$$ \text{sum}((Z \odot L_k^{\text{new}}F_k')^2)
+= ((L_k^{\text{new}})^2)^T ZF_k^2, $$ 
+one has that
+$$ \Delta (\text{sum}(R^2))
+= ((L_k^{\text{new}})^2 - (L_k^{\text{old}})^2)^T ZF_k^2
+-2(L_k^{\text{new}} - L_k^{\text{old}})^T R_{-k} F_k $$
+Finally, replacing $R_{-k}$ with $Y - \sum_{i: i \ne k} Z \odot L_i F_i'$: 
+$$\begin{aligned}
+\Delta(\text{sum}(R^2))
+&= ((L_k^{\text{new}})^2 - (L_k^{\text{old}})^2)^T ZF_k^2
+- 2(L_k^{\text{new}} - L_k^{\text{old}})^T 
+(Y F_k - \text{rowSums} (L_{-k} \odot Z(F_k \odot_b F_{-k})))
+\end{aligned} $$
+(See "Calculating the EBNM `x`s" above for a more detailed derivation of the last step.) This calculation requires approximately $npk$ flops, so I would expect it to be slower than simply calculating sum$(R^2)$ after each update, especially as $k$ gets large.
+
+I omit the details for `by_row` and `by_column` and the simplifications obtained when there is no missing data; these are easy to derive from the above.
+
+
 ## Updating objective
 
-TODO
+The part of the objective that is not stored in the `KL` fields is calculated as `e_loglik = -0.5 * sum(log(2 * pi / tau) + tau * R2)` (here, `R2` has `NA`s where data is missing so that the entries do not contribute to the sum). 
 
-## Summary
+One should observe, however, that if the objective is calculated immediately after updating $\tau$, then this expression has a very simple form. With `by_constant`, for example,
+$$\frac{1}{\tau} = \frac{\text{sum}(\text{R2})}{n_{\text{nonmissing}}},$$
+so
+$$\text{sum}(\tau \cdot \text{R2}) = \tau \cdot \text{sum}(\text{R2}) = n_{\text{nonmissing}}$$
 
-With this implementation, the only $n \times p$ matrices that ever need to be handled are $Y$ and, if data is missing, $Z$ (and $Z$ can be stored as a matrix of integers). So it should be possible to fit a flash object using only slightly more memory than that required to store the data itself.
+In effect, one can verify that for `constant`, `by_row`, and `by_column`, `e_loglik` is simply
+$$ -\frac{1}{2} \text{sum} \left(n_{\text{nonmissing}} \odot \left(\log \left(\frac{2 \pi}{\tau} \right) + 1 \right) \right), $$
+where $n_{\text{nonmissing}}$ is a scalar, $n$-vector of nonmissing values per row (for `by_row`), or $p$-vector of nonmissing values per column (for `by_column`).
+
+If `var_type` is `zero` and is a constant (say, `S = 1`), then one can maintain a scalar value of `tau` as if the precision were constant (using the above updates). Since it will still be true that, for this pseudo-$\tau$, $\text{sum(R2)} = n_{\text{nonmissing}} / \tau$, `e_loglik` can then be calculated as
+$$ -\frac{1}{2} \text{sum} \left(n_{\text{nonmissing}} \odot \left(\log \left(2 \pi S^2 \right) + \frac{1}{\tau S^2} \right) \right) $$
+This also works if `S` is a row or column vector. 
+
+If `S` is a full matrix and $R$ is being stored, then still another approach is possible; one can store $\text{sum}(\log(2 \pi S^2))$ and then calculate $\text{sum(R2} / \text{S}^2)$ as
+$$ \text{sum} \left( (1 / S^2) \odot R^2 \right) 
++ \text{sum}(EL^2 \cdot (1 / S^2) EF^2)
+- \text{sum}((EL)^2 \cdot (1 / S^2) (EF)^2),$$
+where the matrix $(1 / S^2)$ has zeroes where data is missing.
+This is of course similar to the formula for $1 / \tau$ when `var_type = constant`, and similar simple updates that depend only on updated factors and loadings are possible. For example, one can update the objective after a single loading update by calculating
+$$ \Delta(\text{sum}((1 / S^2) \odot R^2)) 
++ (\Delta EL_k^2)^T (1 / S^2)(EF_k^2)
+- (\Delta (EL_k)^2)^T (1 / S^2)((EF_k)^2)$$
+(Due to the form of these updates, I recommend storing `1 / S^2` rather than `S`, with zeroes where data is missing.)
+
+
+
+<!-- ## Updating $\tau$ -->
+
+<!-- Most updates to $\tau$ involve some operation on the matrix of squared residuals: `var_type = constant` takes the overall mean, `by_row` takes row means, and `by_column` takes column means. Write -->
+
+<!-- $$  -->
+<!-- \begin{aligned} -->
+<!-- R2 &= Y^2  -->
+<!-- - 2 Y \odot (EL) (EF)'  -->
+<!-- + Z \odot ((EL) (EF)')^2 -->
+<!-- + Z \odot (EL^2) (EF^2)' -->
+<!-- - Z \odot (EL)^2 ((EF)^2)' -->
+<!-- \end{aligned} -->
+<!-- $$ -->
+
+<!-- $\text{sum}(Y^2)$, $\text{rowSums}(Y^2)$, and $\text{colSums}(Y^2)$ can be calculated once and stored in the data object. Operations on the other terms can also usually be performed efficiently. -->
+
+<!-- For example, -->
+<!-- $$\begin{aligned} -->
+<!-- \text{sum}(Y \odot (EL)(EF)')  -->
+<!-- &= \text{sum}(EL \odot Y(EF)) \\ -->
+<!-- &= \text{sum}((EF)^T \odot (EL)^T Y) -->
+<!-- \end{aligned}$$ -->
+<!-- (One can replace sums with rowSums in the first equality for `by_row`, and one can replace them with colSums in the second equality for `by_column`.) -->
+
+<!-- Identical formulae exist for the fourth and fifth terms in the expression for $R2$. For example,  -->
+<!-- $$\begin{aligned} -->
+<!-- \text{sum}(Z \odot (EL^2)(EF^2)')  -->
+<!-- &= \text{sum}(EL^2 \odot Z(EF^2)) \\ -->
+<!-- &= \text{sum}((EF^2)^T \odot (EL^2)^T Z), -->
+<!-- \end{aligned}$$ -->
+<!-- and when there is no missing data then $Z(EF^2)$ and $(EL^2)^TZ$ are simply $\text{colSums}(EF^2)$ and $\text{colSums}(EL^2)$. -->
+
+<!-- $Z \odot ((EL) (EF)')^2$ is less nice, but can often be calculated efficiently. First, notice that when there is no missing data then one obtains a very simple expression. Writing $L$ for $EL$ and $F$ for $EF$:  -->
+<!-- $$ \begin{aligned} -->
+<!-- \text{sum} ((LF')^2) -->
+<!-- &= \sum_{i, j} \left( \sum_k L_{ik} F_{jk} \right)^2 \\ -->
+<!-- &= \sum_{i, j, k, \ell} L_{ik} F_{jk} L_{i \ell} F_{j \ell} \\ -->
+<!-- &= \sum_{i, k, \ell} L_{ik} L_{i \ell} \sum_j F_{jk} F_{j \ell} \\ -->
+<!-- &= \text{sum}(L^T L \odot F^TF) -->
+<!-- \end{aligned}$$ -->
+
+<!-- With missing data, one may write -->
+<!-- $$\begin{aligned} -->
+<!-- \text{sum} (Z \odot (LF')^2) -->
+<!-- &= \sum_{i, k, \ell} L_{ik} L_{i \ell} \sum_j z_{ij} F_{jk} F_{j \ell} \\ -->
+<!-- &= \sum_{i, k, \ell} \tilde{L}_{i, (k,\ell)} \sum_j z_{ij} \tilde{F}_{j, (k, \ell)} \\ -->
+<!-- &= \text{sum}(\tilde{L} \odot Z \tilde{F}) \\ -->
+<!-- &= \text{sum}(\tilde{F}^T \odot \tilde{L}^T Z) -->
+<!-- \end{aligned}$$ -->
+<!-- where $\tilde{L}$ is a $n \times k^2$ matrix with column $(k, \ell)$ formed by taking the elementwise product of columns $L_{\bullet k}$ and $L_{\bullet \ell}$, and similarly for $\tilde{F}$. Of course, if $k^2 > n$ or $k^2 > p$, then $\tilde{F}$ or $\tilde{L}$ will be larger than the data matrix $Y$, so there is no value to using this method. And in any case, this method requires multiplying a $n \times p$ matrix by a $p \times k^2$ matrix, whereas simply calculating $(Y - LF')^2$ only requires multiplying a $n \times k$ matrix by a $k \times p$ matrix, so if memory is not an issue than this approach should be slower by approximately a factor of $k$. (And when only one factor/loading is being updated and $R_{-k}$ is stored, as with the current greedy optimization algorithm, then it could be slower by up to a factor of $k^2$.) -->
+
+<!-- In the equality on the second-to-last line in the most recent display, sums can be replaced by rowSums (for `by_row`). In the last equality, sums can be replaced by colSums (for `by_column`). -->
