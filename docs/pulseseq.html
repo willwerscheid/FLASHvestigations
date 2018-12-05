@@ -12,7 +12,7 @@
 <meta name="author" content="Jason Willwerscheid" />
 
 
-<title>PulseSeq FLASH analysis</title>
+<title>Analysis of pulse-seq data from Montoro et al.</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -307,7 +307,7 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">PulseSeq FLASH analysis</h1>
+<h1 class="title toc-ignore">Analysis of pulse-seq data from Montoro et al.</h1>
 <h4 class="author"><em>Jason Willwerscheid</em></h4>
 <h4 class="date"><em>12/4/2018</em></h4>
 
@@ -338,7 +338,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/83112253dc2ed80c8ee325e4c8c6ada7e079810e" target="_blank">8311225</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/70cb7d9479cb3cdf0a6bbb741984c2fcea0629db" target="_blank">70cb7d9</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -350,7 +350,9 @@ Ignored files:
 
 Untracked files:
     Untracked:  analysis/gd_notes.Rmd
-    Untracked:  data/all_genes.csv
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -384,6 +386,40 @@ Message
 Rmd
 </td>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/70cb7d9479cb3cdf0a6bbb741984c2fcea0629db/analysis/pulseseq.Rmd" target="_blank">70cb7d9</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/pulseseq.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/pulseseq.html" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/83112253dc2ed80c8ee325e4c8c6ada7e079810e/analysis/pulseseq.Rmd" target="_blank">8311225</a>
 </td>
 <td style="text-align:left;">
@@ -403,7 +439,7 @@ workflowr::wflow_publish(“analysis/pulseseq.Rmd”)
 <hr />
 <div id="introduction-and-code" class="section level2">
 <h2>Introduction and Code</h2>
-<p>I fit 30 factors with normal-mixture priors to the PulseSeq dataset discussed in Montoro et al. I removed all genes with zero total counts and did a <code>log1p</code> transform of the counts. I used the following calls.</p>
+<p>I fit 30 factors with normal-mixture priors to the pulse-seq dataset discussed in <a href="https://www.nature.com/articles/s41586-018-0393-7">Montoro et al.</a> I removed all genes with zero total counts and did a <code>log1p</code> transform of the counts. I used the following calls.</p>
 <pre class="r"><code># Add 30 factors with rough backfits after every 5 factors.
 fl &lt;- flashier(data, greedy.Kmax = 30, var.type = 1, prior.type = &quot;normal.mix&quot;, ash.param = list(optmethod = &quot;mixSQP&quot;), backfit.every = 5, final.backfit = TRUE, backfit.order = &quot;montaigne&quot;, warmstart.backfits = FALSE)
 # Process time on RCC cluster: 92 minutes
@@ -466,6 +502,25 @@ colSums(gene.sig)
 # I will only look at the factors with at least ten significant genes.
 kset &lt;- (1:ncol(gene.p))[colSums(gene.sig) &gt; 9]
 
+# I also want to see which factors contain genes mentioned in the paper.
+paper.genes &lt;- data.frame(
+  gene = c(&quot;Nfia&quot;, &quot;Ascl1&quot;, &quot;Ascl2&quot;, &quot;Ascl3&quot;, &quot;Foxq1&quot;, &quot;Cdhr3&quot;, &quot;Rgs13&quot;,
+           &quot;Muc5b&quot;, &quot;Notch2&quot;, &quot;Il13ra1&quot;, &quot;Krt4&quot;, &quot;Krt13&quot;, &quot;Krt8&quot;, &quot;Ecm1&quot;,
+           &quot;S100a11&quot;, &quot;Cldn3&quot;, &quot;Lgals3&quot;, &quot;Anxa1&quot;, &quot;Il25&quot;, &quot;Tslp&quot;, &quot;Alox5ap&quot;,
+           &quot;Ptprc&quot;, &quot;Pou2f3&quot;, &quot;Gfi1b&quot;, &quot;Spib&quot;, &quot;Sox9&quot;, &quot;Gp2&quot;, &quot;Tff1&quot;,
+           &quot;Tff2&quot;, &quot;Lman1l&quot;, &quot;P2rx4&quot;, &quot;Muc5ac&quot;, &quot;Dcpp1&quot;, &quot;Dcpp2&quot;, &quot;Dcpp3&quot;,
+           &quot;Atp6v1c2&quot;, &quot;Atp6v0d2&quot;, &quot;Cftr&quot;),
+  type = c(&quot;Club&quot;, &quot;NEC&quot;, &quot;Tuft&quot;, &quot;Ion&quot;, &quot;Goblet&quot;, &quot;Cil&quot;, &quot;Tuft&quot;,
+           &quot;Club&quot;, &quot;Club&quot;, &quot;Club&quot;, &quot;Hill&quot;, &quot;Hill&quot;, &quot;Basal&quot;, &quot;Hill&quot;,
+           &quot;Hill&quot;, &quot;Hill&quot;, &quot;Hill&quot;, &quot;Hill&quot;, &quot;Tuft&quot;, &quot;Tuft&quot;, &quot;Tuft2&quot;,
+           &quot;Tuft2&quot;, &quot;Tuft1&quot;, &quot;Tuft2&quot;, &quot;Tuft2&quot;, &quot;Tuft2&quot;, &quot;Goblet&quot;, &quot;Gob1&quot;,
+           &quot;Gob1&quot;, &quot;Gob1&quot;, &quot;Gob1&quot;, &quot;Gob1&quot;, &quot;Gob2&quot;, &quot;Gob2&quot;, &quot;Gob2&quot;,
+           &quot;Ion&quot;, &quot;Ion&quot;, &quot;Ion&quot;))
+paper.genes$gene &lt;- as.character(paper.genes$gene)
+levels(paper.genes$type) &lt;- c(&quot;Basal&quot;, &quot;Ciliated&quot;, &quot;Club&quot;, &quot;Goblet-1&quot;,
+                              &quot;Goblet-2&quot;, &quot;Goblet&quot;, &quot;Hillock&quot;, &quot;Ionocyte&quot;,
+                              &quot;Neuroendocrine&quot;, &quot;Tuft&quot;, &quot;Tuft-1&quot;, &quot;Tuft-2&quot;)
+
 # Set up topGOdata object.
 GO.list &lt;- as.factor(gene.sig[, 1])
 GOdata &lt;- new(&quot;topGOdata&quot;, ontology = &quot;BP&quot;, allGenes = GO.list,
@@ -487,6 +542,17 @@ for (k in kset) {
          geom_boxplot(outlier.shape = NA, color = &quot;red&quot;) +
          geom_jitter(position = position_jitter(0.2), cex = 0.1) +
          labs(x = &quot;Cell Type&quot;, y = paste(&quot;Factor&quot;, k, &quot;value&quot;)))
+  
+  mentions &lt;- which(gene.sig[paper.genes$gene, k] == 1)
+  if (length(mentions) &gt; 0) {
+    mentions.df &lt;- paper.genes[mentions, ]
+    mentions.df$p.val &lt;- gene.p[names(mentions), k]
+    cat(&quot;Significant genes that are also mentioned in the paper:\n&quot;)
+    print(knitr::kable(mentions.df))
+    cat(&quot;\n&quot;)
+  }
+  
+  cat(&quot;Gene Ontology terms:\n&quot;)
   GOdata@allScores &lt;- as.factor(gene.sig[, k])
   result &lt;- suppressMessages(
     runTest(GOdata, algorithm = &quot;classic&quot;, statistic = &quot;fisher&quot;)
@@ -499,6 +565,79 @@ for (k in kset) {
 <div id="factor-1" class="section level2">
 <h2>Factor 1</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-1.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>13</td>
+<td align="left">Krt8</td>
+<td align="left">Basal</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td>15</td>
+<td align="left">S100a11</td>
+<td align="left">Hillock</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td>16</td>
+<td align="left">Cldn3</td>
+<td align="left">Hillock</td>
+<td align="right">4e-07</td>
+</tr>
+<tr class="even">
+<td>17</td>
+<td align="left">Lgals3</td>
+<td align="left">Hillock</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td>18</td>
+<td align="left">Anxa1</td>
+<td align="left">Hillock</td>
+<td align="right">0e+00</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -597,6 +736,61 @@ for (k in kset) {
 <div id="factor-2" class="section level2">
 <h2>Factor 2</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-2.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-2.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-2.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>6</td>
+<td align="left">Cdhr3</td>
+<td align="left">Ciliated</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td align="left">Cldn3</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -695,6 +889,55 @@ for (k in kset) {
 <div id="factor-3" class="section level2">
 <h2>Factor 3</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-3.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-3.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-3.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>8</td>
+<td align="left">Muc5b</td>
+<td align="left">Club</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -793,6 +1036,55 @@ for (k in kset) {
 <div id="factor-4" class="section level2">
 <h2>Factor 4</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-4.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-4.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-4.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>14</td>
+<td align="left">Ecm1</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -891,6 +1183,103 @@ for (k in kset) {
 <div id="factor-5" class="section level2">
 <h2>Factor 5</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-5.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-5.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-5.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2</td>
+<td align="left">Ascl1</td>
+<td align="left">Neuroendocrine</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>7</td>
+<td align="left">Rgs13</td>
+<td align="left">Tuft</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>15</td>
+<td align="left">S100a11</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>17</td>
+<td align="left">Lgals3</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>19</td>
+<td align="left">Il25</td>
+<td align="left">Tuft</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>21</td>
+<td align="left">Alox5ap</td>
+<td align="left">Tuft-2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>23</td>
+<td align="left">Pou2f3</td>
+<td align="left">Tuft-1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>25</td>
+<td align="left">Spib</td>
+<td align="left">Tuft-2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>26</td>
+<td align="left">Sox9</td>
+<td align="left">Tuft-2</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -989,6 +1378,61 @@ for (k in kset) {
 <div id="factor-7" class="section level2">
 <h2>Factor 7</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-6.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-6.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-6.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2</td>
+<td align="left">Ascl1</td>
+<td align="left">Neuroendocrine</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>7</td>
+<td align="left">Rgs13</td>
+<td align="left">Tuft</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -1087,6 +1531,67 @@ for (k in kset) {
 <div id="factor-8" class="section level2">
 <h2>Factor 8</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-7.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-7.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-7.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15</td>
+<td align="left">S100a11</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>17</td>
+<td align="left">Lgals3</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>18</td>
+<td align="left">Anxa1</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -1185,6 +1690,36 @@ for (k in kset) {
 <div id="factor-9" class="section level2">
 <h2>Factor 9</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-8.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-8.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-8.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -1283,6 +1818,127 @@ for (k in kset) {
 <div id="factor-10" class="section level2">
 <h2>Factor 10</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-9.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-9.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-9.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td align="left">Nfia</td>
+<td align="left">Club</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td align="left">Foxq1</td>
+<td align="left">Goblet</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>6</td>
+<td align="left">Cdhr3</td>
+<td align="left">Ciliated</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td align="left">Muc5b</td>
+<td align="left">Club</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td align="left">Krt4</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td align="left">Krt13</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>13</td>
+<td align="left">Krt8</td>
+<td align="left">Basal</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>14</td>
+<td align="left">Ecm1</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>15</td>
+<td align="left">S100a11</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td align="left">Cldn3</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>17</td>
+<td align="left">Lgals3</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>18</td>
+<td align="left">Anxa1</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>36</td>
+<td align="left">Atp6v1c2</td>
+<td align="left">Ionocyte</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -1381,6 +2037,133 @@ for (k in kset) {
 <div id="factor-12" class="section level2">
 <h2>Factor 12</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-10.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-10.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-10.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td align="left">Nfia</td>
+<td align="left">Club</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td align="left">Foxq1</td>
+<td align="left">Goblet</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td>6</td>
+<td align="left">Cdhr3</td>
+<td align="left">Ciliated</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td align="left">Muc5b</td>
+<td align="left">Club</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td align="left">Krt4</td>
+<td align="left">Hillock</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td align="left">Krt13</td>
+<td align="left">Hillock</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td>13</td>
+<td align="left">Krt8</td>
+<td align="left">Basal</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td>14</td>
+<td align="left">Ecm1</td>
+<td align="left">Hillock</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td>15</td>
+<td align="left">S100a11</td>
+<td align="left">Hillock</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td align="left">Cldn3</td>
+<td align="left">Hillock</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td>17</td>
+<td align="left">Lgals3</td>
+<td align="left">Hillock</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td>18</td>
+<td align="left">Anxa1</td>
+<td align="left">Hillock</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td>26</td>
+<td align="left">Sox9</td>
+<td align="left">Tuft-2</td>
+<td align="right">4e-07</td>
+</tr>
+<tr class="even">
+<td>36</td>
+<td align="left">Atp6v1c2</td>
+<td align="left">Ionocyte</td>
+<td align="right">0e+00</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -1479,6 +2262,67 @@ for (k in kset) {
 <div id="factor-14" class="section level2">
 <h2>Factor 14</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-11.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-11.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-11.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>4</td>
+<td align="left">Ascl3</td>
+<td align="left">Ionocyte</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>37</td>
+<td align="left">Atp6v0d2</td>
+<td align="left">Ionocyte</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>38</td>
+<td align="left">Cftr</td>
+<td align="left">Ionocyte</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -1577,6 +2421,36 @@ for (k in kset) {
 <div id="factor-15" class="section level2">
 <h2>Factor 15</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-12.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-12.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-12.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -1675,6 +2549,36 @@ for (k in kset) {
 <div id="factor-16" class="section level2">
 <h2>Factor 16</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-13.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-13.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-13.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -1773,6 +2677,79 @@ for (k in kset) {
 <div id="factor-18" class="section level2">
 <h2>Factor 18</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-14.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-14.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-14.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>7</td>
+<td align="left">Rgs13</td>
+<td align="left">Tuft</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>21</td>
+<td align="left">Alox5ap</td>
+<td align="left">Tuft-2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>24</td>
+<td align="left">Gfi1b</td>
+<td align="left">Tuft-2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>25</td>
+<td align="left">Spib</td>
+<td align="left">Tuft-2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>26</td>
+<td align="left">Sox9</td>
+<td align="left">Tuft-2</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -1871,6 +2848,36 @@ for (k in kset) {
 <div id="factor-20" class="section level2">
 <h2>Factor 20</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-15.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-15.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-15.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -1969,6 +2976,67 @@ for (k in kset) {
 <div id="factor-21" class="section level2">
 <h2>Factor 21</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-16.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-16.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-16.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>11</td>
+<td align="left">Krt4</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td align="left">Krt13</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>14</td>
+<td align="left">Ecm1</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -2067,6 +3135,55 @@ for (k in kset) {
 <div id="factor-23" class="section level2">
 <h2>Factor 23</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-17.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-17.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-17.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>4</td>
+<td align="left">Ascl3</td>
+<td align="left">Ionocyte</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -2165,6 +3282,36 @@ for (k in kset) {
 <div id="factor-24" class="section level2">
 <h2>Factor 24</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-18.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-18.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-18.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -2263,6 +3410,36 @@ for (k in kset) {
 <div id="factor-26" class="section level2">
 <h2>Factor 26</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-19.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-19.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-19.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -2361,6 +3538,61 @@ for (k in kset) {
 <div id="factor-27" class="section level2">
 <h2>Factor 27</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-20.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-20.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-20.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>25</td>
+<td align="left">Spib</td>
+<td align="left">Tuft-2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>27</td>
+<td align="left">Gp2</td>
+<td align="left">Goblet</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -2459,6 +3691,73 @@ for (k in kset) {
 <div id="factor-28" class="section level2">
 <h2>Factor 28</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-21.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-21.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-21.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>7</td>
+<td align="left">Rgs13</td>
+<td align="left">Tuft</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>19</td>
+<td align="left">Il25</td>
+<td align="left">Tuft</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>21</td>
+<td align="left">Alox5ap</td>
+<td align="left">Tuft-2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>24</td>
+<td align="left">Gfi1b</td>
+<td align="left">Tuft-2</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -2557,6 +3856,55 @@ for (k in kset) {
 <div id="factor-29" class="section level2">
 <h2>Factor 29</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-22.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-22.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-22.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>25</td>
+<td align="left">Spib</td>
+<td align="left">Tuft-2</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
@@ -2655,6 +4003,61 @@ for (k in kset) {
 <div id="factor-30" class="section level2">
 <h2>Factor 30</h2>
 <p><img src="figure/pulseseq.Rmd/factors2-23.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of factors2-23.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/89558d3a88b3a67b78ce53d105a582f808dff7ac/docs/figure/pulseseq.Rmd/factors2-23.png" target="_blank">89558d3</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">p.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>6</td>
+<td align="left">Cdhr3</td>
+<td align="left">Ciliated</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>18</td>
+<td align="left">Anxa1</td>
+<td align="left">Hillock</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
 <table>
 <thead>
 <tr class="header">
