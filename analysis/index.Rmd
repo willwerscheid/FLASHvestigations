@@ -40,25 +40,15 @@ Investigations 19 and 20 try FLASH out on large single-cell RNA datasets.
 
 * [Investigation 20.](pulseseq.html) An analysis of the larger "pulse-seq" dataset from Montoro et al.
 
-[Note 4.](matrix_ops.html) I have been experiencing some performance issues when using FLASH to fit large datasets. Here I outline several ways to modify the core FLASH algorithms in view of reducing the memory footprint and improving overall performance. 
-
 ## Still Relevant
 
 Notes 1 and 2 and Investigation 4 describe a way to compute the FLASH objective directly (rather than using the indirect method implemented in `flashr`).
 
-* [Note 1.](obj_notes.html) Notes on computing the FLASH objective function. I derive an explicit expression for the KL divergence between prior and posterior. 
+* [Note 1.](obj_notes.html) Notes on computing the FLASH objective function. I derive an explicit expression for the KL divergence between prior and posterior.
 
 * [Note 2.](flash_em.html) An alternate algorithm for optimizing the FLASH objective, using the explicit expression derived in the previous note.
 
 * [Investigation 4.](alt_alg.html) The alternate algorithm agrees with FLASH with respect to both the objective and fit obtained.
-
-Investigations 5a-b and 13 attempt to determine the best default initialization function.
-
-* [Investigation 5a.](init_fn.html) An argument for changing the default `init_fn` to `udv_si_svd` when there is missing data and `udv_svd` otherwise. Based on an analysis of GTEx data.
-
-* [Investigation 5b.](init_fn2.html) More evidence supporting the recommendations in Investigation 5a. 
-
-* [Investigation 13.](init_fn3.html) A counterargument. Results in Investigations 5a-b probably depend on the fact that $n$ is small ($n = 44$). For large $n$, setting `init_fn` to `udv_si` is best.
 
 
 ## Archived
@@ -77,6 +67,18 @@ Investigations 6 and 7 deal with warmstarts, which were implemented in version 0
 
 * [Investigation 7.](warmstart2.html) The advantages of warmstarts are not nearly as compelling when `ebnm_fn = ebnm_ash`.
 
+Since the newest versions of `flashr` use a home-grown initialization function, Investigations 5a-b and 13 are no longer relevant.
+
+* [Investigation 5a.](init_fn.html) An argument for changing the default `init_fn` to `udv_si_svd` when there is missing data and `udv_svd` otherwise. Based on an analysis of GTEx data.
+
+* [Investigation 5b.](init_fn2.html) More evidence supporting the recommendations in Investigation 5a. 
+
+* [Investigation 13.](init_fn3.html) A counterargument. Results in Investigations 5a-b probably depend on the fact that $n$ is small ($n = 44$). For large $n$, setting `init_fn` to `udv_si` is best.
+
 The changes tested in Investigation 15 were implemented in version 0.6-2 of `flashr`.
 
 * [Investigation 15.](scalar_tau.html) Tests an implementation of changes to the way `tau` is stored, as discussed  [here](https://github.com/stephenslab/flashr/issues/83).
+
+The suggestions outlined in Note 4 were implemented in version X.X-X of `flashr`.
+
+* [Note 4.](matrix_ops.html) Outlines several ways to modify the core FLASH algorithms in view of reducing the memory footprint and improving overall performance. 
