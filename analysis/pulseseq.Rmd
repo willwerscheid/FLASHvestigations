@@ -1,0 +1,103 @@
+---
+title: "PulseSeq FLASH analysis"
+author: "Jason Willwerscheid"
+date: "12/4/2018"
+output:
+  workflowr::wflow_html
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>")
+```
+
+## Introduction and Code
+
+I fit 30 factors with normal-mixture priors to the PulseSeq dataset discussed in Montoro et al. I removed all genes with zero total counts and did a `log1p` transform of the counts. I used the following calls.
+
+```{r calls, eval=FALSE}
+# Add 30 factors with rough backfits after every 5 factors.
+fl <- flashier(data, greedy.Kmax = 30, var.type = 1, prior.type = "normal.mix", ash.param = list(optmethod = "mixSQP"), backfit.every = 5, final.backfit = TRUE, backfit.order = "montaigne", warmstart.backfits = FALSE)
+# Process time on RCC cluster: 92 minutes
+
+# Do a more thorough backfit.
+fl <- flashier(data, flash.init = fl, greedy.Kmax = 0, var.type = 1, prior.type = "normal.mix", ash.param = list(optmethod = "mixSQP"), final.backfit = TRUE, backfit.order = "dropout", warmstart.backfits = FALSE, backfit.maxiter = 500)
+# Process time: 266 minutes
+```
+
+The following code is used to produce the boxplots and tables below.
+
+```{r factors}
+suppressMessages({
+  library(ggplot2)
+  library(topGO)
+  library(org.Mm.eg.db)
+})
+
+fl <- readRDS("~/Downloads/PulseSeq30_backfit.rds")
+# Remove large data object to free up memory.
+fl$fit$Y <- NULL
+
+# Data frame containing cell type and loadings for each factor.
+PSdf <- data.frame(fl$loadings$normalized.loadings[[2]])
+cell.names <- rownames(fl$loadings$normalized.loadings[[2]])
+cell.types <- as.factor(sapply(strsplit(cell.names, "_"), `[`, 5))
+levels(cell.types) <- c("Bas", "Cil", "Clb", "Hil", "Gb1", "Gb2", "GbP",
+                        "Ion", "Nec", "Prl", "Tf1", "Tf2", "TfP")
+PSdf$cell.type <- cell.types
+
+# Need to select signficant genes for topGO.
+#   Scale gene loadings by scale constant * maximum cell loading.
+s <- fl$loadings$scale.constant * 
+  apply(abs(fl$loadings$normalized.loadings[[2]]), 2, max)
+gene.loadings <- fl$loadings$normalized.loadings[[1]]
+gene.loadings <- gene.loadings * rep(s, each = nrow(gene.loadings))
+#   Get a pseudo-t statistic by dividing by the residual SE.
+gene.t <- gene.loadings * sqrt(fl$fit$tau)
+#   Convert to a p-value.
+gene.p <- 2 * (1 - pnorm(abs(gene.t)))
+#   Select significant genes using Benjamini-Hochberg.
+BH <- function(k, alpha = 0.01) {
+  pvals <- gene.p[, k]
+  selected <- rep(0, length(pvals))
+  names(selected) <- names(pvals)
+  
+  n <- length(pvals)
+  sorted.pvals <- sort(pvals)
+  BH <- sorted.pvals < alpha / (n - 0:(n - 1))
+  cutoff <- min(which(!BH))
+  selected[pvals < sorted.pvals[cutoff]] <- 1
+  
+  return(selected)
+}
+gene.sig <- sapply(1:ncol(gene.p), BH)
+
+# How many significant genes per factor are there?
+colSums(gene.sig)
+
+# I will only look at the factors with at least ten significant genes.
+kset <- (1:ncol(gene.p))[colSums(gene.sig) > 9]
+
+# Set up topGOdata object.
+GO.list <- as.factor(gene.sig[, 1])
+GOdata <- new("topGOdata", ontology = "BP", allGenes = GO.list,
+              annot = annFUN.org, mapping = "org.Mm.eg", ID = "symbol")
+```
+```{r factors2, results="asis"}
+# Loop over kset.
+for (k in kset) {
+  cat(paste("## Factor", k, "\n"))
+  fctr <- paste0("X", k)
+  plot(ggplot(PSdf, aes_string(x = "cell.type", y = fctr)) +
+         geom_boxplot(outlier.shape = NA, color = "red") +
+         geom_jitter(position = position_jitter(0.2), cex = 0.1) +
+         labs(x = "Cell Type", y = paste("Factor", k, "value")))
+  GOdata@allScores <- as.factor(gene.sig[, k])
+  result <- suppressMessages(
+    runTest(GOdata, algorithm = "classic", statistic = "fisher")
+  )
+  allRes <- GenTable(GOdata, classic = result, topNodes = 10)
+  print(knitr::kable(allRes))
+  cat("\n")
+}
+```
+
