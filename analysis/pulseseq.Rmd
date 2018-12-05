@@ -114,7 +114,7 @@ for (k in kset) {
   mentions <- which(gene.sig[paper.genes$gene, k] == 1)
   if (length(mentions) > 0) {
     mentions.df <- paper.genes[mentions, ]
-    mentions.df$p.val <- gene.p[names(mentions), k]
+    mentions.df$t.val <- gene.t[names(mentions), k]
     cat("Significant genes that are also mentioned in the paper:\n")
     print(knitr::kable(mentions.df))
     cat("\n")
