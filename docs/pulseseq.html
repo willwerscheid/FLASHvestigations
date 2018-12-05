@@ -314,7 +314,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-12-04</p>
+<p><strong>Last updated:</strong> 2018-12-05</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -338,7 +338,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/70cb7d9479cb3cdf0a6bbb741984c2fcea0629db" target="_blank">70cb7d9</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/d4d022e7855bbe74f27658fb45087d2f12032650" target="_blank">d4d022e</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -350,9 +350,6 @@ Ignored files:
 
 Untracked files:
     Untracked:  analysis/gd_notes.Rmd
-
-Unstaged changes:
-    Modified:   analysis/index.Rmd
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -381,6 +378,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/d4d022e7855bbe74f27658fb45087d2f12032650/analysis/pulseseq.Rmd" target="_blank">d4d022e</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-05
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/pulseseq.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/bb57242e95dd69485feb72236c3b3a6dab23066d/docs/pulseseq.html" target="_blank">bb57242</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-04
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -546,7 +577,7 @@ for (k in kset) {
   mentions &lt;- which(gene.sig[paper.genes$gene, k] == 1)
   if (length(mentions) &gt; 0) {
     mentions.df &lt;- paper.genes[mentions, ]
-    mentions.df$p.val &lt;- gene.p[names(mentions), k]
+    mentions.df$t.val &lt;- gene.t[names(mentions), k]
     cat(&quot;Significant genes that are also mentioned in the paper:\n&quot;)
     print(knitr::kable(mentions.df))
     cat(&quot;\n&quot;)
@@ -601,7 +632,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -609,31 +640,31 @@ Jason Willwerscheid
 <td>13</td>
 <td align="left">Krt8</td>
 <td align="left">Basal</td>
-<td align="right">0e+00</td>
+<td align="right">-10.188834</td>
 </tr>
 <tr class="even">
 <td>15</td>
 <td align="left">S100a11</td>
 <td align="left">Hillock</td>
-<td align="right">0e+00</td>
+<td align="right">-19.542238</td>
 </tr>
 <tr class="odd">
 <td>16</td>
 <td align="left">Cldn3</td>
 <td align="left">Hillock</td>
-<td align="right">4e-07</td>
+<td align="right">-5.084911</td>
 </tr>
 <tr class="even">
 <td>17</td>
 <td align="left">Lgals3</td>
 <td align="left">Hillock</td>
-<td align="right">0e+00</td>
+<td align="right">-11.369577</td>
 </tr>
 <tr class="odd">
 <td>18</td>
 <td align="left">Anxa1</td>
 <td align="left">Hillock</td>
-<td align="right">0e+00</td>
+<td align="right">-12.864415</td>
 </tr>
 </tbody>
 </table>
@@ -772,7 +803,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -780,13 +811,13 @@ Jason Willwerscheid
 <td>6</td>
 <td align="left">Cdhr3</td>
 <td align="left">Ciliated</td>
-<td align="right">0</td>
+<td align="right">23.243771</td>
 </tr>
 <tr class="even">
 <td>16</td>
 <td align="left">Cldn3</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">5.531131</td>
 </tr>
 </tbody>
 </table>
@@ -925,7 +956,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -933,7 +964,7 @@ Jason Willwerscheid
 <td>8</td>
 <td align="left">Muc5b</td>
 <td align="left">Club</td>
-<td align="right">0</td>
+<td align="right">-6.440982</td>
 </tr>
 </tbody>
 </table>
@@ -1072,7 +1103,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -1080,7 +1111,7 @@ Jason Willwerscheid
 <td>14</td>
 <td align="left">Ecm1</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">5.592506</td>
 </tr>
 </tbody>
 </table>
@@ -1219,7 +1250,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -1227,55 +1258,55 @@ Jason Willwerscheid
 <td>2</td>
 <td align="left">Ascl1</td>
 <td align="left">Neuroendocrine</td>
-<td align="right">0</td>
+<td align="right">-10.429897</td>
 </tr>
 <tr class="even">
 <td>7</td>
 <td align="left">Rgs13</td>
 <td align="left">Tuft</td>
-<td align="right">0</td>
+<td align="right">-49.037686</td>
 </tr>
 <tr class="odd">
 <td>15</td>
 <td align="left">S100a11</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">6.507033</td>
 </tr>
 <tr class="even">
 <td>17</td>
 <td align="left">Lgals3</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">6.300152</td>
 </tr>
 <tr class="odd">
 <td>19</td>
 <td align="left">Il25</td>
 <td align="left">Tuft</td>
-<td align="right">0</td>
+<td align="right">-12.456328</td>
 </tr>
 <tr class="even">
 <td>21</td>
 <td align="left">Alox5ap</td>
 <td align="left">Tuft-2</td>
-<td align="right">0</td>
+<td align="right">-10.525482</td>
 </tr>
 <tr class="odd">
 <td>23</td>
 <td align="left">Pou2f3</td>
 <td align="left">Tuft-1</td>
-<td align="right">0</td>
+<td align="right">-7.369498</td>
 </tr>
 <tr class="even">
 <td>25</td>
 <td align="left">Spib</td>
 <td align="left">Tuft-2</td>
-<td align="right">0</td>
+<td align="right">-17.079978</td>
 </tr>
 <tr class="odd">
 <td>26</td>
 <td align="left">Sox9</td>
 <td align="left">Tuft-2</td>
-<td align="right">0</td>
+<td align="right">-7.225993</td>
 </tr>
 </tbody>
 </table>
@@ -1414,7 +1445,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -1422,13 +1453,13 @@ Jason Willwerscheid
 <td>2</td>
 <td align="left">Ascl1</td>
 <td align="left">Neuroendocrine</td>
-<td align="right">0</td>
+<td align="right">44.60350</td>
 </tr>
 <tr class="even">
 <td>7</td>
 <td align="left">Rgs13</td>
 <td align="left">Tuft</td>
-<td align="right">0</td>
+<td align="right">-13.99407</td>
 </tr>
 </tbody>
 </table>
@@ -1567,7 +1598,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -1575,19 +1606,19 @@ Jason Willwerscheid
 <td>15</td>
 <td align="left">S100a11</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">-6.882840</td>
 </tr>
 <tr class="even">
 <td>17</td>
 <td align="left">Lgals3</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">-8.554270</td>
 </tr>
 <tr class="odd">
 <td>18</td>
 <td align="left">Anxa1</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">-6.871433</td>
 </tr>
 </tbody>
 </table>
@@ -1854,7 +1885,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -1862,79 +1893,79 @@ Jason Willwerscheid
 <td>1</td>
 <td align="left">Nfia</td>
 <td align="left">Club</td>
-<td align="right">0</td>
+<td align="right">9.476699</td>
 </tr>
 <tr class="even">
 <td>5</td>
 <td align="left">Foxq1</td>
 <td align="left">Goblet</td>
-<td align="right">0</td>
+<td align="right">-21.713513</td>
 </tr>
 <tr class="odd">
 <td>6</td>
 <td align="left">Cdhr3</td>
 <td align="left">Ciliated</td>
-<td align="right">0</td>
+<td align="right">-6.302895</td>
 </tr>
 <tr class="even">
 <td>8</td>
 <td align="left">Muc5b</td>
 <td align="left">Club</td>
-<td align="right">0</td>
+<td align="right">14.528107</td>
 </tr>
 <tr class="odd">
 <td>11</td>
 <td align="left">Krt4</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">-29.114409</td>
 </tr>
 <tr class="even">
 <td>12</td>
 <td align="left">Krt13</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">-8.894510</td>
 </tr>
 <tr class="odd">
 <td>13</td>
 <td align="left">Krt8</td>
 <td align="left">Basal</td>
-<td align="right">0</td>
+<td align="right">-44.447667</td>
 </tr>
 <tr class="even">
 <td>14</td>
 <td align="left">Ecm1</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">-23.139488</td>
 </tr>
 <tr class="odd">
 <td>15</td>
 <td align="left">S100a11</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">-42.664594</td>
 </tr>
 <tr class="even">
 <td>16</td>
 <td align="left">Cldn3</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">-46.545916</td>
 </tr>
 <tr class="odd">
 <td>17</td>
 <td align="left">Lgals3</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">-50.948248</td>
 </tr>
 <tr class="even">
 <td>18</td>
 <td align="left">Anxa1</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">-56.775524</td>
 </tr>
 <tr class="odd">
 <td>36</td>
 <td align="left">Atp6v1c2</td>
 <td align="left">Ionocyte</td>
-<td align="right">0</td>
+<td align="right">5.813573</td>
 </tr>
 </tbody>
 </table>
@@ -2073,7 +2104,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -2081,85 +2112,85 @@ Jason Willwerscheid
 <td>1</td>
 <td align="left">Nfia</td>
 <td align="left">Club</td>
-<td align="right">0e+00</td>
+<td align="right">-9.433206</td>
 </tr>
 <tr class="even">
 <td>5</td>
 <td align="left">Foxq1</td>
 <td align="left">Goblet</td>
-<td align="right">0e+00</td>
+<td align="right">24.314038</td>
 </tr>
 <tr class="odd">
 <td>6</td>
 <td align="left">Cdhr3</td>
 <td align="left">Ciliated</td>
-<td align="right">0e+00</td>
+<td align="right">-18.214837</td>
 </tr>
 <tr class="even">
 <td>8</td>
 <td align="left">Muc5b</td>
 <td align="left">Club</td>
-<td align="right">0e+00</td>
+<td align="right">-14.773134</td>
 </tr>
 <tr class="odd">
 <td>11</td>
 <td align="left">Krt4</td>
 <td align="left">Hillock</td>
-<td align="right">0e+00</td>
+<td align="right">28.796426</td>
 </tr>
 <tr class="even">
 <td>12</td>
 <td align="left">Krt13</td>
 <td align="left">Hillock</td>
-<td align="right">0e+00</td>
+<td align="right">5.814991</td>
 </tr>
 <tr class="odd">
 <td>13</td>
 <td align="left">Krt8</td>
 <td align="left">Basal</td>
-<td align="right">0e+00</td>
+<td align="right">43.847905</td>
 </tr>
 <tr class="even">
 <td>14</td>
 <td align="left">Ecm1</td>
 <td align="left">Hillock</td>
-<td align="right">0e+00</td>
+<td align="right">19.461544</td>
 </tr>
 <tr class="odd">
 <td>15</td>
 <td align="left">S100a11</td>
 <td align="left">Hillock</td>
-<td align="right">0e+00</td>
+<td align="right">24.516852</td>
 </tr>
 <tr class="even">
 <td>16</td>
 <td align="left">Cldn3</td>
 <td align="left">Hillock</td>
-<td align="right">0e+00</td>
+<td align="right">44.850683</td>
 </tr>
 <tr class="odd">
 <td>17</td>
 <td align="left">Lgals3</td>
 <td align="left">Hillock</td>
-<td align="right">0e+00</td>
+<td align="right">49.298476</td>
 </tr>
 <tr class="even">
 <td>18</td>
 <td align="left">Anxa1</td>
 <td align="left">Hillock</td>
-<td align="right">0e+00</td>
+<td align="right">53.938434</td>
 </tr>
 <tr class="odd">
 <td>26</td>
 <td align="left">Sox9</td>
 <td align="left">Tuft-2</td>
-<td align="right">4e-07</td>
+<td align="right">-5.078661</td>
 </tr>
 <tr class="even">
 <td>36</td>
 <td align="left">Atp6v1c2</td>
 <td align="left">Ionocyte</td>
-<td align="right">0e+00</td>
+<td align="right">-6.082813</td>
 </tr>
 </tbody>
 </table>
@@ -2298,7 +2329,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -2306,19 +2337,19 @@ Jason Willwerscheid
 <td>4</td>
 <td align="left">Ascl3</td>
 <td align="left">Ionocyte</td>
-<td align="right">0</td>
+<td align="right">-30.58022</td>
 </tr>
 <tr class="even">
 <td>37</td>
 <td align="left">Atp6v0d2</td>
 <td align="left">Ionocyte</td>
-<td align="right">0</td>
+<td align="right">-33.64109</td>
 </tr>
 <tr class="odd">
 <td>38</td>
 <td align="left">Cftr</td>
 <td align="left">Ionocyte</td>
-<td align="right">0</td>
+<td align="right">-24.75583</td>
 </tr>
 </tbody>
 </table>
@@ -2713,7 +2744,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -2721,31 +2752,31 @@ Jason Willwerscheid
 <td>7</td>
 <td align="left">Rgs13</td>
 <td align="left">Tuft</td>
-<td align="right">0</td>
+<td align="right">21.452246</td>
 </tr>
 <tr class="even">
 <td>21</td>
 <td align="left">Alox5ap</td>
 <td align="left">Tuft-2</td>
-<td align="right">0</td>
+<td align="right">21.147165</td>
 </tr>
 <tr class="odd">
 <td>24</td>
 <td align="left">Gfi1b</td>
 <td align="left">Tuft-2</td>
-<td align="right">0</td>
+<td align="right">9.272023</td>
 </tr>
 <tr class="even">
 <td>25</td>
 <td align="left">Spib</td>
 <td align="left">Tuft-2</td>
-<td align="right">0</td>
+<td align="right">10.512412</td>
 </tr>
 <tr class="odd">
 <td>26</td>
 <td align="left">Sox9</td>
 <td align="left">Tuft-2</td>
-<td align="right">0</td>
+<td align="right">5.933583</td>
 </tr>
 </tbody>
 </table>
@@ -3012,7 +3043,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -3020,19 +3051,19 @@ Jason Willwerscheid
 <td>11</td>
 <td align="left">Krt4</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">-11.26243</td>
 </tr>
 <tr class="even">
 <td>12</td>
 <td align="left">Krt13</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">-30.80692</td>
 </tr>
 <tr class="odd">
 <td>14</td>
 <td align="left">Ecm1</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">-12.42475</td>
 </tr>
 </tbody>
 </table>
@@ -3171,7 +3202,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -3179,7 +3210,7 @@ Jason Willwerscheid
 <td>4</td>
 <td align="left">Ascl3</td>
 <td align="left">Ionocyte</td>
-<td align="right">0</td>
+<td align="right">-8.357358</td>
 </tr>
 </tbody>
 </table>
@@ -3574,7 +3605,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -3582,13 +3613,13 @@ Jason Willwerscheid
 <td>25</td>
 <td align="left">Spib</td>
 <td align="left">Tuft-2</td>
-<td align="right">0</td>
+<td align="right">25.377272</td>
 </tr>
 <tr class="even">
 <td>27</td>
 <td align="left">Gp2</td>
 <td align="left">Goblet</td>
-<td align="right">0</td>
+<td align="right">8.869902</td>
 </tr>
 </tbody>
 </table>
@@ -3727,7 +3758,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -3735,25 +3766,25 @@ Jason Willwerscheid
 <td>7</td>
 <td align="left">Rgs13</td>
 <td align="left">Tuft</td>
-<td align="right">0</td>
+<td align="right">9.246186</td>
 </tr>
 <tr class="even">
 <td>19</td>
 <td align="left">Il25</td>
 <td align="left">Tuft</td>
-<td align="right">0</td>
+<td align="right">-16.165490</td>
 </tr>
 <tr class="odd">
 <td>21</td>
 <td align="left">Alox5ap</td>
 <td align="left">Tuft-2</td>
-<td align="right">0</td>
+<td align="right">12.537995</td>
 </tr>
 <tr class="even">
 <td>24</td>
 <td align="left">Gfi1b</td>
 <td align="left">Tuft-2</td>
-<td align="right">0</td>
+<td align="right">8.808959</td>
 </tr>
 </tbody>
 </table>
@@ -3892,7 +3923,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -3900,7 +3931,7 @@ Jason Willwerscheid
 <td>25</td>
 <td align="left">Spib</td>
 <td align="left">Tuft-2</td>
-<td align="right">0</td>
+<td align="right">-56.63392</td>
 </tr>
 </tbody>
 </table>
@@ -4039,7 +4070,7 @@ Jason Willwerscheid
 <th></th>
 <th align="left">gene</th>
 <th align="left">type</th>
-<th align="right">p.val</th>
+<th align="right">t.val</th>
 </tr>
 </thead>
 <tbody>
@@ -4047,13 +4078,13 @@ Jason Willwerscheid
 <td>6</td>
 <td align="left">Cdhr3</td>
 <td align="left">Ciliated</td>
-<td align="right">0</td>
+<td align="right">13.775604</td>
 </tr>
 <tr class="even">
 <td>18</td>
 <td align="left">Anxa1</td>
 <td align="left">Hillock</td>
-<td align="right">0</td>
+<td align="right">-6.524072</td>
 </tr>
 </tbody>
 </table>
