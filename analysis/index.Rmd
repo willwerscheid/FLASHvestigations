@@ -34,7 +34,11 @@ Note 3 and Investigation 18 explore stochastic approaches to fitting FLASH objec
 
 * [Investigation 18.](minibatch.html) I implement the idea described in Note 3 and I test it out on data from the GTEx project.
 
-[Investigation 19.](trachea.html) I test out FLASH on a large single-cell RNA dataset.
+Investigations 19 and 20 try FLASH out on large single-cell RNA datasets.
+
+* [Investigation 19.](trachea.html) An analysis of the smaller dataset in [Montoro et al.](https://www.nature.com/articles/s41586-018-0393-7)
+
+* [Investigation 20.](pulseseq.html) An analysis of the larger "pulse-seq" dataset in Montoro et al.
 
 [Note 4.](matrix_ops.html) I have been experiencing some performance issues when using FLASH to fit large datasets. Here I outline several ways to modify the core FLASH algorithms in view of reducing the memory footprint and improving overall performance. 
 
