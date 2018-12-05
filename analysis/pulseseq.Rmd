@@ -1,5 +1,5 @@
 ---
-title: "PulseSeq FLASH analysis"
+title: "Analysis of pulse-seq data from Montoro et al."
 author: "Jason Willwerscheid"
 date: "12/4/2018"
 output:
@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>")
 
 ## Introduction and Code
 
-I fit 30 factors with normal-mixture priors to the PulseSeq dataset discussed in Montoro et al. I removed all genes with zero total counts and did a `log1p` transform of the counts. I used the following calls.
+I fit 30 factors with normal-mixture priors to the pulse-seq dataset discussed in [Montoro et al.](https://www.nature.com/articles/s41586-018-0393-7) I removed all genes with zero total counts and did a `log1p` transform of the counts. I used the following calls.
 
 ```{r calls, eval=FALSE}
 # Add 30 factors with rough backfits after every 5 factors.
@@ -77,6 +77,25 @@ colSums(gene.sig)
 # I will only look at the factors with at least ten significant genes.
 kset <- (1:ncol(gene.p))[colSums(gene.sig) > 9]
 
+# I also want to see which factors contain genes mentioned in the paper.
+paper.genes <- data.frame(
+  gene = c("Nfia", "Ascl1", "Ascl2", "Ascl3", "Foxq1", "Cdhr3", "Rgs13",
+           "Muc5b", "Notch2", "Il13ra1", "Krt4", "Krt13", "Krt8", "Ecm1",
+           "S100a11", "Cldn3", "Lgals3", "Anxa1", "Il25", "Tslp", "Alox5ap",
+           "Ptprc", "Pou2f3", "Gfi1b", "Spib", "Sox9", "Gp2", "Tff1",
+           "Tff2", "Lman1l", "P2rx4", "Muc5ac", "Dcpp1", "Dcpp2", "Dcpp3",
+           "Atp6v1c2", "Atp6v0d2", "Cftr"),
+  type = c("Club", "NEC", "Tuft", "Ion", "Goblet", "Cil", "Tuft",
+           "Club", "Club", "Club", "Hill", "Hill", "Basal", "Hill",
+           "Hill", "Hill", "Hill", "Hill", "Tuft", "Tuft", "Tuft2",
+           "Tuft2", "Tuft1", "Tuft2", "Tuft2", "Tuft2", "Goblet", "Gob1",
+           "Gob1", "Gob1", "Gob1", "Gob1", "Gob2", "Gob2", "Gob2",
+           "Ion", "Ion", "Ion"))
+paper.genes$gene <- as.character(paper.genes$gene)
+levels(paper.genes$type) <- c("Basal", "Ciliated", "Club", "Goblet-1",
+                              "Goblet-2", "Goblet", "Hillock", "Ionocyte",
+                              "Neuroendocrine", "Tuft", "Tuft-1", "Tuft-2")
+
 # Set up topGOdata object.
 GO.list <- as.factor(gene.sig[, 1])
 GOdata <- new("topGOdata", ontology = "BP", allGenes = GO.list,
@@ -91,6 +110,17 @@ for (k in kset) {
          geom_boxplot(outlier.shape = NA, color = "red") +
          geom_jitter(position = position_jitter(0.2), cex = 0.1) +
          labs(x = "Cell Type", y = paste("Factor", k, "value")))
+  
+  mentions <- which(gene.sig[paper.genes$gene, k] == 1)
+  if (length(mentions) > 0) {
+    mentions.df <- paper.genes[mentions, ]
+    mentions.df$p.val <- gene.p[names(mentions), k]
+    cat("Significant genes that are also mentioned in the paper:\n")
+    print(knitr::kable(mentions.df))
+    cat("\n")
+  }
+  
+  cat("Gene Ontology terms:\n")
   GOdata@allScores <- as.factor(gene.sig[, k])
   result <- suppressMessages(
     runTest(GOdata, algorithm = "classic", statistic = "fisher")
