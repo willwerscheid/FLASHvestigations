@@ -1,0 +1,3375 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Analysis of droplet data from Montoro et al. (using preprocessing)</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Analysis of droplet data from Montoro et al. (using preprocessing)</h1>
+<h4 class="author"><em>Jason Willwerscheid</em></h4>
+<h4 class="date"><em>12/6/2018</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-12-06</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/a32ce94eb23fc754131bba9149d36b24ea2d52cf" target="_blank">a32ce94</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/gd_notes.Rmd
+
+Unstaged changes:
+    Modified:   code/trachea.R
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/a32ce94eb23fc754131bba9149d36b24ea2d52cf/analysis/trachea2.Rmd" target="_blank">a32ce94</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-06
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/trachea2.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="introduction-and-code" class="section level2">
+<h2>Introduction and Code</h2>
+<p>I again fit 30 factors to the droplet dataset discussed in <a href="https://www.nature.com/articles/s41586-018-0393-7">Montoro et al.</a> This time, I follow pre-processing steps used by the authors (normalizing individual counts by counts per cell and only using “highly variable genes”). Let’s see whether it makes any difference.</p>
+<p>Click “Code” to view the code used to pre-process the data.</p>
+<pre class="r"><code>library(Matrix)
+library(mgcv)
+library(ggplot2)
+library(mixsqp)
+
+# Functions from https://github.com/adamh-broad/single_cell_airway:
+
+extract.field &lt;- function(string, field = 1, delim = &quot;_&quot;, fixed = TRUE) {
+  return(strsplit(string,delim, fixed=fixed)[[1]][field])
+}
+
+info &lt;- function(text, ...) {
+  cat(sprintf(paste(Sys.time(),&quot;INFO:&quot;, text,&quot;\n&quot;)))
+}
+
+tpm &lt;- function(counts, mult = 10000) {
+  info(&quot;Running TPM normalisation&quot;)
+  total.counts = Matrix::colSums(counts)
+  scaled.counts = t(t(counts) / total.counts)
+  scaled.counts * mult
+}
+
+get.variable.genes.umis &lt;- function(umi.cts, residual.threshold = -0.25,
+                                    use.spline = FALSE, batch = NULL,
+                                    ret.plot = FALSE) {
+  if(!is.null(batch)){
+    v = as.vector(table(batch))
+    total_transcripts = data.frame(as.matrix(t(Matrix.utils::aggregate.Matrix(t(umi.cts), groupings = batch, fun=&quot;sum&quot;))))
+    detection_frac = Matrix.utils::aggregate.Matrix(t(umi.cts &gt; 0), groupings = batch, fun=&quot;sum&quot;)
+    detection_frac = data.frame(as.matrix(t(detection_frac / v)))
+    test_genes = rownames(detection_frac)[Matrix::rowSums(detection_frac &gt; 0) == length(unique(batch))]
+    detection_frac = detection_frac[test_genes, ]
+    total_transcripts = total_transcripts[test_genes, ]
+    detection_frac$gene = rownames(detection_frac)
+    total_transcripts$gene = rownames(total_transcripts)
+    detection_frac = melt(detection_frac, id.vars=&quot;gene&quot;)
+    colnames(detection_frac) = c(&quot;gene&quot;, &quot;batch&quot;, &quot;alpha&quot;)
+    total_transcripts = melt(total_transcripts, id.vars=&quot;gene&quot;)
+    colnames(total_transcripts) = c(&quot;gene&quot;, &quot;batch&quot;, &quot;UMIs&quot;)
+    z = cbind(total_transcripts, detection_frac)[, c(&quot;gene&quot;, &quot;batch&quot;, &quot;alpha&quot;, &quot;UMIs&quot;)]
+    info(&quot;Fitting logistic GLM (controlling for batch covariate)&quot;)
+    model.logit = glm(data = z, formula = alpha ~ log10(UMIs) + batch, family = binomial)
+    #model.logit = robust::glmRob(data = z, formula = alpha ~ log10(UMIs), family = binomial)
+    info(&quot;Fitting spline quantile regression (controlling for batch covariate)&quot;)
+    model.gam = quantreg::rq(data = z, formula = alpha ~ splines::ns(log10(UMIs), df=15) + batch, tau=0.8)
+    #model.gam = mgcv::gam(data = z, formula = alpha ~ s(log10(UMIs)), method=&quot;REML&quot;)
+  }else{
+    info(&quot;Computing gene dection rates (alphas)..&quot;)
+    z = data.frame(UMIs = Matrix::rowSums(umi.cts), alpha= Matrix::rowSums(umi.cts&gt;0) / ncol(umi.cts))
+    z = subset(z, UMIs &gt; 0 | alpha &gt; 0)
+    info(&quot;Fitting GLMs..&quot;)
+    model.logit = glm(data = z, formula = alpha ~ log10(UMIs), family = binomial)
+    #model.logit = robust::glmRob(data = z, formula = alpha ~ log10(UMIs), family = binomial)
+    model.gam = quantreg::rq(data = z, formula = alpha ~ splines::ns(log10(UMIs), df=15), tau=0.8)
+    #model.gam = mgcv::gam(data = z, formula = alpha ~ s(log10(UMIs)), method=&quot;REML&quot;)
+  }
+
+  if(use.spline){
+    info(&quot;use.spline is ON. Using GAM fit (blue), logit in red&quot;)
+    z$predicted = predict(object = model.gam, z, type=&quot;response&quot;)
+    z$predicted.alternate = predict(object = model.logit, z, type=&quot;response&quot;)
+    z$residual = model.gam$residuals
+  }else{
+    info(&quot;use.spline is OFF. Using logit fit (blue), GAM in red&quot;)
+    z$predicted = predict(model.logit, type=&quot;response&quot;) #predict(object = model.logit, z, type=&quot;response&quot;)
+    z$predicted.alternate = predict(object = model.gam, z, type=&quot;response&quot;)
+    z$residual = model.logit$residuals
+  }
+  if(is.null(batch)) {z$gene = rownames(z)}
+  outliers = subset(z, residual &lt; residual.threshold)
+  g = ggplot(z, aes(x=log10(UMIs), y=alpha, label=gene)) + geom_point(color=&quot;grey50&quot;, size=0.5, stroke=0) +
+    ylim(c(0,1)) + geom_line(aes(y=predicted), size=0.5, color=&quot;blue&quot;, linetype=&quot;dotted&quot;) +
+    geom_line(aes(y=predicted.alternate), size=0.5, color=&quot;red&quot;, linetype=&quot;dotted&quot;) +
+    geom_text(data=outliers, color=&quot;black&quot;, size=1.5, vjust=2)
+  if(!is.null(batch)){g = g + facet_wrap(~batch)}
+  if(!ret.plot){print(g)}
+  rv = unique(unlist(lapply(rownames(outliers), extract.field, 1, delim=&quot;_&quot;)))
+  if(ret.plot){return(list(&quot;var.genes&quot;=rv, &quot;plot&quot;=g, &quot;fit.data&quot;=z, &quot;logit&quot;=model.logit))}
+  rv
+}
+
+# Load and preprocess data as in Montoro et al.
+counts &lt;- read.table(&quot;~/Downloads/GSE103354_Trachea_droplet_UMIcounts.txt&quot;)
+counts &lt;- Matrix::Matrix(as.matrix(counts))
+var.genes &lt;- get.variable.genes.umis(counts)
+counts &lt;- tpm(counts)
+counts &lt;- log1p(counts)
+counts &lt;- counts[var.genes, ]
+
+# Add 30 factors with rough backfits after every 5 factors.
+fl &lt;- flashier(counts, greedy.Kmax = 30, var.type = 1,
+               prior.type = c(&quot;nonnegative&quot;, &quot;normal.mix&quot;),
+               ash.param = list(optmethod = &quot;mixSQP&quot;),
+               backfit.every = 5, final.backfit = TRUE,
+               backfit.order = &quot;montaigne&quot;, warmstart.backfits = FALSE,
+               verbose.lvl = 3)
+
+saveRDS(fl, &quot;~/Downloads/ppdrop30.rds&quot;)
+
+# Refine by backfitting.
+fl &lt;- flashier(counts, flash.init = fl, backfit = &quot;only&quot;,
+               backfit.order = &quot;dropout&quot;, backfit.maxiter = 200,
+               verbose.lvl = 3)
+
+saveRDS(fl, &quot;~/Downloads/ppdrop30_backfit.rds&quot;)</code></pre>
+<p>The following code, used to produce the boxplots and tables below, is in all important respects identical to the code used in my <a href="trachea.html">previous analysis</a> of this dataset.</p>
+<pre class="r"><code>suppressMessages({
+  library(ggplot2)
+  library(topGO)
+  library(org.Mm.eg.db)
+})
+#&gt; Warning: package &#39;ggplot2&#39; was built under R version 3.4.4
+
+fl &lt;- readRDS(&quot;~/Downloads/ppdrop30_backfit.rds&quot;)
+# Remove large data object to free up memory.
+fl$fit$Y &lt;- NULL
+
+# Data frame containing cell type and loadings for each factor.
+PSdf &lt;- data.frame(fl$loadings$normalized.loadings[[2]])
+cell.names &lt;- rownames(fl$loadings$normalized.loadings[[2]])
+cell.types &lt;- as.factor(sapply(strsplit(cell.names, &quot;_&quot;), `[`, 3))
+levels(cell.types)
+#&gt; [1] &quot;Basal&quot;          &quot;Ciliated&quot;       &quot;Club&quot;           &quot;Goblet&quot;        
+#&gt; [5] &quot;Ionocyte&quot;       &quot;Neuroendocrine&quot; &quot;Tuft&quot;
+levels(cell.types) &lt;- c(&quot;Bas&quot;, &quot;Cil&quot;, &quot;Clb&quot;, &quot;Gob&quot;, &quot;Ion&quot;, &quot;Nec&quot;, &quot;Tft&quot;)
+PSdf$cell.type &lt;- cell.types
+
+# Need to select signficant genes for topGO.
+#   Scale gene loadings by scale constant * maximum cell loading.
+s &lt;- fl$loadings$scale.constant * 
+  apply(abs(fl$loadings$normalized.loadings[[2]]), 2, max)
+gene.loadings &lt;- fl$loadings$normalized.loadings[[1]]
+gene.loadings &lt;- gene.loadings * rep(s, each = nrow(gene.loadings))
+#   Get a pseudo-t statistic by dividing by the residual SE.
+gene.t &lt;- gene.loadings * sqrt(fl$fit$tau)
+#   Convert to a p-value.
+gene.p &lt;- 2 * (1 - pnorm(abs(gene.t)))
+#   Select significant genes using Benjamini-Hochberg.
+BH &lt;- function(k, alpha = 0.01) {
+  pvals &lt;- gene.p[, k]
+  selected &lt;- rep(0, length(pvals))
+  names(selected) &lt;- names(pvals)
+  
+  n &lt;- length(pvals)
+  sorted.pvals &lt;- sort(pvals)
+  BH &lt;- sorted.pvals &lt; alpha / (n - 0:(n - 1))
+  cutoff &lt;- min(which(!BH))
+  selected[pvals &lt; sorted.pvals[cutoff]] &lt;- 1
+  
+  return(selected)
+}
+gene.sig &lt;- sapply(1:ncol(gene.p), BH)
+
+# How many significant genes per factor are there?
+colSums(gene.sig)
+#&gt;  [1] 206   0  17  45   7  40  88  34   7  43  19  22  18   3   7  42  22
+#&gt; [18]   0   1  22   0   2  37   5   2  26   7   5   3   2
+
+# Omit factors with PVE below a certain (empirically determined) threshold.
+kset &lt;- (1:ncol(gene.p))[fl$pve &gt; 0.0003]
+
+# I also want to see which factors contain genes mentioned in the paper.
+paper.genes &lt;- data.frame(
+  gene = c(&quot;Nfia&quot;, &quot;Ascl1&quot;, &quot;Ascl2&quot;, &quot;Ascl3&quot;, &quot;Foxq1&quot;, &quot;Cdhr3&quot;, &quot;Rgs13&quot;,
+           &quot;Muc5b&quot;, &quot;Notch2&quot;, &quot;Il13ra1&quot;, &quot;Krt4&quot;, &quot;Krt13&quot;, &quot;Krt8&quot;, &quot;Ecm1&quot;,
+           &quot;S100a11&quot;, &quot;Cldn3&quot;, &quot;Lgals3&quot;, &quot;Anxa1&quot;, &quot;Il25&quot;, &quot;Tslp&quot;, &quot;Alox5ap&quot;,
+           &quot;Ptprc&quot;, &quot;Pou2f3&quot;, &quot;Gfi1b&quot;, &quot;Spib&quot;, &quot;Sox9&quot;, &quot;Gp2&quot;, &quot;Tff1&quot;,
+           &quot;Tff2&quot;, &quot;Lman1l&quot;, &quot;P2rx4&quot;, &quot;Muc5ac&quot;, &quot;Dcpp1&quot;, &quot;Dcpp2&quot;, &quot;Dcpp3&quot;,
+           &quot;Atp6v1c2&quot;, &quot;Atp6v0d2&quot;, &quot;Cftr&quot;, &quot;Aqp3&quot;, &quot;Krt5&quot;, &quot;Dapl1&quot;, &quot;Hspa1a&quot;,
+           &quot;Trp63&quot;, &quot;Scgb1a1&quot;, &quot;Krt15&quot;, &quot;Cyp2f2&quot;, &quot;Lypd2&quot;, &quot;Cbr2&quot;, &quot;Foxj1&quot;,
+           &quot;Ccdc153&quot;, &quot;Ccdc113&quot;, &quot;Mlf1&quot;, &quot;Lztfl1&quot;, &quot;Chga&quot;, &quot;Dclk1&quot;),
+  type = c(&quot;Club&quot;, &quot;NEC&quot;, &quot;Tuft&quot;, &quot;Ion&quot;, &quot;Goblet&quot;, &quot;Cil&quot;, &quot;Tuft&quot;,
+           &quot;Club&quot;, &quot;Club&quot;, &quot;Club&quot;, &quot;Hill&quot;, &quot;Hill&quot;, &quot;Basal&quot;, &quot;Hill&quot;,
+           &quot;Hill&quot;, &quot;Hill&quot;, &quot;Hill&quot;, &quot;Hill&quot;, &quot;Tuft&quot;, &quot;Tuft&quot;, &quot;Tuft2&quot;,
+           &quot;Tuft2&quot;, &quot;Tuft1&quot;, &quot;Tuft2&quot;, &quot;Tuft2&quot;, &quot;Tuft2&quot;, &quot;Goblet&quot;, &quot;Gob1&quot;,
+           &quot;Gob1&quot;, &quot;Gob1&quot;, &quot;Gob1&quot;, &quot;Gob1&quot;, &quot;Gob2&quot;, &quot;Gob2&quot;, &quot;Gob2&quot;,
+           &quot;Ion&quot;, &quot;Ion&quot;, &quot;Ion&quot;, &quot;BM&quot;, &quot;BM&quot;, &quot;BM&quot;, &quot;BM&quot;,
+           &quot;BM&quot;, &quot;ClbM&quot;, &quot;ClbM&quot;, &quot;ClbM&quot;, &quot;ClbM&quot;, &quot;ClbM&quot;, &quot;CilM&quot;,
+           &quot;CilM&quot;, &quot;CilM&quot;, &quot;CilM&quot;, &quot;CilM&quot;, &quot;NECM&quot;, &quot;TftM&quot;))
+paper.genes$gene &lt;- as.character(paper.genes$gene)
+levels(paper.genes$type) &lt;- c(&quot;Basal&quot;, &quot;Basal (Marker)&quot;, &quot;Ciliated&quot;, 
+                              &quot;Ciliated (Marker)&quot;, &quot;Club (Marker)&quot;, &quot;Club&quot;,
+                              &quot;Goblet-1&quot;, &quot;Goblet-2&quot;, &quot;Goblet&quot;, &quot;Hillock&quot;,
+                              &quot;Ionocyte&quot;, &quot;NEC&quot;, &quot;NEC (Marker)&quot;,
+                              &quot;Tuft (Marker)&quot;, &quot;Tuft&quot;, &quot;Tuft-1&quot;, &quot;Tuft-2&quot;)
+paper.genes &lt;- paper.genes[paper.genes$gene %in% rownames(gene.sig), ]
+
+# Set up topGOdata object.
+GO.list &lt;- as.factor(gene.sig[, 1])
+GOdata &lt;- new(&quot;topGOdata&quot;, ontology = &quot;BP&quot;, allGenes = GO.list,
+              annot = annFUN.org, mapping = &quot;org.Mm.eg&quot;, ID = &quot;symbol&quot;)
+#&gt; 
+#&gt; Building most specific GOs .....
+#&gt;  ( 2323 GO terms found. )
+#&gt; 
+#&gt; Build GO DAG topology ..........
+#&gt;  ( 5695 GO terms and 13135 relations. )
+#&gt; 
+#&gt; Annotating nodes ...............
+#&gt;  ( 593 genes annotated to the GO terms. )</code></pre>
+<pre class="r"><code># Loop over kset.
+for (k in kset) {
+  cat(paste0(&quot;## Factor &quot;, k, &quot; (PVE: &quot;,
+             formatC(fl$pve[k], format = &quot;f&quot;, digits = 4), &quot;)\n&quot;))
+  fctr &lt;- paste0(&quot;X&quot;, k)
+  plot(ggplot(PSdf, aes_string(x = &quot;cell.type&quot;, y = fctr)) +
+         geom_boxplot(outlier.shape = NA, color = &quot;red&quot;) +
+         geom_jitter(position = position_jitter(0.2), cex = 0.1) +
+         labs(x = &quot;Cell Type&quot;, y = paste(&quot;Factor&quot;, k, &quot;value&quot;)))
+  cat(&quot;\n&quot;)
+  
+  mentions &lt;- which(gene.sig[paper.genes$gene, k] == 1)
+  if (length(mentions) &gt; 0) {
+    mentions.df &lt;- paper.genes[mentions, ]
+    mentions.df$t.val &lt;- gene.t[names(mentions), k]
+    cat(&quot;Significant genes that are also mentioned in the paper:\n&quot;)
+    print(knitr::kable(mentions.df))
+    cat(&quot;\n&quot;)
+  }
+  
+  cat(&quot;Gene Ontology terms:\n&quot;)
+  GOdata@allScores &lt;- as.factor(gene.sig[, k])
+  result &lt;- suppressMessages(
+    runTest(GOdata, algorithm = &quot;classic&quot;, statistic = &quot;fisher&quot;)
+  )
+  allRes &lt;- GenTable(GOdata, classic = result, topNodes = 10)
+  print(knitr::kable(allRes))
+  cat(&quot;\n&quot;)
+}</code></pre>
+</div>
+<div id="factor-1-pve-0.1336" class="section level2">
+<h2>Factor 1 (PVE: 0.1336)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-1.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>6</td>
+<td align="left">Cdhr3</td>
+<td align="left">Ciliated</td>
+<td align="right">9.064397</td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td align="left">Cldn3</td>
+<td align="left">Hillock</td>
+<td align="right">6.800779</td>
+</tr>
+<tr class="odd">
+<td>30</td>
+<td align="left">Lman1l</td>
+<td align="left">Goblet-1</td>
+<td align="right">8206.933533</td>
+</tr>
+<tr class="even">
+<td>39</td>
+<td align="left">Aqp3</td>
+<td align="left">Basal (Marker)</td>
+<td align="right">4.671251</td>
+</tr>
+<tr class="odd">
+<td>44</td>
+<td align="left">Scgb1a1</td>
+<td align="left">Club (Marker)</td>
+<td align="right">6.913990</td>
+</tr>
+<tr class="even">
+<td>45</td>
+<td align="left">Krt15</td>
+<td align="left">Club (Marker)</td>
+<td align="right">5.977194</td>
+</tr>
+<tr class="odd">
+<td>49</td>
+<td align="left">Foxj1</td>
+<td align="left">Ciliated (Marker)</td>
+<td align="right">8.324384</td>
+</tr>
+<tr class="even">
+<td>50</td>
+<td align="left">Ccdc153</td>
+<td align="left">Ciliated (Marker)</td>
+<td align="right">20.772574</td>
+</tr>
+<tr class="odd">
+<td>51</td>
+<td align="left">Ccdc113</td>
+<td align="left">Ciliated (Marker)</td>
+<td align="right">11.758244</td>
+</tr>
+<tr class="even">
+<td>52</td>
+<td align="left">Mlf1</td>
+<td align="left">Ciliated (Marker)</td>
+<td align="right">11.414119</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0044782" class="uri">GO:0044782</a></td>
+<td align="left">cilium organization</td>
+<td align="right">28</td>
+<td align="right">24</td>
+<td align="right">8.31</td>
+<td align="left">4.2e-10</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0060271" class="uri">GO:0060271</a></td>
+<td align="left">cilium assembly</td>
+<td align="right">27</td>
+<td align="right">23</td>
+<td align="right">8.01</td>
+<td align="left">1.3e-09</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0007018" class="uri">GO:0007018</a></td>
+<td align="left">microtubule-based movement</td>
+<td align="right">19</td>
+<td align="right">16</td>
+<td align="right">5.64</td>
+<td align="left">8.6e-07</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0030031" class="uri">GO:0030031</a></td>
+<td align="left">cell projection assembly</td>
+<td align="right">34</td>
+<td align="right">23</td>
+<td align="right">10.09</td>
+<td align="left">2.7e-06</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0120031" class="uri">GO:0120031</a></td>
+<td align="left">plasma membrane bounded cell projection …</td>
+<td align="right">34</td>
+<td align="right">23</td>
+<td align="right">10.09</td>
+<td align="left">2.7e-06</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0003341" class="uri">GO:0003341</a></td>
+<td align="left">cilium movement</td>
+<td align="right">13</td>
+<td align="right">12</td>
+<td align="right">3.86</td>
+<td align="left">3.4e-06</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0070925" class="uri">GO:0070925</a></td>
+<td align="left">organelle assembly</td>
+<td align="right">40</td>
+<td align="right">25</td>
+<td align="right">11.87</td>
+<td align="left">8.3e-06</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0035082" class="uri">GO:0035082</a></td>
+<td align="left">axoneme assembly</td>
+<td align="right">10</td>
+<td align="right">9</td>
+<td align="right">2.97</td>
+<td align="left">0.00011</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0001578" class="uri">GO:0001578</a></td>
+<td align="left">microtubule bundle formation</td>
+<td align="right">13</td>
+<td align="right">10</td>
+<td align="right">3.86</td>
+<td align="left">0.00051</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0030030" class="uri">GO:0030030</a></td>
+<td align="left">cell projection organization</td>
+<td align="right">67</td>
+<td align="right">32</td>
+<td align="right">19.89</td>
+<td align="left">0.00070</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-2-pve-0.0039" class="section level2">
+<h2>Factor 2 (PVE: 0.0039)</h2>
+<p>Gene Ontology terms:</p>
+<pre><code>#&gt; Warning in .local(object, test.stat, ...): No enrichment can pe performed -
+#&gt; there are no feasible GO terms!</code></pre>
+<p><img src="figure/trachea2.Rmd/factors2-2.png" width="672" style="display: block; margin: auto;" /></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0000003" class="uri">GO:0000003</a></td>
+<td align="left">reproduction</td>
+<td align="right">53</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000012" class="uri">GO:0000012</a></td>
+<td align="left">single strand break repair</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000022" class="uri">GO:0000022</a></td>
+<td align="left">mitotic spindle elongation</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000041" class="uri">GO:0000041</a></td>
+<td align="left">transition metal ion transport</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000050" class="uri">GO:0000050</a></td>
+<td align="left">urea cycle</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000052" class="uri">GO:0000052</a></td>
+<td align="left">citrulline metabolic process</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000060" class="uri">GO:0000060</a></td>
+<td align="left">protein import into nucleus, translocati…</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000070" class="uri">GO:0000070</a></td>
+<td align="left">mitotic sister chromatid segregation</td>
+<td align="right">12</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000075" class="uri">GO:0000075</a></td>
+<td align="left">cell cycle checkpoint</td>
+<td align="right">9</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000077" class="uri">GO:0000077</a></td>
+<td align="left">DNA damage checkpoint</td>
+<td align="right">4</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-3-pve-0.2234" class="section level2">
+<h2>Factor 3 (PVE: 0.2234)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-3.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>16</td>
+<td align="left">Cldn3</td>
+<td align="left">Hillock</td>
+<td align="right">4.366385</td>
+</tr>
+<tr class="even">
+<td>44</td>
+<td align="left">Scgb1a1</td>
+<td align="left">Club (Marker)</td>
+<td align="right">9.830284</td>
+</tr>
+<tr class="odd">
+<td>45</td>
+<td align="left">Krt15</td>
+<td align="left">Club (Marker)</td>
+<td align="right">6.119694</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0044764" class="uri">GO:0044764</a></td>
+<td align="left">multi-organism cellular process</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">0.08</td>
+<td align="left">1.6e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0019730" class="uri">GO:0019730</a></td>
+<td align="left">antimicrobial humoral response</td>
+<td align="right">8</td>
+<td align="right">4</td>
+<td align="right">0.22</td>
+<td align="left">2.3e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0035821" class="uri">GO:0035821</a></td>
+<td align="left">modification of morphology or physiology…</td>
+<td align="right">10</td>
+<td align="right">4</td>
+<td align="right">0.27</td>
+<td align="left">6.8e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0009617" class="uri">GO:0009617</a></td>
+<td align="left">response to bacterium</td>
+<td align="right">35</td>
+<td align="right">6</td>
+<td align="right">0.94</td>
+<td align="left">0.00014</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0006952" class="uri">GO:0006952</a></td>
+<td align="left">defense response</td>
+<td align="right">72</td>
+<td align="right">8</td>
+<td align="right">1.94</td>
+<td align="left">0.00019</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0006959" class="uri">GO:0006959</a></td>
+<td align="left">humoral immune response</td>
+<td align="right">13</td>
+<td align="right">4</td>
+<td align="right">0.35</td>
+<td align="left">0.00022</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0042742" class="uri">GO:0042742</a></td>
+<td align="left">defense response to bacterium</td>
+<td align="right">24</td>
+<td align="right">5</td>
+<td align="right">0.65</td>
+<td align="left">0.00023</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0019835" class="uri">GO:0019835</a></td>
+<td align="left">cytolysis</td>
+<td align="right">6</td>
+<td align="right">3</td>
+<td align="right">0.16</td>
+<td align="left">0.00031</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0031640" class="uri">GO:0031640</a></td>
+<td align="left">killing of cells of other organism</td>
+<td align="right">6</td>
+<td align="right">3</td>
+<td align="right">0.16</td>
+<td align="left">0.00031</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0044364" class="uri">GO:0044364</a></td>
+<td align="left">disruption of cells of other organism</td>
+<td align="right">6</td>
+<td align="right">3</td>
+<td align="right">0.16</td>
+<td align="left">0.00031</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-4-pve-0.0036" class="section level2">
+<h2>Factor 4 (PVE: 0.0036)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-4.png" width="672" style="display: block; margin: auto;" /> Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0051301" class="uri">GO:0051301</a></td>
+<td align="left">cell division</td>
+<td align="right">36</td>
+<td align="right">27</td>
+<td align="right">2.43</td>
+<td align="left">2.5e-29</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:1903047" class="uri">GO:1903047</a></td>
+<td align="left">mitotic cell cycle process</td>
+<td align="right">30</td>
+<td align="right">25</td>
+<td align="right">2.02</td>
+<td align="left">6.2e-29</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000278" class="uri">GO:0000278</a></td>
+<td align="left">mitotic cell cycle</td>
+<td align="right">35</td>
+<td align="right">26</td>
+<td align="right">2.36</td>
+<td align="left">7.4e-28</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0007049" class="uri">GO:0007049</a></td>
+<td align="left">cell cycle</td>
+<td align="right">68</td>
+<td align="right">32</td>
+<td align="right">4.59</td>
+<td align="left">1.3e-26</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0022402" class="uri">GO:0022402</a></td>
+<td align="left">cell cycle process</td>
+<td align="right">43</td>
+<td align="right">27</td>
+<td align="right">2.90</td>
+<td align="left">5.9e-26</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0007059" class="uri">GO:0007059</a></td>
+<td align="left">chromosome segregation</td>
+<td align="right">18</td>
+<td align="right">16</td>
+<td align="right">1.21</td>
+<td align="left">9.7e-19</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000280" class="uri">GO:0000280</a></td>
+<td align="left">nuclear division</td>
+<td align="right">21</td>
+<td align="right">17</td>
+<td align="right">1.42</td>
+<td align="left">1.5e-18</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0048285" class="uri">GO:0048285</a></td>
+<td align="left">organelle fission</td>
+<td align="right">22</td>
+<td align="right">17</td>
+<td align="right">1.48</td>
+<td align="left">6.2e-18</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0140014" class="uri">GO:0140014</a></td>
+<td align="left">mitotic nuclear division</td>
+<td align="right">17</td>
+<td align="right">15</td>
+<td align="right">1.15</td>
+<td align="left">2.0e-17</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000819" class="uri">GO:0000819</a></td>
+<td align="left">sister chromatid segregation</td>
+<td align="right">13</td>
+<td align="right">13</td>
+<td align="right">0.88</td>
+<td align="left">7.6e-17</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-5-pve-0.0752" class="section level2">
+<h2>Factor 5 (PVE: 0.0752)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-5.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>39</td>
+<td align="left">Aqp3</td>
+<td align="left">Basal (Marker)</td>
+<td align="right">8.904648</td>
+</tr>
+<tr class="even">
+<td>40</td>
+<td align="left">Krt5</td>
+<td align="left">Basal (Marker)</td>
+<td align="right">5.027403</td>
+</tr>
+<tr class="odd">
+<td>41</td>
+<td align="left">Dapl1</td>
+<td align="left">Basal (Marker)</td>
+<td align="right">5.951365</td>
+</tr>
+<tr class="even">
+<td>45</td>
+<td align="left">Krt15</td>
+<td align="left">Club (Marker)</td>
+<td align="right">7.013567</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0030104" class="uri">GO:0030104</a></td>
+<td align="left">water homeostasis</td>
+<td align="right">5</td>
+<td align="right">2</td>
+<td align="right">0.03</td>
+<td align="left">0.00017</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0050891" class="uri">GO:0050891</a></td>
+<td align="left">multicellular organismal water homeostas…</td>
+<td align="right">5</td>
+<td align="right">2</td>
+<td align="right">0.03</td>
+<td align="left">0.00017</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0031669" class="uri">GO:0031669</a></td>
+<td align="left">cellular response to nutrient levels</td>
+<td align="right">7</td>
+<td align="right">2</td>
+<td align="right">0.04</td>
+<td align="left">0.00036</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0031668" class="uri">GO:0031668</a></td>
+<td align="left">cellular response to extracellular stimu…</td>
+<td align="right">8</td>
+<td align="right">2</td>
+<td align="right">0.04</td>
+<td align="left">0.00048</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0031667" class="uri">GO:0031667</a></td>
+<td align="left">response to nutrient levels</td>
+<td align="right">11</td>
+<td align="right">2</td>
+<td align="right">0.06</td>
+<td align="left">0.00093</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0033554" class="uri">GO:0033554</a></td>
+<td align="left">cellular response to stress</td>
+<td align="right">62</td>
+<td align="right">3</td>
+<td align="right">0.31</td>
+<td align="left">0.00109</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0009991" class="uri">GO:0009991</a></td>
+<td align="left">response to extracellular stimulus</td>
+<td align="right">12</td>
+<td align="right">2</td>
+<td align="right">0.06</td>
+<td align="left">0.00112</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0071496" class="uri">GO:0071496</a></td>
+<td align="left">cellular response to external stimulus</td>
+<td align="right">13</td>
+<td align="right">2</td>
+<td align="right">0.07</td>
+<td align="left">0.00132</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0050878" class="uri">GO:0050878</a></td>
+<td align="left">regulation of body fluid levels</td>
+<td align="right">15</td>
+<td align="right">2</td>
+<td align="right">0.08</td>
+<td align="left">0.00177</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0048871" class="uri">GO:0048871</a></td>
+<td align="left">multicellular organismal homeostasis</td>
+<td align="right">17</td>
+<td align="right">2</td>
+<td align="right">0.09</td>
+<td align="left">0.00229</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-6-pve-0.0107" class="section level2">
+<h2>Factor 6 (PVE: 0.0107)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-6.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>7</td>
+<td align="left">Rgs13</td>
+<td align="left">Tuft</td>
+<td align="right">18.399757</td>
+</tr>
+<tr class="even">
+<td>21</td>
+<td align="left">Alox5ap</td>
+<td align="left">Tuft-2</td>
+<td align="right">13.875513</td>
+</tr>
+<tr class="odd">
+<td>25</td>
+<td align="left">Spib</td>
+<td align="left">Tuft-2</td>
+<td align="right">8.860353</td>
+</tr>
+<tr class="even">
+<td>26</td>
+<td align="left">Sox9</td>
+<td align="left">Tuft-2</td>
+<td align="right">6.758821</td>
+</tr>
+<tr class="odd">
+<td>55</td>
+<td align="left">Dclk1</td>
+<td align="left">Tuft (Marker)</td>
+<td align="right">12.727983</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0006691" class="uri">GO:0006691</a></td>
+<td align="left">leukotriene metabolic process</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">0.19</td>
+<td align="left">0.00022</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0019370" class="uri">GO:0019370</a></td>
+<td align="left">leukotriene biosynthetic process</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">0.19</td>
+<td align="left">0.00022</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0007186" class="uri">GO:0007186</a></td>
+<td align="left">G-protein coupled receptor signaling pat…</td>
+<td align="right">35</td>
+<td align="right">8</td>
+<td align="right">2.18</td>
+<td align="left">0.00073</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0007600" class="uri">GO:0007600</a></td>
+<td align="left">sensory perception</td>
+<td align="right">20</td>
+<td align="right">6</td>
+<td align="right">1.25</td>
+<td align="left">0.00080</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0050877" class="uri">GO:0050877</a></td>
+<td align="left">nervous system process</td>
+<td align="right">31</td>
+<td align="right">7</td>
+<td align="right">1.93</td>
+<td align="left">0.00181</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0002532" class="uri">GO:0002532</a></td>
+<td align="left">production of molecular mediator involve…</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">0.12</td>
+<td align="left">0.00379</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0002538" class="uri">GO:0002538</a></td>
+<td align="left">arachidonic acid metabolite production i…</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">0.12</td>
+<td align="left">0.00379</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0002540" class="uri">GO:0002540</a></td>
+<td align="left">leukotriene production involved in infla…</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">0.12</td>
+<td align="left">0.00379</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:1902305" class="uri">GO:1902305</a></td>
+<td align="left">regulation of sodium ion transmembrane t…</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">0.12</td>
+<td align="left">0.00379</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:2000649" class="uri">GO:2000649</a></td>
+<td align="left">regulation of sodium ion transmembrane t…</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">0.12</td>
+<td align="left">0.00379</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-7-pve-0.0187" class="section level2">
+<h2>Factor 7 (PVE: 0.0187)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-7.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>11</td>
+<td align="left">Krt4</td>
+<td align="left">Hillock</td>
+<td align="right">11.524838</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td align="left">Krt13</td>
+<td align="left">Hillock</td>
+<td align="right">18.680960</td>
+</tr>
+<tr class="odd">
+<td>14</td>
+<td align="left">Ecm1</td>
+<td align="left">Hillock</td>
+<td align="right">15.842705</td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td align="left">Cldn3</td>
+<td align="left">Hillock</td>
+<td align="right">8.353520</td>
+</tr>
+<tr class="odd">
+<td>39</td>
+<td align="left">Aqp3</td>
+<td align="left">Basal (Marker)</td>
+<td align="right">13.594812</td>
+</tr>
+<tr class="even">
+<td>44</td>
+<td align="left">Scgb1a1</td>
+<td align="left">Club (Marker)</td>
+<td align="right">6.531158</td>
+</tr>
+<tr class="odd">
+<td>45</td>
+<td align="left">Krt15</td>
+<td align="left">Club (Marker)</td>
+<td align="right">12.287453</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0031424" class="uri">GO:0031424</a></td>
+<td align="left">keratinization</td>
+<td align="right">7</td>
+<td align="right">6</td>
+<td align="right">0.97</td>
+<td align="left">3.7e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0043588" class="uri">GO:0043588</a></td>
+<td align="left">skin development</td>
+<td align="right">15</td>
+<td align="right">8</td>
+<td align="right">2.07</td>
+<td align="left">0.00028</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0045109" class="uri">GO:0045109</a></td>
+<td align="left">intermediate filament organization</td>
+<td align="right">4</td>
+<td align="right">4</td>
+<td align="right">0.55</td>
+<td align="left">0.00034</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0030216" class="uri">GO:0030216</a></td>
+<td align="left">keratinocyte differentiation</td>
+<td align="right">11</td>
+<td align="right">6</td>
+<td align="right">1.52</td>
+<td align="left">0.00153</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0045103" class="uri">GO:0045103</a></td>
+<td align="left">intermediate filament-based process</td>
+<td align="right">5</td>
+<td align="right">4</td>
+<td align="right">0.69</td>
+<td align="left">0.00153</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0045104" class="uri">GO:0045104</a></td>
+<td align="left">intermediate filament cytoskeleton organ…</td>
+<td align="right">5</td>
+<td align="right">4</td>
+<td align="right">0.69</td>
+<td align="left">0.00153</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0043567" class="uri">GO:0043567</a></td>
+<td align="left">regulation of insulin-like growth factor…</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">0.41</td>
+<td align="left">0.00256</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0046006" class="uri">GO:0046006</a></td>
+<td align="left">regulation of activated T cell prolifera…</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">0.41</td>
+<td align="left">0.00256</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0048009" class="uri">GO:0048009</a></td>
+<td align="left">insulin-like growth factor receptor sign…</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">0.41</td>
+<td align="left">0.00256</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0050798" class="uri">GO:0050798</a></td>
+<td align="left">activated T cell proliferation</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">0.41</td>
+<td align="left">0.00256</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-8-pve-0.0022" class="section level2">
+<h2>Factor 8 (PVE: 0.0022)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-8.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>8</td>
+<td align="left">Muc5b</td>
+<td align="left">Club</td>
+<td align="right">9.029230e+00</td>
+</tr>
+<tr class="even">
+<td>27</td>
+<td align="left">Gp2</td>
+<td align="left">Goblet</td>
+<td align="right">2.111209e+01</td>
+</tr>
+<tr class="odd">
+<td>28</td>
+<td align="left">Tff1</td>
+<td align="left">Goblet-1</td>
+<td align="right">1.991193e+01</td>
+</tr>
+<tr class="even">
+<td>29</td>
+<td align="left">Tff2</td>
+<td align="left">Goblet-1</td>
+<td align="right">1.511579e+01</td>
+</tr>
+<tr class="odd">
+<td>30</td>
+<td align="left">Lman1l</td>
+<td align="left">Goblet-1</td>
+<td align="right">2.762704e+06</td>
+</tr>
+<tr class="even">
+<td>31</td>
+<td align="left">P2rx4</td>
+<td align="left">Goblet-1</td>
+<td align="right">4.525488e+00</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0044764" class="uri">GO:0044764</a></td>
+<td align="left">multi-organism cellular process</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">0.15</td>
+<td align="left">0.00011</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0042742" class="uri">GO:0042742</a></td>
+<td align="left">defense response to bacterium</td>
+<td align="right">24</td>
+<td align="right">6</td>
+<td align="right">1.17</td>
+<td align="left">0.00058</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0019722" class="uri">GO:0019722</a></td>
+<td align="left">calcium-mediated signaling</td>
+<td align="right">6</td>
+<td align="right">3</td>
+<td align="right">0.29</td>
+<td align="left">0.00191</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0019835" class="uri">GO:0019835</a></td>
+<td align="left">cytolysis</td>
+<td align="right">6</td>
+<td align="right">3</td>
+<td align="right">0.29</td>
+<td align="left">0.00191</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0031640" class="uri">GO:0031640</a></td>
+<td align="left">killing of cells of other organism</td>
+<td align="right">6</td>
+<td align="right">3</td>
+<td align="right">0.29</td>
+<td align="left">0.00191</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0044364" class="uri">GO:0044364</a></td>
+<td align="left">disruption of cells of other organism</td>
+<td align="right">6</td>
+<td align="right">3</td>
+<td align="right">0.29</td>
+<td align="left">0.00191</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0006884" class="uri">GO:0006884</a></td>
+<td align="left">cell volume homeostasis</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">0.10</td>
+<td align="left">0.00231</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0032941" class="uri">GO:0032941</a></td>
+<td align="left">secretion by tissue</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">0.10</td>
+<td align="left">0.00231</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0051715" class="uri">GO:0051715</a></td>
+<td align="left">cytolysis in other organism</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">0.10</td>
+<td align="left">0.00231</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0007586" class="uri">GO:0007586</a></td>
+<td align="left">digestion</td>
+<td align="right">7</td>
+<td align="right">3</td>
+<td align="right">0.34</td>
+<td align="left">0.00323</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-9-pve-0.1554" class="section level2">
+<h2>Factor 9 (PVE: 0.1554)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-9.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>39</td>
+<td align="left">Aqp3</td>
+<td align="left">Basal (Marker)</td>
+<td align="right">5.74750</td>
+</tr>
+<tr class="even">
+<td>45</td>
+<td align="left">Krt15</td>
+<td align="left">Club (Marker)</td>
+<td align="right">6.04495</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0050878" class="uri">GO:0050878</a></td>
+<td align="left">regulation of body fluid levels</td>
+<td align="right">15</td>
+<td align="right">3</td>
+<td align="right">0.10</td>
+<td align="left">5.2e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0030104" class="uri">GO:0030104</a></td>
+<td align="left">water homeostasis</td>
+<td align="right">5</td>
+<td align="right">2</td>
+<td align="right">0.03</td>
+<td align="left">0.00034</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0050891" class="uri">GO:0050891</a></td>
+<td align="left">multicellular organismal water homeostas…</td>
+<td align="right">5</td>
+<td align="right">2</td>
+<td align="right">0.03</td>
+<td align="left">0.00034</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0042886" class="uri">GO:0042886</a></td>
+<td align="left">amide transport</td>
+<td align="right">42</td>
+<td align="right">3</td>
+<td align="right">0.28</td>
+<td align="left">0.00126</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0071705" class="uri">GO:0071705</a></td>
+<td align="left">nitrogen compound transport</td>
+<td align="right">51</td>
+<td align="right">3</td>
+<td align="right">0.34</td>
+<td align="left">0.00226</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0071702" class="uri">GO:0071702</a></td>
+<td align="left">organic substance transport</td>
+<td align="right">58</td>
+<td align="right">3</td>
+<td align="right">0.39</td>
+<td align="left">0.00332</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0097193" class="uri">GO:0097193</a></td>
+<td align="left">intrinsic apoptotic signaling pathway</td>
+<td align="right">15</td>
+<td align="right">2</td>
+<td align="right">0.10</td>
+<td align="left">0.00348</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0033554" class="uri">GO:0033554</a></td>
+<td align="left">cellular response to stress</td>
+<td align="right">62</td>
+<td align="right">3</td>
+<td align="right">0.42</td>
+<td align="left">0.00405</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0048871" class="uri">GO:0048871</a></td>
+<td align="left">multicellular organismal homeostasis</td>
+<td align="right">17</td>
+<td align="right">2</td>
+<td align="right">0.11</td>
+<td align="left">0.00449</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0003091" class="uri">GO:0003091</a></td>
+<td align="left">renal water homeostasis</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0.01</td>
+<td align="left">0.00675</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-10-pve-0.0041" class="section level2">
+<h2>Factor 10 (PVE: 0.0041)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-10.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2</td>
+<td align="left">Ascl1</td>
+<td align="left">NEC</td>
+<td align="right">14.8072</td>
+</tr>
+<tr class="even">
+<td>54</td>
+<td align="left">Chga</td>
+<td align="left">NEC (Marker)</td>
+<td align="right">61.0862</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0099504" class="uri">GO:0099504</a></td>
+<td align="left">synaptic vesicle cycle</td>
+<td align="right">5</td>
+<td align="right">4</td>
+<td align="right">0.32</td>
+<td align="left">6.9e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0007626" class="uri">GO:0007626</a></td>
+<td align="left">locomotory behavior</td>
+<td align="right">9</td>
+<td align="right">5</td>
+<td align="right">0.58</td>
+<td align="left">8.7e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0023061" class="uri">GO:0023061</a></td>
+<td align="left">signal release</td>
+<td align="right">14</td>
+<td align="right">6</td>
+<td align="right">0.90</td>
+<td align="left">9.6e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:1903530" class="uri">GO:1903530</a></td>
+<td align="left">regulation of secretion by cell</td>
+<td align="right">21</td>
+<td align="right">7</td>
+<td align="right">1.35</td>
+<td align="left">0.00015</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0006836" class="uri">GO:0006836</a></td>
+<td align="left">neurotransmitter transport</td>
+<td align="right">6</td>
+<td align="right">4</td>
+<td align="right">0.38</td>
+<td align="left">0.00020</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0019233" class="uri">GO:0019233</a></td>
+<td align="left">sensory perception of pain</td>
+<td align="right">6</td>
+<td align="right">4</td>
+<td align="right">0.38</td>
+<td align="left">0.00020</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0007610" class="uri">GO:0007610</a></td>
+<td align="left">behavior</td>
+<td align="right">17</td>
+<td align="right">6</td>
+<td align="right">1.09</td>
+<td align="left">0.00034</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0032940" class="uri">GO:0032940</a></td>
+<td align="left">secretion by cell</td>
+<td align="right">24</td>
+<td align="right">7</td>
+<td align="right">1.54</td>
+<td align="left">0.00039</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0051046" class="uri">GO:0051046</a></td>
+<td align="left">regulation of secretion</td>
+<td align="right">24</td>
+<td align="right">7</td>
+<td align="right">1.54</td>
+<td align="left">0.00039</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0072089" class="uri">GO:0072089</a></td>
+<td align="left">stem cell proliferation</td>
+<td align="right">7</td>
+<td align="right">4</td>
+<td align="right">0.45</td>
+<td align="left">0.00044</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-11-pve-0.0011" class="section level2">
+<h2>Factor 11 (PVE: 0.0011)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-11.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>4</td>
+<td align="left">Ascl3</td>
+<td align="left">Ionocyte</td>
+<td align="right">29.49011</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0007605" class="uri">GO:0007605</a></td>
+<td align="left">sensory perception of sound</td>
+<td align="right">6</td>
+<td align="right">2</td>
+<td align="right">0.18</td>
+<td align="left">0.012</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0050954" class="uri">GO:0050954</a></td>
+<td align="left">sensory perception of mechanical stimulu…</td>
+<td align="right">6</td>
+<td align="right">2</td>
+<td align="right">0.18</td>
+<td align="left">0.012</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0009987" class="uri">GO:0009987</a></td>
+<td align="left">cellular process</td>
+<td align="right">430</td>
+<td align="right">17</td>
+<td align="right">13.05</td>
+<td align="left">0.023</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0044237" class="uri">GO:0044237</a></td>
+<td align="left">cellular metabolic process</td>
+<td align="right">246</td>
+<td align="right">12</td>
+<td align="right">7.47</td>
+<td align="left">0.026</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0005975" class="uri">GO:0005975</a></td>
+<td align="left">carbohydrate metabolic process</td>
+<td align="right">9</td>
+<td align="right">2</td>
+<td align="right">0.27</td>
+<td align="left">0.028</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:1901617" class="uri">GO:1901617</a></td>
+<td align="left">organic hydroxy compound biosynthetic pr…</td>
+<td align="right">9</td>
+<td align="right">2</td>
+<td align="right">0.27</td>
+<td align="left">0.028</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0044249" class="uri">GO:0044249</a></td>
+<td align="left">cellular biosynthetic process</td>
+<td align="right">133</td>
+<td align="right">8</td>
+<td align="right">4.04</td>
+<td align="left">0.029</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0005976" class="uri">GO:0005976</a></td>
+<td align="left">polysaccharide metabolic process</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0.03</td>
+<td align="left">0.030</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0005977" class="uri">GO:0005977</a></td>
+<td align="left">glycogen metabolic process</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0.03</td>
+<td align="left">0.030</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0006073" class="uri">GO:0006073</a></td>
+<td align="left">cellular glucan metabolic process</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0.03</td>
+<td align="left">0.030</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-14-pve-0.0016" class="section level2">
+<h2>Factor 14 (PVE: 0.0016)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-12.png" width="672" style="display: block; margin: auto;" /> Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0045110" class="uri">GO:0045110</a></td>
+<td align="left">intermediate filament bundle assembly</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0.01</td>
+<td align="left">0.0051</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0098609" class="uri">GO:0098609</a></td>
+<td align="left">cell-cell adhesion</td>
+<td align="right">32</td>
+<td align="right">2</td>
+<td align="right">0.16</td>
+<td align="left">0.0082</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0007157" class="uri">GO:0007157</a></td>
+<td align="left">heterophilic cell-cell adhesion via plas…</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">0.01</td>
+<td align="left">0.0101</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0042104" class="uri">GO:0042104</a></td>
+<td align="left">positive regulation of activated T cell …</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">0.01</td>
+<td align="left">0.0101</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0042102" class="uri">GO:0042102</a></td>
+<td align="left">positive regulation of T cell proliferat…</td>
+<td align="right">3</td>
+<td align="right">1</td>
+<td align="right">0.02</td>
+<td align="left">0.0151</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0043567" class="uri">GO:0043567</a></td>
+<td align="left">regulation of insulin-like growth factor…</td>
+<td align="right">3</td>
+<td align="right">1</td>
+<td align="right">0.02</td>
+<td align="left">0.0151</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0046006" class="uri">GO:0046006</a></td>
+<td align="left">regulation of activated T cell prolifera…</td>
+<td align="right">3</td>
+<td align="right">1</td>
+<td align="right">0.02</td>
+<td align="left">0.0151</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0048009" class="uri">GO:0048009</a></td>
+<td align="left">insulin-like growth factor receptor sign…</td>
+<td align="right">3</td>
+<td align="right">1</td>
+<td align="right">0.02</td>
+<td align="left">0.0151</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0050798" class="uri">GO:0050798</a></td>
+<td align="left">activated T cell proliferation</td>
+<td align="right">3</td>
+<td align="right">1</td>
+<td align="right">0.02</td>
+<td align="left">0.0151</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0045109" class="uri">GO:0045109</a></td>
+<td align="left">intermediate filament organization</td>
+<td align="right">4</td>
+<td align="right">1</td>
+<td align="right">0.02</td>
+<td align="left">0.0201</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-15-pve-0.0121" class="section level2">
+<h2>Factor 15 (PVE: 0.0121)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-13.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>14</td>
+<td align="left">Ecm1</td>
+<td align="left">Hillock</td>
+<td align="right">4.456122</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0097190" class="uri">GO:0097190</a></td>
+<td align="left">apoptotic signaling pathway</td>
+<td align="right">27</td>
+<td align="right">4</td>
+<td align="right">0.32</td>
+<td align="left">0.00011</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0097193" class="uri">GO:0097193</a></td>
+<td align="left">intrinsic apoptotic signaling pathway</td>
+<td align="right">15</td>
+<td align="right">3</td>
+<td align="right">0.18</td>
+<td align="left">0.00043</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0001960" class="uri">GO:0001960</a></td>
+<td align="left">negative regulation of cytokine-mediated…</td>
+<td align="right">4</td>
+<td align="right">2</td>
+<td align="right">0.05</td>
+<td align="left">0.00071</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0035556" class="uri">GO:0035556</a></td>
+<td align="left">intracellular signal transduction</td>
+<td align="right">88</td>
+<td align="right">5</td>
+<td align="right">1.04</td>
+<td align="left">0.00107</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0006950" class="uri">GO:0006950</a></td>
+<td align="left">response to stress</td>
+<td align="right">145</td>
+<td align="right">6</td>
+<td align="right">1.71</td>
+<td align="left">0.00110</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0060761" class="uri">GO:0060761</a></td>
+<td align="left">negative regulation of response to cytok…</td>
+<td align="right">5</td>
+<td align="right">2</td>
+<td align="right">0.06</td>
+<td align="left">0.00118</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0032269" class="uri">GO:0032269</a></td>
+<td align="left">negative regulation of cellular protein …</td>
+<td align="right">52</td>
+<td align="right">4</td>
+<td align="right">0.61</td>
+<td align="left">0.00152</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0050678" class="uri">GO:0050678</a></td>
+<td align="left">regulation of epithelial cell proliferat…</td>
+<td align="right">23</td>
+<td align="right">3</td>
+<td align="right">0.27</td>
+<td align="left">0.00162</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0001959" class="uri">GO:0001959</a></td>
+<td align="left">regulation of cytokine-mediated signalin…</td>
+<td align="right">6</td>
+<td align="right">2</td>
+<td align="right">0.07</td>
+<td align="left">0.00175</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0046785" class="uri">GO:0046785</a></td>
+<td align="left">microtubule polymerization</td>
+<td align="right">6</td>
+<td align="right">2</td>
+<td align="right">0.07</td>
+<td align="left">0.00175</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-16-pve-0.0359" class="section level2">
+<h2>Factor 16 (PVE: 0.0359)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-14.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td align="left">Nfia</td>
+<td align="left">Club</td>
+<td align="right">4.401966</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td align="left">Muc5b</td>
+<td align="left">Club</td>
+<td align="right">10.372924</td>
+</tr>
+<tr class="odd">
+<td>29</td>
+<td align="left">Tff2</td>
+<td align="left">Goblet-1</td>
+<td align="right">5.058775</td>
+</tr>
+<tr class="even">
+<td>44</td>
+<td align="left">Scgb1a1</td>
+<td align="left">Club (Marker)</td>
+<td align="right">15.725750</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0044110" class="uri">GO:0044110</a></td>
+<td align="left">growth involved in symbiotic interaction</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">0.21</td>
+<td align="left">0.00031</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0044116" class="uri">GO:0044116</a></td>
+<td align="left">growth of symbiont involved in interacti…</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">0.21</td>
+<td align="left">0.00031</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0002376" class="uri">GO:0002376</a></td>
+<td align="left">immune system process</td>
+<td align="right">97</td>
+<td align="right">15</td>
+<td align="right">6.71</td>
+<td align="left">0.00091</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0050766" class="uri">GO:0050766</a></td>
+<td align="left">positive regulation of phagocytosis</td>
+<td align="right">5</td>
+<td align="right">3</td>
+<td align="right">0.35</td>
+<td align="left">0.00279</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0002526" class="uri">GO:0002526</a></td>
+<td align="left">acute inflammatory response</td>
+<td align="right">10</td>
+<td align="right">4</td>
+<td align="right">0.69</td>
+<td align="left">0.00306</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0050830" class="uri">GO:0050830</a></td>
+<td align="left">defense response to Gram-positive bacter…</td>
+<td align="right">10</td>
+<td align="right">4</td>
+<td align="right">0.69</td>
+<td align="left">0.00306</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0042742" class="uri">GO:0042742</a></td>
+<td align="left">defense response to bacterium</td>
+<td align="right">24</td>
+<td align="right">6</td>
+<td align="right">1.66</td>
+<td align="left">0.00399</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0031347" class="uri">GO:0031347</a></td>
+<td align="left">regulation of defense response</td>
+<td align="right">32</td>
+<td align="right">7</td>
+<td align="right">2.21</td>
+<td align="left">0.00413</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0002682" class="uri">GO:0002682</a></td>
+<td align="left">regulation of immune system process</td>
+<td align="right">59</td>
+<td align="right">10</td>
+<td align="right">4.08</td>
+<td align="left">0.00424</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0002764" class="uri">GO:0002764</a></td>
+<td align="left">immune response-regulating signaling pat…</td>
+<td align="right">11</td>
+<td align="right">4</td>
+<td align="right">0.76</td>
+<td align="left">0.00457</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-17-pve-0.0004" class="section level2">
+<h2>Factor 17 (PVE: 0.0004)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-15.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>49</td>
+<td align="left">Foxj1</td>
+<td align="left">Ciliated (Marker)</td>
+<td align="right">5.460345</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0051321" class="uri">GO:0051321</a></td>
+<td align="left">meiotic cell cycle</td>
+<td align="right">14</td>
+<td align="right">5</td>
+<td align="right">0.45</td>
+<td align="left">3.2e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0006259" class="uri">GO:0006259</a></td>
+<td align="left">DNA metabolic process</td>
+<td align="right">25</td>
+<td align="right">6</td>
+<td align="right">0.80</td>
+<td align="left">5.6e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0044458" class="uri">GO:0044458</a></td>
+<td align="left">motile cilium assembly</td>
+<td align="right">5</td>
+<td align="right">3</td>
+<td align="right">0.16</td>
+<td align="left">0.00027</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0006281" class="uri">GO:0006281</a></td>
+<td align="left">DNA repair</td>
+<td align="right">8</td>
+<td align="right">3</td>
+<td align="right">0.26</td>
+<td align="left">0.00142</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0007049" class="uri">GO:0007049</a></td>
+<td align="left">cell cycle</td>
+<td align="right">68</td>
+<td align="right">7</td>
+<td align="right">2.18</td>
+<td align="left">0.00315</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0034641" class="uri">GO:0034641</a></td>
+<td align="left">cellular nitrogen compound metabolic pro…</td>
+<td align="right">134</td>
+<td align="right">10</td>
+<td align="right">4.29</td>
+<td align="left">0.00357</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0006974" class="uri">GO:0006974</a></td>
+<td align="left">cellular response to DNA damage stimulus</td>
+<td align="right">22</td>
+<td align="right">4</td>
+<td align="right">0.70</td>
+<td align="left">0.00383</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0006310" class="uri">GO:0006310</a></td>
+<td align="left">DNA recombination</td>
+<td align="right">4</td>
+<td align="right">2</td>
+<td align="right">0.13</td>
+<td align="left">0.00562</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0044774" class="uri">GO:0044774</a></td>
+<td align="left">mitotic DNA integrity checkpoint</td>
+<td align="right">4</td>
+<td align="right">2</td>
+<td align="right">0.13</td>
+<td align="left">0.00562</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0090304" class="uri">GO:0090304</a></td>
+<td align="left">nucleic acid metabolic process</td>
+<td align="right">99</td>
+<td align="right">8</td>
+<td align="right">3.17</td>
+<td align="left">0.00700</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-18-pve-0.0191" class="section level2">
+<h2>Factor 18 (PVE: 0.0191)</h2>
+<p>Gene Ontology terms:</p>
+<pre><code>#&gt; Warning in .local(object, test.stat, ...): No enrichment can pe performed -
+#&gt; there are no feasible GO terms!</code></pre>
+<p><img src="figure/trachea2.Rmd/factors2-16.png" width="672" style="display: block; margin: auto;" /></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0000003" class="uri">GO:0000003</a></td>
+<td align="left">reproduction</td>
+<td align="right">53</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000012" class="uri">GO:0000012</a></td>
+<td align="left">single strand break repair</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000022" class="uri">GO:0000022</a></td>
+<td align="left">mitotic spindle elongation</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000041" class="uri">GO:0000041</a></td>
+<td align="left">transition metal ion transport</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000050" class="uri">GO:0000050</a></td>
+<td align="left">urea cycle</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000052" class="uri">GO:0000052</a></td>
+<td align="left">citrulline metabolic process</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000060" class="uri">GO:0000060</a></td>
+<td align="left">protein import into nucleus, translocati…</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000070" class="uri">GO:0000070</a></td>
+<td align="left">mitotic sister chromatid segregation</td>
+<td align="right">12</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000075" class="uri">GO:0000075</a></td>
+<td align="left">cell cycle checkpoint</td>
+<td align="right">9</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000077" class="uri">GO:0000077</a></td>
+<td align="left">DNA damage checkpoint</td>
+<td align="right">4</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-19-pve-0.0007" class="section level2">
+<h2>Factor 19 (PVE: 0.0007)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-17.png" width="672" style="display: block; margin: auto;" /> Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0007267" class="uri">GO:0007267</a></td>
+<td align="left">cell-cell signaling</td>
+<td align="right">38</td>
+<td align="right">1</td>
+<td align="right">0.06</td>
+<td align="left">0.064</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0007155" class="uri">GO:0007155</a></td>
+<td align="left">cell adhesion</td>
+<td align="right">53</td>
+<td align="right">1</td>
+<td align="right">0.09</td>
+<td align="left">0.089</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0022610" class="uri">GO:0022610</a></td>
+<td align="left">biological adhesion</td>
+<td align="right">54</td>
+<td align="right">1</td>
+<td align="right">0.09</td>
+<td align="left">0.091</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0007399" class="uri">GO:0007399</a></td>
+<td align="left">nervous system development</td>
+<td align="right">67</td>
+<td align="right">1</td>
+<td align="right">0.11</td>
+<td align="left">0.113</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0048731" class="uri">GO:0048731</a></td>
+<td align="left">system development</td>
+<td align="right">161</td>
+<td align="right">1</td>
+<td align="right">0.27</td>
+<td align="left">0.272</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0023052" class="uri">GO:0023052</a></td>
+<td align="left">signaling</td>
+<td align="right">165</td>
+<td align="right">1</td>
+<td align="right">0.28</td>
+<td align="left">0.278</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0007154" class="uri">GO:0007154</a></td>
+<td align="left">cell communication</td>
+<td align="right">167</td>
+<td align="right">1</td>
+<td align="right">0.28</td>
+<td align="left">0.282</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0007275" class="uri">GO:0007275</a></td>
+<td align="left">multicellular organism development</td>
+<td align="right">178</td>
+<td align="right">1</td>
+<td align="right">0.30</td>
+<td align="left">0.300</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0048856" class="uri">GO:0048856</a></td>
+<td align="left">anatomical structure development</td>
+<td align="right">195</td>
+<td align="right">1</td>
+<td align="right">0.33</td>
+<td align="left">0.329</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0032502" class="uri">GO:0032502</a></td>
+<td align="left">developmental process</td>
+<td align="right">214</td>
+<td align="right">1</td>
+<td align="right">0.36</td>
+<td align="left">0.361</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-21-pve-0.0087" class="section level2">
+<h2>Factor 21 (PVE: 0.0087)</h2>
+<p>Gene Ontology terms:</p>
+<pre><code>#&gt; Warning in .local(object, test.stat, ...): No enrichment can pe performed -
+#&gt; there are no feasible GO terms!</code></pre>
+<p><img src="figure/trachea2.Rmd/factors2-18.png" width="672" style="display: block; margin: auto;" /></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0000003" class="uri">GO:0000003</a></td>
+<td align="left">reproduction</td>
+<td align="right">53</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000012" class="uri">GO:0000012</a></td>
+<td align="left">single strand break repair</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000022" class="uri">GO:0000022</a></td>
+<td align="left">mitotic spindle elongation</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000041" class="uri">GO:0000041</a></td>
+<td align="left">transition metal ion transport</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000050" class="uri">GO:0000050</a></td>
+<td align="left">urea cycle</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000052" class="uri">GO:0000052</a></td>
+<td align="left">citrulline metabolic process</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000060" class="uri">GO:0000060</a></td>
+<td align="left">protein import into nucleus, translocati…</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000070" class="uri">GO:0000070</a></td>
+<td align="left">mitotic sister chromatid segregation</td>
+<td align="right">12</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000075" class="uri">GO:0000075</a></td>
+<td align="left">cell cycle checkpoint</td>
+<td align="right">9</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000077" class="uri">GO:0000077</a></td>
+<td align="left">DNA damage checkpoint</td>
+<td align="right">4</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-22-pve-0.0049" class="section level2">
+<h2>Factor 22 (PVE: 0.0049)</h2>
+<p>Gene Ontology terms:</p>
+<pre><code>#&gt; Warning in .local(object, test.stat, ...): No enrichment can pe performed -
+#&gt; there are no feasible GO terms!</code></pre>
+<p><img src="figure/trachea2.Rmd/factors2-19.png" width="672" style="display: block; margin: auto;" /></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0000003" class="uri">GO:0000003</a></td>
+<td align="left">reproduction</td>
+<td align="right">53</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000012" class="uri">GO:0000012</a></td>
+<td align="left">single strand break repair</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000022" class="uri">GO:0000022</a></td>
+<td align="left">mitotic spindle elongation</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000041" class="uri">GO:0000041</a></td>
+<td align="left">transition metal ion transport</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000050" class="uri">GO:0000050</a></td>
+<td align="left">urea cycle</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000052" class="uri">GO:0000052</a></td>
+<td align="left">citrulline metabolic process</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000060" class="uri">GO:0000060</a></td>
+<td align="left">protein import into nucleus, translocati…</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000070" class="uri">GO:0000070</a></td>
+<td align="left">mitotic sister chromatid segregation</td>
+<td align="right">12</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000075" class="uri">GO:0000075</a></td>
+<td align="left">cell cycle checkpoint</td>
+<td align="right">9</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000077" class="uri">GO:0000077</a></td>
+<td align="left">DNA damage checkpoint</td>
+<td align="right">4</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-25-pve-0.0004" class="section level2">
+<h2>Factor 25 (PVE: 0.0004)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-20.png" width="672" style="display: block; margin: auto;" /> Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0007157" class="uri">GO:0007157</a></td>
+<td align="left">heterophilic cell-cell adhesion via plas…</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">0.01</td>
+<td align="left">0.0067</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0098742" class="uri">GO:0098742</a></td>
+<td align="left">cell-cell adhesion via plasma-membrane a…</td>
+<td align="right">7</td>
+<td align="right">1</td>
+<td align="right">0.02</td>
+<td align="left">0.0235</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0001523" class="uri">GO:0001523</a></td>
+<td align="left">retinoid metabolic process</td>
+<td align="right">8</td>
+<td align="right">1</td>
+<td align="right">0.03</td>
+<td align="left">0.0268</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0006720" class="uri">GO:0006720</a></td>
+<td align="left">isoprenoid metabolic process</td>
+<td align="right">8</td>
+<td align="right">1</td>
+<td align="right">0.03</td>
+<td align="left">0.0268</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0006721" class="uri">GO:0006721</a></td>
+<td align="left">terpenoid metabolic process</td>
+<td align="right">8</td>
+<td align="right">1</td>
+<td align="right">0.03</td>
+<td align="left">0.0268</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0016101" class="uri">GO:0016101</a></td>
+<td align="left">diterpenoid metabolic process</td>
+<td align="right">8</td>
+<td align="right">1</td>
+<td align="right">0.03</td>
+<td align="left">0.0268</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0098609" class="uri">GO:0098609</a></td>
+<td align="left">cell-cell adhesion</td>
+<td align="right">32</td>
+<td align="right">1</td>
+<td align="right">0.11</td>
+<td align="left">0.1051</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0044255" class="uri">GO:0044255</a></td>
+<td align="left">cellular lipid metabolic process</td>
+<td align="right">37</td>
+<td align="right">1</td>
+<td align="right">0.12</td>
+<td align="left">0.1210</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0006629" class="uri">GO:0006629</a></td>
+<td align="left">lipid metabolic process</td>
+<td align="right">43</td>
+<td align="right">1</td>
+<td align="right">0.15</td>
+<td align="left">0.1399</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0007155" class="uri">GO:0007155</a></td>
+<td align="left">cell adhesion</td>
+<td align="right">53</td>
+<td align="right">1</td>
+<td align="right">0.18</td>
+<td align="left">0.1709</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-26-pve-0.0076" class="section level2">
+<h2>Factor 26 (PVE: 0.0076)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-21.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>8</td>
+<td align="left">Muc5b</td>
+<td align="left">Club</td>
+<td align="right">5.048669</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0051715" class="uri">GO:0051715</a></td>
+<td align="left">cytolysis in other organism</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">0.08</td>
+<td align="left">0.0014</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0072657" class="uri">GO:0072657</a></td>
+<td align="left">protein localization to membrane</td>
+<td align="right">9</td>
+<td align="right">3</td>
+<td align="right">0.35</td>
+<td align="left">0.0037</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0010874" class="uri">GO:0010874</a></td>
+<td align="left">regulation of cholesterol efflux</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">0.12</td>
+<td align="left">0.0042</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0010875" class="uri">GO:0010875</a></td>
+<td align="left">positive regulation of cholesterol efflu…</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">0.12</td>
+<td align="left">0.0042</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0032370" class="uri">GO:0032370</a></td>
+<td align="left">positive regulation of lipid transport</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">0.12</td>
+<td align="left">0.0042</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0032371" class="uri">GO:0032371</a></td>
+<td align="left">regulation of sterol transport</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">0.12</td>
+<td align="left">0.0042</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0032373" class="uri">GO:0032373</a></td>
+<td align="left">positive regulation of sterol transport</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">0.12</td>
+<td align="left">0.0042</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0032374" class="uri">GO:0032374</a></td>
+<td align="left">regulation of cholesterol transport</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">0.12</td>
+<td align="left">0.0042</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0032376" class="uri">GO:0032376</a></td>
+<td align="left">positive regulation of cholesterol trans…</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">0.12</td>
+<td align="left">0.0042</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0043113" class="uri">GO:0043113</a></td>
+<td align="left">receptor clustering</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">0.12</td>
+<td align="left">0.0042</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-30-pve-0.0026" class="section level2">
+<h2>Factor 30 (PVE: 0.0026)</h2>
+<p><img src="figure/trachea2.Rmd/factors2-22.png" width="672" style="display: block; margin: auto;" /> Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0007623" class="uri">GO:0007623</a></td>
+<td align="left">circadian rhythm</td>
+<td align="right">5</td>
+<td align="right">2</td>
+<td align="right">0.02</td>
+<td align="left">5.7e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0045668" class="uri">GO:0045668</a></td>
+<td align="left">negative regulation of osteoblast differ…</td>
+<td align="right">5</td>
+<td align="right">2</td>
+<td align="right">0.02</td>
+<td align="left">5.7e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0043433" class="uri">GO:0043433</a></td>
+<td align="left">negative regulation of DNA binding trans…</td>
+<td align="right">6</td>
+<td align="right">2</td>
+<td align="right">0.02</td>
+<td align="left">8.5e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0045667" class="uri">GO:0045667</a></td>
+<td align="left">regulation of osteoblast differentiation</td>
+<td align="right">7</td>
+<td align="right">2</td>
+<td align="right">0.02</td>
+<td align="left">0.00012</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0048511" class="uri">GO:0048511</a></td>
+<td align="left">rhythmic process</td>
+<td align="right">7</td>
+<td align="right">2</td>
+<td align="right">0.02</td>
+<td align="left">0.00012</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0030279" class="uri">GO:0030279</a></td>
+<td align="left">negative regulation of ossification</td>
+<td align="right">8</td>
+<td align="right">2</td>
+<td align="right">0.03</td>
+<td align="left">0.00016</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0001649" class="uri">GO:0001649</a></td>
+<td align="left">osteoblast differentiation</td>
+<td align="right">10</td>
+<td align="right">2</td>
+<td align="right">0.03</td>
+<td align="left">0.00026</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0030278" class="uri">GO:0030278</a></td>
+<td align="left">regulation of ossification</td>
+<td align="right">15</td>
+<td align="right">2</td>
+<td align="right">0.05</td>
+<td align="left">0.00060</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0051090" class="uri">GO:0051090</a></td>
+<td align="left">regulation of DNA binding transcription …</td>
+<td align="right">18</td>
+<td align="right">2</td>
+<td align="right">0.06</td>
+<td align="left">0.00087</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0007507" class="uri">GO:0007507</a></td>
+<td align="left">heart development</td>
+<td align="right">19</td>
+<td align="right">2</td>
+<td align="right">0.06</td>
+<td align="left">0.00097</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()
+#&gt; R version 3.4.3 (2017-11-30)
+#&gt; Platform: x86_64-apple-darwin15.6.0 (64-bit)
+#&gt; Running under: macOS High Sierra 10.13.6
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+#&gt; 
+#&gt; locale:
+#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+#&gt; [8] methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt;  [1] org.Mm.eg.db_3.5.0   topGO_2.30.1         SparseM_1.77        
+#&gt;  [4] GO.db_3.5.0          AnnotationDbi_1.40.0 IRanges_2.12.0      
+#&gt;  [7] S4Vectors_0.16.0     Biobase_2.38.0       graph_1.56.0        
+#&gt; [10] BiocGenerics_0.24.0  ggplot2_3.1.0       
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] xfun_0.4           lattice_0.20-35    colorspace_1.3-2  
+#&gt;  [4] htmltools_0.3.6    yaml_2.2.0         blob_1.1.0        
+#&gt;  [7] rlang_0.3.0.1      R.oo_1.21.0        pillar_1.2.1      
+#&gt; [10] glue_1.3.0         withr_2.1.2.9000   DBI_0.7           
+#&gt; [13] R.utils_2.6.0      bit64_0.9-7        bindrcpp_0.2      
+#&gt; [16] matrixStats_0.52.2 bindr_0.1          plyr_1.8.4        
+#&gt; [19] stringr_1.3.1      munsell_0.5.0      gtable_0.2.0      
+#&gt; [22] workflowr_1.0.1    flashier_0.1.0     R.methodsS3_1.7.1 
+#&gt; [25] evaluate_0.12      memoise_1.1.0      labeling_0.3      
+#&gt; [28] knitr_1.20.22      highr_0.7          Rcpp_1.0.0        
+#&gt; [31] scales_1.0.0       backports_1.1.2    bit_1.1-12        
+#&gt; [34] digest_0.6.18      stringi_1.2.4      dplyr_0.7.4       
+#&gt; [37] grid_3.4.3         rprojroot_1.3-2    tools_3.4.3       
+#&gt; [40] magrittr_1.5       lazyeval_0.2.1     tibble_1.4.2      
+#&gt; [43] RSQLite_2.0        whisker_0.3-2      pkgconfig_2.0.1   
+#&gt; [46] assertthat_0.2.0   rmarkdown_1.10     R6_2.3.0          
+#&gt; [49] git2r_0.21.0       compiler_3.4.3</code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
