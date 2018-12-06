@@ -34,9 +34,11 @@ Note 3 and Investigation 18 explore stochastic approaches to fitting FLASH objec
 
 * [Investigation 18.](minibatch.html) I implement the idea described in Note 3 and I test it out on data from the GTEx project.
 
-Investigations 19 and 20 try FLASH out on large single-cell RNA datasets.
+Investigations 19a-b and 20 try FLASH out on large single-cell RNA datasets.
 
-* [Investigation 19.](trachea.html) An analysis of the smaller "droplet" dataset from [Montoro et al.](https://www.nature.com/articles/s41586-018-0393-7)
+* [Investigation 19a.](trachea.html) An analysis of the smaller "droplet" dataset from [Montoro et al.](https://www.nature.com/articles/s41586-018-0393-7)
+
+* [Investigation 19b.](trachea2.html) I redo my analysis of the "droplet" dataset, but this time I follow the authors' preprocessing steps. Results are, I think, of much lower quality.
 
 * [Investigation 20.](pulseseq.html) An analysis of the larger "pulse-seq" dataset from Montoro et al.
 
