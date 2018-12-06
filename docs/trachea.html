@@ -315,7 +315,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-10-23</p>
+<p><strong>Last updated:</strong> 2018-12-05</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -339,7 +339,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/28891d170746215925762301910398b37ecc4cb1" target="_blank">28891d1</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/a89c222cf8fd312aa8bcf9cd61a78df3b7803487" target="_blank">a89c222</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -351,8 +351,6 @@ Ignored files:
 
 Untracked files:
     Untracked:  analysis/gd_notes.Rmd
-    Untracked:  code/trachea.R
-    Untracked:  data/trachea/
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -386,6 +384,40 @@ Message
 Rmd
 </td>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/a89c222cf8fd312aa8bcf9cd61a78df3b7803487/analysis/trachea.Rmd" target="_blank">a89c222</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-12-05
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/trachea.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/8327d75f24a6a625b117c67b11540d9cebc2a42f/docs/trachea.html" target="_blank">8327d75</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2018-10-23
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/28891d170746215925762301910398b37ecc4cb1/analysis/trachea.Rmd" target="_blank">28891d1</a>
 </td>
 <td style="text-align:left;">
@@ -403,569 +435,2099 @@ workflowr::wflow_publish(“analysis/trachea.Rmd”)
 </ul>
 <p></details></p>
 <hr />
-<div id="fit-i-subsetted-data" class="section level2">
-<h2>Fit I: subsetted data</h2>
-<p>First, I fit 30 nonnegative loadings (with arbitrary factors) to a subset of the data used in Montoro et al. (I selected for “highly variable genes” using the Seurat package. For the code used to do preprocessing, see <a href="#Code">below</a>.)</p>
-<pre class="r"><code>factors_df &lt;- readRDS(&quot;~/GitHub/FLASHvestigations/data/trachea/factors_df.rds&quot;)
-top_genes &lt;- readRDS(&quot;~/GitHub/FLASHvestigations/data/trachea/top_genes.rds&quot;)</code></pre>
-<p>To find cell-type specific factor/loadings, I use the cell types assigned by Montoro et al. The number of each cell type is as follows:</p>
-<pre class="r"><code>table(factors_df$cell_type)</code></pre>
-<pre><code>
-   Basal Ciliated     Club   Goblet Ionocyte      NEC     Tuft 
-    3843      423     2564       62       26       96      158 </code></pre>
-<p>The following code is used to create the plots below.</p>
-<pre class="r"><code>library(ggplot2)</code></pre>
-<pre><code>Warning: package &#39;ggplot2&#39; was built under R version 3.4.4</code></pre>
-<pre class="r"><code>do_boxplots &lt;- function(kset, incl_top_genes = TRUE) {
-  for (k in kset) {
-    x &lt;- paste0(&quot;X&quot;, k)
-    plot(ggplot(factors_df, aes_string(x = &quot;cell_type&quot;, y = x)) +
-           geom_boxplot(outlier.shape = NA) +
-           labs(x = &quot;Cell Type&quot;, y = paste(&quot;Factor&quot;, k, &quot;value&quot;)))
-    if (incl_top_genes) {
-      print(knitr::kable(top_genes[[k]], digits = 2, row.names = FALSE))
-    }
-  }
-}</code></pre>
-<div id="ciliated-cells" class="section level3">
-<h3>Ciliated cells</h3>
-<p>Three factors are very clearly associated with ciliated cells. A positive loading for factor 1 indicates the presence of a ciliated cell, whereas factors 17 and 18 delineate axes that could serve to differentiate among ciliated cells.</p>
-<pre class="r"><code>do_boxplots(c(1, 17, 18))</code></pre>
-<p><img src="figure/trachea.Rmd/cil_plots-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre><code>
-
-gene_ID           val  desc                                          
---------------  -----  ----------------------------------------------
-Ccdc153          0.08  coiled-coil domain containing 153             
-Tmem212          0.08  transmembrane protein 212                     
-1110017D15Rik    0.08  RIKEN cDNA 1110017D15 gene                    
-Fam183b          0.08  family with sequence similarity 183, member B 
-1700016K19Rik    0.08  RIKEN cDNA 1700016K19 gene                    
-Dynlrb2          0.08  dynein light chain roadblock-type 2           
-AU040972         0.08                                                
-Tctex1d4         0.07  Tctex1 domain containing 4                    
-1700007K13Rik    0.07  RIKEN cDNA 1700007K13 gene                    
-Rsph1            0.07  radial spoke head 1 homolog (Chlamydomonas)   
-3300002A11Rik    0.07                                                
-1700026L06Rik    0.07  NA                                            
-Sntn             0.07  sentan, cilia apical structure protein        
-1700001C02Rik    0.07  RIKEN cDNA 1700001C02 gene                    
-Gm867            0.07  predicted gene 867                            
-Tm4sf1           0.07  transmembrane 4 superfamily member 1          
-Mlf1             0.07  myeloid leukemia factor 1                     
-Cdhr4            0.07  cadherin-related family member 4              
-Cfap126          0.07  cilia and flagella associated protein 126     
-Ccdc113          0.07  coiled-coil domain containing 113             </code></pre>
-<p><img src="figure/trachea.Rmd/cil_plots-2.png" width="672" style="display: block; margin: auto;" /></p>
-<pre><code>
-
-gene_ID      val  desc                                                  
----------  -----  ------------------------------------------------------
-Adam8       0.15  a disintegrin and metallopeptidase domain 8           
-Cdhr4       0.15  cadherin-related family member 4                      
-Cdh26       0.14  cadherin-like 26                                      
-Wnt11       0.12  wingless-type MMTV integration site family, member 11 
-Dnah6       0.12  dynein, axonemal, heavy chain 6                       
-Dnah10      0.12  dynein, axonemal, heavy chain 10                      
-BC048546    0.12  NA                                                    
-Hydin       0.12  HYDIN, axonemal central pair apparatus protein        
-Dnah9       0.11  dynein, axonemal, heavy chain 9                       
-Cdhr3       0.11  cadherin-related family member 3                      
-Unc79       0.10  unc-79 homolog                                        
-Ccdc108     0.10  NA                                                    
-Mapk15      0.10  mitogen-activated protein kinase 15                   
-Spef2       0.10  sperm flagellar 2                                     
-Jam3        0.10  junction adhesion molecule 3                          
-Ckb         0.10  creatine kinase, brain                                
-Cd177       0.10  CD177 antigen                                         
-Pcp4l1      0.09  Purkinje cell protein 4-like 1                        
-Lhb         0.09  luteinizing hormone beta                              
-Foxj1       0.09  forkhead box J1                                       </code></pre>
-<p><img src="figure/trachea.Rmd/cil_plots-3.png" width="672" style="display: block; margin: auto;" /></p>
-<pre><code>
-
-gene_ID           val  desc                                              
---------------  -----  --------------------------------------------------
-Pcp4l1           0.14  Purkinje cell protein 4-like 1                    
-Tbata            0.14  thymus, brain and testes associated               
-Ckb              0.12  creatine kinase, brain                            
-Lrrc34           0.12  leucine rich repeat containing 34                 
-1700040L02Rik    0.11  NA                                                
-1700007G11Rik    0.11  NA                                                
-Jam3             0.11  junction adhesion molecule 3                      
-Slc35g3          0.10  solute carrier family 35, member G3               
-Akap14           0.10  A kinase (PRKA) anchor protein 14                 
-Spag6            0.10  sperm associated antigen 6                        
-Dnajb13          0.10  DnaJ heat shock protein family (Hsp40) member B13 
-Ccdc113          0.09  coiled-coil domain containing 113                 
-Ctsk             0.09  cathepsin K                                       
-Tekt1            0.09  tektin 1                                          
-1700024G13Rik    0.09  RIKEN cDNA 1700024G13 gene                        
-Aoc1             0.09  amine oxidase, copper-containing 1                
-C530043A13Rik    0.09                                                    
-6820408C15Rik    0.09  RIKEN cDNA 6820408C15 gene                        
-Tmem232          0.09  transmembrane protein 232                         
-Hmgcs2           0.09  3-hydroxy-3-methylglutaryl-Coenzyme A synthase 2  </code></pre>
-</div>
-<div id="ionocytes" class="section level3">
-<h3>Ionocytes</h3>
-<p>One factor reliably identifies ionocytes.</p>
-<pre class="r"><code>do_boxplots(15)</code></pre>
-<p><img src="figure/trachea.Rmd/ion_plots-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre><code>
-
-gene_ID      val  desc                                                    
----------  -----  --------------------------------------------------------
-Gm933       0.35  NA                                                      
-Ascl3       0.28  achaete-scute family bHLH transcription factor 3        
-Moxd1       0.28  monooxygenase, DBH-like 1                               
-Stap1       0.28  signal transducing adaptor family member 1              
-Foxi1       0.26  forkhead box I1                                         
-Asgr1       0.22  asialoglycoprotein receptor 1                           
-Slc12a2     0.18  solute carrier family 12, member 2                      
-Nrip3       0.17  nuclear receptor interacting protein 3                  
-Hepacam2    0.16  HEPACAM family member 2                                 
-Ldhb        0.15  lactate dehydrogenase B                                 
-Gng4        0.15  guanine nucleotide binding protein (G protein), gamma 4 
-P2ry14      0.14  purinergic receptor P2Y, G-protein coupled, 14          
-Coch        0.14  cochlin                                                 
-Tekt5       0.14  tektin 5                                                
-Muc20       0.13  mucin 20                                                
-Gch1        0.13  GTP cyclohydrolase 1                                    
-Rasd1       0.12  RAS, dexamethasone-induced 1                            
-Ckap2       0.11  cytoskeleton associated protein 2                       
-Cd81        0.10  CD81 antigen                                            
-Nupr1       0.09  nuclear protein transcription regulator 1               </code></pre>
-</div>
-<div id="neuroendocrine-cells" class="section level3">
-<h3>Neuroendocrine cells</h3>
-<p>Another factor reliably identifies neuroendocrine cells. Interesting, the same genes are less expressed in tuft cells.</p>
-<pre class="r"><code>do_boxplots(4)</code></pre>
-<p><img src="figure/trachea.Rmd/nec_plots-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre><code>
-
-gene_ID     val  desc                                                           
---------  -----  ---------------------------------------------------------------
-Chga       0.20  chromogranin A                                                 
-Scg5       0.19  secretogranin V                                                
-Pkib       0.18  protein kinase inhibitor beta, cAMP dependent, testis specific 
-Calca      0.18  calcitonin/calcitonin-related polypeptide, alpha               
-Ngf        0.17  nerve growth factor                                            
-Nov        0.17  nephroblastoma overexpressed gene                              
-Cxcl13     0.16  chemokine (C-X-C motif) ligand 13                              
-Cib3       0.14  calcium and integrin binding family member 3                   
-Ly6h       0.14  lymphocyte antigen 6 complex, locus H                          
-Scg2       0.14  secretogranin II                                               
-Uchl1      0.14  ubiquitin carboxy-terminal hydrolase L1                        
-Ascl1      0.13  achaete-scute family bHLH transcription factor 1               
-Olfm1      0.13  olfactomedin 1                                                 
-Chgb       0.13  chromogranin B                                                 
-Snap25     0.13  synaptosomal-associated protein 25                             
-Tmem163    0.12  transmembrane protein 163                                      
-Tcerg1l    0.12  transcription elongation regulator 1-like                      
-Ddc        0.12  dopa decarboxylase                                             
-Rundc3a    0.12  RUN domain containing 3A                                       
-Snca       0.12  synuclein, alpha                                               </code></pre>
-</div>
-<div id="tuft-cells" class="section level3">
-<h3>Tuft cells</h3>
-<p>Factor 2 indicates the presence of a tuft cell, while factor 12 delineates an axis that could serve to differentiate tuft cells.</p>
-<pre class="r"><code>do_boxplots(c(2, 12))</code></pre>
-<p><img src="figure/trachea.Rmd/tuft_plots-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre><code>
-
-gene_ID      val  desc                                                               
----------  -----  -------------------------------------------------------------------
-Lrmp        0.14  lymphoid-restricted membrane protein                               
-Ltc4s       0.14  leukotriene C4 synthase                                            
-Trpm5       0.14  transient receptor potential cation channel, subfamily M, member 5 
-Gng13       0.14  guanine nucleotide binding protein (G protein), gamma 13           
-Ly6g6f      0.13  lymphocyte antigen 6 complex, locus G6F                            
-Alox5ap     0.13  arachidonate 5-lipoxygenase activating protein                     
-Selm        0.13  NA                                                                 
-Sh2d6       0.13  SH2 domain containing 6                                            
-Rgs13       0.13  regulator of G-protein signaling 13                                
-Hck         0.13  hemopoietic cell kinase                                            
-Espn        0.13  espin                                                              
-Avil        0.13  advillin                                                           
-Dclk1       0.13  doublecortin-like kinase 1                                         
-Gnat3       0.12  guanine nucleotide binding protein, alpha transducing 3            
-Fxyd6       0.12  FXYD domain-containing ion transport regulator 6                   
-Hepacam2    0.12  HEPACAM family member 2                                            
-Gnb3        0.12  guanine nucleotide binding protein (G protein), beta 3             
-Plac8       0.12  placenta-specific 8                                                
-Matk        0.12  megakaryocyte-associated tyrosine kinase                           
-Ovol3       0.12  ovo like zinc finger 3                                             </code></pre>
-<p><img src="figure/trachea.Rmd/tuft_plots-2.png" width="672" style="display: block; margin: auto;" /></p>
-<pre><code>
-
-gene_ID           val  desc                                                                     
---------------  -----  -------------------------------------------------------------------------
-Scgb3a1          0.27  secretoglobin, family 3A, member 1                                       
-Ovol3            0.27  ovo like zinc finger 3                                                   
-Reg3g            0.24  regenerating islet-derived 3 gamma                                       
-Muc5b            0.21  mucin 5, subtype B, tracheobronchial                                     
-Pigr             0.20  polymeric immunoglobulin receptor                                        
-Gnb3             0.19  guanine nucleotide binding protein (G protein), beta 3                   
-Bpifb1           0.19  BPI fold containing family B, member 1                                   
-Sftpa1           0.16  surfactant associated protein A1                                         
-Msln             0.15  mesothelin                                                               
-Agr2             0.14  anterior gradient 2                                                      
-Pglyrp1          0.13  peptidoglycan recognition protein 1                                      
-Fxyd6            0.12  FXYD domain-containing ion transport regulator 6                         
-Serpinb11        0.12  serine (or cysteine) peptidase inhibitor, clade B (ovalbumin), member 11 
-Clca1            0.12  chloride channel accessory 1                                             
-Pon1             0.11  paraoxonase 1                                                            
-Sucnr1           0.11  succinate receptor 1                                                     
-Dmbt1            0.10  deleted in malignant brain tumors 1                                      
-Otos             0.10  otospiralin                                                              
-Bex1             0.10  brain expressed X-linked 1                                               
-2210011C24Rik    0.10  RIKEN cDNA 2210011C24 gene                                               </code></pre>
-</div>
-<div id="goblet-cells" class="section level3">
-<h3>Goblet cells</h3>
-<p>Factors 14 and 27 are virtually solely expressed in goblet cells.</p>
-<pre class="r"><code>do_boxplots(c(14, 27))</code></pre>
-<p><img src="figure/trachea.Rmd/gob_plots-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre><code>
-
-gene_ID       val  desc                                                                              
-----------  -----  ----------------------------------------------------------------------------------
-Lman1l       0.38  lectin, mannose-binding 1 like                                                    
-Gp2          0.35  glycoprotein 2 (zymogen granule membrane)                                         
-Lmcd1        0.32  LIM and cysteine-rich domains 1                                                   
-Tff2         0.25  trefoil factor 2 (spasmolytic protein 1)                                          
-Cgref1       0.24  cell growth regulator with EF hand domain 1                                       
-Dmbt1        0.23  deleted in malignant brain tumors 1                                               
-Fkbp11       0.21  FK506 binding protein 11                                                          
-Tff1         0.19  trefoil factor 1                                                                  
-Serpinb11    0.16  serine (or cysteine) peptidase inhibitor, clade B (ovalbumin), member 11          
-BC048546     0.15  NA                                                                                
-Muc5b        0.15  mucin 5, subtype B, tracheobronchial                                              
-Azgp1        0.14  alpha-2-glycoprotein 1, zinc                                                      
-Creb3l1      0.14  cAMP responsive element binding protein 3-like 1                                  
-Creb3l4      0.13  cAMP responsive element binding protein 3-like 4                                  
-Galnt6       0.12  polypeptide N-acetylgalactosaminyltransferase 6                                   
-Agr2         0.11  anterior gradient 2                                                               
-Pglyrp1      0.11  peptidoglycan recognition protein 1                                               
-Wfdc18       0.11  WAP four-disulfide core domain 18                                                 
-Cited4       0.10  Cbp/p300-interacting transactivator, with Glu/Asp-rich carboxy-terminal domain, 4 
-Slc12a2      0.10  solute carrier family 12, member 2                                                </code></pre>
-<p><img src="figure/trachea.Rmd/gob_plots-2.png" width="672" style="display: block; margin: auto;" /></p>
-<pre><code>
-
-gene_ID       val  desc                                                                              
-----------  -----  ----------------------------------------------------------------------------------
-Lmcd1        0.93  LIM and cysteine-rich domains 1                                                   
-Dmbt1        0.18  deleted in malignant brain tumors 1                                               
-Gp2          0.14  glycoprotein 2 (zymogen granule membrane)                                         
-Cited4       0.10  Cbp/p300-interacting transactivator, with Glu/Asp-rich carboxy-terminal domain, 4 
-Dcpp3        0.08  demilune cell and parotid protein 3                                               
-Sbpl         0.08  spermine binding protein-like                                                     
-Msln         0.07  mesothelin                                                                        
-Ltf          0.07  lactotransferrin                                                                  
-Fkbp11       0.07  FK506 binding protein 11                                                          
-Dcpp1        0.06  demilune cell and parotid protein 1                                               
-Sox9         0.06  SRY (sex determining region Y)-box 9                                              
-Serpinb11    0.06  serine (or cysteine) peptidase inhibitor, clade B (ovalbumin), member 11          
-Creb3l4      0.06  cAMP responsive element binding protein 3-like 4                                  
-BC048546     0.06  NA                                                                                </code></pre>
-</div>
-<div id="club-cells" class="section level3">
-<h3>Club cells</h3>
-<p>As might be expected, there are no factors that cleanly identify club cells. However, expression patterns are markedly different in club cells for factors 20 and 29.</p>
-<pre class="r"><code>do_boxplots(c(20, 29))</code></pre>
-<p><img src="figure/trachea.Rmd/club_plots-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre><code>
-
-gene_ID     val  desc                                                  
---------  -----  ------------------------------------------------------
-Ltf        0.23  lactotransferrin                                      
-Wfdc2      0.22  WAP four-disulfide core domain 2                      
-Ces1f      0.20  carboxylesterase 1F                                   
-Sftpd      0.20  surfactant associated protein D                       
-Lyz2       0.20  lysozyme 2                                            
-Alox15     0.17  arachidonate 15-lipoxygenase                          
-Cyp2a5     0.17  cytochrome P450, family 2, subfamily a, polypeptide 5 
-Cxcl17     0.17  chemokine (C-X-C motif) ligand 17                     
-Msln       0.16  mesothelin                                            
-Pglyrp1    0.16  peptidoglycan recognition protein 1                   
-Nupr1      0.16  nuclear protein transcription regulator 1             
-Lgals3     0.15  lectin, galactose binding, soluble 3                  
-Aldh1a1    0.15  aldehyde dehydrogenase family 1, subfamily A1         
-Clu        0.14  clusterin                                             
-Aqp5       0.14  aquaporin 5                                           
-Agr2       0.14  anterior gradient 2                                   
-Anxa1      0.13  annexin A1                                            
-Porcn      0.13  porcupine O-acyltransferase                           
-Krt4       0.12  keratin 4                                             
-Crip1      0.12  cysteine-rich protein 1 (intestinal)                  </code></pre>
-<p><img src="figure/trachea.Rmd/club_plots-2.png" width="672" style="display: block; margin: auto;" /></p>
-<pre><code>
-
-gene_ID     val  desc                                     
---------  -----  -----------------------------------------
-Hp         0.83  haptoglobin                              
-Sftpb      0.19  surfactant associated protein B          
-Pon1       0.17  paraoxonase 1                            
-Bpifb1     0.17  BPI fold containing family B, member 1   
-Trf        0.11  transferrin                              
-Sult1d1    0.11  sulfotransferase family 1D, member 1     
-Hspb1      0.10  heat shock protein 1                     
-Cldn10     0.10  claudin 10                               
-Scgb3a1    0.09  secretoglobin, family 3A, member 1       
-Clu        0.09  clusterin                                
-Sftpd      0.08  surfactant associated protein D          
-Muc20      0.08  mucin 20                                 
-Ldhb       0.07  lactate dehydrogenase B                  
-Wfdc2      0.07  WAP four-disulfide core domain 2         
-Sftpa1     0.07  surfactant associated protein A1         
-Cxcl17     0.07  chemokine (C-X-C motif) ligand 17        
-Slc12a2    0.07  solute carrier family 12, member 2       
-Tff2       0.07  trefoil factor 2 (spasmolytic protein 1) 
-Ccl20      0.07  chemokine (C-C motif) ligand 20          
-Hspa1a     0.06  heat shock protein 1A                    </code></pre>
-</div>
-<div id="basal-cells" class="section level3">
-<h3>Basal cells</h3>
-<p>I would also not expect to see clean factors for basal cells. But note that factor 5 is usually positive for basal cells, but more often negative for other cell types.</p>
-<pre class="r"><code>do_boxplots(5)</code></pre>
-<p><img src="figure/trachea.Rmd/basal_plots-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre><code>
-
-gene_ID     val  desc                                                     
---------  -----  ---------------------------------------------------------
-Lgals3     0.18  lectin, galactose binding, soluble 3                     
-Krt5       0.16  keratin 5                                                
-Aqp3       0.15  aquaporin 3                                              
-Cav1       0.15  caveolin 1, caveolae protein                             
-Anxa1      0.15  annexin A1                                               
-Krt7       0.14  keratin 7                                                
-Sfn        0.14  stratifin                                                
-Gsn        0.14  gelsolin                                                 
-Krt15      0.14  keratin 15                                               
-Dapl1      0.14  death associated protein-like 1                          
-Upk3bl     0.12  uroplakin 3B-like                                        
-Sparc      0.12  secreted acidic cysteine rich glycoprotein               
-Tppp3      0.12  tubulin polymerization-promoting protein family member 3 
-Vsnl1      0.12  visinin-like 1                                           
-Krt17      0.12  keratin 17                                               
-Ifitm1     0.11  interferon induced transmembrane protein 1               
-F3         0.11  coagulation factor III                                   
-Rpl13      0.11  ribosomal protein L13                                    
-Tacstd2    0.11  tumor-associated calcium signal transducer 2             
-Phlda1     0.11  pleckstrin homology like domain, family A, member 1      </code></pre>
-</div>
-</div>
-<div id="fit-ii-complete-data" class="section level2">
-<h2>Fit II: complete data</h2>
-<p>For comparison, I fit 10 factors greedily using point-normal priors (with no backfitting) and with loose convergence conditions (<code>tol = 10</code>). This took about 2 hours on the RCC cluster using 32 GB of memory.</p>
-<pre class="r"><code>complete_factors_df &lt;- readRDS(&quot;~/GitHub/FLASHvestigations/data/trachea/complete_factors_df.rds&quot;)
-complete_top_genes &lt;- readRDS(&quot;~/GitHub/FLASHvestigations/data/trachea/complete_top_genes.rds&quot;)</code></pre>
-<div id="ciliated" class="section level3">
-<h3>Ciliated</h3>
-<p>Factor 2 can be compared with factor 1 above.</p>
-<pre class="r"><code>plot(ggplot(complete_factors_df, aes_string(x = &quot;cell_type&quot;, y = &quot;X2&quot;)) +
-           geom_boxplot(outlier.shape = NA) +
-           labs(x = &quot;Cell Type&quot;, y = paste(&quot;Factor 2 value&quot;)))</code></pre>
-<p><img src="figure/trachea.Rmd/ciliated_complete-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>print(complete_top_genes[[2]])</code></pre>
-<pre><code>     AU040972        Tuba1a         Krt15       Ccdc153         Tppp3 
-   0.13244389    0.11614931    0.10856870    0.10793090    0.10423640 
-      Dynlrb2       Tmem212 1110017D15Rik       Chchd10         Elof1 
-   0.10322122    0.10226836    0.09807541    0.09275055    0.09070016 
-        Rsph1       Fam183b 1700007K13Rik       Scgb3a2          Mlf1 
-   0.08833730    0.08694013    0.08614052    0.08554581    0.08273393 
-1700016K19Rik        Riiad1         Cd24a          Aqp5          Aqp3 
-   0.08229105    0.08141643    0.08127612    0.07772825    0.07628333 </code></pre>
-<p>I reproduce the plot from above for comparison:</p>
-<pre class="r"><code>do_boxplots(1)</code></pre>
-<p><img src="figure/trachea.Rmd/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre><code>
-
-gene_ID           val  desc                                          
---------------  -----  ----------------------------------------------
-Ccdc153          0.08  coiled-coil domain containing 153             
-Tmem212          0.08  transmembrane protein 212                     
-1110017D15Rik    0.08  RIKEN cDNA 1110017D15 gene                    
-Fam183b          0.08  family with sequence similarity 183, member B 
-1700016K19Rik    0.08  RIKEN cDNA 1700016K19 gene                    
-Dynlrb2          0.08  dynein light chain roadblock-type 2           
-AU040972         0.08                                                
-Tctex1d4         0.07  Tctex1 domain containing 4                    
-1700007K13Rik    0.07  RIKEN cDNA 1700007K13 gene                    
-Rsph1            0.07  radial spoke head 1 homolog (Chlamydomonas)   
-3300002A11Rik    0.07                                                
-1700026L06Rik    0.07  NA                                            
-Sntn             0.07  sentan, cilia apical structure protein        
-1700001C02Rik    0.07  RIKEN cDNA 1700001C02 gene                    
-Gm867            0.07  predicted gene 867                            
-Tm4sf1           0.07  transmembrane 4 superfamily member 1          
-Mlf1             0.07  myeloid leukemia factor 1                     
-Cdhr4            0.07  cadherin-related family member 4              
-Cfap126          0.07  cilia and flagella associated protein 126     
-Ccdc113          0.07  coiled-coil domain containing 113             </code></pre>
-</div>
-<div id="neuroendocrine-cells-1" class="section level3">
-<h3>Neuroendocrine cells</h3>
-<p>Factor 9 can be compared with factor 4 above.</p>
-<pre class="r"><code>plot(ggplot(complete_factors_df, aes_string(x = &quot;cell_type&quot;, y = &quot;X9&quot;)) +
-           geom_boxplot(outlier.shape = NA) +
-           labs(x = &quot;Cell Type&quot;, y = paste(&quot;Factor 9 value&quot;)))</code></pre>
-<p><img src="figure/trachea.Rmd/nec_complete-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>print(complete_top_genes[[9]])</code></pre>
-<pre><code>     Calca       Chga     Cxcl13    Tmem158       Scg5      Wfdc2 
-0.17185395 0.14734323 0.14441024 0.12496379 0.11933002 0.11280509 
-     Gsto1       Pkib       Cbr2     Cyp2f2     Igfbp5     Tuba1a 
-0.10879159 0.10803154 0.10201765 0.10025768 0.09961508 0.09890735 
-       Nov       Car8   Selenbp1        Ngf        Cd9      Krt15 
-0.09823076 0.09709957 0.09438934 0.09266654 0.09163381 0.08768492 
-      Krt7      Gsta4 
-0.08548184 0.08459633 </code></pre>
-<pre class="r"><code>do_boxplots(4)</code></pre>
-<p><img src="figure/trachea.Rmd/nec_complete-2.png" width="672" style="display: block; margin: auto;" /></p>
-<pre><code>
-
-gene_ID     val  desc                                                           
---------  -----  ---------------------------------------------------------------
-Chga       0.20  chromogranin A                                                 
-Scg5       0.19  secretogranin V                                                
-Pkib       0.18  protein kinase inhibitor beta, cAMP dependent, testis specific 
-Calca      0.18  calcitonin/calcitonin-related polypeptide, alpha               
-Ngf        0.17  nerve growth factor                                            
-Nov        0.17  nephroblastoma overexpressed gene                              
-Cxcl13     0.16  chemokine (C-X-C motif) ligand 13                              
-Cib3       0.14  calcium and integrin binding family member 3                   
-Ly6h       0.14  lymphocyte antigen 6 complex, locus H                          
-Scg2       0.14  secretogranin II                                               
-Uchl1      0.14  ubiquitin carboxy-terminal hydrolase L1                        
-Ascl1      0.13  achaete-scute family bHLH transcription factor 1               
-Olfm1      0.13  olfactomedin 1                                                 
-Chgb       0.13  chromogranin B                                                 
-Snap25     0.13  synaptosomal-associated protein 25                             
-Tmem163    0.12  transmembrane protein 163                                      
-Tcerg1l    0.12  transcription elongation regulator 1-like                      
-Ddc        0.12  dopa decarboxylase                                             
-Rundc3a    0.12  RUN domain containing 3A                                       
-Snca       0.12  synuclein, alpha                                               </code></pre>
-</div>
-<div id="tuft-cells-1" class="section level3">
-<h3>Tuft cells</h3>
-<p>Finally, factor 5 can be compared with factor 2 above.</p>
-<pre class="r"><code>plot(ggplot(complete_factors_df, aes_string(x = &quot;cell_type&quot;, y = &quot;X5&quot;)) +
-           geom_boxplot(outlier.shape = NA) +
-           labs(x = &quot;Cell Type&quot;, y = paste(&quot;Factor 5 value&quot;)))</code></pre>
-<p><img src="figure/trachea.Rmd/tuft_complete-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>print(complete_top_genes[[5]])</code></pre>
-<pre><code>      Lrmp      Gng13      Plac8      Ltc4s       Gnb3      Gsto1 
-0.15622099 0.13385388 0.12714941 0.12300622 0.11153609 0.10685213 
-  Selenbp1     Cyp2f2       Cbr2      Krt15     Cyp2a5       Aqp5 
-0.10298391 0.10210536 0.09708848 0.08929564 0.08929273 0.08673411 
-   Scgb3a2      Lypd2      Calm2      Wfdc2        Ltf      Ces1d 
-0.08585164 0.08531915 0.08426686 0.08374960 0.08230332 0.08123320 
-     Gsta4     S100a6 
-0.07991431 0.07953447 </code></pre>
-<pre class="r"><code>do_boxplots(2)</code></pre>
-<p><img src="figure/trachea.Rmd/tuft_complete-2.png" width="672" style="display: block; margin: auto;" /></p>
-<pre><code>
-
-gene_ID      val  desc                                                               
----------  -----  -------------------------------------------------------------------
-Lrmp        0.14  lymphoid-restricted membrane protein                               
-Ltc4s       0.14  leukotriene C4 synthase                                            
-Trpm5       0.14  transient receptor potential cation channel, subfamily M, member 5 
-Gng13       0.14  guanine nucleotide binding protein (G protein), gamma 13           
-Ly6g6f      0.13  lymphocyte antigen 6 complex, locus G6F                            
-Alox5ap     0.13  arachidonate 5-lipoxygenase activating protein                     
-Selm        0.13  NA                                                                 
-Sh2d6       0.13  SH2 domain containing 6                                            
-Rgs13       0.13  regulator of G-protein signaling 13                                
-Hck         0.13  hemopoietic cell kinase                                            
-Espn        0.13  espin                                                              
-Avil        0.13  advillin                                                           
-Dclk1       0.13  doublecortin-like kinase 1                                         
-Gnat3       0.12  guanine nucleotide binding protein, alpha transducing 3            
-Fxyd6       0.12  FXYD domain-containing ion transport regulator 6                   
-Hepacam2    0.12  HEPACAM family member 2                                            
-Gnb3        0.12  guanine nucleotide binding protein (G protein), beta 3             
-Plac8       0.12  placenta-specific 8                                                
-Matk        0.12  megakaryocyte-associated tyrosine kinase                           
-Ovol3       0.12  ovo like zinc finger 3                                             </code></pre>
-</div>
-</div>
-<div id="code" class="section level2">
-<h2>Code</h2>
-<p>The code used to pre-process the dataset can be viewed below.</p>
-<pre class="r"><code>library(mixsqp)
-devtools::load_all(&quot;~/GitHub/flashrtools/&quot;)
-
-t_fl30 &lt;- system.time({
-  fl30 &lt;- flashier(trachea,
-                   var_type = &quot;by_row&quot;,
-                   method = &quot;nnloadings&quot;,
-                   greedy_Kmax = 30,
-                   backfit_maxiter = 100)
+<div id="introduction-and-code" class="section level2">
+<h2>Introduction and Code</h2>
+<p>I fit 30 factors to the drop-seq dataset discussed in <a href="https://www.nature.com/articles/s41586-018-0393-7">Montoro et al.</a> I removed all genes with zero total counts and did a <code>log1p</code> transform of the counts. I used nonnegative priors for gene loadings and normal-mixture priors for cell loadings.</p>
+<pre class="r"><code># Add 30 factors with rough backfits after every 5 factors.
+fl &lt;- flashier(data, greedy.Kmax = 30, var.type = 1, 
+               prior.type = c(&quot;nonnegative&quot;, &quot;normal.mix&quot;), 
+               ash.param = list(optmethod = &quot;mixSQP&quot;), 
+               backfit.every = 5, final.backfit = TRUE, 
+               backfit.order = &quot;montaigne&quot;, warmstart.backfits = FALSE)
+# Refine by backfitting.
+fl &lt;- flashier(data, flash.init = fl, backfit = &quot;only&quot;,
+               backfit.order = &quot;dropout&quot;, backfit.maxiter = 200)</code></pre>
+<p>The following code is used to produce the boxplots and tables below.</p>
+<pre class="r"><code>suppressMessages({
+  library(ggplot2)
+  library(topGO)
+  library(org.Mm.eg.db)
 })
+#&gt; Warning: package &#39;ggplot2&#39; was built under R version 3.4.4
 
-# Fit a hierarchical FLASH object to ensure there are no serious problems:
-hier_fl &lt;- flashier(fl30$ldf$f,
-                    greedy_Kmax = 30,
-                    var_type = &quot;by_row&quot;,
-                    method = &quot;fastest&quot;)
-plot(hier_fl, plot_factors = TRUE, plot_scree = FALSE)
+fl &lt;- readRDS(&quot;~/Downloads/DropSeq30_backfit.rds&quot;)
+# Remove large data object to free up memory.
+fl$fit$Y &lt;- NULL
 
-# Extract factors and append cell type (as established by Montoro et al.):
-factors_df &lt;- data.frame(fl30$ldf$f)
+# Data frame containing cell type and loadings for each factor.
+PSdf &lt;- data.frame(fl$loadings$normalized.loadings[[2]])
+cell.names &lt;- rownames(fl$loadings$normalized.loadings[[2]])
+cell.types &lt;- as.factor(sapply(strsplit(cell.names, &quot;_&quot;), `[`, 3))
+levels(cell.types)
+#&gt; [1] &quot;Basal&quot;          &quot;Ciliated&quot;       &quot;Club&quot;           &quot;Goblet&quot;        
+#&gt; [5] &quot;Ionocyte&quot;       &quot;Neuroendocrine&quot; &quot;Tuft&quot;
+levels(cell.types) &lt;- c(&quot;Bas&quot;, &quot;Cil&quot;, &quot;Clb&quot;, &quot;Gob&quot;, &quot;Ion&quot;, &quot;Nec&quot;, &quot;Tft&quot;)
+PSdf$cell.type &lt;- cell.types
 
-cell_types &lt;- sapply(strsplit(colnames(trachea), &quot;_&quot;), function(x) x[3])
-cell_types &lt;- as.factor(cell_types)
-lvls &lt;- levels(cell_types)
-lvls[lvls == &quot;Neuroendocrine&quot;] &lt;- &quot;NEC&quot;
-levels(cell_types) &lt;- lvls
+# Need to select signficant genes for topGO.
+#   Scale gene loadings by scale constant * maximum cell loading.
+s &lt;- fl$loadings$scale.constant * 
+  apply(abs(fl$loadings$normalized.loadings[[2]]), 2, max)
+gene.loadings &lt;- fl$loadings$normalized.loadings[[1]]
+gene.loadings &lt;- gene.loadings * rep(s, each = nrow(gene.loadings))
+#   Get a pseudo-t statistic by dividing by the residual SE.
+gene.t &lt;- gene.loadings * sqrt(fl$fit$tau)
+#   Convert to a p-value.
+gene.p &lt;- 2 * (1 - pnorm(abs(gene.t)))
+#   Select significant genes using Benjamini-Hochberg.
+BH &lt;- function(k, alpha = 0.01) {
+  pvals &lt;- gene.p[, k]
+  selected &lt;- rep(0, length(pvals))
+  names(selected) &lt;- names(pvals)
+  
+  n &lt;- length(pvals)
+  sorted.pvals &lt;- sort(pvals)
+  BH &lt;- sorted.pvals &lt; alpha / (n - 0:(n - 1))
+  cutoff &lt;- min(which(!BH))
+  selected[pvals &lt; sorted.pvals[cutoff]] &lt;- 1
+  
+  return(selected)
+}
+gene.sig &lt;- sapply(1:ncol(gene.p), BH)
 
-factors_df$cell_type &lt;- cell_types
-saveRDS(factors_df, &quot;~/GitHub/FLASHvestigations/data/trachea/factors_df.rds&quot;)
+# How many significant genes per factor are there?
+colSums(gene.sig)
+#&gt;  [1] 286 512  98  74 163 183 131 198 168 541 364 365 104 558 535 499  31
+#&gt; [18] 504 406 436   3 183   0  96 448 326 361 404  45 156
 
-top_genes &lt;- get_top_loading_elements(fl30)
-top_genes &lt;- add_desc_to_top_genes(top_genes,
-                                   dataset = &quot;mmusculus_gene_ensembl&quot;)
-saveRDS(top_genes, &quot;~/GitHub/FLASHvestigations/data/trachea/top_genes.rds&quot;)</code></pre>
+# Omit factors with PVE below a certain (empirically determined) threshold.
+kset &lt;- (1:ncol(gene.p))[fl$pve &gt; 0.0001 &amp; colSums(gene.sig) &gt; 9]
+
+# I also want to see which factors contain genes mentioned in the paper.
+paper.genes &lt;- data.frame(
+  gene = c(&quot;Nfia&quot;, &quot;Ascl1&quot;, &quot;Ascl2&quot;, &quot;Ascl3&quot;, &quot;Foxq1&quot;, &quot;Cdhr3&quot;, &quot;Rgs13&quot;,
+           &quot;Muc5b&quot;, &quot;Notch2&quot;, &quot;Il13ra1&quot;, &quot;Krt4&quot;, &quot;Krt13&quot;, &quot;Krt8&quot;, &quot;Ecm1&quot;,
+           &quot;S100a11&quot;, &quot;Cldn3&quot;, &quot;Lgals3&quot;, &quot;Anxa1&quot;, &quot;Il25&quot;, &quot;Tslp&quot;, &quot;Alox5ap&quot;,
+           &quot;Ptprc&quot;, &quot;Pou2f3&quot;, &quot;Gfi1b&quot;, &quot;Spib&quot;, &quot;Sox9&quot;, &quot;Gp2&quot;, &quot;Tff1&quot;,
+           &quot;Tff2&quot;, &quot;Lman1l&quot;, &quot;P2rx4&quot;, &quot;Muc5ac&quot;, &quot;Dcpp1&quot;, &quot;Dcpp2&quot;, &quot;Dcpp3&quot;,
+           &quot;Atp6v1c2&quot;, &quot;Atp6v0d2&quot;, &quot;Cftr&quot;, &quot;Aqp3&quot;, &quot;Krt5&quot;, &quot;Dapl1&quot;, &quot;Hspa1a&quot;,
+           &quot;Trp63&quot;, &quot;Scgb1a1&quot;, &quot;Krt15&quot;, &quot;Cyp2f2&quot;, &quot;Lypd2&quot;, &quot;Cbr2&quot;, &quot;Foxj1&quot;,
+           &quot;Ccdc153&quot;, &quot;Ccdc113&quot;, &quot;Mlf1&quot;, &quot;Lztfl1&quot;, &quot;Chga&quot;, &quot;Dclk1&quot;),
+  type = c(&quot;Club&quot;, &quot;NEC&quot;, &quot;Tuft&quot;, &quot;Ion&quot;, &quot;Goblet&quot;, &quot;Cil&quot;, &quot;Tuft&quot;,
+           &quot;Club&quot;, &quot;Club&quot;, &quot;Club&quot;, &quot;Hill&quot;, &quot;Hill&quot;, &quot;Basal&quot;, &quot;Hill&quot;,
+           &quot;Hill&quot;, &quot;Hill&quot;, &quot;Hill&quot;, &quot;Hill&quot;, &quot;Tuft&quot;, &quot;Tuft&quot;, &quot;Tuft2&quot;,
+           &quot;Tuft2&quot;, &quot;Tuft1&quot;, &quot;Tuft2&quot;, &quot;Tuft2&quot;, &quot;Tuft2&quot;, &quot;Goblet&quot;, &quot;Gob1&quot;,
+           &quot;Gob1&quot;, &quot;Gob1&quot;, &quot;Gob1&quot;, &quot;Gob1&quot;, &quot;Gob2&quot;, &quot;Gob2&quot;, &quot;Gob2&quot;,
+           &quot;Ion&quot;, &quot;Ion&quot;, &quot;Ion&quot;, &quot;BM&quot;, &quot;BM&quot;, &quot;BM&quot;, &quot;BM&quot;,
+           &quot;BM&quot;, &quot;ClbM&quot;, &quot;ClbM&quot;, &quot;ClbM&quot;, &quot;ClbM&quot;, &quot;ClbM&quot;, &quot;CilM&quot;,
+           &quot;CilM&quot;, &quot;CilM&quot;, &quot;CilM&quot;, &quot;CilM&quot;, &quot;NECM&quot;, &quot;TftM&quot;))
+paper.genes$gene &lt;- as.character(paper.genes$gene)
+levels(paper.genes$type) &lt;- c(&quot;Basal&quot;, &quot;Basal (Marker)&quot;, &quot;Ciliated&quot;, 
+                              &quot;Ciliated (Marker)&quot;, &quot;Club (Marker)&quot;, &quot;Club&quot;,
+                              &quot;Goblet-1&quot;, &quot;Goblet-2&quot;, &quot;Goblet&quot;, &quot;Hillock&quot;,
+                              &quot;Ionocyte&quot;, &quot;NEC&quot;, &quot;NEC (Marker)&quot;,
+                              &quot;Tuft (Marker)&quot;, &quot;Tuft&quot;, &quot;Tuft-1&quot;, &quot;Tuft-2&quot;)
+
+# Set up topGOdata object.
+GO.list &lt;- as.factor(gene.sig[, 1])
+GOdata &lt;- new(&quot;topGOdata&quot;, ontology = &quot;BP&quot;, allGenes = GO.list,
+              annot = annFUN.org, mapping = &quot;org.Mm.eg&quot;, ID = &quot;symbol&quot;)
+#&gt; 
+#&gt; Building most specific GOs .....
+#&gt;  ( 11286 GO terms found. )
+#&gt; 
+#&gt; Build GO DAG topology ..........
+#&gt;  ( 15215 GO terms and 35696 relations. )
+#&gt; 
+#&gt; Annotating nodes ...............
+#&gt;  ( 15591 genes annotated to the GO terms. )</code></pre>
+<pre class="r"><code># Loop over kset.
+for (k in kset) {
+  cat(paste0(&quot;## Factor &quot;, k, &quot; (PVE: &quot;,
+             formatC(fl$pve[k], format = &quot;f&quot;, digits = 4), &quot;)\n&quot;))
+  fctr &lt;- paste0(&quot;X&quot;, k)
+  plot(ggplot(PSdf, aes_string(x = &quot;cell.type&quot;, y = fctr)) +
+         geom_boxplot(outlier.shape = NA, color = &quot;red&quot;) +
+         geom_jitter(position = position_jitter(0.2), cex = 0.1) +
+         labs(x = &quot;Cell Type&quot;, y = paste(&quot;Factor&quot;, k, &quot;value&quot;)))
+  cat(&quot;\n&quot;)
+  
+  mentions &lt;- which(gene.sig[paper.genes$gene, k] == 1)
+  if (length(mentions) &gt; 0) {
+    mentions.df &lt;- paper.genes[mentions, ]
+    mentions.df$t.val &lt;- gene.t[names(mentions), k]
+    cat(&quot;Significant genes that are also mentioned in the paper:\n&quot;)
+    print(knitr::kable(mentions.df))
+    cat(&quot;\n&quot;)
+  }
+  
+  cat(&quot;Gene Ontology terms:\n&quot;)
+  GOdata@allScores &lt;- as.factor(gene.sig[, k])
+  result &lt;- suppressMessages(
+    runTest(GOdata, algorithm = &quot;classic&quot;, statistic = &quot;fisher&quot;)
+  )
+  allRes &lt;- GenTable(GOdata, classic = result, topNodes = 10)
+  print(knitr::kable(allRes))
+  cat(&quot;\n&quot;)
+}</code></pre>
+</div>
+<div id="factor-1-pve-0.5246" class="section level2">
+<h2>Factor 1 (PVE: 0.5246)</h2>
+<p><img src="figure/trachea.Rmd/factors2-1.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>13</td>
+<td align="left">Krt8</td>
+<td align="left">Basal</td>
+<td align="right">7.242263</td>
+</tr>
+<tr class="even">
+<td>15</td>
+<td align="left">S100a11</td>
+<td align="left">Hillock</td>
+<td align="right">17.425570</td>
+</tr>
+<tr class="odd">
+<td>16</td>
+<td align="left">Cldn3</td>
+<td align="left">Hillock</td>
+<td align="right">7.228331</td>
+</tr>
+<tr class="even">
+<td>17</td>
+<td align="left">Lgals3</td>
+<td align="left">Hillock</td>
+<td align="right">10.231025</td>
+</tr>
+<tr class="odd">
+<td>18</td>
+<td align="left">Anxa1</td>
+<td align="left">Hillock</td>
+<td align="right">11.827277</td>
+</tr>
+<tr class="even">
+<td>39</td>
+<td align="left">Aqp3</td>
+<td align="left">Basal (Marker)</td>
+<td align="right">7.943683</td>
+</tr>
+<tr class="odd">
+<td>42</td>
+<td align="left">Hspa1a</td>
+<td align="left">Basal (Marker)</td>
+<td align="right">5.491426</td>
+</tr>
+<tr class="even">
+<td>44</td>
+<td align="left">Scgb1a1</td>
+<td align="left">Club (Marker)</td>
+<td align="right">9.262051</td>
+</tr>
+<tr class="odd">
+<td>45</td>
+<td align="left">Krt15</td>
+<td align="left">Club (Marker)</td>
+<td align="right">11.714101</td>
+</tr>
+<tr class="even">
+<td>46</td>
+<td align="left">Cyp2f2</td>
+<td align="left">Club (Marker)</td>
+<td align="right">27.970810</td>
+</tr>
+<tr class="odd">
+<td>47</td>
+<td align="left">Lypd2</td>
+<td align="left">Club (Marker)</td>
+<td align="right">11.379180</td>
+</tr>
+<tr class="even">
+<td>48</td>
+<td align="left">Cbr2</td>
+<td align="left">Club (Marker)</td>
+<td align="right">16.672470</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0006518" class="uri">GO:0006518</a></td>
+<td align="left">peptide metabolic process</td>
+<td align="right">682</td>
+<td align="right">54</td>
+<td align="right">11.20</td>
+<td align="left">1.6e-22</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0006412" class="uri">GO:0006412</a></td>
+<td align="left">translation</td>
+<td align="right">539</td>
+<td align="right">46</td>
+<td align="right">8.85</td>
+<td align="left">1.7e-20</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0043043" class="uri">GO:0043043</a></td>
+<td align="left">peptide biosynthetic process</td>
+<td align="right">560</td>
+<td align="right">46</td>
+<td align="right">9.20</td>
+<td align="left">8.0e-20</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0043603" class="uri">GO:0043603</a></td>
+<td align="left">cellular amide metabolic process</td>
+<td align="right">802</td>
+<td align="right">54</td>
+<td align="right">13.17</td>
+<td align="left">2.8e-19</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0043604" class="uri">GO:0043604</a></td>
+<td align="left">amide biosynthetic process</td>
+<td align="right">626</td>
+<td align="right">46</td>
+<td align="right">10.28</td>
+<td align="left">6.6e-18</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:1901566" class="uri">GO:1901566</a></td>
+<td align="left">organonitrogen compound biosynthetic pro…</td>
+<td align="right">1386</td>
+<td align="right">68</td>
+<td align="right">22.76</td>
+<td align="left">6.4e-17</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0002181" class="uri">GO:0002181</a></td>
+<td align="left">cytoplasmic translation</td>
+<td align="right">60</td>
+<td align="right">14</td>
+<td align="right">0.99</td>
+<td align="left">6.4e-13</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0046034" class="uri">GO:0046034</a></td>
+<td align="left">ATP metabolic process</td>
+<td align="right">191</td>
+<td align="right">21</td>
+<td align="right">3.14</td>
+<td align="left">6.1e-12</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0009205" class="uri">GO:0009205</a></td>
+<td align="left">purine ribonucleoside triphosphate metab…</td>
+<td align="right">213</td>
+<td align="right">21</td>
+<td align="right">3.50</td>
+<td align="left">4.9e-11</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0009126" class="uri">GO:0009126</a></td>
+<td align="left">purine nucleoside monophosphate metaboli…</td>
+<td align="right">216</td>
+<td align="right">21</td>
+<td align="right">3.55</td>
+<td align="left">6.4e-11</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-2-pve-0.0189" class="section level2">
+<h2>Factor 2 (PVE: 0.0189)</h2>
+<p><img src="figure/trachea.Rmd/factors2-2.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>6</td>
+<td align="left">Cdhr3</td>
+<td align="left">Ciliated</td>
+<td align="right">14.432419</td>
+</tr>
+<tr class="even">
+<td>13</td>
+<td align="left">Krt8</td>
+<td align="left">Basal</td>
+<td align="right">7.915175</td>
+</tr>
+<tr class="odd">
+<td>15</td>
+<td align="left">S100a11</td>
+<td align="left">Hillock</td>
+<td align="right">8.134064</td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td align="left">Cldn3</td>
+<td align="left">Hillock</td>
+<td align="right">8.365458</td>
+</tr>
+<tr class="odd">
+<td>17</td>
+<td align="left">Lgals3</td>
+<td align="left">Hillock</td>
+<td align="right">6.710951</td>
+</tr>
+<tr class="even">
+<td>18</td>
+<td align="left">Anxa1</td>
+<td align="left">Hillock</td>
+<td align="right">8.197110</td>
+</tr>
+<tr class="odd">
+<td>42</td>
+<td align="left">Hspa1a</td>
+<td align="left">Basal (Marker)</td>
+<td align="right">5.422251</td>
+</tr>
+<tr class="even">
+<td>46</td>
+<td align="left">Cyp2f2</td>
+<td align="left">Club (Marker)</td>
+<td align="right">9.230342</td>
+</tr>
+<tr class="odd">
+<td>48</td>
+<td align="left">Cbr2</td>
+<td align="left">Club (Marker)</td>
+<td align="right">6.684108</td>
+</tr>
+<tr class="even">
+<td>49</td>
+<td align="left">Foxj1</td>
+<td align="left">Ciliated (Marker)</td>
+<td align="right">14.103074</td>
+</tr>
+<tr class="odd">
+<td>50</td>
+<td align="left">Ccdc153</td>
+<td align="left">Ciliated (Marker)</td>
+<td align="right">33.342495</td>
+</tr>
+<tr class="even">
+<td>51</td>
+<td align="left">Ccdc113</td>
+<td align="left">Ciliated (Marker)</td>
+<td align="right">20.003698</td>
+</tr>
+<tr class="odd">
+<td>52</td>
+<td align="left">Mlf1</td>
+<td align="left">Ciliated (Marker)</td>
+<td align="right">20.536544</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0003341" class="uri">GO:0003341</a></td>
+<td align="left">cilium movement</td>
+<td align="right">68</td>
+<td align="right">38</td>
+<td align="right">1.92</td>
+<td align="left">&lt; 1e-30</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0044782" class="uri">GO:0044782</a></td>
+<td align="left">cilium organization</td>
+<td align="right">283</td>
+<td align="right">65</td>
+<td align="right">8.00</td>
+<td align="left">&lt; 1e-30</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0060271" class="uri">GO:0060271</a></td>
+<td align="left">cilium assembly</td>
+<td align="right">265</td>
+<td align="right">60</td>
+<td align="right">7.50</td>
+<td align="left">&lt; 1e-30</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0007018" class="uri">GO:0007018</a></td>
+<td align="left">microtubule-based movement</td>
+<td align="right">242</td>
+<td align="right">53</td>
+<td align="right">6.85</td>
+<td align="left">&lt; 1e-30</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0035082" class="uri">GO:0035082</a></td>
+<td align="left">axoneme assembly</td>
+<td align="right">56</td>
+<td align="right">29</td>
+<td align="right">1.58</td>
+<td align="left">1.8e-30</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0120031" class="uri">GO:0120031</a></td>
+<td align="left">plasma membrane bounded cell projection …</td>
+<td align="right">432</td>
+<td align="right">65</td>
+<td align="right">12.22</td>
+<td align="left">3.6e-29</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0030031" class="uri">GO:0030031</a></td>
+<td align="left">cell projection assembly</td>
+<td align="right">439</td>
+<td align="right">65</td>
+<td align="right">12.42</td>
+<td align="left">9.3e-29</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0001578" class="uri">GO:0001578</a></td>
+<td align="left">microtubule bundle formation</td>
+<td align="right">84</td>
+<td align="right">30</td>
+<td align="right">2.38</td>
+<td align="left">1.8e-25</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0007017" class="uri">GO:0007017</a></td>
+<td align="left">microtubule-based process</td>
+<td align="right">630</td>
+<td align="right">73</td>
+<td align="right">17.82</td>
+<td align="left">1.9e-25</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0070925" class="uri">GO:0070925</a></td>
+<td align="left">organelle assembly</td>
+<td align="right">650</td>
+<td align="right">68</td>
+<td align="right">18.39</td>
+<td align="left">3.5e-21</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-3-pve-0.0387" class="section level2">
+<h2>Factor 3 (PVE: 0.0387)</h2>
+<p><img src="figure/trachea.Rmd/factors2-3.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>13</td>
+<td align="left">Krt8</td>
+<td align="left">Basal</td>
+<td align="right">5.067801</td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td align="left">Cldn3</td>
+<td align="left">Hillock</td>
+<td align="right">6.660415</td>
+</tr>
+<tr class="odd">
+<td>44</td>
+<td align="left">Scgb1a1</td>
+<td align="left">Club (Marker)</td>
+<td align="right">6.303162</td>
+</tr>
+<tr class="even">
+<td>46</td>
+<td align="left">Cyp2f2</td>
+<td align="left">Club (Marker)</td>
+<td align="right">7.803280</td>
+</tr>
+<tr class="odd">
+<td>47</td>
+<td align="left">Lypd2</td>
+<td align="left">Club (Marker)</td>
+<td align="right">5.961594</td>
+</tr>
+<tr class="even">
+<td>48</td>
+<td align="left">Cbr2</td>
+<td align="left">Club (Marker)</td>
+<td align="right">5.262580</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0043618" class="uri">GO:0043618</a></td>
+<td align="left">regulation of transcription from RNA pol…</td>
+<td align="right">44</td>
+<td align="right">6</td>
+<td align="right">0.24</td>
+<td align="left">1.4e-07</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0043620" class="uri">GO:0043620</a></td>
+<td align="left">regulation of DNA-templated transcriptio…</td>
+<td align="right">48</td>
+<td align="right">6</td>
+<td align="right">0.26</td>
+<td align="left">2.4e-07</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0035914" class="uri">GO:0035914</a></td>
+<td align="left">skeletal muscle cell differentiation</td>
+<td align="right">59</td>
+<td align="right">6</td>
+<td align="right">0.33</td>
+<td align="left">8.4e-07</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0050896" class="uri">GO:0050896</a></td>
+<td align="left">response to stimulus</td>
+<td align="right">6040</td>
+<td align="right">55</td>
+<td align="right">33.32</td>
+<td align="left">1.9e-06</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0019730" class="uri">GO:0019730</a></td>
+<td align="left">antimicrobial humoral response</td>
+<td align="right">41</td>
+<td align="right">5</td>
+<td align="right">0.23</td>
+<td align="left">2.9e-06</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0007519" class="uri">GO:0007519</a></td>
+<td align="left">skeletal muscle tissue development</td>
+<td align="right">139</td>
+<td align="right">7</td>
+<td align="right">0.77</td>
+<td align="left">1.1e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0009888" class="uri">GO:0009888</a></td>
+<td align="left">tissue development</td>
+<td align="right">1492</td>
+<td align="right">22</td>
+<td align="right">8.23</td>
+<td align="left">1.4e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0060538" class="uri">GO:0060538</a></td>
+<td align="left">skeletal muscle organ development</td>
+<td align="right">144</td>
+<td align="right">7</td>
+<td align="right">0.79</td>
+<td align="left">1.4e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0035821" class="uri">GO:0035821</a></td>
+<td align="left">modification of morphology or physiology…</td>
+<td align="right">96</td>
+<td align="right">6</td>
+<td align="right">0.53</td>
+<td align="left">1.5e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0046686" class="uri">GO:0046686</a></td>
+<td align="left">response to cadmium ion</td>
+<td align="right">28</td>
+<td align="right">4</td>
+<td align="right">0.15</td>
+<td align="left">1.6e-05</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-4-pve-0.0581" class="section level2">
+<h2>Factor 4 (PVE: 0.0581)</h2>
+<p><img src="figure/trachea.Rmd/factors2-4.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>39</td>
+<td align="left">Aqp3</td>
+<td align="left">Basal (Marker)</td>
+<td align="right">5.969027</td>
+</tr>
+<tr class="even">
+<td>42</td>
+<td align="left">Hspa1a</td>
+<td align="left">Basal (Marker)</td>
+<td align="right">6.596314</td>
+</tr>
+<tr class="odd">
+<td>46</td>
+<td align="left">Cyp2f2</td>
+<td align="left">Club (Marker)</td>
+<td align="right">6.806845</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0043618" class="uri">GO:0043618</a></td>
+<td align="left">regulation of transcription from RNA pol…</td>
+<td align="right">44</td>
+<td align="right">4</td>
+<td align="right">0.17</td>
+<td align="left">2.6e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0010941" class="uri">GO:0010941</a></td>
+<td align="left">regulation of cell death</td>
+<td align="right">1472</td>
+<td align="right">17</td>
+<td align="right">5.76</td>
+<td align="left">3.3e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0043620" class="uri">GO:0043620</a></td>
+<td align="left">regulation of DNA-templated transcriptio…</td>
+<td align="right">48</td>
+<td align="right">4</td>
+<td align="right">0.19</td>
+<td align="left">3.6e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000028" class="uri">GO:0000028</a></td>
+<td align="left">ribosomal small subunit assembly</td>
+<td align="right">19</td>
+<td align="right">3</td>
+<td align="right">0.07</td>
+<td align="left">5.3e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0035914" class="uri">GO:0035914</a></td>
+<td align="left">skeletal muscle cell differentiation</td>
+<td align="right">59</td>
+<td align="right">4</td>
+<td align="right">0.23</td>
+<td align="left">8.2e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0009612" class="uri">GO:0009612</a></td>
+<td align="left">response to mechanical stimulus</td>
+<td align="right">119</td>
+<td align="right">5</td>
+<td align="right">0.47</td>
+<td align="left">0.00010</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0043604" class="uri">GO:0043604</a></td>
+<td align="left">amide biosynthetic process</td>
+<td align="right">626</td>
+<td align="right">10</td>
+<td align="right">2.45</td>
+<td align="left">0.00014</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0021761" class="uri">GO:0021761</a></td>
+<td align="left">limbic system development</td>
+<td align="right">70</td>
+<td align="right">4</td>
+<td align="right">0.27</td>
+<td align="left">0.00016</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0050896" class="uri">GO:0050896</a></td>
+<td align="left">response to stimulus</td>
+<td align="right">6040</td>
+<td align="right">38</td>
+<td align="right">23.63</td>
+<td align="left">0.00016</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0007519" class="uri">GO:0007519</a></td>
+<td align="left">skeletal muscle tissue development</td>
+<td align="right">139</td>
+<td align="right">5</td>
+<td align="right">0.54</td>
+<td align="left">0.00021</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-5-pve-0.0016" class="section level2">
+<h2>Factor 5 (PVE: 0.0016)</h2>
+<p><img src="figure/trachea.Rmd/factors2-5.png" width="672" style="display: block; margin: auto;" /> Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0051301" class="uri">GO:0051301</a></td>
+<td align="left">cell division</td>
+<td align="right">512</td>
+<td align="right">60</td>
+<td align="right">4.56</td>
+<td align="left">&lt; 1e-30</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0007049" class="uri">GO:0007049</a></td>
+<td align="left">cell cycle</td>
+<td align="right">1426</td>
+<td align="right">80</td>
+<td align="right">12.71</td>
+<td align="left">&lt; 1e-30</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:1903047" class="uri">GO:1903047</a></td>
+<td align="left">mitotic cell cycle process</td>
+<td align="right">553</td>
+<td align="right">56</td>
+<td align="right">4.93</td>
+<td align="left">&lt; 1e-30</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0022402" class="uri">GO:0022402</a></td>
+<td align="left">cell cycle process</td>
+<td align="right">912</td>
+<td align="right">66</td>
+<td align="right">8.13</td>
+<td align="left">&lt; 1e-30</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000278" class="uri">GO:0000278</a></td>
+<td align="left">mitotic cell cycle</td>
+<td align="right">714</td>
+<td align="right">60</td>
+<td align="right">6.37</td>
+<td align="left">&lt; 1e-30</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0007059" class="uri">GO:0007059</a></td>
+<td align="left">chromosome segregation</td>
+<td align="right">275</td>
+<td align="right">43</td>
+<td align="right">2.45</td>
+<td align="left">&lt; 1e-30</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0140014" class="uri">GO:0140014</a></td>
+<td align="left">mitotic nuclear division</td>
+<td align="right">222</td>
+<td align="right">33</td>
+<td align="right">1.98</td>
+<td align="left">&lt; 1e-30</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0000280" class="uri">GO:0000280</a></td>
+<td align="left">nuclear division</td>
+<td align="right">341</td>
+<td align="right">38</td>
+<td align="right">3.04</td>
+<td align="left">&lt; 1e-30</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0098813" class="uri">GO:0098813</a></td>
+<td align="left">nuclear chromosome segregation</td>
+<td align="right">212</td>
+<td align="right">32</td>
+<td align="right">1.89</td>
+<td align="left">1.5e-30</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0048285" class="uri">GO:0048285</a></td>
+<td align="left">organelle fission</td>
+<td align="right">386</td>
+<td align="right">38</td>
+<td align="right">3.44</td>
+<td align="left">3.0e-29</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-6-pve-0.0076" class="section level2">
+<h2>Factor 6 (PVE: 0.0076)</h2>
+<p><img src="figure/trachea.Rmd/factors2-6.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>11</td>
+<td align="left">Krt4</td>
+<td align="left">Hillock</td>
+<td align="right">14.016113</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td align="left">Krt13</td>
+<td align="left">Hillock</td>
+<td align="right">15.089416</td>
+</tr>
+<tr class="odd">
+<td>13</td>
+<td align="left">Krt8</td>
+<td align="left">Basal</td>
+<td align="right">7.489441</td>
+</tr>
+<tr class="even">
+<td>14</td>
+<td align="left">Ecm1</td>
+<td align="left">Hillock</td>
+<td align="right">16.277826</td>
+</tr>
+<tr class="odd">
+<td>15</td>
+<td align="left">S100a11</td>
+<td align="left">Hillock</td>
+<td align="right">12.758571</td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td align="left">Cldn3</td>
+<td align="left">Hillock</td>
+<td align="right">9.570576</td>
+</tr>
+<tr class="odd">
+<td>17</td>
+<td align="left">Lgals3</td>
+<td align="left">Hillock</td>
+<td align="right">16.290688</td>
+</tr>
+<tr class="even">
+<td>18</td>
+<td align="left">Anxa1</td>
+<td align="left">Hillock</td>
+<td align="right">17.406668</td>
+</tr>
+<tr class="odd">
+<td>39</td>
+<td align="left">Aqp3</td>
+<td align="left">Basal (Marker)</td>
+<td align="right">10.049004</td>
+</tr>
+<tr class="even">
+<td>45</td>
+<td align="left">Krt15</td>
+<td align="left">Club (Marker)</td>
+<td align="right">10.647146</td>
+</tr>
+<tr class="odd">
+<td>46</td>
+<td align="left">Cyp2f2</td>
+<td align="left">Club (Marker)</td>
+<td align="right">9.785778</td>
+</tr>
+<tr class="even">
+<td>48</td>
+<td align="left">Cbr2</td>
+<td align="left">Club (Marker)</td>
+<td align="right">5.267489</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0031579" class="uri">GO:0031579</a></td>
+<td align="left">membrane raft organization</td>
+<td align="right">22</td>
+<td align="right">6</td>
+<td align="right">0.23</td>
+<td align="left">8.3e-08</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0031424" class="uri">GO:0031424</a></td>
+<td align="left">keratinization</td>
+<td align="right">24</td>
+<td align="right">6</td>
+<td align="right">0.25</td>
+<td align="left">1.5e-07</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0007162" class="uri">GO:0007162</a></td>
+<td align="left">negative regulation of cell adhesion</td>
+<td align="right">224</td>
+<td align="right">13</td>
+<td align="right">2.37</td>
+<td align="left">7.6e-07</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0001765" class="uri">GO:0001765</a></td>
+<td align="left">membrane raft assembly</td>
+<td align="right">10</td>
+<td align="right">4</td>
+<td align="right">0.11</td>
+<td align="left">2.4e-06</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0022610" class="uri">GO:0022610</a></td>
+<td align="left">biological adhesion</td>
+<td align="right">1075</td>
+<td align="right">29</td>
+<td align="right">11.38</td>
+<td align="left">2.7e-06</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0022408" class="uri">GO:0022408</a></td>
+<td align="left">negative regulation of cell-cell adhesio…</td>
+<td align="right">146</td>
+<td align="right">10</td>
+<td align="right">1.55</td>
+<td align="left">3.4e-06</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0098609" class="uri">GO:0098609</a></td>
+<td align="left">cell-cell adhesion</td>
+<td align="right">594</td>
+<td align="right">20</td>
+<td align="right">6.29</td>
+<td align="left">4.8e-06</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0071709" class="uri">GO:0071709</a></td>
+<td align="left">membrane assembly</td>
+<td align="right">25</td>
+<td align="right">5</td>
+<td align="right">0.26</td>
+<td align="left">5.6e-06</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0007155" class="uri">GO:0007155</a></td>
+<td align="left">cell adhesion</td>
+<td align="right">1064</td>
+<td align="right">28</td>
+<td align="right">11.26</td>
+<td align="left">6.6e-06</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0030216" class="uri">GO:0030216</a></td>
+<td align="left">keratinocyte differentiation</td>
+<td align="right">97</td>
+<td align="right">8</td>
+<td align="right">1.03</td>
+<td align="left">8.6e-06</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-7-pve-0.0185" class="section level2">
+<h2>Factor 7 (PVE: 0.0185)</h2>
+<p><img src="figure/trachea.Rmd/factors2-7.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15</td>
+<td align="left">S100a11</td>
+<td align="left">Hillock</td>
+<td align="right">10.231936</td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td align="left">Cldn3</td>
+<td align="left">Hillock</td>
+<td align="right">6.118989</td>
+</tr>
+<tr class="odd">
+<td>17</td>
+<td align="left">Lgals3</td>
+<td align="left">Hillock</td>
+<td align="right">6.959122</td>
+</tr>
+<tr class="even">
+<td>18</td>
+<td align="left">Anxa1</td>
+<td align="left">Hillock</td>
+<td align="right">7.969162</td>
+</tr>
+<tr class="odd">
+<td>44</td>
+<td align="left">Scgb1a1</td>
+<td align="left">Club (Marker)</td>
+<td align="right">9.736032</td>
+</tr>
+<tr class="even">
+<td>45</td>
+<td align="left">Krt15</td>
+<td align="left">Club (Marker)</td>
+<td align="right">7.180916</td>
+</tr>
+<tr class="odd">
+<td>46</td>
+<td align="left">Cyp2f2</td>
+<td align="left">Club (Marker)</td>
+<td align="right">20.148326</td>
+</tr>
+<tr class="even">
+<td>47</td>
+<td align="left">Lypd2</td>
+<td align="left">Club (Marker)</td>
+<td align="right">8.531190</td>
+</tr>
+<tr class="odd">
+<td>48</td>
+<td align="left">Cbr2</td>
+<td align="left">Club (Marker)</td>
+<td align="right">11.853278</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0006518" class="uri">GO:0006518</a></td>
+<td align="left">peptide metabolic process</td>
+<td align="right">682</td>
+<td align="right">19</td>
+<td align="right">4.86</td>
+<td align="left">3.1e-07</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0019730" class="uri">GO:0019730</a></td>
+<td align="left">antimicrobial humoral response</td>
+<td align="right">41</td>
+<td align="right">6</td>
+<td align="right">0.29</td>
+<td align="left">4.2e-07</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0006412" class="uri">GO:0006412</a></td>
+<td align="left">translation</td>
+<td align="right">539</td>
+<td align="right">16</td>
+<td align="right">3.84</td>
+<td align="left">1.3e-06</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0043043" class="uri">GO:0043043</a></td>
+<td align="left">peptide biosynthetic process</td>
+<td align="right">560</td>
+<td align="right">16</td>
+<td align="right">3.99</td>
+<td align="left">2.1e-06</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0043603" class="uri">GO:0043603</a></td>
+<td align="left">cellular amide metabolic process</td>
+<td align="right">802</td>
+<td align="right">19</td>
+<td align="right">5.71</td>
+<td align="left">3.5e-06</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0002181" class="uri">GO:0002181</a></td>
+<td align="left">cytoplasmic translation</td>
+<td align="right">60</td>
+<td align="right">6</td>
+<td align="right">0.43</td>
+<td align="left">4.2e-06</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0000028" class="uri">GO:0000028</a></td>
+<td align="left">ribosomal small subunit assembly</td>
+<td align="right">19</td>
+<td align="right">4</td>
+<td align="right">0.14</td>
+<td align="left">8.7e-06</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0043604" class="uri">GO:0043604</a></td>
+<td align="left">amide biosynthetic process</td>
+<td align="right">626</td>
+<td align="right">16</td>
+<td align="right">4.46</td>
+<td align="left">8.9e-06</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0042221" class="uri">GO:0042221</a></td>
+<td align="left">response to chemical</td>
+<td align="right">2842</td>
+<td align="right">39</td>
+<td align="right">20.23</td>
+<td align="left">1.6e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0006880" class="uri">GO:0006880</a></td>
+<td align="left">intracellular sequestering of iron ion</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">0.01</td>
+<td align="left">5.0e-05</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-8-pve-0.0028" class="section level2">
+<h2>Factor 8 (PVE: 0.0028)</h2>
+<p><img src="figure/trachea.Rmd/factors2-8.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>7</td>
+<td align="left">Rgs13</td>
+<td align="left">Tuft</td>
+<td align="right">24.955241</td>
+</tr>
+<tr class="even">
+<td>13</td>
+<td align="left">Krt8</td>
+<td align="left">Basal</td>
+<td align="right">7.649654</td>
+</tr>
+<tr class="odd">
+<td>18</td>
+<td align="left">Anxa1</td>
+<td align="left">Hillock</td>
+<td align="right">5.991935</td>
+</tr>
+<tr class="even">
+<td>19</td>
+<td align="left">Il25</td>
+<td align="left">Tuft</td>
+<td align="right">8.547482</td>
+</tr>
+<tr class="odd">
+<td>21</td>
+<td align="left">Alox5ap</td>
+<td align="left">Tuft-2</td>
+<td align="right">16.380566</td>
+</tr>
+<tr class="even">
+<td>23</td>
+<td align="left">Pou2f3</td>
+<td align="left">Tuft-1</td>
+<td align="right">8.797474</td>
+</tr>
+<tr class="odd">
+<td>25</td>
+<td align="left">Spib</td>
+<td align="left">Tuft-2</td>
+<td align="right">13.945543</td>
+</tr>
+<tr class="even">
+<td>26</td>
+<td align="left">Sox9</td>
+<td align="left">Tuft-2</td>
+<td align="right">9.185370</td>
+</tr>
+<tr class="odd">
+<td>44</td>
+<td align="left">Scgb1a1</td>
+<td align="left">Club (Marker)</td>
+<td align="right">5.237961</td>
+</tr>
+<tr class="even">
+<td>55</td>
+<td align="left">Dclk1</td>
+<td align="left">Tuft (Marker)</td>
+<td align="right">15.476724</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0007186" class="uri">GO:0007186</a></td>
+<td align="left">G-protein coupled receptor signaling pat…</td>
+<td align="right">536</td>
+<td align="right">19</td>
+<td align="right">6.02</td>
+<td align="left">9.6e-06</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0065007" class="uri">GO:0065007</a></td>
+<td align="left">biological regulation</td>
+<td align="right">8828</td>
+<td align="right">126</td>
+<td align="right">99.09</td>
+<td align="left">1.8e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0021979" class="uri">GO:0021979</a></td>
+<td align="left">hypothalamus cell differentiation</td>
+<td align="right">6</td>
+<td align="right">3</td>
+<td align="right">0.07</td>
+<td align="left">2.7e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0050896" class="uri">GO:0050896</a></td>
+<td align="left">response to stimulus</td>
+<td align="right">6040</td>
+<td align="right">94</td>
+<td align="right">67.80</td>
+<td align="left">3.8e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0006518" class="uri">GO:0006518</a></td>
+<td align="left">peptide metabolic process</td>
+<td align="right">682</td>
+<td align="right">20</td>
+<td align="right">7.66</td>
+<td align="left">8.2e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0043603" class="uri">GO:0043603</a></td>
+<td align="left">cellular amide metabolic process</td>
+<td align="right">802</td>
+<td align="right">22</td>
+<td align="right">9.00</td>
+<td align="left">9.5e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0019370" class="uri">GO:0019370</a></td>
+<td align="left">leukotriene biosynthetic process</td>
+<td align="right">9</td>
+<td align="right">3</td>
+<td align="right">0.10</td>
+<td align="left">0.00011</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0006880" class="uri">GO:0006880</a></td>
+<td align="left">intracellular sequestering of iron ion</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">0.02</td>
+<td align="left">0.00013</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0097577" class="uri">GO:0097577</a></td>
+<td align="left">sequestering of iron ion</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">0.02</td>
+<td align="left">0.00013</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0098609" class="uri">GO:0098609</a></td>
+<td align="left">cell-cell adhesion</td>
+<td align="right">594</td>
+<td align="right">18</td>
+<td align="right">6.67</td>
+<td align="left">0.00013</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-9-pve-0.0012" class="section level2">
+<h2>Factor 9 (PVE: 0.0012)</h2>
+<p><img src="figure/trachea.Rmd/factors2-9.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2</td>
+<td align="left">Ascl1</td>
+<td align="left">NEC</td>
+<td align="right">14.57633</td>
+</tr>
+<tr class="even">
+<td>54</td>
+<td align="left">Chga</td>
+<td align="left">NEC (Marker)</td>
+<td align="right">45.57047</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0050877" class="uri">GO:0050877</a></td>
+<td align="left">nervous system process</td>
+<td align="right">698</td>
+<td align="right">28</td>
+<td align="right">6.72</td>
+<td align="left">1.1e-10</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0003008" class="uri">GO:0003008</a></td>
+<td align="left">system process</td>
+<td align="right">1209</td>
+<td align="right">37</td>
+<td align="right">11.63</td>
+<td align="left">1.7e-10</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0007610" class="uri">GO:0007610</a></td>
+<td align="left">behavior</td>
+<td align="right">526</td>
+<td align="right">24</td>
+<td align="right">5.06</td>
+<td align="left">2.1e-10</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0099504" class="uri">GO:0099504</a></td>
+<td align="left">synaptic vesicle cycle</td>
+<td align="right">113</td>
+<td align="right">11</td>
+<td align="right">1.09</td>
+<td align="left">1.1e-08</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0007268" class="uri">GO:0007268</a></td>
+<td align="left">chemical synaptic transmission</td>
+<td align="right">471</td>
+<td align="right">20</td>
+<td align="right">4.53</td>
+<td align="left">2.6e-08</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0098916" class="uri">GO:0098916</a></td>
+<td align="left">anterograde trans-synaptic signaling</td>
+<td align="right">471</td>
+<td align="right">20</td>
+<td align="right">4.53</td>
+<td align="left">2.6e-08</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0099537" class="uri">GO:0099537</a></td>
+<td align="left">trans-synaptic signaling</td>
+<td align="right">472</td>
+<td align="right">20</td>
+<td align="right">4.54</td>
+<td align="left">2.7e-08</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0099536" class="uri">GO:0099536</a></td>
+<td align="left">synaptic signaling</td>
+<td align="right">473</td>
+<td align="right">20</td>
+<td align="right">4.55</td>
+<td align="left">2.8e-08</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0050804" class="uri">GO:0050804</a></td>
+<td align="left">modulation of chemical synaptic transmis…</td>
+<td align="right">300</td>
+<td align="right">16</td>
+<td align="right">2.89</td>
+<td align="left">3.2e-08</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0006812" class="uri">GO:0006812</a></td>
+<td align="left">cation transport</td>
+<td align="right">840</td>
+<td align="right">26</td>
+<td align="right">8.08</td>
+<td align="left">1.1e-07</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-13-pve-0.0027" class="section level2">
+<h2>Factor 13 (PVE: 0.0027)</h2>
+<p><img src="figure/trachea.Rmd/factors2-10.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td align="left">Nfia</td>
+<td align="left">Club</td>
+<td align="right">5.591073</td>
+</tr>
+<tr class="even">
+<td>39</td>
+<td align="left">Aqp3</td>
+<td align="left">Basal (Marker)</td>
+<td align="right">7.844628</td>
+</tr>
+<tr class="odd">
+<td>41</td>
+<td align="left">Dapl1</td>
+<td align="left">Basal (Marker)</td>
+<td align="right">6.546861</td>
+</tr>
+<tr class="even">
+<td>46</td>
+<td align="left">Cyp2f2</td>
+<td align="left">Club (Marker)</td>
+<td align="right">10.639600</td>
+</tr>
+<tr class="odd">
+<td>48</td>
+<td align="left">Cbr2</td>
+<td align="left">Club (Marker)</td>
+<td align="right">5.402642</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0019886" class="uri">GO:0019886</a></td>
+<td align="left">antigen processing and presentation of e…</td>
+<td align="right">14</td>
+<td align="right">4</td>
+<td align="right">0.08</td>
+<td align="left">7.9e-07</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0002495" class="uri">GO:0002495</a></td>
+<td align="left">antigen processing and presentation of p…</td>
+<td align="right">18</td>
+<td align="right">4</td>
+<td align="right">0.10</td>
+<td align="left">2.4e-06</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0002504" class="uri">GO:0002504</a></td>
+<td align="left">antigen processing and presentation of p…</td>
+<td align="right">19</td>
+<td align="right">4</td>
+<td align="right">0.10</td>
+<td align="left">3.0e-06</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0002478" class="uri">GO:0002478</a></td>
+<td align="left">antigen processing and presentation of e…</td>
+<td align="right">21</td>
+<td align="right">4</td>
+<td align="right">0.11</td>
+<td align="left">4.6e-06</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0019884" class="uri">GO:0019884</a></td>
+<td align="left">antigen processing and presentation of e…</td>
+<td align="right">26</td>
+<td align="right">4</td>
+<td align="right">0.14</td>
+<td align="left">1.1e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0006518" class="uri">GO:0006518</a></td>
+<td align="left">peptide metabolic process</td>
+<td align="right">682</td>
+<td align="right">14</td>
+<td align="right">3.72</td>
+<td align="left">1.8e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0043603" class="uri">GO:0043603</a></td>
+<td align="left">cellular amide metabolic process</td>
+<td align="right">802</td>
+<td align="right">14</td>
+<td align="right">4.37</td>
+<td align="left">0.00010</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0048002" class="uri">GO:0048002</a></td>
+<td align="left">antigen processing and presentation of p…</td>
+<td align="right">49</td>
+<td align="right">4</td>
+<td align="right">0.27</td>
+<td align="left">0.00014</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0009636" class="uri">GO:0009636</a></td>
+<td align="left">response to toxic substance</td>
+<td align="right">94</td>
+<td align="right">5</td>
+<td align="right">0.51</td>
+<td align="left">0.00016</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0002250" class="uri">GO:0002250</a></td>
+<td align="left">adaptive immune response</td>
+<td align="right">301</td>
+<td align="right">8</td>
+<td align="right">1.64</td>
+<td align="left">0.00023</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-17-pve-0.0003" class="section level2">
+<h2>Factor 17 (PVE: 0.0003)</h2>
+<p><img src="figure/trachea.Rmd/factors2-11.png" width="672" style="display: block; margin: auto;" /> Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0034213" class="uri">GO:0034213</a></td>
+<td align="left">quinolinate catabolic process</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0.00</td>
+<td align="left">0.0012</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0050976" class="uri">GO:0050976</a></td>
+<td align="left">detection of mechanical stimulus involve…</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">0.00</td>
+<td align="left">0.0023</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:1904106" class="uri">GO:1904106</a></td>
+<td align="left">protein localization to microvillus</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">0.00</td>
+<td align="left">0.0023</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0023041" class="uri">GO:0023041</a></td>
+<td align="left">neuronal signal transduction</td>
+<td align="right">4</td>
+<td align="right">1</td>
+<td align="right">0.00</td>
+<td align="left">0.0046</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0050975" class="uri">GO:0050975</a></td>
+<td align="left">sensory perception of touch</td>
+<td align="right">4</td>
+<td align="right">1</td>
+<td align="right">0.00</td>
+<td align="left">0.0046</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0072526" class="uri">GO:0072526</a></td>
+<td align="left">pyridine-containing compound catabolic p…</td>
+<td align="right">4</td>
+<td align="right">1</td>
+<td align="right">0.00</td>
+<td align="left">0.0046</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:1904970" class="uri">GO:1904970</a></td>
+<td align="left">brush border assembly</td>
+<td align="right">4</td>
+<td align="right">1</td>
+<td align="right">0.00</td>
+<td align="left">0.0046</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0002250" class="uri">GO:0002250</a></td>
+<td align="left">adaptive immune response</td>
+<td align="right">301</td>
+<td align="right">3</td>
+<td align="right">0.35</td>
+<td align="left">0.0047</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0009582" class="uri">GO:0009582</a></td>
+<td align="left">detection of abiotic stimulus</td>
+<td align="right">91</td>
+<td align="right">2</td>
+<td align="right">0.11</td>
+<td align="left">0.0049</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0009581" class="uri">GO:0009581</a></td>
+<td align="left">detection of external stimulus</td>
+<td align="right">92</td>
+<td align="right">2</td>
+<td align="right">0.11</td>
+<td align="left">0.0050</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-24-pve-0.0006" class="section level2">
+<h2>Factor 24 (PVE: 0.0006)</h2>
+<p><img src="figure/trachea.Rmd/factors2-12.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>26</td>
+<td align="left">Sox9</td>
+<td align="left">Tuft-2</td>
+<td align="right">5.658985</td>
+</tr>
+<tr class="even">
+<td>27</td>
+<td align="left">Gp2</td>
+<td align="left">Goblet</td>
+<td align="right">27.331516</td>
+</tr>
+<tr class="odd">
+<td>28</td>
+<td align="left">Tff1</td>
+<td align="left">Goblet-1</td>
+<td align="right">13.907192</td>
+</tr>
+<tr class="even">
+<td>29</td>
+<td align="left">Tff2</td>
+<td align="left">Goblet-1</td>
+<td align="right">12.207553</td>
+</tr>
+<tr class="odd">
+<td>30</td>
+<td align="left">Lman1l</td>
+<td align="left">Goblet-1</td>
+<td align="right">22.949418</td>
+</tr>
+<tr class="even">
+<td>33</td>
+<td align="left">Dcpp1</td>
+<td align="left">Goblet-2</td>
+<td align="right">9.848094</td>
+</tr>
+<tr class="odd">
+<td>34</td>
+<td align="left">Dcpp2</td>
+<td align="left">Goblet-2</td>
+<td align="right">10.711118</td>
+</tr>
+<tr class="even">
+<td>35</td>
+<td align="left">Dcpp3</td>
+<td align="left">Goblet-2</td>
+<td align="right">11.463935</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0019722" class="uri">GO:0019722</a></td>
+<td align="left">calcium-mediated signaling</td>
+<td align="right">125</td>
+<td align="right">6</td>
+<td align="right">0.67</td>
+<td align="left">5.4e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0006884" class="uri">GO:0006884</a></td>
+<td align="left">cell volume homeostasis</td>
+<td align="right">17</td>
+<td align="right">3</td>
+<td align="right">0.09</td>
+<td align="left">9.4e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0019932" class="uri">GO:0019932</a></td>
+<td align="left">second-messenger-mediated signaling</td>
+<td align="right">207</td>
+<td align="right">7</td>
+<td align="right">1.10</td>
+<td align="left">0.00012</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0001580" class="uri">GO:0001580</a></td>
+<td align="left">detection of chemical stimulus involved …</td>
+<td align="right">19</td>
+<td align="right">3</td>
+<td align="right">0.10</td>
+<td align="left">0.00013</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0050913" class="uri">GO:0050913</a></td>
+<td align="left">sensory perception of bitter taste</td>
+<td align="right">21</td>
+<td align="right">3</td>
+<td align="right">0.11</td>
+<td align="left">0.00018</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0050912" class="uri">GO:0050912</a></td>
+<td align="left">detection of chemical stimulus involved …</td>
+<td align="right">23</td>
+<td align="right">3</td>
+<td align="right">0.12</td>
+<td align="left">0.00024</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0030968" class="uri">GO:0030968</a></td>
+<td align="left">endoplasmic reticulum unfolded protein r…</td>
+<td align="right">60</td>
+<td align="right">4</td>
+<td align="right">0.32</td>
+<td align="left">0.00029</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0050907" class="uri">GO:0050907</a></td>
+<td align="left">detection of chemical stimulus involved …</td>
+<td align="right">26</td>
+<td align="right">3</td>
+<td align="right">0.14</td>
+<td align="left">0.00035</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0034620" class="uri">GO:0034620</a></td>
+<td align="left">cellular response to unfolded protein</td>
+<td align="right">66</td>
+<td align="right">4</td>
+<td align="right">0.35</td>
+<td align="left">0.00042</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0032808" class="uri">GO:0032808</a></td>
+<td align="left">lacrimal gland development</td>
+<td align="right">7</td>
+<td align="right">2</td>
+<td align="right">0.04</td>
+<td align="left">0.00058</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="factor-29-pve-0.0001" class="section level2">
+<h2>Factor 29 (PVE: 0.0001)</h2>
+<p><img src="figure/trachea.Rmd/factors2-13.png" width="672" style="display: block; margin: auto;" /> Significant genes that are also mentioned in the paper:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">gene</th>
+<th align="left">type</th>
+<th align="right">t.val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>4</td>
+<td align="left">Ascl3</td>
+<td align="left">Ionocyte</td>
+<td align="right">27.53504</td>
+</tr>
+<tr class="even">
+<td>37</td>
+<td align="left">Atp6v0d2</td>
+<td align="left">Ionocyte</td>
+<td align="right">22.27301</td>
+</tr>
+<tr class="odd">
+<td>38</td>
+<td align="left">Cftr</td>
+<td align="left">Ionocyte</td>
+<td align="right">17.94190</td>
+</tr>
+</tbody>
+</table>
+<p>Gene Ontology terms:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">GO.ID</th>
+<th align="left">Term</th>
+<th align="right">Annotated</th>
+<th align="right">Significant</th>
+<th align="right">Expected</th>
+<th align="left">classic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="GO:0007600" class="uri">GO:0007600</a></td>
+<td align="left">sensory perception</td>
+<td align="right">382</td>
+<td align="right">8</td>
+<td align="right">1.00</td>
+<td align="left">5.7e-06</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0050877" class="uri">GO:0050877</a></td>
+<td align="left">nervous system process</td>
+<td align="right">698</td>
+<td align="right">10</td>
+<td align="right">1.84</td>
+<td align="left">9.6e-06</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0055067" class="uri">GO:0055067</a></td>
+<td align="left">monovalent inorganic cation homeostasis</td>
+<td align="right">123</td>
+<td align="right">5</td>
+<td align="right">0.32</td>
+<td align="left">1.7e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0003008" class="uri">GO:0003008</a></td>
+<td align="left">system process</td>
+<td align="right">1209</td>
+<td align="right">12</td>
+<td align="right">3.18</td>
+<td align="left">4.3e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0006821" class="uri">GO:0006821</a></td>
+<td align="left">chloride transport</td>
+<td align="right">78</td>
+<td align="right">4</td>
+<td align="right">0.21</td>
+<td align="left">5.1e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0007191" class="uri">GO:0007191</a></td>
+<td align="left">adenylate cyclase-activating dopamine re…</td>
+<td align="right">5</td>
+<td align="right">2</td>
+<td align="right">0.01</td>
+<td align="left">6.7e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0030321" class="uri">GO:0030321</a></td>
+<td align="left">transepithelial chloride transport</td>
+<td align="right">5</td>
+<td align="right">2</td>
+<td align="right">0.01</td>
+<td align="left">6.7e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:1901617" class="uri">GO:1901617</a></td>
+<td align="left">organic hydroxy compound biosynthetic pr…</td>
+<td align="right">166</td>
+<td align="right">5</td>
+<td align="right">0.44</td>
+<td align="left">7.1e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="GO:0030004" class="uri">GO:0030004</a></td>
+<td align="left">cellular monovalent inorganic cation hom…</td>
+<td align="right">91</td>
+<td align="right">4</td>
+<td align="right">0.24</td>
+<td align="left">9.3e-05</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:0042421" class="uri">GO:0042421</a></td>
+<td align="left">norepinephrine biosynthetic process</td>
+<td align="right">6</td>
+<td align="right">2</td>
+<td align="right">0.02</td>
+<td align="left">1e-04</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
-<pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>R version 3.4.3 (2017-11-30)
-Platform: x86_64-apple-darwin15.6.0 (64-bit)
-Running under: macOS High Sierra 10.13.6
-
-Matrix products: default
-BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
-LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
-
-locale:
-[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
-
-attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
-
-other attached packages:
-[1] ggplot2_3.0.0
-
-loaded via a namespace (and not attached):
- [1] Rcpp_0.12.19      bindr_0.1         knitr_1.20       
- [4] whisker_0.3-2     magrittr_1.5      workflowr_1.0.1  
- [7] munsell_0.4.3     colorspace_1.3-2  R6_2.2.2         
-[10] rlang_0.2.0       highr_0.6         dplyr_0.7.4      
-[13] stringr_1.3.0     plyr_1.8.4        tools_3.4.3      
-[16] grid_3.4.3        gtable_0.2.0      R.oo_1.21.0      
-[19] withr_2.1.1.9000  git2r_0.21.0      htmltools_0.3.6  
-[22] assertthat_0.2.0  yaml_2.1.17       lazyeval_0.2.1   
-[25] rprojroot_1.3-2   digest_0.6.15     tibble_1.4.2     
-[28] bindrcpp_0.2      R.utils_2.6.0     glue_1.2.0       
-[31] evaluate_0.10.1   rmarkdown_1.8     labeling_0.3     
-[34] stringi_1.1.6     pillar_1.2.1      compiler_3.4.3   
-[37] scales_0.5.0      backports_1.1.2   R.methodsS3_1.7.1
-[40] pkgconfig_2.0.1  </code></pre>
+<pre class="r"><code>sessionInfo()
+#&gt; R version 3.4.3 (2017-11-30)
+#&gt; Platform: x86_64-apple-darwin15.6.0 (64-bit)
+#&gt; Running under: macOS High Sierra 10.13.6
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+#&gt; 
+#&gt; locale:
+#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+#&gt; [8] methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt;  [1] org.Mm.eg.db_3.5.0   topGO_2.30.1         SparseM_1.77        
+#&gt;  [4] GO.db_3.5.0          AnnotationDbi_1.40.0 IRanges_2.12.0      
+#&gt;  [7] S4Vectors_0.16.0     Biobase_2.38.0       graph_1.56.0        
+#&gt; [10] BiocGenerics_0.24.0  ggplot2_3.1.0       
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] xfun_0.4           lattice_0.20-35    colorspace_1.3-2  
+#&gt;  [4] htmltools_0.3.6    yaml_2.2.0         blob_1.1.0        
+#&gt;  [7] rlang_0.3.0.1      R.oo_1.21.0        pillar_1.2.1      
+#&gt; [10] glue_1.3.0         withr_2.1.2.9000   DBI_0.7           
+#&gt; [13] R.utils_2.6.0      bit64_0.9-7        bindrcpp_0.2      
+#&gt; [16] matrixStats_0.52.2 bindr_0.1          plyr_1.8.4        
+#&gt; [19] stringr_1.3.1      munsell_0.5.0      gtable_0.2.0      
+#&gt; [22] workflowr_1.0.1    flashier_0.1.0     R.methodsS3_1.7.1 
+#&gt; [25] evaluate_0.12      memoise_1.1.0      labeling_0.3      
+#&gt; [28] knitr_1.20.22      highr_0.7          Rcpp_1.0.0        
+#&gt; [31] scales_1.0.0       backports_1.1.2    bit_1.1-12        
+#&gt; [34] digest_0.6.18      stringi_1.2.4      dplyr_0.7.4       
+#&gt; [37] grid_3.4.3         rprojroot_1.3-2    tools_3.4.3       
+#&gt; [40] magrittr_1.5       lazyeval_0.2.1     tibble_1.4.2      
+#&gt; [43] RSQLite_2.0        whisker_0.3-2      pkgconfig_2.0.1   
+#&gt; [46] assertthat_0.2.0   rmarkdown_1.8      R6_2.3.0          
+#&gt; [49] git2r_0.21.0       compiler_3.4.3</code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
