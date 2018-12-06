@@ -1,0 +1,137 @@
+---
+title: "Analysis of droplet data from Montoro et al. (using preprocessing)"
+author: "Jason Willwerscheid"
+date: "12/6/2018"
+output: 
+  workflowr::wflow_html:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>")
+```
+
+## Introduction and Code
+
+I again fit 30 factors to the droplet dataset discussed in [Montoro et al.](https://www.nature.com/articles/s41586-018-0393-7) This time, I follow pre-processing steps used by the authors (normalizing individual counts by counts per cell and only using "highly variable genes"). Let's see whether it makes any difference.
+
+Click "Code" to view the code used to pre-process the data.
+
+```{r code, code=readLines("../code/trachea.R"), eval=FALSE}
+```
+
+The following code, used to produce the boxplots and tables below, is in all important respects identical to the code used in my [previous analysis](trachea.html) of this dataset.
+
+```{r factors}
+suppressMessages({
+  library(ggplot2)
+  library(topGO)
+  library(org.Mm.eg.db)
+})
+
+fl <- readRDS("~/Downloads/ppdrop30_backfit.rds")
+# Remove large data object to free up memory.
+fl$fit$Y <- NULL
+
+# Data frame containing cell type and loadings for each factor.
+PSdf <- data.frame(fl$loadings$normalized.loadings[[2]])
+cell.names <- rownames(fl$loadings$normalized.loadings[[2]])
+cell.types <- as.factor(sapply(strsplit(cell.names, "_"), `[`, 3))
+levels(cell.types)
+levels(cell.types) <- c("Bas", "Cil", "Clb", "Gob", "Ion", "Nec", "Tft")
+PSdf$cell.type <- cell.types
+
+# Need to select signficant genes for topGO.
+#   Scale gene loadings by scale constant * maximum cell loading.
+s <- fl$loadings$scale.constant * 
+  apply(abs(fl$loadings$normalized.loadings[[2]]), 2, max)
+gene.loadings <- fl$loadings$normalized.loadings[[1]]
+gene.loadings <- gene.loadings * rep(s, each = nrow(gene.loadings))
+#   Get a pseudo-t statistic by dividing by the residual SE.
+gene.t <- gene.loadings * sqrt(fl$fit$tau)
+#   Convert to a p-value.
+gene.p <- 2 * (1 - pnorm(abs(gene.t)))
+#   Select significant genes using Benjamini-Hochberg.
+BH <- function(k, alpha = 0.01) {
+  pvals <- gene.p[, k]
+  selected <- rep(0, length(pvals))
+  names(selected) <- names(pvals)
+  
+  n <- length(pvals)
+  sorted.pvals <- sort(pvals)
+  BH <- sorted.pvals < alpha / (n - 0:(n - 1))
+  cutoff <- min(which(!BH))
+  selected[pvals < sorted.pvals[cutoff]] <- 1
+  
+  return(selected)
+}
+gene.sig <- sapply(1:ncol(gene.p), BH)
+
+# How many significant genes per factor are there?
+colSums(gene.sig)
+
+# Omit factors with PVE below a certain (empirically determined) threshold.
+kset <- (1:ncol(gene.p))[fl$pve > 0.0003]
+
+# I also want to see which factors contain genes mentioned in the paper.
+paper.genes <- data.frame(
+  gene = c("Nfia", "Ascl1", "Ascl2", "Ascl3", "Foxq1", "Cdhr3", "Rgs13",
+           "Muc5b", "Notch2", "Il13ra1", "Krt4", "Krt13", "Krt8", "Ecm1",
+           "S100a11", "Cldn3", "Lgals3", "Anxa1", "Il25", "Tslp", "Alox5ap",
+           "Ptprc", "Pou2f3", "Gfi1b", "Spib", "Sox9", "Gp2", "Tff1",
+           "Tff2", "Lman1l", "P2rx4", "Muc5ac", "Dcpp1", "Dcpp2", "Dcpp3",
+           "Atp6v1c2", "Atp6v0d2", "Cftr", "Aqp3", "Krt5", "Dapl1", "Hspa1a",
+           "Trp63", "Scgb1a1", "Krt15", "Cyp2f2", "Lypd2", "Cbr2", "Foxj1",
+           "Ccdc153", "Ccdc113", "Mlf1", "Lztfl1", "Chga", "Dclk1"),
+  type = c("Club", "NEC", "Tuft", "Ion", "Goblet", "Cil", "Tuft",
+           "Club", "Club", "Club", "Hill", "Hill", "Basal", "Hill",
+           "Hill", "Hill", "Hill", "Hill", "Tuft", "Tuft", "Tuft2",
+           "Tuft2", "Tuft1", "Tuft2", "Tuft2", "Tuft2", "Goblet", "Gob1",
+           "Gob1", "Gob1", "Gob1", "Gob1", "Gob2", "Gob2", "Gob2",
+           "Ion", "Ion", "Ion", "BM", "BM", "BM", "BM",
+           "BM", "ClbM", "ClbM", "ClbM", "ClbM", "ClbM", "CilM",
+           "CilM", "CilM", "CilM", "CilM", "NECM", "TftM"))
+paper.genes$gene <- as.character(paper.genes$gene)
+levels(paper.genes$type) <- c("Basal", "Basal (Marker)", "Ciliated", 
+                              "Ciliated (Marker)", "Club (Marker)", "Club",
+                              "Goblet-1", "Goblet-2", "Goblet", "Hillock",
+                              "Ionocyte", "NEC", "NEC (Marker)",
+                              "Tuft (Marker)", "Tuft", "Tuft-1", "Tuft-2")
+paper.genes <- paper.genes[paper.genes$gene %in% rownames(gene.sig), ]
+
+# Set up topGOdata object.
+GO.list <- as.factor(gene.sig[, 1])
+GOdata <- new("topGOdata", ontology = "BP", allGenes = GO.list,
+              annot = annFUN.org, mapping = "org.Mm.eg", ID = "symbol")
+```
+```{r factors2, results="asis"}
+# Loop over kset.
+for (k in kset) {
+  cat(paste0("## Factor ", k, " (PVE: ",
+             formatC(fl$pve[k], format = "f", digits = 4), ")\n"))
+  fctr <- paste0("X", k)
+  plot(ggplot(PSdf, aes_string(x = "cell.type", y = fctr)) +
+         geom_boxplot(outlier.shape = NA, color = "red") +
+         geom_jitter(position = position_jitter(0.2), cex = 0.1) +
+         labs(x = "Cell Type", y = paste("Factor", k, "value")))
+  cat("\n")
+  
+  mentions <- which(gene.sig[paper.genes$gene, k] == 1)
+  if (length(mentions) > 0) {
+    mentions.df <- paper.genes[mentions, ]
+    mentions.df$t.val <- gene.t[names(mentions), k]
+    cat("Significant genes that are also mentioned in the paper:\n")
+    print(knitr::kable(mentions.df))
+    cat("\n")
+  }
+  
+  cat("Gene Ontology terms:\n")
+  GOdata@allScores <- as.factor(gene.sig[, k])
+  result <- suppressMessages(
+    runTest(GOdata, algorithm = "classic", statistic = "fisher")
+  )
+  allRes <- GenTable(GOdata, classic = result, topNodes = 10)
+  print(knitr::kable(allRes))
+  cat("\n")
+}
+```
