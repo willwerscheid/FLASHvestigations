@@ -7,147 +7,136 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>")
 ```
 
-## Fit I: subsetted data
+## Introduction and Code
 
-First, I fit 30 nonnegative loadings (with arbitrary factors) to a subset of the data used in Montoro et al. (I selected for "highly variable genes" using the Seurat package. For the code used to do preprocessing, see [below](#Code).)
+I fit 30 factors to the drop-seq dataset discussed in [Montoro et al.](https://www.nature.com/articles/s41586-018-0393-7) I removed all genes with zero total counts and did a `log1p` transform of the counts. I used nonnegative priors for gene loadings and normal-mixture priors for cell loadings.
 
-```{r load_data}
-factors_df <- readRDS("~/GitHub/FLASHvestigations/data/trachea/factors_df.rds")
-top_genes <- readRDS("~/GitHub/FLASHvestigations/data/trachea/top_genes.rds")
+```{r calls, eval=FALSE}
+# Add 30 factors with rough backfits after every 5 factors.
+fl <- flashier(data, greedy.Kmax = 30, var.type = 1, 
+               prior.type = c("nonnegative", "normal.mix"), 
+               ash.param = list(optmethod = "mixSQP"), 
+               backfit.every = 5, final.backfit = TRUE, 
+               backfit.order = "montaigne", warmstart.backfits = FALSE)
+# Refine by backfitting.
+fl <- flashier(data, flash.init = fl, backfit = "only",
+               backfit.order = "dropout", backfit.maxiter = 200)
 ```
 
-To find cell-type specific factor/loadings, I use the cell types assigned by Montoro et al. The number of each cell type is as follows: 
+The following code is used to produce the boxplots and tables below.
 
-```{r table}
-table(factors_df$cell_type)
-```
+```{r factors}
+suppressMessages({
+  library(ggplot2)
+  library(topGO)
+  library(org.Mm.eg.db)
+})
 
-The following code is used to create the plots below.
+fl <- readRDS("~/Downloads/DropSeq30_backfit.rds")
+# Remove large data object to free up memory.
+fl$fit$Y <- NULL
 
-```{r plot_tools}
-library(ggplot2)
-do_boxplots <- function(kset, incl_top_genes = TRUE) {
-  for (k in kset) {
-    x <- paste0("X", k)
-    plot(ggplot(factors_df, aes_string(x = "cell_type", y = x)) +
-           geom_boxplot(outlier.shape = NA) +
-           labs(x = "Cell Type", y = paste("Factor", k, "value")))
-    if (incl_top_genes) {
-      print(knitr::kable(top_genes[[k]], digits = 2, row.names = FALSE))
-    }
-  }
+# Data frame containing cell type and loadings for each factor.
+PSdf <- data.frame(fl$loadings$normalized.loadings[[2]])
+cell.names <- rownames(fl$loadings$normalized.loadings[[2]])
+cell.types <- as.factor(sapply(strsplit(cell.names, "_"), `[`, 3))
+levels(cell.types)
+levels(cell.types) <- c("Bas", "Cil", "Clb", "Gob", "Ion", "Nec", "Tft")
+PSdf$cell.type <- cell.types
+
+# Need to select signficant genes for topGO.
+#   Scale gene loadings by scale constant * maximum cell loading.
+s <- fl$loadings$scale.constant * 
+  apply(abs(fl$loadings$normalized.loadings[[2]]), 2, max)
+gene.loadings <- fl$loadings$normalized.loadings[[1]]
+gene.loadings <- gene.loadings * rep(s, each = nrow(gene.loadings))
+#   Get a pseudo-t statistic by dividing by the residual SE.
+gene.t <- gene.loadings * sqrt(fl$fit$tau)
+#   Convert to a p-value.
+gene.p <- 2 * (1 - pnorm(abs(gene.t)))
+#   Select significant genes using Benjamini-Hochberg.
+BH <- function(k, alpha = 0.01) {
+  pvals <- gene.p[, k]
+  selected <- rep(0, length(pvals))
+  names(selected) <- names(pvals)
+  
+  n <- length(pvals)
+  sorted.pvals <- sort(pvals)
+  BH <- sorted.pvals < alpha / (n - 0:(n - 1))
+  cutoff <- min(which(!BH))
+  selected[pvals < sorted.pvals[cutoff]] <- 1
+  
+  return(selected)
 }
+gene.sig <- sapply(1:ncol(gene.p), BH)
+
+# How many significant genes per factor are there?
+colSums(gene.sig)
+
+# Omit factors with PVE below a certain (empirically determined) threshold.
+kset <- (1:ncol(gene.p))[fl$pve > 0.0001 & colSums(gene.sig) > 9]
+
+# I also want to see which factors contain genes mentioned in the paper.
+paper.genes <- data.frame(
+  gene = c("Nfia", "Ascl1", "Ascl2", "Ascl3", "Foxq1", "Cdhr3", "Rgs13",
+           "Muc5b", "Notch2", "Il13ra1", "Krt4", "Krt13", "Krt8", "Ecm1",
+           "S100a11", "Cldn3", "Lgals3", "Anxa1", "Il25", "Tslp", "Alox5ap",
+           "Ptprc", "Pou2f3", "Gfi1b", "Spib", "Sox9", "Gp2", "Tff1",
+           "Tff2", "Lman1l", "P2rx4", "Muc5ac", "Dcpp1", "Dcpp2", "Dcpp3",
+           "Atp6v1c2", "Atp6v0d2", "Cftr", "Aqp3", "Krt5", "Dapl1", "Hspa1a",
+           "Trp63", "Scgb1a1", "Krt15", "Cyp2f2", "Lypd2", "Cbr2", "Foxj1",
+           "Ccdc153", "Ccdc113", "Mlf1", "Lztfl1", "Chga", "Dclk1"),
+  type = c("Club", "NEC", "Tuft", "Ion", "Goblet", "Cil", "Tuft",
+           "Club", "Club", "Club", "Hill", "Hill", "Basal", "Hill",
+           "Hill", "Hill", "Hill", "Hill", "Tuft", "Tuft", "Tuft2",
+           "Tuft2", "Tuft1", "Tuft2", "Tuft2", "Tuft2", "Goblet", "Gob1",
+           "Gob1", "Gob1", "Gob1", "Gob1", "Gob2", "Gob2", "Gob2",
+           "Ion", "Ion", "Ion", "BM", "BM", "BM", "BM",
+           "BM", "ClbM", "ClbM", "ClbM", "ClbM", "ClbM", "CilM",
+           "CilM", "CilM", "CilM", "CilM", "NECM", "TftM"))
+paper.genes$gene <- as.character(paper.genes$gene)
+levels(paper.genes$type) <- c("Basal", "Basal (Marker)", "Ciliated", 
+                              "Ciliated (Marker)", "Club (Marker)", "Club",
+                              "Goblet-1", "Goblet-2", "Goblet", "Hillock",
+                              "Ionocyte", "NEC", "NEC (Marker)",
+                              "Tuft (Marker)", "Tuft", "Tuft-1", "Tuft-2")
+
+# Set up topGOdata object.
+GO.list <- as.factor(gene.sig[, 1])
+GOdata <- new("topGOdata", ontology = "BP", allGenes = GO.list,
+              annot = annFUN.org, mapping = "org.Mm.eg", ID = "symbol")
 ```
-
-### Ciliated cells
-
-Three factors are very clearly associated with ciliated cells. A positive loading for factor 1 indicates the presence of a ciliated cell, whereas factors 17 and 18 delineate axes that could serve to differentiate among ciliated cells.
-
-```{r cil_plots}
-do_boxplots(c(1, 17, 18))
-```
-
-### Ionocytes
-
-One factor reliably identifies ionocytes.
-
-```{r ion_plots}
-do_boxplots(15)
-```
-
-### Neuroendocrine cells
-
-Another factor reliably identifies neuroendocrine cells. Interesting, the same genes are less expressed in tuft cells. 
-
-```{r nec_plots}
-do_boxplots(4)
-```
-
-### Tuft cells
-
-Factor 2 indicates the presence of a tuft cell, while factor 12 delineates an axis that could serve to differentiate tuft cells.
-
-```{r tuft_plots}
-do_boxplots(c(2, 12))
-```
-
-### Goblet cells
-
-Factors 14 and 27 are virtually solely expressed in goblet cells.
-
-```{r gob_plots}
-do_boxplots(c(14, 27))
-```
-
-### Club cells
-
-As might be expected, there are no factors that cleanly identify club cells. However, expression patterns are markedly different in club cells for factors 20 and 29.
-
-```{r club_plots}
-do_boxplots(c(20, 29))
-```
-
-### Basal cells
-
-I would also not expect to see clean factors for basal cells. But note that factor 5 is usually positive for basal cells, but more often negative for other cell types. 
-
-```{r basal_plots}
-do_boxplots(5)
-```
-
-## Fit II: complete data
-
-For comparison, I fit 10 factors greedily using point-normal priors (with no backfitting) and with loose convergence conditions (`tol = 10`). This took about 2 hours on the RCC cluster using 32 GB of memory.
-
-```{r fit2}
-complete_factors_df <- readRDS("~/GitHub/FLASHvestigations/data/trachea/complete_factors_df.rds")
-complete_top_genes <- readRDS("~/GitHub/FLASHvestigations/data/trachea/complete_top_genes.rds")
-```
-
-### Ciliated
-
-Factor 2 can be compared with factor 1 above.
-
-```{r ciliated_complete}
-plot(ggplot(complete_factors_df, aes_string(x = "cell_type", y = "X2")) +
-           geom_boxplot(outlier.shape = NA) +
-           labs(x = "Cell Type", y = paste("Factor 2 value")))
-print(complete_top_genes[[2]])
-```
-
-I reproduce the plot from above for comparison:
-```{r}
-do_boxplots(1)
-```
-
-### Neuroendocrine cells
-
-Factor 9 can be compared with factor 4 above.
-```{r nec_complete}
-plot(ggplot(complete_factors_df, aes_string(x = "cell_type", y = "X9")) +
-           geom_boxplot(outlier.shape = NA) +
-           labs(x = "Cell Type", y = paste("Factor 9 value")))
-print(complete_top_genes[[9]])
-do_boxplots(4)
-```
-
-### Tuft cells
-
-Finally, factor 5 can be compared with factor 2 above.
-```{r tuft_complete}
-plot(ggplot(complete_factors_df, aes_string(x = "cell_type", y = "X5")) +
-           geom_boxplot(outlier.shape = NA) +
-           labs(x = "Cell Type", y = paste("Factor 5 value")))
-print(complete_top_genes[[5]])
-do_boxplots(2)
-```
-
-
-## Code
-
-The code used to pre-process the dataset can be viewed below.
-```{r preprocess, code=readLines("~/GitHub/FLASHvestigations/code/trachea.R"), eval=FALSE}
+```{r factors2, results="asis"}
+# Loop over kset.
+for (k in kset) {
+  cat(paste0("## Factor ", k, " (PVE: ",
+             formatC(fl$pve[k], format = "f", digits = 4), ")\n"))
+  fctr <- paste0("X", k)
+  plot(ggplot(PSdf, aes_string(x = "cell.type", y = fctr)) +
+         geom_boxplot(outlier.shape = NA, color = "red") +
+         geom_jitter(position = position_jitter(0.2), cex = 0.1) +
+         labs(x = "Cell Type", y = paste("Factor", k, "value")))
+  cat("\n")
+  
+  mentions <- which(gene.sig[paper.genes$gene, k] == 1)
+  if (length(mentions) > 0) {
+    mentions.df <- paper.genes[mentions, ]
+    mentions.df$t.val <- gene.t[names(mentions), k]
+    cat("Significant genes that are also mentioned in the paper:\n")
+    print(knitr::kable(mentions.df))
+    cat("\n")
+  }
+  
+  cat("Gene Ontology terms:\n")
+  GOdata@allScores <- as.factor(gene.sig[, k])
+  result <- suppressMessages(
+    runTest(GOdata, algorithm = "classic", statistic = "fisher")
+  )
+  allRes <- GenTable(GOdata, classic = result, topNodes = 10)
+  print(knitr::kable(allRes))
+  cat("\n")
+}
 ```
