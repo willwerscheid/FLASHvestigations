@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Tensor Decomposition of GTEx Brain Data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Tensor Decomposition of GTEx Brain Data</h1>
+<h4 class="author"><em>Jason Willwerscheid</em></h4>
+<h4 class="date"><em>1/8/2019</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2019-01-11</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/3e8d54a204846f884ec67733e9f21f8dc0485217" target="_blank">3e8d54a</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/figure/
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/flashier_bench.Rmd
+    Untracked:  analysis/gd_notes.Rmd
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/3e8d54a204846f884ec67733e9f21f8dc0485217/analysis/brain.Rmd" target="_blank">3e8d54a</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-01-11
+</td>
+<td style="text-align:left;">
+workflowr::wflow_publish(“analysis/brain.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>TODO: describe data here.</p>
+</div>
+<div id="code" class="section level2">
+<h2>Code</h2>
+<p>for preprocessing GTEx data and fitting flash objects to the brain subtensor…</p>
+<pre class="r"><code># Download GTEx data from GTEx Portal and load into R using Peter&#39;s code ------
+
+samples.file &lt;- &quot;https://storage.googleapis.com/gtex_analysis_v7/annotations/GTEx_v7_Annotations_SampleAttributesDS.txt&quot;
+read.counts.file &lt;- &quot;~/Downloads/GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_reads.gct.gz&quot;
+
+source(&quot;https://raw.githubusercontent.com/stephenslab/topics/master/code/gtex.R?token=AWTMG_VIxH9P52pyv6O3a3tRQEFn0F9Zks5cN431wA%3D%3D&quot;)
+gtex &lt;- read.gtex.data(samples.file, read.counts.file)
+
+
+# Pre-process the data as described in Wang, Fischer, and Song (2017) ---------
+
+# &quot;Normalization was performed using the size factors produced by the
+#   estimateSizeFactors function of DESeq2.&quot;
+
+#     Calculate the (logged) geometric means of the counts for each gene.
+gene.geom.means &lt;- apply(gtex$counts, 2, function(x) {
+  if (all(x == 0)) {-Inf} else {sum(log(x[x &gt; 0])) / length(x)}
+})
+#     Take the median of the normalized counts for each sample:
+size.factors &lt;- apply(gtex$counts, 1, function(x) {
+  exp(median((log(x) - gene.geom.means)[x &gt; 0]))
+})
+#     Normalize the samples:
+gtex$counts &lt;- apply(gtex$counts, 2, `/`, size.factors)
+
+# &quot;We required at least 15 samples to include a given tissue and an average of
+#   at least 500 normalized reads in one or more tissues to retain a gene.&quot;
+
+tissues.to.include &lt;- names(which(table(gtex$samples$specific) &gt; 14))
+samples.to.retain &lt;- samples$specific %in% tissues.to.include
+gtex$counts &lt;- gtex$counts[samples.to.retain, ]
+gtex$samples &lt;- gtex$samples[samples.to.retain, ]
+
+gene.max.avg.reads &lt;- apply(gtex$counts, 2, function(x) {
+  max(aggregate(x, by = list(gtex$samples$specific), FUN = mean)$x)
+})
+genes.to.retain &lt;- gene.max.avg.reads &gt; 500
+gtex$counts &lt;- gtex$counts[, genes.to.retain]
+
+# Log-transform data:
+
+gtex$counts &lt;- log1p(gtex$counts)
+
+
+# Convert the data from a matrix to a tissue x individual x gene array --------
+
+individual &lt;- as.factor(sapply(strsplit(rownames(gtex$counts), &quot;-&quot;), function(x) {
+  paste(x[1:2], collapse = &quot;-&quot;)
+}))
+gtex.df &lt;- data.frame(individual = individual,
+                      tissue = droplevels(gtex$samples$specific))
+gtex.df &lt;- cbind(gtex.df, gtex$counts)
+gtex &lt;- reshape2::melt(gtex.df)
+colnames(gtex)[3] &lt;- &quot;gene&quot;
+rm(gtex.df)
+
+gtex &lt;- reshape2::acast(gtex, tissue ~ individual ~ gene)
+# object size: 4.6 Gb (a 49 x 714 x 17792 array)
+
+saveRDS(gtex, &quot;~/Downloads/gtex_v7_array.rds&quot;) # temporary
+
+
+# Create smaller array using only brain tissues -------------------------------
+
+brain.tissues &lt;- which(substr(dimnames(gtex)[[1]], 1, 5) == &quot;brain&quot;)
+brain &lt;- gtex[brain.tissues, , ]
+# Remove individuals with no brains:
+brain &lt;- brain[, apply(brain, 2, function(x) sum(!is.na(x))) &gt; 0, ]
+# object size: 450 Mb (a 13 x 254 x 17792 array)
+
+saveRDS(brain, &quot;~/Downloads/gtex_v7_brain.rds&quot;) # temporary
+
+
+# Fit flash object ------------------------------------------------------------
+
+devtools::load_all(&quot;~/Github/ashr&quot;)
+devtools::load_all(&quot;~/Github/flashier&quot;)
+devtools::load_all(&quot;~/Github/ebnm&quot;)
+
+brain &lt;- set.flash.data(brain) # object size: 675 Mb
+brain.flash &lt;- flashier(brain,
+                        var.type = 3,
+                        prior.type = c(&quot;nonnegative&quot;, &quot;nonzero.mode&quot;, &quot;normal.mix&quot;),
+                        conv.crit.fn = function(new, old, k) {
+                          flashier:::calc.max.abs.chg.EF(new, old, k, n = 1)
+                        },
+                        greedy.Kmax = 10,
+                        greedy.tol = 5e-4,
+                        backfit.after = 2,
+                        backfit.every = 1,
+                        inner.backfit.maxiter = 1,
+                        ash.param = list(optmethod = &quot;mixSQP&quot;),
+                        nonmissing.thresh = c(0, 0.05, 0),
+                        verbose = &quot;O L1 E2&quot;)
+
+saveRDS(brain.flash, &quot;~/Downloads/brain_flash.rds&quot;) # temporary
+
+brain.flash &lt;- flashier(brain,
+                        flash.init = brain.flash,
+                        backfit = &quot;only&quot;,
+                        backfit.order = &quot;dropout&quot;,
+                        conv.crit.fn = function(new, old, k) {
+                          flashier:::calc.max.abs.chg.EF(new, old, k, n = 1)
+                        },
+                        backfit.tol = 5e-4,
+                        verbose = &quot;O L1 E2&quot;)
+
+saveRDS(brain.flash, &quot;~/Downloads/brain_flash_bf.rds&quot;) # temporary
+
+# Remove large fields from flash object.
+brain.flash$fit$Y &lt;- NULL
+brain.flash$fit$Z &lt;- NULL
+brain.flash$sampler &lt;- NULL
+
+saveRDS(brain.flash, &quot;./data/brain/brain05.rds&quot;)
+
+# Other &quot;brain&quot; objects were created using a different nonmissing.thresh.
+
+
+# Create data frame containing demographics and technical factors -------------
+
+phenotypes &lt;- readRDS(&quot;~/Downloads/GTEx_v7_Subjects.rds&quot;)
+class(phenotypes) &lt;- &quot;data.frame&quot;
+rownames(phenotypes) &lt;- phenotypes$SUBJID
+phenotypes &lt;- phenotypes[, -1]
+# Get subset corresponding to individuals with brains.
+phenotypes &lt;- phenotypes[rownames(brain.flash$loadings$normalized.loadings[[2]]), ]
+# Remove COHORT because they&#39;re all postmortem.
+phenotypes &lt;- phenotypes[, -1]
+# Remove ETHNCTY because there are no hispanics.
+phenotypes &lt;- phenotypes[, -4]
+
+samples &lt;- readr::read_delim(&quot;https://storage.googleapis.com/gtex_analysis_v7/annotations/GTEx_v7_Annotations_SampleAttributesDS.txt&quot;,
+                             delim = &quot;\t&quot;)
+samples &lt;- samples[, c(&quot;SAMPID&quot;, &quot;SMGEBTCHD&quot;)]
+# Extract individuals from sample IDs.
+samples$SAMPID &lt;- sapply(lapply(strsplit(samples$SAMPID, &quot;-&quot;), `[`, 1:2),
+                         paste, collapse = &quot;-&quot;)
+# Convert sequencing date to number of days after first sequencing date.
+samples$SMGEBTCHD &lt;- as.numeric(as.POSIXct(samples$SMGEBTCHD, format = &quot;%m/%d/%Y&quot;))
+samples$SMGEBTCHD &lt;- samples$SMGEBTCHD - min(samples$SMGEBTCHD, na.rm = TRUE)
+samples$SMGEBTCHD &lt;- samples$SMGEBTCHD / (60 * 60 * 24)
+
+SEQDATE &lt;- aggregate(SMGEBTCHD ~ SAMPID, data = samples,
+                       FUN = mean, na.rm = TRUE)
+rownames(SEQDATE) &lt;- SEQDATE$SAMPID
+SEQDATE &lt;- SEQDATE[, 2, drop = FALSE]
+SEQDATE &lt;- SEQDATE[rownames(brain.flash$loadings$normalized.loadings[[2]]), ]
+
+all.covar &lt;- cbind(phenotypes, SEQDATE)
+
+# Do not upload to GitHub (data includes protected attributes)!
+saveRDS(all.covar, &quot;~/Downloads/GTEx_v7_brain_covar.rds&quot;)</code></pre>
+<p>…and for producing the plots and tables below.</p>
+<pre class="r"><code># Flip signs so that individual loadings are mostly postive -------------------
+
+align.data &lt;- function(brain) {
+  for (k in 1:brain$n.factors) {
+    if (mean(brain$loadings$normalized.loadings[[2]][, k]) &lt; 0) {
+      brain$loadings$normalized.loadings[[2]][, k] &lt;- -1 *
+        brain$loadings$normalized.loadings[[2]][, k]
+      brain$loadings$normalized.loadings[[3]][, k] &lt;- -1 *
+        brain$loadings$normalized.loadings[[3]][, k]
+    }
+  }
+  return(brain)
+}
+
+# Barplots --------------------------------------------------------------------
+
+do.plots &lt;- function(brain, k, incl.gene.plot = TRUE, fix.ind.ylim = FALSE) {
+  brain.colors &lt;- c(&quot;hotpink&quot;, &quot;gray40&quot;, &quot;green3&quot;, &quot;blue1&quot;, &quot;blue3&quot;, 
+                    &quot;gray20&quot;, &quot;black&quot;, &quot;lightpink&quot;, &quot;red1&quot;, &quot;green4&quot;, 
+                    &quot;green1&quot;, &quot;red4&quot;, &quot;red3&quot;)
+
+  tissue.idx &lt;- order(brain$loadings$normalized.loadings[[1]][, k],
+               decreasing = TRUE)
+  barplot(brain$loadings$normalized.loadings[[1]][tissue.idx, k],
+          col = brain.colors[tissue.idx], 
+          axisnames = FALSE,
+          xlab = &quot;Tissues&quot;)
+  
+  if (incl.gene.plot) {
+    barplot(sort(brain$loadings$normalized.loadings[[3]][, k],
+                 decreasing = TRUE),
+            axisnames = FALSE,
+            xlab = &quot;Genes&quot;,
+            main = paste0(&quot;Factor &quot;, k, &quot;: &quot;, 
+                          100 * round(brain$pve[k], 4), &quot;% PVE&quot;))
+  }
+  
+  vals &lt;- brain$loadings$normalized.loadings[[2]][, k]
+  exclusions &lt;- brain$fit$exclusions[[k]][[2]]
+  if (length(exclusions) &gt; 0)
+    vals &lt;- vals[-exclusions]
+  ylim &lt;- NULL
+  if (fix.ind.ylim)
+    ylim &lt;- c(-0.15, 0.25)
+  barplot(sort(vals, decreasing = TRUE),
+          axisnames = FALSE,
+          xlab = &quot;Individuals&quot;,
+          ylim = ylim)
+}
+
+all.plots &lt;- function(brain) {
+  par(mfrow = c(2, 3))
+  for (k in order(brain$pve, decreasing = TRUE)) {
+    do.plots(brain, k)
+  }
+}
+
+all.plots.comparison &lt;- function(brain1, brain2) {
+  par(mfrow = c(2, 4))
+  for (k in 1:brain1$n.factors) {
+    do.plots(brain1, k, incl.gene.plot = FALSE, fix.ind.ylim = TRUE)
+    do.plots(brain2, k, incl.gene.plot = FALSE, fix.ind.ylim = TRUE)
+  }
+}
+
+# Top tissues and genes -------------------------------------------------------
+
+get.top.tissues &lt;- function(brain, k) {
+  tissue.names &lt;- c(&quot;amygdala&quot;, &quot;ac cortex&quot;, &quot;caudate bg&quot;,
+                    &quot;cerebral hemisphere&quot;, &quot;cerebellum&quot;,
+                    &quot;cortex&quot;, &quot;fr cortex&quot;, &quot;hippocampus&quot;,
+                    &quot;hypothalamus&quot;, &quot;nuc acc bg&quot;, &quot;putamen bg&quot;,
+                    &quot;spinal cord&quot;, &quot;substantia nigra&quot;)
+  
+  loadings &lt;- round(brain$loadings$normalized.loadings[[1]][, k], 2)
+  tissue.labels &lt;- paste0(tissue.names, &quot; (&quot;, loadings, &quot;)&quot;)
+  
+  n.tissues &lt;- sum(loadings &gt; 0.1)
+  if (n.tissues &gt; 6)
+    return(&quot;most tissues&quot;)
+
+  tissue.idx &lt;- order(loadings, decreasing = TRUE)[1:n.tissues]
+  return(paste(tissue.labels[tissue.idx], collapse = &quot;, &quot;))
+}
+
+get.top.go &lt;- function(brain, k, n.loadings = 200) {
+  loadings &lt;- brain$loadings$normalized.loadings[[3]][, k]
+  names(loadings) &lt;- sapply(strsplit(names(loadings), &quot;.&quot;, fixed = TRUE), 
+                            `[`, 1)
+  overexpressed &lt;- names(sort(loadings, decreasing = TRUE)[1:n.loadings])
+  cp.res &lt;- clusterProfiler::enrichGO(overexpressed, &quot;org.Hs.eg.db&quot;, 
+                                      ont = &quot;BP&quot;, keyType = &quot;ENSEMBL&quot;,
+                                      universe = names(loadings), 
+                                      minGSSize = 10)
+  over &lt;- paste(head(cp.res, 3)$Description, collapse = &quot;, &quot;)
+  
+  if (k == 1) {
+    under &lt;- NA
+  } else {
+    underexpressed &lt;- names(sort(loadings, decreasing = FALSE)[1:n.loadings])
+    cp.res2 &lt;- clusterProfiler::enrichGO(underexpressed, &quot;org.Hs.eg.db&quot;, 
+                                         ont = &quot;BP&quot;, keyType = &quot;ENSEMBL&quot;,
+                                         universe = names(loadings), 
+                                         minGSSize = 10)
+    under &lt;- paste(head(cp.res2, 3)$Description, collapse = &quot;, &quot;)
+  }
+  
+  list(over = over, under = under)
+}
+
+# Regression on demographic and technical variables ---------------------------
+
+do.regression &lt;- function(brain, covar, k) {
+  excl &lt;- brain$fit$exclusions[[k]][[2]]
+  loadings &lt;- brain$loadings$normalized.loadings[[2]][, k]
+  if (length(excl) &gt; 0) {
+    covar &lt;- covar[-excl, ]
+    loadings &lt;- loadings[-excl]
+  }
+  df &lt;- cbind(covar, loadings = loadings)
+  mod &lt;- lm(loadings ~ ., data = df)
+  
+  p.vals &lt;- round(coefficients(summary(mod))[-1, 4], 3)
+  sex.col &lt;- which(substr(names(p.vals), 1, 1) == &quot;S&quot;)
+  age.col &lt;- which(substr(names(p.vals), 1, 1) == &quot;A&quot;)
+  race.col &lt;- which(substr(names(p.vals), 1, 1) == &quot;R&quot;)
+  tech.col &lt;- (1:length(p.vals))[-c(sex.col, age.col, race.col)]
+  
+  mod.anova &lt;- anova(mod)
+  resid.ss &lt;- mod.anova$`Sum Sq`[8]
+  sex.pve &lt;- mod.anova$`Sum Sq`[1] / resid.ss
+  age.pve &lt;- mod.anova$`Sum Sq`[2] / resid.ss
+  race.pve &lt;- mod.anova$`Sum Sq`[3] / resid.ss
+  tech.pve &lt;- sum(mod.anova$`Sum Sq`[4:7]) / resid.ss
+  
+  sex.res &lt;- paste0(&quot;PVE: &quot;, 100 * round(sex.pve, 4), &quot;% (p: &quot;,
+                    paste(p.vals[sex.col], collapse = &quot;, &quot;), &quot;)&quot;)
+  age.res &lt;- paste0(&quot;PVE: &quot;, 100 * round(age.pve, 4), &quot;% (p: &quot;,
+                    paste(p.vals[age.col], collapse = &quot;, &quot;), &quot;)&quot;)
+  race.res &lt;- paste0(&quot;PVE: &quot;, 100 * round(race.pve, 4), &quot;% (p: &quot;,
+                    paste(p.vals[race.col], collapse = &quot;, &quot;), &quot;)&quot;)
+  tech.res &lt;- paste0(&quot;PVE: &quot;, 100 * round(tech.pve, 4), &quot;% (p: &quot;,
+                    paste(p.vals[tech.col], collapse = &quot;, &quot;), &quot;)&quot;)
+  
+  return(list(sex = sex.res, age = age.res, race = race.res, tech = tech.res))
+}
+
+# Table of results ------------------------------------------------------------
+
+do.table &lt;- function(brain, covar, k) {
+  top.go &lt;- get.top.go(brain, k)
+  regress.res &lt;- do.regression(brain, covar, k)
+  tabl &lt;- rbind(c(&quot;PVE: &quot;, paste0(100 * round(brain$pve[k], 4), &quot;%&quot;)),
+                c(&quot;top tissues: &quot;, get.top.tissues(brain, k)),
+                c(&quot;overexpressed: &quot;, top.go$over),
+                c(&quot;underexpressed: &quot;, top.go$under),
+                c(&quot;age effect: &quot;, regress.res$age),
+                c(&quot;sex effect: &quot;, regress.res$sex),
+                c(&quot;race effect: &quot;, regress.res$race),
+                c(&quot;technical factors:&quot;, regress.res$tech))
+  return(tabl)
+}
+
+all.tables &lt;- function(brain, covar) {
+  cat(&quot;\n&quot;)
+  for (k in order(brain$pve, decreasing = TRUE)) {
+    print(knitr::kable(do.table(brain, covar, k), 
+                       caption = paste(&quot;Factor&quot;, k)))
+    cat(&quot;\n&quot;)
+  }
+}</code></pre>
+</div>
+<div id="a-first-attempt" class="section level2">
+<h2>A first attempt</h2>
+<p>At first, results look good. Different factors clearly correspond to different types of brain tissue. But there are problems….</p>
+<pre class="r"><code>brain00 &lt;- readRDS(&quot;./data/brain/brain00.rds&quot;)
+brain00 &lt;- align.data(brain00)
+all.plots(brain00)</code></pre>
+<p><img src="figure/brain.Rmd/firstAttempt-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/brain.Rmd/firstAttempt-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/brain.Rmd/firstAttempt-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/brain.Rmd/firstAttempt-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/brain.Rmd/firstAttempt-5.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="using-a-nonmissingness-threshold" class="section level2">
+<h2>Using a nonmissingness threshold</h2>
+<p>Results look better.</p>
+<pre class="r"><code>brain05 &lt;- readRDS(&quot;./data/brain/brain05.rds&quot;)
+brain05 &lt;- align.data(brain05)
+
+brain001 &lt;- readRDS(&quot;./data/brain/brain001.rds&quot;)
+brain001 &lt;- align.data(brain001)
+
+all.plots(brain05)</code></pre>
+<p><img src="figure/brain.Rmd/brain05-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/brain.Rmd/brain05-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/brain.Rmd/brain05-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/brain.Rmd/brain05-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/brain.Rmd/brain05-5.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="factor-details" class="section level2">
+<h2>Factor details</h2>
+<p>Note, in particular, the large differences from the paper in proportions of variance explained by demographic effects.</p>
+<pre class="r"><code>covar &lt;- readRDS(&quot;~/Downloads/GTEx_v7_brain_covar.rds&quot;)
+all.tables(brain05, covar)
+#&gt; 
+#&gt; Loading required package: org.Hs.eg.db
+#&gt; Loading required package: AnnotationDbi
+#&gt; Loading required package: stats4
+#&gt; Loading required package: BiocGenerics
+#&gt; Loading required package: parallel
+#&gt; 
+#&gt; Attaching package: &#39;BiocGenerics&#39;
+#&gt; The following objects are masked from &#39;package:parallel&#39;:
+#&gt; 
+#&gt;     clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+#&gt;     clusterExport, clusterMap, parApply, parCapply, parLapply,
+#&gt;     parLapplyLB, parRapply, parSapply, parSapplyLB
+#&gt; The following objects are masked from &#39;package:stats&#39;:
+#&gt; 
+#&gt;     IQR, mad, sd, var, xtabs
+#&gt; The following objects are masked from &#39;package:base&#39;:
+#&gt; 
+#&gt;     anyDuplicated, append, as.data.frame, cbind, colMeans,
+#&gt;     colnames, colSums, do.call, duplicated, eval, evalq, Filter,
+#&gt;     Find, get, grep, grepl, intersect, is.unsorted, lapply,
+#&gt;     lengths, Map, mapply, match, mget, order, paste, pmax,
+#&gt;     pmax.int, pmin, pmin.int, Position, rank, rbind, Reduce,
+#&gt;     rowMeans, rownames, rowSums, sapply, setdiff, sort, table,
+#&gt;     tapply, union, unique, unsplit, which, which.max, which.min
+#&gt; Loading required package: Biobase
+#&gt; Welcome to Bioconductor
+#&gt; 
+#&gt;     Vignettes contain introductory material; view with
+#&gt;     &#39;browseVignettes()&#39;. To cite Bioconductor, see
+#&gt;     &#39;citation(&quot;Biobase&quot;)&#39;, and for packages &#39;citation(&quot;pkgname&quot;)&#39;.
+#&gt; Loading required package: IRanges
+#&gt; Loading required package: S4Vectors
+#&gt; 
+#&gt; Attaching package: &#39;S4Vectors&#39;
+#&gt; The following object is masked from &#39;package:base&#39;:
+#&gt; 
+#&gt;     expand.grid
+#&gt; </code></pre>
+<table>
+<caption>Factor 1</caption>
+<tbody>
+<tr class="odd">
+<td align="left">PVE:</td>
+<td align="left">98.77%</td>
+</tr>
+<tr class="even">
+<td align="left">top tissues:</td>
+<td align="left">most tissues</td>
+</tr>
+<tr class="odd">
+<td align="left">overexpressed:</td>
+<td align="left">SRP-dependent cotranslational protein targeting to membrane, establishment of protein localization to membrane, cotranslational protein targeting to membrane</td>
+</tr>
+<tr class="even">
+<td align="left">underexpressed:</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">age effect:</td>
+<td align="left">PVE: 2.54% (p: 0.008)</td>
+</tr>
+<tr class="even">
+<td align="left">sex effect:</td>
+<td align="left">PVE: 1.24% (p: 0.25, 0.153)</td>
+</tr>
+<tr class="odd">
+<td align="left">race effect:</td>
+<td align="left">PVE: 2.69% (p: 0.041, 0.03, 0.095)</td>
+</tr>
+<tr class="even">
+<td align="left">technical factors:</td>
+<td align="left">PVE: 4.27% (p: 0.022, 0.432, 0.405)</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Factor 2</caption>
+<tbody>
+<tr class="odd">
+<td align="left">PVE:</td>
+<td align="left">0.44%</td>
+</tr>
+<tr class="even">
+<td align="left">top tissues:</td>
+<td align="left">cerebral hemisphere (0.74), cerebellum (0.67)</td>
+</tr>
+<tr class="odd">
+<td align="left">overexpressed:</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">underexpressed:</td>
+<td align="left">telencephalon development, forebrain development, forebrain generation of neurons</td>
+</tr>
+<tr class="odd">
+<td align="left">age effect:</td>
+<td align="left">PVE: 0.14% (p: 0.887)</td>
+</tr>
+<tr class="even">
+<td align="left">sex effect:</td>
+<td align="left">PVE: 2.62% (p: 0.111, 0.653)</td>
+</tr>
+<tr class="odd">
+<td align="left">race effect:</td>
+<td align="left">PVE: 0.38% (p: 0.581, 0.634)</td>
+</tr>
+<tr class="even">
+<td align="left">technical factors:</td>
+<td align="left">PVE: 7.4% (p: 0.224, 0.776, 0.74)</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Factor 3</caption>
+<tbody>
+<tr class="odd">
+<td align="left">PVE:</td>
+<td align="left">0.19%</td>
+</tr>
+<tr class="even">
+<td align="left">top tissues:</td>
+<td align="left">spinal cord (0.81), substantia nigra (0.41), hypothalamus (0.31), hippocampus (0.19), putamen bg (0.13)</td>
+</tr>
+<tr class="odd">
+<td align="left">overexpressed:</td>
+<td align="left">skeletal system development, embryonic skeletal system development, anterior/posterior pattern specification</td>
+</tr>
+<tr class="even">
+<td align="left">underexpressed:</td>
+<td align="left">telencephalon development, regulation of neurotransmitter levels, neurotransmitter transport</td>
+</tr>
+<tr class="odd">
+<td align="left">age effect:</td>
+<td align="left">PVE: 1.11% (p: 0.27)</td>
+</tr>
+<tr class="even">
+<td align="left">sex effect:</td>
+<td align="left">PVE: 2.22% (p: 0.116, 0.424)</td>
+</tr>
+<tr class="odd">
+<td align="left">race effect:</td>
+<td align="left">PVE: 0.11% (p: 0.638, 0.536)</td>
+</tr>
+<tr class="even">
+<td align="left">technical factors:</td>
+<td align="left">PVE: 6.32% (p: 0.503, 0.09, 0.036)</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Factor 4</caption>
+<tbody>
+<tr class="odd">
+<td align="left">PVE:</td>
+<td align="left">0.11%</td>
+</tr>
+<tr class="even">
+<td align="left">top tissues:</td>
+<td align="left">fr cortex (0.65), cortex (0.54), ac cortex (0.46), hippocampus (0.22), amygdala (0.12)</td>
+</tr>
+<tr class="odd">
+<td align="left">overexpressed:</td>
+<td align="left">potassium ion transport, fear response, regulation of membrane potential</td>
+</tr>
+<tr class="even">
+<td align="left">underexpressed:</td>
+<td align="left">sensory perception, pattern specification process, nephron tubule development</td>
+</tr>
+<tr class="odd">
+<td align="left">age effect:</td>
+<td align="left">PVE: 6.05% (p: 0.001)</td>
+</tr>
+<tr class="even">
+<td align="left">sex effect:</td>
+<td align="left">PVE: 2.59% (p: 0.016, 0.006)</td>
+</tr>
+<tr class="odd">
+<td align="left">race effect:</td>
+<td align="left">PVE: 0.18% (p: 0.964, 0.854)</td>
+</tr>
+<tr class="even">
+<td align="left">technical factors:</td>
+<td align="left">PVE: 5.13% (p: 0.409, 0.064, 0.055)</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Factor 6</caption>
+<tbody>
+<tr class="odd">
+<td align="left">PVE:</td>
+<td align="left">0.06%</td>
+</tr>
+<tr class="even">
+<td align="left">top tissues:</td>
+<td align="left">nuc acc bg (0.66), caudate bg (0.57), putamen bg (0.46), spinal cord (0.13)</td>
+</tr>
+<tr class="odd">
+<td align="left">overexpressed:</td>
+<td align="left">behavior, associative learning, learning or memory</td>
+</tr>
+<tr class="even">
+<td align="left">underexpressed:</td>
+<td align="left">forebrain development, cyclic-nucleotide-mediated signaling, second-messenger-mediated signaling</td>
+</tr>
+<tr class="odd">
+<td align="left">age effect:</td>
+<td align="left">PVE: 0.05% (p: 0.769)</td>
+</tr>
+<tr class="even">
+<td align="left">sex effect:</td>
+<td align="left">PVE: 0.37% (p: 0.507, 0.638)</td>
+</tr>
+<tr class="odd">
+<td align="left">race effect:</td>
+<td align="left">PVE: 0.7% (p: 0.758, 0.833, 0.577)</td>
+</tr>
+<tr class="even">
+<td align="left">technical factors:</td>
+<td align="left">PVE: 3.83% (p: 0.097, 0.148, 0.112)</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Factor 7</caption>
+<tbody>
+<tr class="odd">
+<td align="left">PVE:</td>
+<td align="left">0.04%</td>
+</tr>
+<tr class="even">
+<td align="left">top tissues:</td>
+<td align="left">hypothalamus (0.96), substantia nigra (0.21), nuc acc bg (0.17)</td>
+</tr>
+<tr class="odd">
+<td align="left">overexpressed:</td>
+<td align="left">behavior, signal release, neuropeptide signaling pathway</td>
+</tr>
+<tr class="even">
+<td align="left">underexpressed:</td>
+<td align="left">ensheathment of neurons, axon ensheathment, myelination</td>
+</tr>
+<tr class="odd">
+<td align="left">age effect:</td>
+<td align="left">PVE: 0.26% (p: 0.728)</td>
+</tr>
+<tr class="even">
+<td align="left">sex effect:</td>
+<td align="left">PVE: 0.21% (p: 0.757, 0.042)</td>
+</tr>
+<tr class="odd">
+<td align="left">race effect:</td>
+<td align="left">PVE: 0.29% (p: 0.658, 0.567)</td>
+</tr>
+<tr class="even">
+<td align="left">technical factors:</td>
+<td align="left">PVE: 4.71% (p: 0.617, 0.338, 0.273)</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Factor 5</caption>
+<tbody>
+<tr class="odd">
+<td align="left">PVE:</td>
+<td align="left">0.04%</td>
+</tr>
+<tr class="even">
+<td align="left">top tissues:</td>
+<td align="left">most tissues</td>
+</tr>
+<tr class="odd">
+<td align="left">overexpressed:</td>
+<td align="left">bicarbonate transport, neutrophil chemotaxis, leukocyte migration</td>
+</tr>
+<tr class="even">
+<td align="left">underexpressed:</td>
+<td align="left">neurotransmitter transport, modulation of chemical synaptic transmission, synaptic vesicle cycle</td>
+</tr>
+<tr class="odd">
+<td align="left">age effect:</td>
+<td align="left">PVE: 8.52% (p: 0.001)</td>
+</tr>
+<tr class="even">
+<td align="left">sex effect:</td>
+<td align="left">PVE: 0.17% (p: 0.378, 0.021)</td>
+</tr>
+<tr class="odd">
+<td align="left">race effect:</td>
+<td align="left">PVE: 2.45% (p: 0.971, 0.882, 0.1)</td>
+</tr>
+<tr class="even">
+<td align="left">technical factors:</td>
+<td align="left">PVE: 3.34% (p: 0.519, 0.708, 0.559)</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Factor 10</caption>
+<tbody>
+<tr class="odd">
+<td align="left">PVE:</td>
+<td align="left">0.03%</td>
+</tr>
+<tr class="even">
+<td align="left">top tissues:</td>
+<td align="left">most tissues</td>
+</tr>
+<tr class="odd">
+<td align="left">overexpressed:</td>
+<td align="left">positive regulation of response to external stimulus, regulation of receptor activity, L-glutamate transport</td>
+</tr>
+<tr class="even">
+<td align="left">underexpressed:</td>
+<td align="left">cell-matrix adhesion</td>
+</tr>
+<tr class="odd">
+<td align="left">age effect:</td>
+<td align="left">PVE: 3.8% (p: 0.012)</td>
+</tr>
+<tr class="even">
+<td align="left">sex effect:</td>
+<td align="left">PVE: 0.39% (p: 0.556, 0.967)</td>
+</tr>
+<tr class="odd">
+<td align="left">race effect:</td>
+<td align="left">PVE: 0.46% (p: 0.765, 0.621, 0.794)</td>
+</tr>
+<tr class="even">
+<td align="left">technical factors:</td>
+<td align="left">PVE: 9.59% (p: 0.287, 0.137, 0.035)</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Factor 8</caption>
+<tbody>
+<tr class="odd">
+<td align="left">PVE:</td>
+<td align="left">0.03%</td>
+</tr>
+<tr class="even">
+<td align="left">top tissues:</td>
+<td align="left">most tissues</td>
+</tr>
+<tr class="odd">
+<td align="left">overexpressed:</td>
+<td align="left">regulation of receptor activity</td>
+</tr>
+<tr class="even">
+<td align="left">underexpressed:</td>
+<td align="left">neutrophil activation, granulocyte activation, neutrophil mediated immunity</td>
+</tr>
+<tr class="odd">
+<td align="left">age effect:</td>
+<td align="left">PVE: 0.37% (p: 0.117)</td>
+</tr>
+<tr class="even">
+<td align="left">sex effect:</td>
+<td align="left">PVE: 2.95% (p: 0.064, 0)</td>
+</tr>
+<tr class="odd">
+<td align="left">race effect:</td>
+<td align="left">PVE: 2.2% (p: 0.297, 0.143, 0.46)</td>
+</tr>
+<tr class="even">
+<td align="left">technical factors:</td>
+<td align="left">PVE: 25.21% (p: 0.619, 0.12, 0.058)</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Factor 9</caption>
+<tbody>
+<tr class="odd">
+<td align="left">PVE:</td>
+<td align="left">0.02%</td>
+</tr>
+<tr class="even">
+<td align="left">top tissues:</td>
+<td align="left">most tissues</td>
+</tr>
+<tr class="odd">
+<td align="left">overexpressed:</td>
+<td align="left">response to lipopolysaccharide, regulation of angiogenesis, response to molecule of bacterial origin</td>
+</tr>
+<tr class="even">
+<td align="left">underexpressed:</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">age effect:</td>
+<td align="left">PVE: 6.66% (p: 0)</td>
+</tr>
+<tr class="even">
+<td align="left">sex effect:</td>
+<td align="left">PVE: 0.16% (p: 0.544, 0.203)</td>
+</tr>
+<tr class="odd">
+<td align="left">race effect:</td>
+<td align="left">PVE: 0.57% (p: 0.917, 0.911, 0.441)</td>
+</tr>
+<tr class="even">
+<td align="left">technical factors:</td>
+<td align="left">PVE: 2.92% (p: 0.028, 0.937, 0.972)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="varying-the-threshold" class="section level2">
+<h2>Varying the threshold</h2>
+<p>Below are plots of loadings with the nonmissingness threshold set at .05 (left) and .001 (right).</p>
+<pre class="r"><code>all.plots.comparison(brain05, brain001)</code></pre>
+<p><img src="figure/brain.Rmd/compareThresh-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/brain.Rmd/compareThresh-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/brain.Rmd/compareThresh-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/brain.Rmd/compareThresh-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/brain.Rmd/compareThresh-5.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()
+#&gt; R version 3.4.3 (2017-11-30)
+#&gt; Platform: x86_64-apple-darwin15.6.0 (64-bit)
+#&gt; Running under: macOS High Sierra 10.13.6
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+#&gt; 
+#&gt; locale:
+#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] parallel  stats4    stats     graphics  grDevices utils     datasets 
+#&gt; [8] methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt; [1] org.Hs.eg.db_3.5.0   AnnotationDbi_1.40.0 IRanges_2.12.0      
+#&gt; [4] S4Vectors_0.16.0     Biobase_2.38.0       BiocGenerics_0.24.0 
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] qvalue_2.10.0         clusterProfiler_3.6.0 fgsea_1.4.1          
+#&gt;  [4] xfun_0.4              purrr_0.2.4           reshape2_1.4.3       
+#&gt;  [7] splines_3.4.3         colorspace_1.3-2      htmltools_0.3.6      
+#&gt; [10] yaml_2.2.0            blob_1.1.0            rlang_0.3.0.1        
+#&gt; [13] R.oo_1.21.0           pillar_1.2.1          glue_1.3.0           
+#&gt; [16] DBI_0.7               R.utils_2.6.0         BiocParallel_1.12.0  
+#&gt; [19] bit64_0.9-7           bindrcpp_0.2          rvcheck_0.1.3        
+#&gt; [22] plyr_1.8.4            bindr_0.1             stringr_1.3.1        
+#&gt; [25] munsell_0.5.0         GOSemSim_2.4.1        gtable_0.2.0         
+#&gt; [28] workflowr_1.0.1       flashier_0.1.0        R.methodsS3_1.7.1    
+#&gt; [31] memoise_1.1.0         evaluate_0.12         knitr_1.20.22        
+#&gt; [34] highr_0.7             Rcpp_1.0.0            backports_1.1.2      
+#&gt; [37] scales_1.0.0          DO.db_2.9             bit_1.1-12           
+#&gt; [40] gridExtra_2.3         fastmatch_1.1-0       ggplot2_3.1.0        
+#&gt; [43] digest_0.6.18         stringi_1.2.4         dplyr_0.7.4          
+#&gt; [46] rprojroot_1.3-2       grid_3.4.3            DOSE_3.4.0           
+#&gt; [49] tools_3.4.3           magrittr_1.5          lazyeval_0.2.1       
+#&gt; [52] tibble_1.4.2          RSQLite_2.0           tidyr_0.7.2          
+#&gt; [55] whisker_0.3-2         GO.db_3.5.0           pkgconfig_2.0.1      
+#&gt; [58] data.table_1.10.4-3   assertthat_0.2.0      rmarkdown_1.10       
+#&gt; [61] R6_2.3.0              igraph_1.1.2          git2r_0.21.0         
+#&gt; [64] compiler_3.4.3</code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
