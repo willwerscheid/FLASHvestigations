@@ -1,0 +1,238 @@
+---
+title: "Tensor Decomposition of GTEx Brain Data"
+author: "Jason Willwerscheid"
+date: "1/8/2019"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>")
+```
+
+## Data
+
+TODO: describe data here.
+
+## Code
+
+for preprocessing GTEx data and fitting flash objects to the brain subtensor...
+```{r preprocess, code=readLines("../code/brain.R"), eval=FALSE}
+```
+
+...and for producing the plots and tables below.
+```{r allCode}
+# Flip signs so that individual loadings are mostly postive -------------------
+
+align.data <- function(brain) {
+  for (k in 1:brain$n.factors) {
+    if (mean(brain$loadings$normalized.loadings[[2]][, k]) < 0) {
+      brain$loadings$normalized.loadings[[2]][, k] <- -1 *
+        brain$loadings$normalized.loadings[[2]][, k]
+      brain$loadings$normalized.loadings[[3]][, k] <- -1 *
+        brain$loadings$normalized.loadings[[3]][, k]
+    }
+  }
+  return(brain)
+}
+
+# Barplots --------------------------------------------------------------------
+
+do.plots <- function(brain, k, incl.gene.plot = TRUE, fix.ind.ylim = FALSE) {
+  brain.colors <- c("hotpink", "gray40", "green3", "blue1", "blue3", 
+                    "gray20", "black", "lightpink", "red1", "green4", 
+                    "green1", "red4", "red3")
+
+  tissue.idx <- order(brain$loadings$normalized.loadings[[1]][, k],
+               decreasing = TRUE)
+  barplot(brain$loadings$normalized.loadings[[1]][tissue.idx, k],
+          col = brain.colors[tissue.idx], 
+          axisnames = FALSE,
+          xlab = "Tissues")
+  
+  if (incl.gene.plot) {
+    barplot(sort(brain$loadings$normalized.loadings[[3]][, k],
+                 decreasing = TRUE),
+            axisnames = FALSE,
+            xlab = "Genes",
+            main = paste0("Factor ", k, ": ", 
+                          100 * round(brain$pve[k], 4), "% PVE"))
+  }
+  
+  vals <- brain$loadings$normalized.loadings[[2]][, k]
+  exclusions <- brain$fit$exclusions[[k]][[2]]
+  if (length(exclusions) > 0)
+    vals <- vals[-exclusions]
+  ylim <- NULL
+  if (fix.ind.ylim)
+    ylim <- c(-0.15, 0.25)
+  barplot(sort(vals, decreasing = TRUE),
+          axisnames = FALSE,
+          xlab = "Individuals",
+          ylim = ylim)
+}
+
+all.plots <- function(brain) {
+  par(mfrow = c(2, 3))
+  for (k in order(brain$pve, decreasing = TRUE)) {
+    do.plots(brain, k)
+  }
+}
+
+all.plots.comparison <- function(brain1, brain2) {
+  par(mfrow = c(2, 4))
+  for (k in 1:brain1$n.factors) {
+    do.plots(brain1, k, incl.gene.plot = FALSE, fix.ind.ylim = TRUE)
+    do.plots(brain2, k, incl.gene.plot = FALSE, fix.ind.ylim = TRUE)
+  }
+}
+
+# Top tissues and genes -------------------------------------------------------
+
+get.top.tissues <- function(brain, k) {
+  tissue.names <- c("amygdala", "ac cortex", "caudate bg",
+                    "cerebral hemisphere", "cerebellum",
+                    "cortex", "fr cortex", "hippocampus",
+                    "hypothalamus", "nuc acc bg", "putamen bg",
+                    "spinal cord", "substantia nigra")
+  
+  loadings <- round(brain$loadings$normalized.loadings[[1]][, k], 2)
+  tissue.labels <- paste0(tissue.names, " (", loadings, ")")
+  
+  n.tissues <- sum(loadings > 0.1)
+  if (n.tissues > 6)
+    return("most tissues")
+
+  tissue.idx <- order(loadings, decreasing = TRUE)[1:n.tissues]
+  return(paste(tissue.labels[tissue.idx], collapse = ", "))
+}
+
+get.top.go <- function(brain, k, n.loadings = 200) {
+  loadings <- brain$loadings$normalized.loadings[[3]][, k]
+  names(loadings) <- sapply(strsplit(names(loadings), ".", fixed = TRUE), 
+                            `[`, 1)
+  overexpressed <- names(sort(loadings, decreasing = TRUE)[1:n.loadings])
+  cp.res <- clusterProfiler::enrichGO(overexpressed, "org.Hs.eg.db", 
+                                      ont = "BP", keyType = "ENSEMBL",
+                                      universe = names(loadings), 
+                                      minGSSize = 10)
+  over <- paste(head(cp.res, 3)$Description, collapse = ", ")
+  
+  if (k == 1) {
+    under <- NA
+  } else {
+    underexpressed <- names(sort(loadings, decreasing = FALSE)[1:n.loadings])
+    cp.res2 <- clusterProfiler::enrichGO(underexpressed, "org.Hs.eg.db", 
+                                         ont = "BP", keyType = "ENSEMBL",
+                                         universe = names(loadings), 
+                                         minGSSize = 10)
+    under <- paste(head(cp.res2, 3)$Description, collapse = ", ")
+  }
+  
+  list(over = over, under = under)
+}
+
+# Regression on demographic and technical variables ---------------------------
+
+do.regression <- function(brain, covar, k) {
+  excl <- brain$fit$exclusions[[k]][[2]]
+  loadings <- brain$loadings$normalized.loadings[[2]][, k]
+  if (length(excl) > 0) {
+    covar <- covar[-excl, ]
+    loadings <- loadings[-excl]
+  }
+  df <- cbind(covar, loadings = loadings)
+  mod <- lm(loadings ~ ., data = df)
+  
+  p.vals <- round(coefficients(summary(mod))[-1, 4], 3)
+  sex.col <- which(substr(names(p.vals), 1, 1) == "S")
+  age.col <- which(substr(names(p.vals), 1, 1) == "A")
+  race.col <- which(substr(names(p.vals), 1, 1) == "R")
+  tech.col <- (1:length(p.vals))[-c(sex.col, age.col, race.col)]
+  
+  mod.anova <- anova(mod)
+  resid.ss <- mod.anova$`Sum Sq`[8]
+  sex.pve <- mod.anova$`Sum Sq`[1] / resid.ss
+  age.pve <- mod.anova$`Sum Sq`[2] / resid.ss
+  race.pve <- mod.anova$`Sum Sq`[3] / resid.ss
+  tech.pve <- sum(mod.anova$`Sum Sq`[4:7]) / resid.ss
+  
+  sex.res <- paste0("PVE: ", 100 * round(sex.pve, 4), "% (p: ",
+                    paste(p.vals[sex.col], collapse = ", "), ")")
+  age.res <- paste0("PVE: ", 100 * round(age.pve, 4), "% (p: ",
+                    paste(p.vals[age.col], collapse = ", "), ")")
+  race.res <- paste0("PVE: ", 100 * round(race.pve, 4), "% (p: ",
+                    paste(p.vals[race.col], collapse = ", "), ")")
+  tech.res <- paste0("PVE: ", 100 * round(tech.pve, 4), "% (p: ",
+                    paste(p.vals[tech.col], collapse = ", "), ")")
+  
+  return(list(sex = sex.res, age = age.res, race = race.res, tech = tech.res))
+}
+
+# Table of results ------------------------------------------------------------
+
+do.table <- function(brain, covar, k) {
+  top.go <- get.top.go(brain, k)
+  regress.res <- do.regression(brain, covar, k)
+  tabl <- rbind(c("PVE: ", paste0(100 * round(brain$pve[k], 4), "%")),
+                c("top tissues: ", get.top.tissues(brain, k)),
+                c("overexpressed: ", top.go$over),
+                c("underexpressed: ", top.go$under),
+                c("age effect: ", regress.res$age),
+                c("sex effect: ", regress.res$sex),
+                c("race effect: ", regress.res$race),
+                c("technical factors:", regress.res$tech))
+  return(tabl)
+}
+
+all.tables <- function(brain, covar) {
+  cat("\n")
+  for (k in order(brain$pve, decreasing = TRUE)) {
+    print(knitr::kable(do.table(brain, covar, k), 
+                       caption = paste("Factor", k)))
+    cat("\n")
+  }
+}
+```
+
+## A first attempt
+
+At first, results look good. Different factors clearly correspond to different types of brain tissue. But there are problems....
+
+```{r firstAttempt}
+brain00 <- readRDS("./data/brain/brain00.rds")
+brain00 <- align.data(brain00)
+all.plots(brain00)
+```
+
+## Using a nonmissingness threshold
+
+Results look better.
+
+```{r brain05}
+brain05 <- readRDS("./data/brain/brain05.rds")
+brain05 <- align.data(brain05)
+
+brain001 <- readRDS("./data/brain/brain001.rds")
+brain001 <- align.data(brain001)
+
+all.plots(brain05)
+```
+
+## Factor details
+
+Note, in particular, the large differences from the paper in proportions of variance explained by demographic effects.
+
+```{r tables, results = "asis"}
+covar <- readRDS("~/Downloads/GTEx_v7_brain_covar.rds")
+all.tables(brain05, covar)
+```
+
+## Varying the threshold
+
+Below are plots of loadings with the nonmissingness threshold set at .05 (left) and .001 (right).
+
+```{r compareThresh}
+all.plots.comparison(brain05, brain001)
+```
