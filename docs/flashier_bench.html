@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Flashier benchmarking</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Flashier benchmarking</h1>
+<h4 class="author"><em>Jason Willwerscheid</em></h4>
+<h4 class="date"><em>1/11/2019</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2019-01-12</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/7951c3c5abaab0d3abf231ee2f892ca843e8efe0" target="_blank">7951c3c</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/gd_notes.Rmd
+
+Unstaged changes:
+    Modified:   analysis/brain.Rmd
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/7951c3c5abaab0d3abf231ee2f892ca843e8efe0/analysis/flashier_bench.Rmd" target="_blank">7951c3c</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-01-12
+</td>
+<td style="text-align:left;">
+workflowr::wflow_publish(“analysis/flashier_bench.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="gtex-eqtl-data" class="section level2">
+<h2>GTEx eQTL data</h2>
+<p>First, I fit the “strong” subset of SNP-gene association statistics used in Urbut, Wang, Carbonetto, and Stephens (2018) (the <code>strong.z</code> dataset found <a href="https://stephenslab.github.io/gtexresults/gtexdata.html">here</a>). I fit five FLASH factors with normal-mixture priors using <code>flashr</code> and using <code>flashier</code> with <code>backfit.order</code> set to <code>&quot;dropout&quot;</code>, <code>&quot;sequential&quot;</code>, and <code>&quot;montaigne&quot;</code>.</p>
+<p>The data is a dense 16k x 44 matrix that takes up 7.0 MB of memory when loaded into <code>R</code>. I used the <code>broadwl</code> partition of the <code>midway2</code> RCC cluster with 4 CPUs and 8 GB of memory, and I used Gao Wang’s <code>monitor_memory.py</code> script to test memory usage, as recommended in Peter Carbonetto’s large-scale data analysis <a href="https://github.com/pcarbo/R-survival-large-scale">tutorial</a>.</p>
+<table>
+<caption>GTEx eQTL data</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">VMS (GB)</th>
+<th align="right">RSS (GB)</th>
+<th align="right">Greedy (s/iter)</th>
+<th align="right">Backfit (s/iter)</th>
+<th align="right">Backfit iter</th>
+<th align="right">Obj diff</th>
+<th align="right">Time (min)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>flashr</td>
+<td align="right">0.67</td>
+<td align="right">0.42</td>
+<td align="right">0.56</td>
+<td align="right">0.41</td>
+<td align="right">195</td>
+<td align="right">1894</td>
+<td align="right">2.22</td>
+</tr>
+<tr class="even">
+<td>dropout</td>
+<td align="right">0.48</td>
+<td align="right">0.30</td>
+<td align="right">0.41</td>
+<td align="right">0.41</td>
+<td align="right">182</td>
+<td align="right">1894</td>
+<td align="right">1.98</td>
+</tr>
+<tr class="odd">
+<td>sequential</td>
+<td align="right"></td>
+<td align="right"></td>
+<td align="right"></td>
+<td align="right">0.40</td>
+<td align="right">210</td>
+<td align="right">1894</td>
+<td align="right">2.15</td>
+</tr>
+<tr class="even">
+<td>montaigne</td>
+<td align="right"></td>
+<td align="right"></td>
+<td align="right"></td>
+<td align="right">0.41</td>
+<td align="right">324</td>
+<td align="right">1894</td>
+<td align="right">2.97</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="montoro-et-al.-3-scrna-seq-data" class="section level2">
+<h2>Montoro et al. 3’ scRNA-seq data</h2>
+<p>Next, I fit the droplet-based 3’ scRNA-seq dataset analyzed in Montoro et al. (2018) (the data can be obtained <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE103354">here</a>). I performed a log-plus-one transform of the data, then I fit five FLASH factors using normal-mixture priors.</p>
+<p>The data matrix is 18k x 7k and takes up 1011 MB of memory when loaded into <code>R</code> as a dense matrix. However, only 9.3% of entries are nonzero, so the data can also be loaded as a sparse <code>Matrix</code> object, in which case the data takes up 143 MB of memory. I fit FLASH objects to the larger <code>matrix</code> object using the same four approaches used to fit the GTEx dataset, then I fit a FLASH object to the sparse <code>Matrix</code> object using <code>flashier</code> with <code>backfit.order = &quot;dropout&quot;</code> (<code>flashr</code> does not support objects of class <code>Matrix</code>). All fits were performed on the <code>broadwl</code> partition of the <code>midway2</code> RCC cluster using 4 CPUs and 32 GB of memory.</p>
+<table>
+<caption>Montoro 3’ scRNA data</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">VMS (GB)</th>
+<th align="right">RSS (GB)</th>
+<th align="right">Greedy (s/iter)</th>
+<th align="right">Backfit (s/iter)</th>
+<th align="right">Backfit iter</th>
+<th align="right">Obj diff</th>
+<th align="right">Time (min)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>flashr</td>
+<td align="right">18.4</td>
+<td align="right">18.1</td>
+<td align="right">23.49</td>
+<td align="right">15.64</td>
+<td align="right">250</td>
+<td align="right">27002</td>
+<td align="right">101.97</td>
+</tr>
+<tr class="even">
+<td>dropout</td>
+<td align="right">3.9</td>
+<td align="right">3.7</td>
+<td align="right">1.91</td>
+<td align="right">1.92</td>
+<td align="right">285</td>
+<td align="right">26982</td>
+<td align="right">11.27</td>
+</tr>
+<tr class="odd">
+<td>sequential</td>
+<td align="right"></td>
+<td align="right"></td>
+<td align="right"></td>
+<td align="right">2.71</td>
+<td align="right">250</td>
+<td align="right">27109</td>
+<td align="right">13.45</td>
+</tr>
+<tr class="even">
+<td>montaigne</td>
+<td align="right"></td>
+<td align="right"></td>
+<td align="right"></td>
+<td align="right">1.82</td>
+<td align="right">100</td>
+<td align="right">13004</td>
+<td align="right">5.20</td>
+</tr>
+<tr class="odd">
+<td>sparse</td>
+<td align="right">1.1</td>
+<td align="right">0.9</td>
+<td align="right">0.90</td>
+<td align="right">0.88</td>
+<td align="right">285</td>
+<td align="right">26982</td>
+<td align="right">5.22</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="montoro-et-al.-full-length-scrna-seq-data" class="section level2">
+<h2>Montoro et al. full-length scRNA-seq data</h2>
+<p>Finally, I fit the larger full-length scRNA “PulseSeq” dataset from Montoro et al. (2018). The dataset is about ten times larger than the droplet-based scRNA-seq dataset, so it was not feasible to use <code>flashr</code>. I again fit five factors using normal-mixture priors, and I set <code>backfit.order = &quot;dropout&quot;</code>.</p>
+<p>The dataset is 22k x 66k, with 9.3% of entries not equal to zero, and occupies 1.49 GB of memory when loaded into <code>R</code> as a sparse <code>Matrix</code> object. (I did not attempt to fit a larger <code>matrix</code> object.) The fit was again performed on <code>broadwl</code> using 4 CPUs and 32 GB of memory.</p>
+<table>
+<caption>Montoro full-length scRNA data</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">VMS (GB)</th>
+<th align="right">RSS (GB)</th>
+<th align="right">Greedy (s/iter)</th>
+<th align="right">Backfit (s/iter)</th>
+<th align="right">Backfit iter</th>
+<th align="right">Obj diff</th>
+<th align="right">Time (min)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>sparse</td>
+<td align="right">6</td>
+<td align="right">5.8</td>
+<td align="right">7.74</td>
+<td align="right">3.9</td>
+<td align="right">334</td>
+<td align="right">300023</td>
+<td align="right">27.23</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS High Sierra 10.13.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+ [1] workflowr_1.0.1   Rcpp_1.0.0        digest_0.6.18    
+ [4] rprojroot_1.3-2   R.methodsS3_1.7.1 backports_1.1.2  
+ [7] magrittr_1.5      git2r_0.21.0      evaluate_0.12    
+[10] highr_0.7         stringi_1.2.4     whisker_0.3-2    
+[13] R.oo_1.21.0       R.utils_2.6.0     rmarkdown_1.10   
+[16] tools_3.4.3       stringr_1.3.1     xfun_0.4         
+[19] yaml_2.2.0        compiler_3.4.3    htmltools_0.3.6  
+[22] knitr_1.20.22    </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
