@@ -1,0 +1,123 @@
+---
+title: "Flashier benchmarking"
+author: "Jason Willwerscheid"
+date: "1/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## GTEx eQTL data
+
+First, I fit the "strong" subset of SNP-gene association statistics used in Urbut, Wang, Carbonetto, and Stephens (2018) (the `strong.z` dataset found [here](https://stephenslab.github.io/gtexresults/gtexdata.html)). I fit five FLASH factors with normal-mixture priors using `flashr` and using `flashier` with `backfit.order` set to `"dropout"`, `"sequential"`, and `"montaigne"`.
+
+The data is a dense 16k x 44 matrix that takes up 7.0 MB of memory when loaded into `R`. I used the `broadwl` partition of the `midway2` RCC cluster with 4 CPUs and 8 GB of memory, and I used Gao Wang's `monitor_memory.py` script to test memory usage, as recommended in Peter Carbonetto's large-scale data analysis [tutorial](https://github.com/pcarbo/R-survival-large-scale).
+
+```{r res, echo = FALSE}
+cols <- c("VMS (GB)",
+          "RSS (GB)",
+          "Greedy (s/iter)",
+          "Backfit (s/iter)",
+          "Backfit iter",
+          "Obj diff",
+          "Time (min)")
+
+res <- data.frame(
+  mem.VMS <- c(0.67, 0.48, NA, NA),
+  mem.RSS <- c(0.42, 0.30, NA, NA),
+  time.per.iter.greedy <- c(53/(5 + 16 + 19 + 37 + 18), 
+                            44/(5 + 16 + 17 + 45 + 25),
+                            NA,
+                            NA),
+  time.per.iter.bf <- c(80/(5*39),
+                        75/(5*26 + 4*(37 - 26) + 2*(41 - 37)),
+                        85/(5*42),
+                        134/324),
+  niter.bf <- c(5*39, 5*26 + 4*(37 - 26) + 2*(41 - 37), 5*42, 324),
+  obj <- c(-1280814 + 1282708,
+           -1280814 + 1282708,
+           -1280814 + 1282708,
+           -1280814 + 1282708),
+  total.fit.time <- c(53 + 80, 44 + 75, 44 + 85, 44 + 134) / 60
+)
+row.names(res) <- c("flashr", "dropout", "sequential", "montaigne")
+
+options(knitr.kable.NA = "")
+knitr::kable(res, 
+             digits = 2, 
+             col.names = cols,
+             caption = "GTEx eQTL data")
+```
+
+## Montoro et al. 3' scRNA-seq data
+
+Next, I fit the droplet-based 3' scRNA-seq dataset analyzed in Montoro et al. (2018) (the data can be obtained [here](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE103354)). I performed a log-plus-one transform of the data, then I fit five FLASH factors using normal-mixture priors. 
+
+The data matrix is 18k x 7k and takes up 1011 MB of memory when loaded into `R` as a dense matrix. However, only 9.3% of entries are nonzero, so the data can also be loaded as a sparse `Matrix` object, in which case the data takes up 143 MB of memory. I fit FLASH objects to the larger `matrix` object using the same four approaches used to fit the GTEx dataset, then I fit a FLASH object to the sparse `Matrix` object using `flashier` with `backfit.order = "dropout"` (`flashr` does not support objects of class `Matrix`). All fits were performed on the `broadwl` partition of the `midway2` RCC cluster using 4 CPUs and 32 GB of memory.
+
+```{r res2, echo = FALSE}
+res <- data.frame(
+  mem.VMS <- c(18.4, 3.9, NA, NA, 1.1),
+  mem.RSS <- c(18.1, 3.7, NA, NA, 0.9),
+  time.per.iter.greedy <- c(2208/(5 + 12 + 6 + 33 + 38), 
+                            130/(4 + 12 + 6 + 33 + 13),
+                            NA,
+                            NA,
+                            61/(4 + 12 + 6 + 33 + 13)),
+  time.per.iter.bf <- c(3910/(5*50),
+                        546/(5*27 + 4*(63 - 27) + 3 + 2 + 1),
+                        677/(5*50),
+                        182/100,
+                        252/(5*27 + 4*(63 - 27) + 3 + 2 + 1)),
+  niter.bf <- c(5*50, 
+                5*27 + 4*(63 - 27) + 3 + 2 + 1, 
+                5*50, 
+                100,
+                5*27 + 4*(63 - 27) + 3 + 2 + 1),
+  obj <- c(132041244 - 132014242, 
+           132041224 - 132014242, 
+           132041351 - 132014242, 
+           132027246 - 132014242, 
+           132041224 - 132014242),
+  total.fit.time <- c(2208 + 3910, 
+                      130 + 546, 
+                      130 + 677, 
+                      130 + 182, 
+                      61 + 252) / 60
+)
+row.names(res) <- c("flashr", "dropout", "sequential", "montaigne", "sparse")
+
+options(knitr.kable.NA = "")
+knitr::kable(res, 
+             digits = 2, 
+             col.names = cols,
+             caption = "Montoro 3' scRNA data")
+```
+
+## Montoro et al. full-length scRNA-seq data
+
+Finally, I fit the larger full-length scRNA "PulseSeq" dataset from Montoro et al. (2018). The dataset is about ten times larger than the droplet-based scRNA-seq dataset, so it was not feasible to use `flashr`. I again fit five factors using normal-mixture priors, and I set `backfit.order = "dropout"`.
+
+The dataset is 22k x 66k, with 9.3% of entries not equal to zero, and occupies 1.49 GB of memory when loaded into `R` as a sparse `Matrix` object. (I did not attempt to fit a larger `matrix` object.) The fit was again performed on `broadwl` using 4 CPUs and 32 GB of memory.
+
+```{r res3, echo = FALSE}
+res <- data.frame(
+  mem.VMS <- 6.0,
+  mem.RSS <- 5.8,
+  time.per.iter.greedy <- 333 / (5 + 16 + 8 + 10 + 4),
+  time.per.iter.bf <- 1301 / (5*44 + 4*(45 - 44) + 3*(47 - 45) 
+                              + 2*(98 - 47) + 2),
+  niter.bf <- 5*44 + 4*(45 - 44) + 3*(47 - 45) + 2*(98 - 47) + 2,
+  obj <- 2033491332 - 2033191309,
+  total.fit.time <- (333 + 1301) / 60
+)
+row.names(res) <- c("sparse")
+
+options(knitr.kable.NA = "")
+knitr::kable(res, 
+             digits = 2, 
+             col.names = cols,
+             caption = "Montoro full-length scRNA data")
+```
