@@ -9,6 +9,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+**Update** 1/12/19: There are multiple errors in the formulae derived below which I haven't bothered to correct. For the correct formulae, see `flashier`  (in particular, see `factor_init.R`, `factor_update.R`, `tau.R`, and `objective.R`). Once one becomes accustomed to n-mode products (which are used throughout `flashier`), the code reads much more easily than this document. 
+
 ## Introduction
 
 Currently, FLASH does not perform well on large datasets. The reason is that it maintains and manipulates at least three matrices (`Rk`, `R2`, and `R2k`) which are each of the same size as the data matrix `Y`. When `var_type` is `by_row` or `by_column`, a fourth large matrix `tau` is maintained, and when there is missing data, still another large matrix is stored (a copy of `Y`, with missing data imputed to be zero). 
@@ -17,11 +19,11 @@ Let $Y \in \mathbb{R}^{n \times p}$, and let $k$ be the rank of the flash fit. I
 
 I outline two improved implementations. In the first, the only $n \times p$ matrices that are required are the data matrix $Y$ with `NA`s set to zero and, if there is missing data, a matrix $Z$ with zeroes where data is missing and ones elsewhere. The original data matrix is not needed. I never modify or transpose $Y$ or $Z$, so the total memory requirements should not be much larger than the memory needed to store $Y$ and $Z$.
 
-The second assumes that one is willing to maintain a matrix of residuals $R$, initialized at $Y$ ($Z$ is kept to ensure that $R$ has zeroes where data is missing). The primary disadvantage is that one cannot take advantage of sparsity in $Y$, and it requires some care to update $R$ correctly and at the right time, but it is potentially much faster than the first implementation.
+The second assumes that one is willing to maintain a matrix of residuals $R$, initialized at $Y$ ($Z$ is kept to ensure that $R$ has zeroes where data is missing). The primary disadvantage is that one cannot take advantage of sparsity in $Y$, and it requires some care to update $R$ correctly and at the right time, but it is potentially much faster than the first implementation. (**Update** 1/12/19: this approach rarely provides a noticeable speedup over the first approach.)
 
 ## Initializing factors
 
-To initialize a new factor, we currently form a matrix of residuals, run an SVD-type algorithm on it, and then initialize using the leading singular vector. However, we don't need to recourse to an external package here. Since we only require one singular vector, the minimization problem is simple. When there is no missing data, the problem is to solve:
+To initialize a new factor, we currently form a matrix of residuals, run an SVD-type algorithm on it, and then initialize using the leading singular vector. However, we don't need to recur to an external package here. Since we only require one singular vector, the minimization problem is simple. When there is no missing data, the problem is to solve:
 $$ (l_k, f_k) 
 = {\arg \min}_{l_k, f_k} \| R_{-k} - l_k f_k' \|_F^2
 = {\arg \min}_{l_k, f_k} \| Y - L_{-k}F_{-k}' - l_k f_k' \|_F^2 $$
