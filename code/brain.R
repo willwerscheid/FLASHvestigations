@@ -114,7 +114,8 @@ brain.flash$sampler <- NULL
 
 saveRDS(brain.flash, "./data/brain/brain05.rds")
 
-# Other "brain" objects were created using a different nonmissing.thresh.
+# Other "brain" objects were created using different settings for
+#   nonmissing.thresh.
 
 
 # Create data frame containing demographics and technical factors -------------
@@ -149,5 +150,5 @@ SEQDATE <- SEQDATE[rownames(brain.flash$loadings$normalized.loadings[[2]]), ]
 
 all.covar <- cbind(phenotypes, SEQDATE)
 
-# Do not upload to GitHub (data includes protected attributes)!
+# Do not upload to GitHub (data includes protected attributes!)
 saveRDS(all.covar, "~/Downloads/GTEx_v7_brain_covar.rds")
