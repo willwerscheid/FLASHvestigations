@@ -6,6 +6,16 @@ output:
     toc: false
 ---
 
+## Featured
+
+[Note 5.](flashier_features.html) New features included in the `flashier` implementation of EBMF.
+
+[Investigation 21.](flashier_bench.html) Benchmarking `flashier`.
+
+[Note 4.](matrix_ops.html) An early set of notes that identified key ways to reduce the memory footprint of `flashr`. The good ideas were implemented in `flashier`. Not all of the ideas were good.
+
+[Investigation 22.](brain.html) A `flashier` analysis of the GTEx brain subtensor.
+
 ## In Progress
 
 Investigations 8 and 9 implement parallel backfitting updates.
@@ -80,7 +90,3 @@ Since the newest versions of `flashr` use a home-grown initialization function, 
 The changes tested in Investigation 15 were implemented in version 0.6-2 of `flashr`.
 
 * [Investigation 15.](scalar_tau.html) Tests an implementation of changes to the way `tau` is stored, as discussed  [here](https://github.com/stephenslab/flashr/issues/83).
-
-The suggestions outlined in Note 4 were implemented in version X.X-X of `flashr`.
-
-* [Note 4.](matrix_ops.html) Outlines several ways to modify the core FLASH algorithms in view of reducing the memory footprint and improving overall performance. 
