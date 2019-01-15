@@ -1,5 +1,5 @@
 ---
-title: "Tensor Decomposition of GTEx Brain Data"
+title: "Tensor Decomposition of GTEx brain data"
 author: "Jason Willwerscheid"
 date: "1/8/2019"
 output:
@@ -39,7 +39,8 @@ align.data <- function(brain) {
 
 # Barplots --------------------------------------------------------------------
 
-do.plots <- function(brain, k, incl.gene.plot = TRUE, fix.ind.ylim = FALSE) {
+do.plots <- function(brain, k, incl.gene.plot = TRUE, fix.ind.ylim = FALSE,
+                     remove.exclusions = TRUE) {
   brain.colors <- c("hotpink", "gray40", "green3", "blue1", "blue3", 
                     "gray20", "black", "lightpink", "red1", "green4", 
                     "green1", "red4", "red3")
@@ -52,18 +53,24 @@ do.plots <- function(brain, k, incl.gene.plot = TRUE, fix.ind.ylim = FALSE) {
           xlab = "Tissues")
   
   if (incl.gene.plot) {
+    if (brain$pve[k] < 1e-4) {
+      pve.str <- "<0.01% PVE"
+    } else {
+      pve.str <- paste0(100 * round(brain$pve[k], 4), "% PVE")
+    }
     barplot(sort(brain$loadings$normalized.loadings[[3]][, k],
                  decreasing = TRUE),
             axisnames = FALSE,
             xlab = "Genes",
-            main = paste0("Factor ", k, ": ", 
-                          100 * round(brain$pve[k], 4), "% PVE"))
+            main = paste0("Factor ", k, ": ", pve.str))
   }
   
   vals <- brain$loadings$normalized.loadings[[2]][, k]
-  exclusions <- brain$fit$exclusions[[k]][[2]]
-  if (length(exclusions) > 0)
-    vals <- vals[-exclusions]
+  if (remove.exclusions) {
+    exclusions <- brain$fit$exclusions[[k]][[2]]
+    if (length(exclusions) > 0)
+      vals <- vals[-exclusions]
+  }
   ylim <- NULL
   if (fix.ind.ylim)
     ylim <- c(-0.15, 0.25)
@@ -73,10 +80,10 @@ do.plots <- function(brain, k, incl.gene.plot = TRUE, fix.ind.ylim = FALSE) {
           ylim = ylim)
 }
 
-all.plots <- function(brain) {
+all.plots <- function(brain, remove.exclusions = TRUE) {
   par(mfrow = c(2, 3))
   for (k in order(brain$pve, decreasing = TRUE)) {
-    do.plots(brain, k)
+    do.plots(brain, k, remove.exclusions = remove.exclusions)
   }
 }
 
@@ -92,7 +99,7 @@ all.plots.comparison <- function(brain1, brain2) {
 
 get.top.tissues <- function(brain, k) {
   tissue.names <- c("amygdala", "ac cortex", "caudate bg",
-                    "cerebral hemisphere", "cerebellum",
+                    "cerebellar hemisphere", "cerebellum",
                     "cortex", "fr cortex", "hippocampus",
                     "hypothalamus", "nuc acc bg", "putamen bg",
                     "spinal cord", "substantia nigra")
@@ -138,6 +145,7 @@ get.top.go <- function(brain, k, n.loadings = 200) {
 do.regression <- function(brain, covar, k) {
   excl <- brain$fit$exclusions[[k]][[2]]
   loadings <- brain$loadings$normalized.loadings[[2]][, k]
+  
   if (length(excl) > 0) {
     covar <- covar[-excl, ]
     loadings <- loadings[-excl]
@@ -145,18 +153,22 @@ do.regression <- function(brain, covar, k) {
   df <- cbind(covar, loadings = loadings)
   mod <- lm(loadings ~ ., data = df)
   
-  p.vals <- round(coefficients(summary(mod))[-1, 4], 3)
-  sex.col <- which(substr(names(p.vals), 1, 1) == "S")
-  age.col <- which(substr(names(p.vals), 1, 1) == "A")
-  race.col <- which(substr(names(p.vals), 1, 1) == "R")
+  p.vals <- coefficients(summary(mod))[-1, 4]
+  p.vals <- ifelse(p.vals < 0.01, 
+                   formatC(p.vals, digits = 1, format = "e"),
+                   round(p.vals, digits = 2))
+  sex.col <- which(substr(names(p.vals), 1, 3) == "SEX")
+  age.col <- which(substr(names(p.vals), 1, 3) == "AGE")
+  race.col <- which(substr(names(p.vals), 1, 4) == "RACE")
   tech.col <- (1:length(p.vals))[-c(sex.col, age.col, race.col)]
   
   mod.anova <- anova(mod)
-  resid.ss <- mod.anova$`Sum Sq`[8]
-  sex.pve <- mod.anova$`Sum Sq`[1] / resid.ss
-  age.pve <- mod.anova$`Sum Sq`[2] / resid.ss
-  race.pve <- mod.anova$`Sum Sq`[3] / resid.ss
-  tech.pve <- sum(mod.anova$`Sum Sq`[4:7]) / resid.ss
+  ss <- sum(mod.anova$`Sum Sq`)
+  sex.pve <- mod.anova["SEX", ]$`Sum Sq` / ss
+  age.pve <- mod.anova["AGE", ]$`Sum Sq` / ss
+  race.pve <- mod.anova["RACE", ]$`Sum Sq` / ss
+  tech.pve <- sum(mod.anova[c("DTHVNT", "TRISCHD", 
+                              "logTRISCHD", "SEQDATE"), ]$`Sum Sq`) / ss
   
   sex.res <- paste0("PVE: ", 100 * round(sex.pve, 4), "% (p: ",
                     paste(p.vals[sex.col], collapse = ", "), ")")
@@ -208,7 +220,7 @@ all.plots(brain00)
 
 ## Using a nonmissingness threshold
 
-Results look better.
+Loadings on individuals and factor PVEs look much better.
 
 ```{r brain05}
 brain05 <- readRDS("./data/brain/brain05.rds")
@@ -220,19 +232,53 @@ brain001 <- align.data(brain001)
 all.plots(brain05)
 ```
 
-## Factor details
+## Factor details (10 factors)
 
 Note, in particular, the large differences from the paper in proportions of variance explained by demographic effects.
 
 ```{r tables, results = "asis"}
 covar <- readRDS("~/Downloads/GTEx_v7_brain_covar.rds")
+# Two of the race levels only have one tissue each, so I remove them.
+covar$RACE[covar$RACE %in% c(1, 4)] <- NA
+covar$RACE <- droplevels(covar$RACE)
+
 all.tables(brain05, covar)
+```
+
+## Choosing a class of priors
+
+Below are loadings obtained by putting `normal.mixture`, `nonnegative`, and `nonzero.mode` priors on individual loadings.
+
+```{r comparePriors}
+brain2f.nm <- align.data(readRDS("./data/brain/brain2f_nm.rds"))
+brain2f.nn <- align.data(readRDS("./data/brain/brain2f_nn.rds"))
+brain2f.nz <- align.data(readRDS("./data/brain/brain2f_nz.rds"))
+all.plots(brain2f.nm, remove.exclusions = FALSE)
+all.plots(brain2f.nn, remove.exclusions = FALSE)
+all.plots(brain2f.nz, remove.exclusions = FALSE)
 ```
 
 ## Varying the threshold
 
-Below are plots of loadings with the nonmissingness threshold set at .05 (left) and .001 (right).
+I compare the loadings obtained by setting the nonmissingness threshold to .05 (left) and .001 (right).
 
 ```{r compareThresh}
 all.plots.comparison(brain05, brain001)
+```
+
+## Increasing the number of factors
+
+I add another 10 factors to the `brain05` flash object and backfit.
+
+```{r 20f}
+brain20f <- readRDS("./data/brain/brain20f.rds")
+brain20f <- align.data(brain20f)
+
+all.plots(brain20f)
+```
+
+## Factor details (20 factors)
+
+```{r 20tables, results = "asis"}
+all.tables(brain20f, covar)
 ```
