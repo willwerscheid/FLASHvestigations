@@ -1,0 +1,72 @@
+---
+title: "Benchmarking my_etruncnorm"
+author: "Jason Willwerscheid"
+date: "1/26/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+I benchmark the rewritten `my_etruncnorm` and `my_vtruncnorm` against their counterparts in package `truncnorm`. I expect `truncnorm` to be a bit faster since it calls into C, but my hope is that the difference isn't too noticeable.
+
+```{r code}
+devtools::load_all("~/Github/ashr")
+library(truncnorm)
+
+do_benchmark <- function(ns, FUN1, FUN2) {
+  means <- matrix(0, nrow = 2, ncol = length(ns))
+  medians <- matrix(0, nrow = 2, ncol = length(ns))
+  for (i in 1:length(ns)) {
+    times = floor(10000000 / ns[i])
+    res <- microbenchmark::microbenchmark(FUN1(a, b), 
+                                          FUN2(a, b), 
+                                          setup = {
+                                            a = -abs(rnorm(ns[i]))
+                                            b = abs(rnorm(ns[i]))
+                                          }, 
+                                          times = times,
+                                          unit = "ms")
+    res <- summary(res)
+    means[, i] <- res$mean
+    medians[, i] <- res$median
+  }
+  return(list(means = means, medians = medians))
+}
+```
+
+## etruncnorm
+
+```{r etruncnorm}
+ns <- 10^seq(1, 6, by = 0.5)
+res <- do_benchmark(ns, etruncnorm, my_etruncnorm)
+ymin <- log10(min(c(res$means, res$medians)))
+ymax <- log10(max(c(res$means, res$medians)))
+plot(log10(ns), log10(res$means[2, ]), type = 'l', lty = 1, col = "red",
+     xlab = "log10(n)", ylab = "log10(ms)", ylim = c(ymin, ymax))
+lines(log10(ns), log10(res$medians[2, ]), col = "red", lty = 2)
+lines(log10(ns), log10(res$means[1, ]), col = "black", lty = 1)
+lines(log10(ns), log10(res$medians[1, ]), col = "black", lty = 2)
+legend("topleft", legend = c("my_etrunc (mean)", "my_etrunc (median)",
+                             "etrunc (mean)", "etrunc (median)"), 
+       lty = c(1, 2, 1, 2), col = c("red", "red", "black", "black"))
+```
+
+## vtruncnorm
+
+```{r vtruncnorm}
+res <- do_benchmark(ns, vtruncnorm, my_vtruncnorm)
+ymin <- log10(min(c(res$means, res$medians)))
+ymax <- log10(max(c(res$means, res$medians)))
+plot(log10(ns), log10(res$means[2, ]), type = 'l', lty = 1, col = "red",
+     xlab = "log10(n)", ylab = "log10(ms)", ylim = c(ymin, ymax))
+lines(log10(ns), log10(res$medians[2, ]), col = "red", lty = 2)
+lines(log10(ns), log10(res$means[1, ]), col = "black", lty = 1)
+lines(log10(ns), log10(res$medians[1, ]), col = "black", lty = 2)
+legend("topleft", legend = c("my_vtrunc (mean)", "my_vtrunc (median)",
+                             "vtrunc (mean)", "vtrunc (median)"), 
+       lty = c(1, 2, 1, 2), col = c("red", "red", "black", "black"))
+```
