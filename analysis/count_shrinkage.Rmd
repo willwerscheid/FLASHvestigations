@@ -1,0 +1,214 @@
+---
+title: "An ASH approach to finding structure in count data"
+author: "Jason Willwerscheid"
+date: "2/12/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+Let's say that we're interested in finding structure in a matrix of counts $Y$. The usual approach is to set $X = \log(Y + \alpha)$ for some pseudocount $\alpha > 0$ and then look for low-rank structure in $X$. 
+
+Here I propose a different method that uses `ashr` to shrink the counts $Y_{ij}$.
+
+## Model for the data-generating process
+
+One can consider the individual counts $Y_{ij}$ as Poisson random variables with (unknown) rate parameters $\lambda_{ij}$. And in fact, it's structure in $\Lambda$ that we're primarily interested in, not structure in $Y$.
+
+The simplest model is that
+$$ \Lambda = \exp(LF'), $$
+but in most applications one wouldn't expect the matrix of log-rates to be low-rank. A more useful model puts
+$$ \Lambda = \exp(LF' + E), $$ where $E_{ij} \sim N(0, \sigma_{ij}^2)$ (with some structure in the matrix of variances $\Sigma$).
+
+## Fitting $LF'$ using ASH and FLASH
+
+I propose a three-step approach to estimating $LF'$:
+
+1. Since we're really interested in $\Lambda$ (not $Y$), I propose that we first estimate $\Lambda$ using `ashr`. The ASH model is
+$$ Y_{ij} \sim \text{Poisson}(\lambda_{ij});\ \lambda_{ij} \sim g, $$
+where $g$ is a unimodal prior to be estimated. (One can also run `ashr` separately on each row or column of $Y$ to get row-wise or column-wise priors.) Conveniently, `ashr` directly gives estimates for posterior means $\mathbb{E} (\lambda_{ij})$ and posterior variances $\text{Var}(\lambda_{ij})$. 
+
+2. Transform the ASH estimates using the approximations
+$$ X_{ij} := \mathbb{E} (\log \lambda_{ij}) \approx \log \mathbb{E}(\lambda_{ij}) -  \frac{\text{Var}(\lambda_{ij})}{2(\mathbb{E}(\lambda_{ij}))^2}$$
+and
+$$ S_{ij}^2 := \text{Var} (\log \lambda_{ij}) \approx \frac{\text{Var}(\lambda_{ij})}{(\mathbb{E}(\lambda_{ij}))^2} $$
+(Importantly, the posterior means are all non-zero so that one can directly take logarithms. No pseudo-counts are needed.)
+
+3. Run FLASH on the data $(X, S)$ with the additional variance in $E$ specified as a "noisy" variance structure. In other words, the FLASH model is
+$$ X_{ij} = LF' + E^{(1)} + E^{(2)} $$
+where $E_{ij}^{(1)} \sim N(0, S_{ij}^2)$ (with the $S_{ij}$s fixed) and $E_{ij}^{(2)} \sim N(0, 1 / \tau_{ij})$ (with the $\tau_{ij}$s to be estimated). (And, as usual, there are priors on each column of $L$ and $F$.) The variance structure in $E^{(2)}$ matches the assumed noise structure in $\log (\Lambda)$. 
+
+## Example
+
+To illustrate why this approach is a good idea, I consider a simple example with a low-intensity baseline and a block of high intensity:
+
+```{r simY}
+set.seed(666)
+n <- 120
+p <- 160
+
+log.lambda <- (-1 + outer(c(rep(2, n / 4), rep(0, 3 * n / 4)),
+                          c(rep(2, p / 4), rep(0, 3 * p / 4)))
+               + 0.5 * rnorm(n * p))
+Y <- matrix(rpois(n * p, exp(log.lambda)), n, p)
+
+# Define some variables to make analysis easier.
+hi.rows <- rep(FALSE, n)
+hi.rows[1:(n / 4)] <- TRUE
+hi.cols <- rep(FALSE, p)
+hi.cols[1:(p / 4)] <- TRUE
+
+# Show heatmap.
+image(x = 1:n, y = 1:p, z = log.lambda, xlab = "x index", ylab = "y index")
+```
+
+The usual approach would run FLASH as follows.
+
+```{r usualFLASH}
+# Use my own branch due to bug in stephens999/master.
+devtools::load_all("~/Github/ashr")
+devtools::load_all("~/Github/flashier")
+
+fl.log1p <- flashier(log1p(Y), var.type = 0,
+                     greedy.Kmax = 10, verbose = 1)
+```
+
+My proposed approach is the following.
+
+```{r newFLASH}
+# 1. Get ASH estimates for lambda (posterior means and SDs).
+Y.ash <- ashr::ash(betahat = rep(0, n * p), sebetahat = 1, 
+                   lik = ashr::lik_pois(as.vector(Y)), mode = 0,
+                   method = "shrink")
+pm <- Y.ash$result$PosteriorMean
+psd <- Y.ash$result$PosteriorSD
+
+# 2. Transform to log scale.
+X <- matrix(log(pm) - psd^2 / pm^2, n, p)
+S <- matrix(psd / pm, n, p)
+
+# 3. Run FLASH.
+fl.ash <- flashier(X, S = S, var.type = 0, 
+                   greedy.Kmax = 10, verbose = 1)
+```
+
+For comparison, I also run `ashr` separately on each column of $Y$.
+
+```{r colFLASH}
+colwise.pm <- array(0, dim = dim(Y))
+colwise.psd <- array(0, dim = dim(Y))
+for (i in 1:p) {
+  # For a fair comparison, I use the same grid that was selected by Y.ash.
+  col.ash <- ashr::ash(betahat = rep(0, n), sebetahat = 1, 
+                       lik = ashr::lik_pois(Y[, i]), mode = 0,
+                       method = "shrink", mixsd = Y.ash$fitted_g$b)
+  colwise.pm[, i] <- col.ash$result$PosteriorMean
+  colwise.psd[, i] <- col.ash$result$PosteriorSD
+}
+
+colw.X <- log(colwise.pm) - colwise.psd^2 / colwise.pm^2
+colw.S <- colwise.psd / colwise.pm
+
+fl.colw <- flashier(colw.X, S = colw.S, var.type = 0, 
+                    greedy.Kmax = 10, verbose = 1)
+```
+
+I calculate the root mean-squared error and the mean shrinkage obtained using each method. I calculate separately for large $\lambda_{ij}$, small $\lambda_{ij}$ in columns where all values are small, and small $\lambda_{ij}$ in columns where some values are large.
+
+```{r res.table}
+get.res <- function(fl) {
+  preds <- flashier:::lowrank.expand(get.EF(fl$fit))
+  hi.resid <- preds[hi.rows, hi.cols] - log.lambda[hi.rows, hi.cols]
+  lo.resid <- preds[, !hi.cols] - log.lambda[, !hi.cols]
+  mix.resid <- preds[!hi.rows, hi.cols] - log.lambda[!hi.rows, hi.cols]
+  res <- list(rmse.hi = sqrt(mean((hi.resid)^2)),
+              rmse.lo = sqrt(mean((lo.resid)^2)),
+              rmse.mix = sqrt(mean((mix.resid)^2)),
+              shrnk.hi = -mean(hi.resid),
+              shrnk.lo = -mean(lo.resid),
+              shrnk.mix = -mean(mix.resid))
+  res <- lapply(res, round, 2)
+  return(res)
+}
+
+res <- data.frame(cbind(get.res(fl.log1p), get.res(fl.ash), get.res(fl.colw)))
+var.names <- c("RMSE (lg vals)", 
+               "RMSE (sm vals)", 
+               "RMSE (sm vals in lg cols)", 
+               "Mean shrinkage (lg vals)",
+               "Mean shrinkage (sm vals)", 
+               "Mean shrinkage (sm vals in lg cols)")
+meth.names <- c("log1p", "ASH", "col-wise ASH")
+row.names(res) <- var.names
+colnames(res) <- meth.names
+
+knitr::kable(res, digits = 2)
+```
+
+If we care about controlling FDR, then the RMSE is unimportant on its own. Indeed, while the log1p and column-wise ASH methods perform similarly in terms of RMSE, the log1p approach tends to yield anti-conservative estimates for small $\lambda_{ij}$, while the column-wise ASH approach "errs" by shrinking the estimates towards zero. The latter is much more desirable from the perspective of FDR control.
+
+I'm surprised that `ashr` shrinks small $\lambda_{ij}$ more in columns where there are some large $\lambda_{ij}$: I expected the opposite. For a reason that at present eludes me, `ashr` is more likely to put mass on the null component when some values are large (when all are small, then it rarely puts any mass on the null component).
+
+
+
+<!-- ## Appendix -->
+
+<!-- Under the first model, of course, -->
+<!-- $$ \mathbb{E}(Y_{ij}) = \text{Var}(Y_{ij}) = \exp(LF')_{ij} $$ -->
+
+<!-- The second model is a lognormal mixture of Poissons, which has mean -->
+<!-- $$ \mathbb{E}(Y_{ij}) = \mu_{ij} := \exp \left((LF')_{ij} + \frac{\sigma_{ij}^2}{2} \right) $$ -->
+<!-- and variance -->
+<!-- $$ \text{Var}(Y_{ij}) = \mu_{ij} + \mu_{ij}^2 \left( e^{\sigma_{ij}^2} - 1\right). $$ -->
+<!-- (These results are from [Aitchison (1989)](https://academic.oup.com/biomet/article-abstract/76/4/643/254386).) -->
+<!-- The first term $\mu_{ij}$ can be thought of as Poisson variance and the second as an overdispersion term. Interestingly, the second term is exactly the variance of a lognormal distribution with mean (not log-mean!) $\mu_{ij}$ and log-variance $\sigma_{ij}^2$. -->
+
+
+<!-- ## Log transform -->
+
+<!-- The most common approach is to add a pseudocount $\alpha$ to the count matrix and look for structure in the matrix $g(Y) = \log(Y + \alpha)$. The corresponding FLASH model is -->
+<!-- $$ \log(Y + \alpha) \sim LF' + E. $$ -->
+<!-- Here I will write $E_{ij} \sim N(0, 1 / \tau_{ij})$ to minimize confusion with the variances corresponding to the data-generating process. Equivalently, -->
+<!-- $$ Y \sim \text{Lognormal}((LF')_{ij}, 1 / \tau_{ij}) - \alpha, $$ -->
+<!-- so $Y$ has mean -->
+<!-- $$ \mathbb{E}(Y_{ij}) = \nu_{ij} - \alpha:= \exp \left((LF')_{ij} + \frac{1}{2 \tau_{ij}} \right) - \alpha$$ -->
+<!-- and variance -->
+<!-- $$ \text{Var}(Y_{ij}) = \nu_{ij}^2 \left( e^{1 / \tau_{ij}} - 1\right).$$ -->
+
+<!-- ### Poisson model -->
+
+<!-- Under the simpler Poisson model for the data-generating process (where means and variances must be equal), $\tau_{ij}$ is completely determined by $(LF')_{ij}$ and satisfies -->
+<!-- $$ 1 / \tau_{ij} = \log \left( 1 + \frac{1}{\nu_{ij}} - \frac{\alpha}{\nu_{ij}^2} \right).$$ -->
+<!-- When $\alpha$ is small and $\nu_{ij}$ is large, then $\tau_{ij} \approx \nu_{ij} \approx \exp(LF')_{ij}$. Further, it can be shown that $\exp(LF')_{ij}$ is a passably tight lower bound for $\tau_{ij}$ for all values of $(LF')_{ij}$. -->
+
+<!-- A very simple way to account for this Poisson variance in FLASH is to estimate $\exp(LF')$ at $\text{pmax}(Y, 1)$ (possibly, shrinking the entries of $Y$ via `mashr` or univariate `ashr`), so that the precisions $\tau_{ij}$ are fixed at $\text{pmax}(Y, 1)$ (or at $\text{pmax}(\text{ashr}(Y), 1)$) throughout the fitting process. -->
+
+<!-- (Note that it's not a good idea to update precisions based on successive estimates of $LF'$ because the ELBO is then no longer guaranteed to increase monotonically. It's best to estimate them once and for all -- and underestimation is better than overestimation.) -->
+
+<!-- ### Overdispersed model -->
+
+<!-- As mentioned, the "true" variance structure includes both a Poisson term and an overdispersion term. And, again as mentioned, the overdispersion term is identical to the variance of a lognormal distribution that has the same mean as the Poisson. In a sense, then (ignoring $\alpha$ for the moment), the overdispersion term is exactly modeled by running FLASH on the log-transformed data; the only difference is that the FLASH model omits the Poisson portion of the variance. An important consequence is that if we want to model structure in the matrix of (data-generating) variances $\Sigma$ (e.g., row- or column-specific variances), then it is sufficient to impose the same structure on the matrix of (FLASH) variances $1 / \tau$. -->
+
+<!-- To also take into account the Poisson portion of the variance, I suggest using a trick similar to the above: simply add a fixed amount of variance to the usual FLASH variance estimates. That is, fit the "noisy" variance structure -->
+<!-- $$ Y = LF' + E^{(1)} + E^{(2)}, $$ -->
+<!-- where $E_{ij}^{(1)} \sim N(0, \text{pmin}(1 / Y_{ij}, 1))$ represents the fixed (Poisson) variance and $E_{ij}^{(2)} \sim N(0, 1 / \tau_{ij})$ represents the overdispersion term that is to be estimated. -->
+
+<!-- ## Anscombe transform -->
+
+<!-- It is tempting to use the Anscombe transform, fix all precisions at 1 (with, possibly, higher precisions for small counts), and be done with it. This approach is appropriate for the simpler Poisson model, but it is inadequate to modeling the overdispersed model. -->
+
+<!-- To show this, I consider the square-root transform -->
+<!-- $$ g(Y_{ij}) = 2 \sqrt{Y_{ij}} $$ -->
+<!-- which corresponds to the flash model -->
+<!-- $$ \sqrt{Y_{ij}} \sim \frac{1}{2} N((LF')_{ij}, 1 / \tau_{ij}) $$ -->
+<!-- or, equivalently, -->
+<!-- $$ Y_{ij} \sim \frac{1}{4 \tau_{ij}} \chi_1^2 (\sqrt{\tau_{ij}} (LF')_{ij}) $$ -->
+<!-- which has mean -->
+<!-- $$ \mathbb{E} (Y_{ij}) = \kappa_{ij} := \frac{1}{4} \left( (LF')_{ij}^2 + \frac{1}{\tau_{ij}} \right)$$ -->
+<!-- and variance -->
+<!-- $$ \text{Var} (Y_{ij}) = \frac{1}{4 \tau_{ij}} \left( (LF')_{ij}^2 + \frac{1}{2\tau_{ij}} \right) = \frac{1}{\tau_{ij}} \left( \kappa_{ij} - \frac{1}{8 \tau_{ij}} \right).$$ -->
+<!-- Note, in particular, that the effect of the scaling parameter $\tau_{ij}$ is, roughly, to scale the variances according to the means $\kappa_{ij}$, whereas the "true" model includes a parameter that scales the variances according to the *squared* means $\nu_{ij}$. Thus I would expect the square-root (and Anscombe) transform to do poorly on the overdispersed model. -->
