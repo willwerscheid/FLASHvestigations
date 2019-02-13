@@ -315,7 +315,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2019-01-28</p>
+<p><strong>Last updated:</strong> 2019-02-13</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -324,7 +324,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/d5bdcbc4e9c645a4dc2238c765f4f6c71d69bbf9" target="_blank">d5bdcbc</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/0b17dcf0da6d37eab90e8318b97f1b1cab361aa3" target="_blank">0b17dcf</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -335,11 +335,16 @@ Ignored files:
     Ignored:    docs/figure/.DS_Store
 
 Untracked files:
+    Untracked:  analysis/count_preproc_r1.Rmd
     Untracked:  analysis/gd_notes.Rmd
+    Untracked:  code/count_sim.R
     Untracked:  code/pathways.R
     Untracked:  data/lowrank/
-    Untracked:  data/tmp.rds
-    Untracked:  data/tmp2.rds
+    Untracked:  data/tmp14.rds
+    Untracked:  data/tmpdata.rds
+    Untracked:  data/tmplfsr.rds
+    Untracked:  docs/figure/count_notes.Rmd/
+    Untracked:  temp_debug.RDS
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -368,6 +373,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/0b17dcf0da6d37eab90e8318b97f1b1cab361aa3/analysis/index.Rmd" target="_blank">0b17dcf</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-02-13
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/index.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/ba4e5750b24aef6ea02b14784914b92eaaa7cd37/docs/index.html" target="_blank">ba4e575</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-01-28
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -2026,7 +2065,7 @@ Start workflowr project.
 <h2>Featured</h2>
 <p><a href="flashier_features.html">Note 5.</a> New features included in the <code>flashier</code> implementation of EBMF.</p>
 <p><a href="flashier_bench.html">Investigation 21.</a> Benchmarking <code>flashier</code>.</p>
-<p><a href="brain.html">Investigation 22.</a> A <code>flashier</code> analysis of the GTEx brain subtensor.</p>
+<p><a href="count_shrinkage.html">Investigation 24.</a> I propose a new approach to factorizing count data that uses adaptive shrinkage to estimate the rate matrix.</p>
 </div>
 <div id="in-progress" class="section level2">
 <h2>In Progress</h2>
@@ -2055,6 +2094,7 @@ Start workflowr project.
 <li><p><a href="trachea2.html">Investigation 19b.</a> I redo my analysis of the “droplet” dataset, but this time I follow the authors’ preprocessing steps. Results are, I think, of much lower quality.</p></li>
 <li><p><a href="pulseseq.html">Investigation 20.</a> An analysis of the larger “pulse-seq” dataset from Montoro et al.</p></li>
 </ul>
+<p><a href="brain.html">Investigation 22.</a> A <code>flashier</code> analysis of the GTEx brain subtensor.</p>
 <p><a href="truncnorm.html">Investigation 23.</a> I benchmark the newly rewritten <code>my_etruncnorm</code> and <code>my_vtruncnorm</code> functions in package <code>ashr</code> against their counterparts in package <code>truncnorm</code>.</p>
 </div>
 <div id="still-relevant" class="section level2">
