@@ -44,15 +44,15 @@ where $E_{ij}^{(1)} \sim N(0, S_{ij}^2)$ (with the $S_{ij}$s fixed) and $E_{ij}^
 
 ## Example
 
-To illustrate why this approach is a good idea, I consider a simple example with a low-intensity baseline and a block of high intensity:
+To illustrate the approach, I consider a very simple example with a low-intensity baseline and a block of higher intensity:
 
 ```{r simY}
 set.seed(666)
 n <- 120
 p <- 160
 
-log.lambda <- (-1 + outer(c(rep(2, n / 4), rep(0, 3 * n / 4)),
-                          c(rep(2, p / 4), rep(0, 3 * p / 4)))
+log.lambda <- (-1 + outer(c(2 * abs(rnorm(0.25 * n)), rep(0, 0.75 * n)),
+                          c(abs(rnorm(0.25 * p)), rep(0, 0.75 * p)))
                + 0.5 * rnorm(n * p))
 Y <- matrix(rpois(n * p, exp(log.lambda)), n, p)
 
@@ -117,14 +117,22 @@ fl.colw <- flashier(colw.X, S = colw.S, var.type = 0,
                     greedy.Kmax = 10, verbose = 1)
 ```
 
+(Note that three factors are fit here. The third is loaded on a small number of columns and accounts for a very small proportion of total variance. Such factors are frequently found when using Gaussian methods on Poisson data.)
+
 I calculate the root mean-squared error and the mean shrinkage obtained using each method. I calculate separately for large $\lambda_{ij}$, small $\lambda_{ij}$ in columns where all values are small, and small $\lambda_{ij}$ in columns where some values are large.
 
 ```{r res.table}
-get.res <- function(fl) {
+get.res <- function(fl, log1p) {
   preds <- flashier:::lowrank.expand(get.EF(fl$fit))
-  hi.resid <- preds[hi.rows, hi.cols] - log.lambda[hi.rows, hi.cols]
-  lo.resid <- preds[, !hi.cols] - log.lambda[, !hi.cols]
-  mix.resid <- preds[!hi.rows, hi.cols] - log.lambda[!hi.rows, hi.cols]
+  # "De-bias" the log1p method by transforming everything to the log1p scale.
+  true.vals <- log(exp(log.lambda) + 1)
+  if (!log1p)
+    preds <- log(exp(preds) + 1)
+  
+  hi.resid <- preds[hi.rows, hi.cols] - true.vals[hi.rows, hi.cols]
+  lo.resid <- preds[, !hi.cols] - true.vals[, !hi.cols]
+  mix.resid <- preds[!hi.rows, hi.cols] - true.vals[!hi.rows, hi.cols]
+  
   res <- list(rmse.hi = sqrt(mean((hi.resid)^2)),
               rmse.lo = sqrt(mean((lo.resid)^2)),
               rmse.mix = sqrt(mean((mix.resid)^2)),
@@ -132,10 +140,13 @@ get.res <- function(fl) {
               shrnk.lo = -mean(lo.resid),
               shrnk.mix = -mean(mix.resid))
   res <- lapply(res, round, 2)
+  
   return(res)
 }
 
-res <- data.frame(cbind(get.res(fl.log1p), get.res(fl.ash), get.res(fl.colw)))
+res <- data.frame(cbind(get.res(fl.log1p, TRUE), 
+                        get.res(fl.ash, FALSE), 
+                        get.res(fl.colw, FALSE)))
 var.names <- c("RMSE (lg vals)", 
                "RMSE (sm vals)", 
                "RMSE (sm vals in lg cols)", 
@@ -149,10 +160,7 @@ colnames(res) <- meth.names
 knitr::kable(res, digits = 2)
 ```
 
-If we care about controlling FDR, then the RMSE is unimportant on its own. Indeed, while the log1p and column-wise ASH methods perform similarly in terms of RMSE, the log1p approach tends to yield anti-conservative estimates for small $\lambda_{ij}$, while the column-wise ASH approach "errs" by shrinking the estimates towards zero. The latter is much more desirable from the perspective of FDR control.
-
-I'm surprised that `ashr` shrinks small $\lambda_{ij}$ more in columns where there are some large $\lambda_{ij}$: I expected the opposite. For a reason that at present eludes me, `ashr` is more likely to put mass on the null component when some values are large (when all are small, then it rarely puts any mass on the null component).
-
+Although the usual log1p method does best in terms of RMSE, the new methods do better in shrinking larger rates, which might be advantageous for FDR control. Another possible advantage of the new methods is that they give estimates on the log scale and are thus easy to interpret. The log1p approach can return negative fitted values, which must be thresholded to zero after the fact.
 
 
 <!-- ## Appendix -->
