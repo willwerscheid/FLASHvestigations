@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>An ASH approach to finding structure in count data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">An ASH approach to finding structure in count data</h1>
+<h4 class="author"><em>Jason Willwerscheid</em></h4>
+<h4 class="date"><em>2/12/2019</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2019-02-13</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/5eaa875aa97b815b07d175aaaee3782a22576b3e" target="_blank">5eaa875</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/count_preproc_r1.Rmd
+    Untracked:  analysis/gd_notes.Rmd
+    Untracked:  code/count_sim.R
+    Untracked:  code/pathways.R
+    Untracked:  data/lowrank/
+    Untracked:  data/tmp14.rds
+    Untracked:  data/tmpdata.rds
+    Untracked:  data/tmplfsr.rds
+    Untracked:  docs/figure/count_notes.Rmd/
+    Untracked:  temp_debug.RDS
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/5eaa875aa97b815b07d175aaaee3782a22576b3e/analysis/count_shrinkage.Rmd" target="_blank">5eaa875</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-02-13
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/count_shrinkage.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Let’s say that we’re interested in finding structure in a matrix of counts <span class="math inline">\(Y\)</span>. The usual approach is to set <span class="math inline">\(X = \log(Y + \alpha)\)</span> for some pseudocount <span class="math inline">\(\alpha &gt; 0\)</span> and then look for low-rank structure in <span class="math inline">\(X\)</span>.</p>
+<p>Here I propose a different method that uses <code>ashr</code> to shrink the counts <span class="math inline">\(Y_{ij}\)</span>.</p>
+</div>
+<div id="model-for-the-data-generating-process" class="section level2">
+<h2>Model for the data-generating process</h2>
+<p>One can consider the individual counts <span class="math inline">\(Y_{ij}\)</span> as Poisson random variables with (unknown) rate parameters <span class="math inline">\(\lambda_{ij}\)</span>. And in fact, it’s structure in <span class="math inline">\(\Lambda\)</span> that we’re primarily interested in, not structure in <span class="math inline">\(Y\)</span>.</p>
+<p>The simplest model is that <span class="math display">\[ \Lambda = \exp(LF&#39;), \]</span> but in most applications one wouldn’t expect the matrix of log-rates to be low-rank. A more useful model puts <span class="math display">\[ \Lambda = \exp(LF&#39; + E), \]</span> where <span class="math inline">\(E_{ij} \sim N(0, \sigma_{ij}^2)\)</span> (with some structure in the matrix of variances <span class="math inline">\(\Sigma\)</span>).</p>
+</div>
+<div id="fitting-lf-using-ash-and-flash" class="section level2">
+<h2>Fitting <span class="math inline">\(LF&#39;\)</span> using ASH and FLASH</h2>
+<p>I propose a three-step approach to estimating <span class="math inline">\(LF&#39;\)</span>:</p>
+<ol style="list-style-type: decimal">
+<li><p>Since we’re really interested in <span class="math inline">\(\Lambda\)</span> (not <span class="math inline">\(Y\)</span>), I propose that we first estimate <span class="math inline">\(\Lambda\)</span> using <code>ashr</code>. The ASH model is <span class="math display">\[ Y_{ij} \sim \text{Poisson}(\lambda_{ij});\ \lambda_{ij} \sim g, \]</span> where <span class="math inline">\(g\)</span> is a unimodal prior to be estimated. (One can also run <code>ashr</code> separately on each row or column of <span class="math inline">\(Y\)</span> to get row-wise or column-wise priors.) Conveniently, <code>ashr</code> directly gives estimates for posterior means <span class="math inline">\(\mathbb{E} (\lambda_{ij})\)</span> and posterior variances <span class="math inline">\(\text{Var}(\lambda_{ij})\)</span>.</p></li>
+<li><p>Transform the ASH estimates using the approximations <span class="math display">\[ X_{ij} := \mathbb{E} (\log \lambda_{ij}) \approx \log \mathbb{E}(\lambda_{ij}) -  \frac{\text{Var}(\lambda_{ij})}{2(\mathbb{E}(\lambda_{ij}))^2}\]</span> and <span class="math display">\[ S_{ij}^2 := \text{Var} (\log \lambda_{ij}) \approx \frac{\text{Var}(\lambda_{ij})}{(\mathbb{E}(\lambda_{ij}))^2} \]</span> (Importantly, the posterior means are all non-zero so that one can directly take logarithms. No pseudo-counts are needed.)</p></li>
+<li><p>Run FLASH on the data <span class="math inline">\((X, S)\)</span> with the additional variance in <span class="math inline">\(E\)</span> specified as a “noisy” variance structure. In other words, the FLASH model is <span class="math display">\[ X_{ij} = LF&#39; + E^{(1)} + E^{(2)} \]</span> where <span class="math inline">\(E_{ij}^{(1)} \sim N(0, S_{ij}^2)\)</span> (with the <span class="math inline">\(S_{ij}\)</span>s fixed) and <span class="math inline">\(E_{ij}^{(2)} \sim N(0, 1 / \tau_{ij})\)</span> (with the <span class="math inline">\(\tau_{ij}\)</span>s to be estimated). (And, as usual, there are priors on each column of <span class="math inline">\(L\)</span> and <span class="math inline">\(F\)</span>.) The variance structure in <span class="math inline">\(E^{(2)}\)</span> matches the assumed noise structure in <span class="math inline">\(\log (\Lambda)\)</span>.</p></li>
+</ol>
+</div>
+<div id="example" class="section level2">
+<h2>Example</h2>
+<p>To illustrate why this approach is a good idea, I consider a simple example with a low-intensity baseline and a block of high intensity:</p>
+<pre class="r"><code>set.seed(666)
+n &lt;- 120
+p &lt;- 160
+
+log.lambda &lt;- (-1 + outer(c(rep(2, n / 4), rep(0, 3 * n / 4)),
+                          c(rep(2, p / 4), rep(0, 3 * p / 4)))
+               + 0.5 * rnorm(n * p))
+Y &lt;- matrix(rpois(n * p, exp(log.lambda)), n, p)
+
+# Define some variables to make analysis easier.
+hi.rows &lt;- rep(FALSE, n)
+hi.rows[1:(n / 4)] &lt;- TRUE
+hi.cols &lt;- rep(FALSE, p)
+hi.cols[1:(p / 4)] &lt;- TRUE
+
+# Show heatmap.
+image(x = 1:n, y = 1:p, z = log.lambda, xlab = &quot;x index&quot;, ylab = &quot;y index&quot;)</code></pre>
+<p><img src="figure/count_shrinkage.Rmd/simY-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The usual approach would run FLASH as follows.</p>
+<pre class="r"><code># Use my own branch due to bug in stephens999/master.
+devtools::load_all(&quot;~/Github/ashr&quot;)</code></pre>
+<pre><code>Loading ashr</code></pre>
+<pre class="r"><code>devtools::load_all(&quot;~/Github/flashier&quot;)</code></pre>
+<pre><code>Loading flashier</code></pre>
+<pre class="r"><code>fl.log1p &lt;- flashier(log1p(Y), var.type = 0,
+                     greedy.Kmax = 10, verbose = 1)</code></pre>
+<pre><code>Initializing flash object...
+Adding factor 1 to flash object...
+Adding factor 2 to flash object...
+Adding factor 3 to flash object...
+Factor doesn&#39;t increase objective and won&#39;t be added.
+Nullchecking 2 factors...
+Wrapping up...
+Done.</code></pre>
+<p>My proposed approach is the following.</p>
+<pre class="r"><code># 1. Get ASH estimates for lambda (posterior means and SDs).
+Y.ash &lt;- ashr::ash(betahat = rep(0, n * p), sebetahat = 1, 
+                   lik = ashr::lik_pois(as.vector(Y)), mode = 0,
+                   method = &quot;shrink&quot;)
+pm &lt;- Y.ash$result$PosteriorMean
+psd &lt;- Y.ash$result$PosteriorSD
+
+# 2. Transform to log scale.
+X &lt;- matrix(log(pm) - psd^2 / pm^2, n, p)
+S &lt;- matrix(psd / pm, n, p)
+
+# 3. Run FLASH.
+fl.ash &lt;- flashier(X, S = S, var.type = 0, 
+                   greedy.Kmax = 10, verbose = 1)</code></pre>
+<pre><code>Initializing flash object...
+Adding factor 1 to flash object...
+Adding factor 2 to flash object...
+Adding factor 3 to flash object...
+An iteration decreased the objective by 1.75e+00. Try backfitting with warmstarts.
+Factor doesn&#39;t increase objective and won&#39;t be added.
+Nullchecking 2 factors...
+Wrapping up...
+Done.</code></pre>
+<p>For comparison, I also run <code>ashr</code> separately on each column of <span class="math inline">\(Y\)</span>.</p>
+<pre class="r"><code>colwise.pm &lt;- array(0, dim = dim(Y))
+colwise.psd &lt;- array(0, dim = dim(Y))
+for (i in 1:p) {
+  # For a fair comparison, I use the same grid that was selected by Y.ash.
+  col.ash &lt;- ashr::ash(betahat = rep(0, n), sebetahat = 1, 
+                       lik = ashr::lik_pois(Y[, i]), mode = 0,
+                       method = &quot;shrink&quot;, mixsd = Y.ash$fitted_g$b)
+  colwise.pm[, i] &lt;- col.ash$result$PosteriorMean
+  colwise.psd[, i] &lt;- col.ash$result$PosteriorSD
+}
+
+colw.X &lt;- log(colwise.pm) - colwise.psd^2 / colwise.pm^2
+colw.S &lt;- colwise.psd / colwise.pm
+
+fl.colw &lt;- flashier(colw.X, S = colw.S, var.type = 0, 
+                    greedy.Kmax = 10, verbose = 1)</code></pre>
+<pre><code>Initializing flash object...
+Adding factor 1 to flash object...
+Adding factor 2 to flash object...
+Adding factor 3 to flash object...
+Factor doesn&#39;t increase objective and won&#39;t be added.
+Nullchecking 2 factors...
+Wrapping up...
+Done.</code></pre>
+<p>I calculate the root mean-squared error and the mean shrinkage obtained using each method. I calculate separately for large <span class="math inline">\(\lambda_{ij}\)</span>, small <span class="math inline">\(\lambda_{ij}\)</span> in columns where all values are small, and small <span class="math inline">\(\lambda_{ij}\)</span> in columns where some values are large.</p>
+<pre class="r"><code>get.res &lt;- function(fl) {
+  preds &lt;- flashier:::lowrank.expand(get.EF(fl$fit))
+  hi.resid &lt;- preds[hi.rows, hi.cols] - log.lambda[hi.rows, hi.cols]
+  lo.resid &lt;- preds[, !hi.cols] - log.lambda[, !hi.cols]
+  mix.resid &lt;- preds[!hi.rows, hi.cols] - log.lambda[!hi.rows, hi.cols]
+  res &lt;- list(rmse.hi = sqrt(mean((hi.resid)^2)),
+              rmse.lo = sqrt(mean((lo.resid)^2)),
+              rmse.mix = sqrt(mean((mix.resid)^2)),
+              shrnk.hi = -mean(hi.resid),
+              shrnk.lo = -mean(lo.resid),
+              shrnk.mix = -mean(mix.resid))
+  res &lt;- lapply(res, round, 2)
+  return(res)
+}
+
+res &lt;- data.frame(cbind(get.res(fl.log1p), get.res(fl.ash), get.res(fl.colw)))
+var.names &lt;- c(&quot;RMSE (lg vals)&quot;, 
+               &quot;RMSE (sm vals)&quot;, 
+               &quot;RMSE (sm vals in lg cols)&quot;, 
+               &quot;Mean shrinkage (lg vals)&quot;,
+               &quot;Mean shrinkage (sm vals)&quot;, 
+               &quot;Mean shrinkage (sm vals in lg cols)&quot;)
+meth.names &lt;- c(&quot;log1p&quot;, &quot;ASH&quot;, &quot;col-wise ASH&quot;)
+row.names(res) &lt;- var.names
+colnames(res) &lt;- meth.names
+
+knitr::kable(res, digits = 2)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">log1p</th>
+<th align="left">ASH</th>
+<th align="left">col-wise ASH</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>RMSE (lg vals)</td>
+<td align="left">0.48</td>
+<td align="left">0.49</td>
+<td align="left">0.49</td>
+</tr>
+<tr class="even">
+<td>RMSE (sm vals)</td>
+<td align="left">1.34</td>
+<td align="left">0.6</td>
+<td align="left">0.57</td>
+</tr>
+<tr class="odd">
+<td>RMSE (sm vals in lg cols)</td>
+<td align="left">1.36</td>
+<td align="left">0.59</td>
+<td align="left">1.11</td>
+</tr>
+<tr class="even">
+<td>Mean shrinkage (lg vals)</td>
+<td align="left">0</td>
+<td align="left">-0.08</td>
+<td align="left">-0.05</td>
+</tr>
+<tr class="odd">
+<td>Mean shrinkage (sm vals)</td>
+<td align="left">-1.25</td>
+<td align="left">0.33</td>
+<td align="left">0.2</td>
+</tr>
+<tr class="even">
+<td>Mean shrinkage (sm vals in lg cols)</td>
+<td align="left">-1.27</td>
+<td align="left">0.31</td>
+<td align="left">0.89</td>
+</tr>
+</tbody>
+</table>
+<p>If we care about controlling FDR, then the RMSE is unimportant on its own. Indeed, while the log1p and column-wise ASH methods perform similarly in terms of RMSE, the log1p approach tends to yield anti-conservative estimates for small <span class="math inline">\(\lambda_{ij}\)</span>, while the column-wise ASH approach “errs” by shrinking the estimates towards zero. The latter is much more desirable from the perspective of FDR control.</p>
+<p>I’m surprised that <code>ashr</code> shrinks small <span class="math inline">\(\lambda_{ij}\)</span> more in columns where there are some large <span class="math inline">\(\lambda_{ij}\)</span>: I expected the opposite. For a reason that at present eludes me, <code>ashr</code> is more likely to put mass on the null component when some values are large (when all are small, then it rarely puts any mass on the null component).</p>
+<!-- ## Appendix -->
+<!-- Under the first model, of course, -->
+<!-- $$ \mathbb{E}(Y_{ij}) = \text{Var}(Y_{ij}) = \exp(LF')_{ij} $$ -->
+<!-- The second model is a lognormal mixture of Poissons, which has mean -->
+<!-- $$ \mathbb{E}(Y_{ij}) = \mu_{ij} := \exp \left((LF')_{ij} + \frac{\sigma_{ij}^2}{2} \right) $$ -->
+<!-- and variance -->
+<!-- $$ \text{Var}(Y_{ij}) = \mu_{ij} + \mu_{ij}^2 \left( e^{\sigma_{ij}^2} - 1\right). $$ -->
+<!-- (These results are from [Aitchison (1989)](https://academic.oup.com/biomet/article-abstract/76/4/643/254386).) -->
+<!-- The first term $\mu_{ij}$ can be thought of as Poisson variance and the second as an overdispersion term. Interestingly, the second term is exactly the variance of a lognormal distribution with mean (not log-mean!) $\mu_{ij}$ and log-variance $\sigma_{ij}^2$. -->
+<!-- ## Log transform -->
+<!-- The most common approach is to add a pseudocount $\alpha$ to the count matrix and look for structure in the matrix $g(Y) = \log(Y + \alpha)$. The corresponding FLASH model is -->
+<!-- $$ \log(Y + \alpha) \sim LF' + E. $$ -->
+<!-- Here I will write $E_{ij} \sim N(0, 1 / \tau_{ij})$ to minimize confusion with the variances corresponding to the data-generating process. Equivalently, -->
+<!-- $$ Y \sim \text{Lognormal}((LF')_{ij}, 1 / \tau_{ij}) - \alpha, $$ -->
+<!-- so $Y$ has mean -->
+<!-- $$ \mathbb{E}(Y_{ij}) = \nu_{ij} - \alpha:= \exp \left((LF')_{ij} + \frac{1}{2 \tau_{ij}} \right) - \alpha$$ -->
+<!-- and variance -->
+<!-- $$ \text{Var}(Y_{ij}) = \nu_{ij}^2 \left( e^{1 / \tau_{ij}} - 1\right).$$ -->
+<!-- ### Poisson model -->
+<!-- Under the simpler Poisson model for the data-generating process (where means and variances must be equal), $\tau_{ij}$ is completely determined by $(LF')_{ij}$ and satisfies -->
+<!-- $$ 1 / \tau_{ij} = \log \left( 1 + \frac{1}{\nu_{ij}} - \frac{\alpha}{\nu_{ij}^2} \right).$$ -->
+<!-- When $\alpha$ is small and $\nu_{ij}$ is large, then $\tau_{ij} \approx \nu_{ij} \approx \exp(LF')_{ij}$. Further, it can be shown that $\exp(LF')_{ij}$ is a passably tight lower bound for $\tau_{ij}$ for all values of $(LF')_{ij}$. -->
+<!-- A very simple way to account for this Poisson variance in FLASH is to estimate $\exp(LF')$ at $\text{pmax}(Y, 1)$ (possibly, shrinking the entries of $Y$ via `mashr` or univariate `ashr`), so that the precisions $\tau_{ij}$ are fixed at $\text{pmax}(Y, 1)$ (or at $\text{pmax}(\text{ashr}(Y), 1)$) throughout the fitting process. -->
+<!-- (Note that it's not a good idea to update precisions based on successive estimates of $LF'$ because the ELBO is then no longer guaranteed to increase monotonically. It's best to estimate them once and for all -- and underestimation is better than overestimation.) -->
+<!-- ### Overdispersed model -->
+<!-- As mentioned, the "true" variance structure includes both a Poisson term and an overdispersion term. And, again as mentioned, the overdispersion term is identical to the variance of a lognormal distribution that has the same mean as the Poisson. In a sense, then (ignoring $\alpha$ for the moment), the overdispersion term is exactly modeled by running FLASH on the log-transformed data; the only difference is that the FLASH model omits the Poisson portion of the variance. An important consequence is that if we want to model structure in the matrix of (data-generating) variances $\Sigma$ (e.g., row- or column-specific variances), then it is sufficient to impose the same structure on the matrix of (FLASH) variances $1 / \tau$. -->
+<!-- To also take into account the Poisson portion of the variance, I suggest using a trick similar to the above: simply add a fixed amount of variance to the usual FLASH variance estimates. That is, fit the "noisy" variance structure -->
+<!-- $$ Y = LF' + E^{(1)} + E^{(2)}, $$ -->
+<!-- where $E_{ij}^{(1)} \sim N(0, \text{pmin}(1 / Y_{ij}, 1))$ represents the fixed (Poisson) variance and $E_{ij}^{(2)} \sim N(0, 1 / \tau_{ij})$ represents the overdispersion term that is to be estimated. -->
+<!-- ## Anscombe transform -->
+<!-- It is tempting to use the Anscombe transform, fix all precisions at 1 (with, possibly, higher precisions for small counts), and be done with it. This approach is appropriate for the simpler Poisson model, but it is inadequate to modeling the overdispersed model. -->
+<!-- To show this, I consider the square-root transform -->
+<!-- $$ g(Y_{ij}) = 2 \sqrt{Y_{ij}} $$ -->
+<!-- which corresponds to the flash model -->
+<!-- $$ \sqrt{Y_{ij}} \sim \frac{1}{2} N((LF')_{ij}, 1 / \tau_{ij}) $$ -->
+<!-- or, equivalently, -->
+<!-- $$ Y_{ij} \sim \frac{1}{4 \tau_{ij}} \chi_1^2 (\sqrt{\tau_{ij}} (LF')_{ij}) $$ -->
+<!-- which has mean -->
+<!-- $$ \mathbb{E} (Y_{ij}) = \kappa_{ij} := \frac{1}{4} \left( (LF')_{ij}^2 + \frac{1}{\tau_{ij}} \right)$$ -->
+<!-- and variance -->
+<!-- $$ \text{Var} (Y_{ij}) = \frac{1}{4 \tau_{ij}} \left( (LF')_{ij}^2 + \frac{1}{2\tau_{ij}} \right) = \frac{1}{\tau_{ij}} \left( \kappa_{ij} - \frac{1}{8 \tau_{ij}} \right).$$ -->
+<!-- Note, in particular, that the effect of the scaling parameter $\tau_{ij}$ is, roughly, to scale the variances according to the means $\kappa_{ij}$, whereas the "true" model includes a parameter that scales the variances according to the *squared* means $\nu_{ij}$. Thus I would expect the square-root (and Anscombe) transform to do poorly on the overdispersed model. -->
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS High Sierra 10.13.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] flashier_0.1.0 ashr_2.2-29   
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.0          highr_0.7           compiler_3.4.3     
+ [4] git2r_0.21.0        workflowr_1.0.1     R.methodsS3_1.7.1  
+ [7] R.utils_2.6.0       iterators_1.0.10    tools_3.4.3        
+[10] testthat_2.0.1      digest_0.6.18       etrunct_0.1        
+[13] evaluate_0.12       memoise_1.1.0       lattice_0.20-35    
+[16] rlang_0.3.0.1       Matrix_1.2-14       foreach_1.4.4      
+[19] commonmark_1.4      yaml_2.2.0          parallel_3.4.3     
+[22] ebnm_0.1-17         xfun_0.4            withr_2.1.2.9000   
+[25] stringr_1.3.1       roxygen2_6.0.1.9000 xml2_1.2.0         
+[28] knitr_1.21.6        devtools_1.13.4     rprojroot_1.3-2    
+[31] grid_3.4.3          R6_2.3.0            rmarkdown_1.11     
+[34] mixsqp_0.1-97       magrittr_1.5        whisker_0.3-2      
+[37] backports_1.1.2     codetools_0.2-15    htmltools_0.3.6    
+[40] MASS_7.3-48         assertthat_0.2.0    stringi_1.2.4      
+[43] doParallel_1.0.14   pscl_1.5.2          truncnorm_1.0-8    
+[46] SQUAREM_2017.10-1   R.oo_1.21.0        </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
