@@ -12,7 +12,7 @@ output:
 
 [Investigation 21.](flashier_bench.html) Benchmarking `flashier`.
 
-[Investigation 22.](brain.html) A `flashier` analysis of the GTEx brain subtensor.
+[Investigation 24.](count_shrinkage.html) I propose a new approach to factorizing count data that uses adaptive shrinkage to estimate the rate matrix.
 
 
 ## In Progress
@@ -50,6 +50,8 @@ Investigations 19a-b and 20 try FLASH out on large single-cell RNA datasets.
 * [Investigation 19b.](trachea2.html) I redo my analysis of the "droplet" dataset, but this time I follow the authors' preprocessing steps. Results are, I think, of much lower quality.
 
 * [Investigation 20.](pulseseq.html) An analysis of the larger "pulse-seq" dataset from Montoro et al.
+
+[Investigation 22.](brain.html) A `flashier` analysis of the GTEx brain subtensor.
 
 [Investigation 23.](truncnorm.html) I benchmark the newly rewritten `my_etruncnorm` and `my_vtruncnorm` functions in package `ashr` against their counterparts in package `truncnorm`.
 
