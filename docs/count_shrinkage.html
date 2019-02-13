@@ -440,7 +440,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/5eaa875aa97b815b07d175aaaee3782a22576b3e" target="_blank">5eaa875</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/0c4f8456dfe7f92072ff7b9f6374f29eee696062" target="_blank">0c4f845</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -494,6 +494,40 @@ Message
 Rmd
 </td>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/0c4f8456dfe7f92072ff7b9f6374f29eee696062/analysis/count_shrinkage.Rmd" target="_blank">0c4f845</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-02-13
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/count_shrinkage.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/38224ab48301ec5f8790a200b9ba2dae332887c2/docs/count_shrinkage.html" target="_blank">38224ab</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-02-13
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/5eaa875aa97b815b07d175aaaee3782a22576b3e/analysis/count_shrinkage.Rmd" target="_blank">5eaa875</a>
 </td>
 <td style="text-align:left;">
@@ -532,13 +566,13 @@ wflow_publish(“analysis/count_shrinkage.Rmd”)
 </div>
 <div id="example" class="section level2">
 <h2>Example</h2>
-<p>To illustrate why this approach is a good idea, I consider a simple example with a low-intensity baseline and a block of high intensity:</p>
+<p>To illustrate the approach, I consider a very simple example with a low-intensity baseline and a block of higher intensity:</p>
 <pre class="r"><code>set.seed(666)
 n &lt;- 120
 p &lt;- 160
 
-log.lambda &lt;- (-1 + outer(c(rep(2, n / 4), rep(0, 3 * n / 4)),
-                          c(rep(2, p / 4), rep(0, 3 * p / 4)))
+log.lambda &lt;- (-1 + outer(c(2 * abs(rnorm(0.25 * n)), rep(0, 0.75 * n)),
+                          c(abs(rnorm(0.25 * p)), rep(0, 0.75 * p)))
                + 0.5 * rnorm(n * p))
 Y &lt;- matrix(rpois(n * p, exp(log.lambda)), n, p)
 
@@ -551,6 +585,36 @@ hi.cols[1:(p / 4)] &lt;- TRUE
 # Show heatmap.
 image(x = 1:n, y = 1:p, z = log.lambda, xlab = &quot;x index&quot;, ylab = &quot;y index&quot;)</code></pre>
 <p><img src="figure/count_shrinkage.Rmd/simY-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of simY-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/38224ab48301ec5f8790a200b9ba2dae332887c2/docs/figure/count_shrinkage.Rmd/simY-1.png" target="_blank">38224ab</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-02-13
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>The usual approach would run FLASH as follows.</p>
 <pre class="r"><code># Use my own branch due to bug in stephens999/master.
 devtools::load_all(&quot;~/Github/ashr&quot;)</code></pre>
@@ -586,7 +650,6 @@ fl.ash &lt;- flashier(X, S = S, var.type = 0,
 Adding factor 1 to flash object...
 Adding factor 2 to flash object...
 Adding factor 3 to flash object...
-An iteration decreased the objective by 1.75e+00. Try backfitting with warmstarts.
 Factor doesn&#39;t increase objective and won&#39;t be added.
 Nullchecking 2 factors...
 Wrapping up...
@@ -612,16 +675,24 @@ fl.colw &lt;- flashier(colw.X, S = colw.S, var.type = 0,
 Adding factor 1 to flash object...
 Adding factor 2 to flash object...
 Adding factor 3 to flash object...
+Adding factor 4 to flash object...
 Factor doesn&#39;t increase objective and won&#39;t be added.
-Nullchecking 2 factors...
+Nullchecking 3 factors...
 Wrapping up...
 Done.</code></pre>
+<p>(Note that three factors are fit here. The third is loaded on a small number of columns and accounts for a very small proportion of total variance. Such factors are frequently found when using Gaussian methods on Poisson data.)</p>
 <p>I calculate the root mean-squared error and the mean shrinkage obtained using each method. I calculate separately for large <span class="math inline">\(\lambda_{ij}\)</span>, small <span class="math inline">\(\lambda_{ij}\)</span> in columns where all values are small, and small <span class="math inline">\(\lambda_{ij}\)</span> in columns where some values are large.</p>
-<pre class="r"><code>get.res &lt;- function(fl) {
+<pre class="r"><code>get.res &lt;- function(fl, log1p) {
   preds &lt;- flashier:::lowrank.expand(get.EF(fl$fit))
-  hi.resid &lt;- preds[hi.rows, hi.cols] - log.lambda[hi.rows, hi.cols]
-  lo.resid &lt;- preds[, !hi.cols] - log.lambda[, !hi.cols]
-  mix.resid &lt;- preds[!hi.rows, hi.cols] - log.lambda[!hi.rows, hi.cols]
+  # &quot;De-bias&quot; the log1p method by transforming everything to the log1p scale.
+  true.vals &lt;- log(exp(log.lambda) + 1)
+  if (!log1p)
+    preds &lt;- log(exp(preds) + 1)
+  
+  hi.resid &lt;- preds[hi.rows, hi.cols] - true.vals[hi.rows, hi.cols]
+  lo.resid &lt;- preds[, !hi.cols] - true.vals[, !hi.cols]
+  mix.resid &lt;- preds[!hi.rows, hi.cols] - true.vals[!hi.rows, hi.cols]
+  
   res &lt;- list(rmse.hi = sqrt(mean((hi.resid)^2)),
               rmse.lo = sqrt(mean((lo.resid)^2)),
               rmse.mix = sqrt(mean((mix.resid)^2)),
@@ -629,10 +700,13 @@ Done.</code></pre>
               shrnk.lo = -mean(lo.resid),
               shrnk.mix = -mean(mix.resid))
   res &lt;- lapply(res, round, 2)
+  
   return(res)
 }
 
-res &lt;- data.frame(cbind(get.res(fl.log1p), get.res(fl.ash), get.res(fl.colw)))
+res &lt;- data.frame(cbind(get.res(fl.log1p, TRUE), 
+                        get.res(fl.ash, FALSE), 
+                        get.res(fl.colw, FALSE)))
 var.names &lt;- c(&quot;RMSE (lg vals)&quot;, 
                &quot;RMSE (sm vals)&quot;, 
                &quot;RMSE (sm vals in lg cols)&quot;, 
@@ -656,44 +730,43 @@ knitr::kable(res, digits = 2)</code></pre>
 <tbody>
 <tr class="odd">
 <td>RMSE (lg vals)</td>
-<td align="left">0.48</td>
-<td align="left">0.49</td>
-<td align="left">0.49</td>
+<td align="left">0.33</td>
+<td align="left">0.45</td>
+<td align="left">0.39</td>
 </tr>
 <tr class="even">
 <td>RMSE (sm vals)</td>
-<td align="left">1.34</td>
-<td align="left">0.6</td>
-<td align="left">0.57</td>
+<td align="left">0.18</td>
+<td align="left">0.17</td>
+<td align="left">0.17</td>
 </tr>
 <tr class="odd">
 <td>RMSE (sm vals in lg cols)</td>
-<td align="left">1.36</td>
-<td align="left">0.59</td>
-<td align="left">1.11</td>
+<td align="left">0.18</td>
+<td align="left">0.17</td>
+<td align="left">0.19</td>
 </tr>
 <tr class="even">
 <td>Mean shrinkage (lg vals)</td>
-<td align="left">0</td>
-<td align="left">-0.08</td>
-<td align="left">-0.05</td>
+<td align="left">0.11</td>
+<td align="left">0.26</td>
+<td align="left">0.21</td>
 </tr>
 <tr class="odd">
 <td>Mean shrinkage (sm vals)</td>
-<td align="left">-1.25</td>
-<td align="left">0.33</td>
-<td align="left">0.2</td>
+<td align="left">0.09</td>
+<td align="left">0.08</td>
+<td align="left">0.07</td>
 </tr>
 <tr class="even">
 <td>Mean shrinkage (sm vals in lg cols)</td>
-<td align="left">-1.27</td>
-<td align="left">0.31</td>
-<td align="left">0.89</td>
+<td align="left">0.08</td>
+<td align="left">0.09</td>
+<td align="left">0.1</td>
 </tr>
 </tbody>
 </table>
-<p>If we care about controlling FDR, then the RMSE is unimportant on its own. Indeed, while the log1p and column-wise ASH methods perform similarly in terms of RMSE, the log1p approach tends to yield anti-conservative estimates for small <span class="math inline">\(\lambda_{ij}\)</span>, while the column-wise ASH approach “errs” by shrinking the estimates towards zero. The latter is much more desirable from the perspective of FDR control.</p>
-<p>I’m surprised that <code>ashr</code> shrinks small <span class="math inline">\(\lambda_{ij}\)</span> more in columns where there are some large <span class="math inline">\(\lambda_{ij}\)</span>: I expected the opposite. For a reason that at present eludes me, <code>ashr</code> is more likely to put mass on the null component when some values are large (when all are small, then it rarely puts any mass on the null component).</p>
+<p>Although the usual log1p method does best in terms of RMSE, the new methods do better in shrinking larger rates, which might be advantageous for FDR control. Another possible advantage of the new methods is that they give estimates on the log scale and are thus easy to interpret. The log1p approach can return negative fitted values, which must be thresholded to zero after the fact.</p>
 <!-- ## Appendix -->
 <!-- Under the first model, of course, -->
 <!-- $$ \mathbb{E}(Y_{ij}) = \text{Var}(Y_{ij}) = \exp(LF')_{ij} $$ -->
