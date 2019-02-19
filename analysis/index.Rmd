@@ -12,8 +12,6 @@ output:
 
 [Investigation 21.](flashier_bench.html) Benchmarking `flashier`.
 
-[Investigation 24.](count_shrinkage.html) I propose a new approach to factorizing count data that uses adaptive shrinkage to estimate the rate matrix.
-
 
 ## In Progress
 
@@ -53,7 +51,11 @@ Investigations 19a-b and 20 try FLASH out on large single-cell RNA datasets.
 
 [Investigation 22.](brain.html) A `flashier` analysis of the GTEx brain subtensor.
 
-[Investigation 23.](truncnorm.html) I benchmark the newly rewritten `my_etruncnorm` and `my_vtruncnorm` functions in package `ashr` against their counterparts in package `truncnorm`.
+Investigations 24 and 25 explore approaches to count data.
+
+* [Investigation 24.](count_shrinkage.html) I propose a new approach to factorizing count data that uses adaptive shrinkage to estimate the rate matrix.
+
+* [Investigation 25.](count_preproc_r1.html) I compare three different data transformations, three approaches to handling the heteroskedacity of the `log1p` transformation, and two approaches to dealing with row- and column-specific scaling.
 
 
 ## Still Relevant
@@ -91,9 +93,13 @@ Since the newest versions of `flashr` use a home-grown initialization function, 
 
 * [Investigation 13.](init_fn3.html) A counterargument. Results in Investigations 5a-b probably depend on the fact that $n$ is small ($n = 44$). For large $n$, setting `init_fn` to `udv_si` is best.
 
-The changes tested in Investigation 15 were implemented in version 0.6-2 of `flashr`.
+The changes tested here were implemented in version 0.6-2 of `flashr`.
 
 * [Investigation 15.](scalar_tau.html) Tests an implementation of changes to the way `tau` is stored, as discussed  [here](https://github.com/stephenslab/flashr/issues/83).
+
+And the changes tested here were implemented in version 2.2-29 of `ashr`.
+
+* [Investigation 23.](truncnorm.html) I benchmark the rewritten `my_etruncnorm` and `my_vtruncnorm` functions in package `ashr` against their counterparts in package `truncnorm`.
 
 [Note 4.](matrix_ops.html) An early set of notes that identified key ways to reduce the memory footprint of `flashr`. The good ideas were implemented in `flashier`. Not all of the ideas were good.
 
