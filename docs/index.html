@@ -315,7 +315,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2019-02-13</p>
+<p><strong>Last updated:</strong> 2019-02-19</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -324,7 +324,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/0b17dcf0da6d37eab90e8318b97f1b1cab361aa3" target="_blank">0b17dcf</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/223898e6688c3990742aca0791e9ca169c7da214" target="_blank">223898e</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -335,7 +335,6 @@ Ignored files:
     Ignored:    docs/figure/.DS_Store
 
 Untracked files:
-    Untracked:  analysis/count_preproc_r1.Rmd
     Untracked:  analysis/gd_notes.Rmd
     Untracked:  code/count_sim.R
     Untracked:  code/pathways.R
@@ -344,7 +343,6 @@ Untracked files:
     Untracked:  data/tmpdata.rds
     Untracked:  data/tmplfsr.rds
     Untracked:  docs/figure/count_notes.Rmd/
-    Untracked:  temp_debug.RDS
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -373,6 +371,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/223898e6688c3990742aca0791e9ca169c7da214/analysis/index.Rmd" target="_blank">223898e</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-02-19
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/index.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/57be68cae896d3699ba5c294ad9cad3c4af90c06/docs/index.html" target="_blank">57be68c</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-02-13
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -2065,7 +2097,6 @@ Start workflowr project.
 <h2>Featured</h2>
 <p><a href="flashier_features.html">Note 5.</a> New features included in the <code>flashier</code> implementation of EBMF.</p>
 <p><a href="flashier_bench.html">Investigation 21.</a> Benchmarking <code>flashier</code>.</p>
-<p><a href="count_shrinkage.html">Investigation 24.</a> I propose a new approach to factorizing count data that uses adaptive shrinkage to estimate the rate matrix.</p>
 </div>
 <div id="in-progress" class="section level2">
 <h2>In Progress</h2>
@@ -2095,7 +2126,11 @@ Start workflowr project.
 <li><p><a href="pulseseq.html">Investigation 20.</a> An analysis of the larger “pulse-seq” dataset from Montoro et al.</p></li>
 </ul>
 <p><a href="brain.html">Investigation 22.</a> A <code>flashier</code> analysis of the GTEx brain subtensor.</p>
-<p><a href="truncnorm.html">Investigation 23.</a> I benchmark the newly rewritten <code>my_etruncnorm</code> and <code>my_vtruncnorm</code> functions in package <code>ashr</code> against their counterparts in package <code>truncnorm</code>.</p>
+<p>Investigations 24 and 25 explore approaches to count data.</p>
+<ul>
+<li><p><a href="count_shrinkage.html">Investigation 24.</a> I propose a new approach to factorizing count data that uses adaptive shrinkage to estimate the rate matrix.</p></li>
+<li><p><a href="count_preproc_r1.html">Investigation 25.</a> I compare three different data transformations, three approaches to handling the heteroskedacity of the <code>log1p</code> transformation, and two approaches to dealing with row- and column-specific scaling.</p></li>
+</ul>
 </div>
 <div id="still-relevant" class="section level2">
 <h2>Still Relevant</h2>
@@ -2125,9 +2160,13 @@ Start workflowr project.
 <li><p><a href="init_fn2.html">Investigation 5b.</a> More evidence supporting the recommendations in Investigation 5a.</p></li>
 <li><p><a href="init_fn3.html">Investigation 13.</a> A counterargument. Results in Investigations 5a-b probably depend on the fact that <span class="math inline">\(n\)</span> is small (<span class="math inline">\(n = 44\)</span>). For large <span class="math inline">\(n\)</span>, setting <code>init_fn</code> to <code>udv_si</code> is best.</p></li>
 </ul>
-<p>The changes tested in Investigation 15 were implemented in version 0.6-2 of <code>flashr</code>.</p>
+<p>The changes tested here were implemented in version 0.6-2 of <code>flashr</code>.</p>
 <ul>
 <li><a href="scalar_tau.html">Investigation 15.</a> Tests an implementation of changes to the way <code>tau</code> is stored, as discussed <a href="https://github.com/stephenslab/flashr/issues/83">here</a>.</li>
+</ul>
+<p>And the changes tested here were implemented in version 2.2-29 of <code>ashr</code>.</p>
+<ul>
+<li><a href="truncnorm.html">Investigation 23.</a> I benchmark the rewritten <code>my_etruncnorm</code> and <code>my_vtruncnorm</code> functions in package <code>ashr</code> against their counterparts in package <code>truncnorm</code>.</li>
 </ul>
 <p><a href="matrix_ops.html">Note 4.</a> An early set of notes that identified key ways to reduce the memory footprint of <code>flashr</code>. The good ideas were implemented in <code>flashier</code>. Not all of the ideas were good.</p>
 </div>
