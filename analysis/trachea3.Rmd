@@ -1,0 +1,299 @@
+---
+title: "Comparing transformations of scRNA data"
+author: "Jason Willwerscheid"
+date: "2/24/2019"
+output: 
+  workflowr::wflow_html:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Introduction
+
+I fit FLASH objects to the 3'-droplet based dataset described in Montoro et al. (and also analyzed [here](trachea.html)). I take three approaches:
+
+1. Use the Anscombe transform $X_{ij} = \sqrt{Y_{ij} + 3/8}$ and fix all standard errors at 1.
+
+2. Use the log1p transform $X_{ij} = \log(Y_{ij} + 1)$ and fix standard errors $S = \frac{\sqrt{Y_{ij}}}{Y_{ij} + 1}$ (motivated by assuming $Y_{ij} \sim \text{Poisson}(\lambda_{ij})$, taking the MLE $\hat{\lambda}_{ij} = Y_{ij}$, and estimating the variance of $\log(Y_{ij} + 1)$ via Taylor expansion). To avoid setting $S_{ij} = 0$, I set $S_{ij} = 1/2$ when $Y_{ij} = 0$.
+
+3. Use the more complicated approach described [here](count_data.html), with "pseudodata" $X$ and $S$ obtained by expanding the Poisson log likelihood around the posterior means yielded by the "log1p" fit described above.
+
+In each case, I fit a maximum of 50 factors. I calculate local false sign rates for gene-factor pairs by sampling from the posterior.
+
+The code used to produce the fits and sample from the posterior is as follows.
+
+```{r fit_code, code = readLines("../code/trachea3.R"), eval = FALSE}
+```
+
+I pre-run the code and load the results from file.
+
+```{r load_res}
+library(ggplot2)
+library(clusterProfiler)
+
+fl.anscombe <- readRDS("./data/trachea3/Anscombe50nodata.rds")
+lfsr.anscombe <- readRDS("./data/trachea3/AnscombeLFSR.rds")
+fl.log1p <- readRDS("./data/trachea3/log1p39nodata.rds")
+lfsr.log1p <- readRDS("./data/trachea3/log1pLFSR.rds")
+fl.pseudo <- readRDS("./data/trachea3/pseudo50nodata.rds")
+lfsr.pseudo <- readRDS("./data/trachea3/pseudoLFSR.rds")
+```
+
+## PVE
+
+The most important thing to note here is that the "log1p" method halts after adding 39 factors, whereas the other two methods add a full 50 factors. A smaller number of factors is certainly desirable for interpretability, but it's not at all implausible that more than 50 factors are "really" in play.
+
+```{r pve}
+all.fl <- list(fl.anscombe, fl.log1p, fl.pseudo)
+all.pve <- unlist(lapply(all.fl, function(fl) sort(fl$pve, decreasing = TRUE)))
+all.nfactors <- sapply(all.fl, `[[`, "n.factors")
+
+factor.idx <- unlist(lapply(all.nfactors, function(n) 1:n))
+trans.names <- c("Anscombe", "log1p", "pseudodata")
+pve.df <- data.frame(trans = rep(trans.names, times = all.nfactors),
+                     idx = factor.idx,
+                     pve = all.pve)
+
+ggplot(pve.df, aes(x = idx, y = pve, color = trans)) + 
+  geom_line() +
+  labs(x = "Factor index (sorted)", color = "Transformation") +
+  scale_y_continuous(name = "PVE", trans = "log10")
+```
+
+## Sparsity
+
+For some reason, the "log1p" method produces many more factors that have sparse cell loadings, and a few more factors with very sparse gene loadings. 
+
+```{r spars}
+gene.sparsity <- unlist(lapply(all.fl, function(fl) {
+  sapply(fl$fit$g, function(x) x[[1]]$pi[1])
+}))
+cell.sparsity <- unlist(lapply(all.fl, function(fl) {
+  sapply(fl$fit$g, function(x) x[[2]]$pi[1])
+}))
+sparsity.df <- data.frame(trans = rep(trans.names, times = all.nfactors),
+                          idx = factor.idx,
+                          cell.sparsity = cell.sparsity,
+                          gene.sparsity = gene.sparsity)
+
+ggplot(sparsity.df, aes(x = trans, y = cell.sparsity)) +
+  geom_violin(aes(color = trans)) + 
+  geom_jitter(width = 0.1, cex = 0.5) +
+  labs(x = NULL, y = "Cell loadings sparsity") +
+  theme(legend.position = "none")
+
+ggplot(subset(sparsity.df, gene.sparsity > 0), 
+       aes(x = trans, y = gene.sparsity)) + 
+  geom_violin(aes(color = trans)) + 
+  geom_jitter(width = 0.2, cex = 0.5) +
+  scale_y_continuous(name = "Gene loadings sparsity (logit scale)", 
+                     trans = "logit") + 
+  labs(x = NULL) +
+  theme(legend.position = "none")
+```
+
+## Ciliated-specific factors
+
+Since the cells were labeled using a clustering of log-transformed data, it's probably unfair to judge the other two methods based on how well they cluster the data. Still, the "pseudodata" approach produces at least one clean ciliated-specific factor, whereas the "Anscombe" approach doesn't produce any bimodal factors that are predominantly weighted on ciliated cells.
+
+```{r cil}
+n <- nrow(fl.log1p$loadings$normalized.loadings[[2]])
+cell.names <- rownames(fl.log1p$loadings$normalized.loadings[[2]])
+mouse <- as.factor(sapply(strsplit(cell.names, "_"), `[`, 1))
+cell.types <- as.factor(sapply(strsplit(cell.names, "_"), `[`, 3))
+
+find.factors <- function(fl, cell.type, top.n) {
+  cell.loadings <- fl$loadings$normalized.loadings[[2]]
+  which.cells <- which(cell.types == cell.type)
+  ks.tests <- apply(cell.loadings, 2, function(LL) {
+    ks.test(LL[which.cells], LL[-which.cells], alternative = "less")
+  })
+  p.vals <- sapply(ks.tests, `[[`, "p.value")
+  which.k <- order(p.vals)[1:top.n]
+  return(list(k = which.k, p = signif(p.vals[which.k], digits = 2)))
+}
+
+cell.type.df <- function(cell.type, top.n) {
+  factors <- lapply(all.fl, find.factors, cell.type, top.n)
+  loadings <- as.vector(mapply(function(fl, factors) {
+    fl$loadings$normalized.loadings[[2]][, factors$k]
+  }, all.fl, factors))
+  df <- data.frame(trans = rep(trans.names, each = top.n * n),
+                   k = paste("factor",
+                             rep(unlist(lapply(factors, `[[`, "k")), each = n)),
+                   loading = loadings,
+                   cell.type = rep(cell.types, times = 3 * top.n))
+}
+
+plot.top.n <- function(cell.type, top.n) {
+  df <- cell.type.df(cell.type, top.n)
+
+  plot(ggplot(df, aes_string(x = "cell.type", y = "loading")) +
+         geom_violin(aes(color = cell.type), 
+                     scale = "width", draw_quantiles = 0.5) +
+         geom_jitter(width = 0.15, cex = 0.1) +
+         facet_wrap(facets = vars(trans, k), nrow = top.n, ncol = 3, 
+                    dir = "v", scales = "free_y", 
+                    labeller = labeller(.multi_line = FALSE)) +
+         labs(x = NULL, y = NULL, color = "Cell Type") + 
+         theme(axis.text.x = element_blank(),
+               axis.text.y = element_blank()))
+}
+
+plot.top.n("Ciliated", 3)
+```
+
+### Pathways (over-expressed genes)
+
+```{r cil.over}
+all.genes <- rownames(fl.log1p$loadings$normalized.loadings[[1]])
+all.entrez <- bitr(all.genes, 
+                   fromType = "SYMBOL", 
+                   toType = "ENTREZID",
+                   OrgDb = "org.Mm.eg.db")$ENTREZID
+
+find.pathways <- function(fl, lfsr, k, 
+                          lfsr.cutoff = .995, 
+                          over = TRUE, 
+                          top.n = 5) {
+  if (over)
+    idx <- which((lfsr[, k] > lfsr.cutoff) 
+                 & (fl$loadings$normalized.loadings[[1]][, k] > 0))
+  else
+    idx <- which((lfsr[, k] > lfsr.cutoff) 
+                 & (fl$loadings$normalized.loadings[[1]][, k] < 0))
+  genes <- all.genes[idx]
+  entrez <- bitr(genes, 
+                 fromType = "SYMBOL", 
+                 toType = "ENTREZID",
+                 OrgDb = "org.Mm.eg.db")$ENTREZID
+  enrich.res <- enrichGO(entrez,
+                         universe = all.entrez,
+                         OrgDb = "org.Mm.eg.db",
+                         ont = "BP",
+                         pAdjustMethod = "BH",
+                         pvalueCutoff = 0.001,
+                         readable = TRUE)
+  n.rows <- min(top.n, nrow(enrich.res@result))
+  if (n.rows > 0) {
+    simp.res <- simplify(enrich.res)@result[1:n.rows, 
+                                            c("Description", "p.adjust")]
+  } else {
+    simp.res <- "No pathways were found."
+  }
+  return(simp.res)
+}
+
+knitr::kable(find.pathways(fl.anscombe, lfsr.anscombe, 9), 
+             caption = "Anscombe (factor 9)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 19), 
+             caption = "log1p (factor 19)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 4), 
+             caption = "log1p (factor 4)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.pseudo, lfsr.pseudo, 11), 
+             caption = "Pseudodata (factor 11)", 
+             format.args = list(scientific = TRUE))
+```
+
+### Pathways (under-expressed genes)
+
+```{r cil.under}
+knitr::kable(find.pathways(fl.anscombe, lfsr.anscombe, 9, over = FALSE), 
+             caption = "Anscombe (factor 9)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 19, over = FALSE), 
+             caption = "log1p (factor 19)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 4, over = FALSE), 
+             caption = "log1p (factor 4)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.pseudo, lfsr.pseudo, 11, over = FALSE), 
+             caption = "Pseudodata (factor 11)", 
+             format.args = list(scientific = TRUE))
+```
+
+## Ionocyte-specific factors
+
+If ionocytes are in fact a distinct cell type, and if the clustering is at all close to reality, then both the Anscombe and pseudodata approaches have trouble picking them out.
+
+```{r ion}
+plot.top.n("Ionocyte", 3)
+```
+
+### Pathways (over-expressed genes)
+```{r ion.over}
+knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 31), 
+             caption = "log1p (factor 31)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 32), 
+             caption = "log1p (factor 32)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.pseudo, lfsr.pseudo, 40), 
+             caption = "Pseudodata (factor 40)", 
+             format.args = list(scientific = TRUE))
+```
+
+### Pathways (under-expressed genes)
+```{r ion.under}
+knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 31, over = FALSE), 
+             caption = "log1p (factor 31)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 32, over = FALSE), 
+             caption = "log1p (factor 32)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.pseudo, lfsr.pseudo, 40, over = FALSE), 
+             caption = "Pseudodata (factor 40)", 
+             format.args = list(scientific = TRUE))
+```
+
+## Tuft-specific factors
+
+If the given clustering is accurate, then the Anscombe transform again has difficulty.
+
+```{r tuft}
+plot.top.n("Tuft", 3)
+```
+
+### Pathways (over-expressed genes)
+```{r tuft.over}
+knitr::kable(find.pathways(fl.anscombe, lfsr.anscombe, 13), 
+             caption = "Anscombe (factor 13)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 7), 
+             caption = "log1p (factor 7)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 9), 
+             caption = "log1p (factor 9)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.pseudo, lfsr.pseudo, 15), 
+             caption = "Pseudodata (factor 15)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.pseudo, lfsr.pseudo, 28), 
+             caption = "Pseudodata (factor 28)", 
+             format.args = list(scientific = TRUE))
+```
+
+### Pathways (under-expressed genes)
+```{r tuft.under}
+knitr::kable(find.pathways(fl.anscombe, lfsr.anscombe, 13, over = FALSE), 
+             caption = "Anscombe (factor 13)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 7, over = FALSE), 
+             caption = "log1p (factor 7)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 9, over = FALSE), 
+             caption = "log1p (factor 9)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.pseudo, lfsr.pseudo, 15, over = FALSE), 
+             caption = "Pseudodata (factor 15)", 
+             format.args = list(scientific = TRUE))
+knitr::kable(find.pathways(fl.pseudo, lfsr.pseudo, 28, over = FALSE), 
+             caption = "Pseudodata (factor 28)", 
+             format.args = list(scientific = TRUE))
+```
