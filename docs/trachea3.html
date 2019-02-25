@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Comparing transformations of scRNA data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Comparing transformations of scRNA data</h1>
+<h4 class="author"><em>Jason Willwerscheid</em></h4>
+<h4 class="date"><em>2/24/2019</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2019-02-25</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/45cc7cdc24d0a82222d3e1066838544ad4664e2a" target="_blank">45cc7cd</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    data/.DS_Store
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/gd_notes.Rmd
+    Untracked:  code/count_sim.R
+    Untracked:  code/pathways.R
+    Untracked:  code/trachea3.R
+    Untracked:  data/lowrank/
+    Untracked:  data/tmp14.rds
+    Untracked:  data/tmpdata.rds
+    Untracked:  data/tmplfsr.rds
+    Untracked:  data/trachea3/
+    Untracked:  docs/figure/count_notes.Rmd/
+
+Unstaged changes:
+    Deleted:    data/before_bad.Rdata
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/45cc7cdc24d0a82222d3e1066838544ad4664e2a/analysis/trachea3.Rmd" target="_blank">45cc7cd</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-02-25
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/trachea3.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>I fit FLASH objects to the 3’-droplet based dataset described in Montoro et al. (and also analyzed <a href="trachea.html">here</a>). I take three approaches:</p>
+<ol style="list-style-type: decimal">
+<li><p>Use the Anscombe transform <span class="math inline">\(X_{ij} = \sqrt{Y_{ij} + 3/8}\)</span> and fix all standard errors at 1.</p></li>
+<li><p>Use the log1p transform <span class="math inline">\(X_{ij} = \log(Y_{ij} + 1)\)</span> and fix standard errors <span class="math inline">\(S = \frac{\sqrt{Y_{ij}}}{Y_{ij} + 1}\)</span> (motivated by assuming <span class="math inline">\(Y_{ij} \sim \text{Poisson}(\lambda_{ij})\)</span>, taking the MLE <span class="math inline">\(\hat{\lambda}_{ij} = Y_{ij}\)</span>, and estimating the variance of <span class="math inline">\(\log(Y_{ij} + 1)\)</span> via Taylor expansion). To avoid setting <span class="math inline">\(S_{ij} = 0\)</span>, I set <span class="math inline">\(S_{ij} = 1/2\)</span> when <span class="math inline">\(Y_{ij} = 0\)</span>.</p></li>
+<li><p>Use the more complicated approach described <a href="count_data.html">here</a>, with “pseudodata” <span class="math inline">\(X\)</span> and <span class="math inline">\(S\)</span> obtained by expanding the Poisson log likelihood around the posterior means yielded by the “log1p” fit described above.</p></li>
+</ol>
+<p>In each case, I fit a maximum of 50 factors. I calculate local false sign rates for gene-factor pairs by sampling from the posterior.</p>
+<p>The code used to produce the fits and sample from the posterior is as follows.</p>
+<pre class="r"><code>devtools::load_all(&quot;~/Github/ashr&quot;)
+devtools::load_all(&quot;~/Github/flashier&quot;)
+library(Matrix)
+
+# Anscombe transform --------------------------------------------------------
+
+trachea &lt;- read.table(&quot;~/Downloads/GSE103354_Trachea_droplet_UMIcounts.txt&quot;)
+trachea &lt;- as.matrix(trachea)
+# trachea &lt;- Matrix(trachea)
+trachea &lt;- 2 * sqrt(trachea + 0.375)
+
+# ncells &lt;- rowSums(trachea &gt; 0)
+# gene.idx &lt;- which(ncells &gt; 4)
+# trachea &lt;- trachea[gene.idx, ]
+
+# saveRDS(trachea, &quot;./data/tmpdata.rds&quot;)
+trachea &lt;- readRDS(&quot;./data/tmpdata.rds&quot;)
+
+# Let&#39;s flash.
+flash.fit &lt;- flashier(trachea,
+                      S = 1, var.type = NULL,
+                      prior.type = c(&quot;normal.mix&quot;, &quot;nonnegative&quot;),
+                      greedy.Kmax = 10,
+                      backfit = &quot;alternating&quot;, backfit.order = &quot;dropout&quot;,
+                      backfit.maxiter = 5, backfit.reltol = 10,
+                      verbose = 3)
+# saveRDS(flash.fit, &quot;./data/tmp.rds&quot;)
+
+flash.fit2 &lt;- flashier(trachea, flash.init = flash.fit,
+                       S = 1, var.type = NULL,
+                       prior.type = c(&quot;normal.mix&quot;, &quot;nonnegative&quot;),
+                       greedy.Kmax = 25,
+                       backfit = &quot;alternating&quot;, backfit.order = &quot;dropout&quot;,
+                       backfit.maxiter = 3, backfit.reltol = 10,
+                       verbose = 3)
+# saveRDS(flash.fit2, &quot;./data/tmp2.rds&quot;)
+# rm(flash.fit)
+
+flash.fit3 &lt;- flashier(trachea, flash.init = flash.fit2,
+                       S = 1, var.type = NULL,
+                       prior.type = c(&quot;normal.mix&quot;, &quot;nonnegative&quot;),
+                       greedy.Kmax = 50,
+                       backfit.every = 3, backfit.order = &quot;dropout&quot;,
+                       backfit.maxiter = 5, backfit.reltol = 10,
+                       verbose = 3)
+# saveRDS(flash.fit3, &quot;./data/tmp3.rds&quot;)
+# rm(flash.fit2)
+
+flash.fit4 &lt;- flashier(trachea, flash.init = flash.fit3,
+                       S = 1, var.type = NULL,
+                       prior.type = c(&quot;normal.mix&quot;, &quot;nonnegative&quot;),
+                       greedy.Kmax = 50,
+                       final.backfit = TRUE, backfit.order = &quot;dropout&quot;,
+                       backfit.maxiter = 100, backfit.reltol = 10,
+                       verbose = 3)
+# saveRDS(flash.fit4, &quot;./data/Anscombe50.rds&quot;)
+# rm(flash.fit3)
+
+n.rounds &lt;- 25
+samps.per.round &lt;- 20
+
+fl &lt;- flash.fit4
+gene.signs &lt;- sign(fl$loadings$normalized.loadings[[1]])
+lfsr &lt;- array(0, dim = dim(gene.signs))
+set.seed(666)
+for (i in 1:n.rounds) {
+  cat(paste(&quot;Sampling round&quot;, i, &quot;\n&quot;))
+  samp &lt;- fl$sampler(samps.per.round)
+  samp &lt;- lapply(samp, `[[`, 1)
+  samp &lt;- lapply(samp, sign)
+  samp &lt;- lapply(samp, function(x) x == gene.signs)
+  lfsr &lt;- lfsr + Reduce(`+`, samp)
+}
+lfsr &lt;- lfsr / (n.rounds * samps.per.round)
+# saveRDS(lfsr, &quot;./data/AnscombeLFSR.rds&quot;)
+
+# log1p transform -----------------------------------------------------------
+
+trachea &lt;- read.table(&quot;~/Downloads/GSE103354_Trachea_droplet_UMIcounts.txt&quot;)
+trachea &lt;- as.matrix(trachea)
+trachea &lt;- log1p(trachea)
+
+# saveRDS(trachea, &quot;./data/tmpdata.rds&quot;)
+# trachea &lt;- readRDS(&quot;./data/tmpdata.rds&quot;)
+
+S &lt;- sqrt(trachea) / (trachea + 1)
+S[S == 0] &lt;- 0.5
+
+trachea &lt;- set.flash.data(data = trachea, S = S, var.type = NULL)
+
+rm(S)
+
+flash.fit &lt;- flashier(trachea, var.type = NULL,
+                      prior.type = c(&quot;normal.mix&quot;, &quot;nonnegative&quot;),
+                      greedy.Kmax = 10,
+                      backfit = &quot;alternating&quot;, backfit.order = &quot;dropout&quot;,
+                      backfit.maxiter = 5, backfit.reltol = 10,
+                      verbose = 3)
+# saveRDS(flash.fit, &quot;./tmp.rds&quot;)
+
+flash.fit2 &lt;- flashier(trachea, flash.init = flash.fit,
+                       var.type = NULL,
+                       prior.type = c(&quot;normal.mix&quot;, &quot;nonnegative&quot;),
+                       greedy.Kmax = 25,
+                       backfit = &quot;alternating&quot;, backfit.order = &quot;dropout&quot;,
+                       backfit.maxiter = 3, backfit.reltol = 10,
+                       verbose = 3)
+# saveRDS(flash.fit2, &quot;./tmp2.rds&quot;)
+# rm(flash.fit)
+
+flash.fit3 &lt;- flashier(trachea, flash.init = flash.fit2,
+                       var.type = NULL,
+                       prior.type = c(&quot;normal.mix&quot;, &quot;nonnegative&quot;),
+                       greedy.Kmax = 50,
+                       backfit.every = 3, backfit.order = &quot;dropout&quot;,
+                       backfit.maxiter = 5, backfit.reltol = 10,
+                       verbose = 3)
+saveRDS(flash.fit3, &quot;./log1p39.rds&quot;)
+
+fl &lt;- flash.fit3
+gene.signs &lt;- sign(fl$loadings$normalized.loadings[[1]])
+lfsr &lt;- array(0, dim = dim(gene.signs))
+set.seed(666)
+for (i in 1:n.rounds) {
+  cat(paste(&quot;Sampling round&quot;, i, &quot;\n&quot;))
+  samp &lt;- fl$sampler(samps.per.round)
+  samp &lt;- lapply(samp, `[[`, 1)
+  samp &lt;- lapply(samp, sign)
+  samp &lt;- lapply(samp, function(x) x == gene.signs)
+  lfsr &lt;- lfsr + Reduce(`+`, samp)
+}
+lfsr &lt;- lfsr / (n.rounds * samps.per.round)
+# saveRDS(lfsr, &quot;./data/log1pLFSR.rds&quot;)
+
+# &quot;pseudodata&quot; approach -----------------------------------------------------
+
+Y &lt;- read.table(&quot;~/Downloads/GSE103354_Trachea_droplet_UMIcounts.txt&quot;)
+Y &lt;- as.matrix(Y)
+log.pm &lt;- flashier:::lowrank.expand(flash.fit3$fit$EF)
+pm &lt;- exp(log.pm)
+X &lt;- log.pm + (Y - pm) / pm
+S &lt;- 1 / sqrt(pm)
+
+rm(Y)
+rm(log.pm)
+rm(pm)
+
+pseudodata &lt;- set.flash.data(data = X, S = S, var.type = NULL)
+rm(X)
+rm(S)
+
+flash.fit &lt;- flashier(pseudodata, var.type = NULL,
+                      prior.type = c(&quot;normal.mix&quot;, &quot;nonnegative&quot;),
+                      greedy.Kmax = 10,
+                      backfit = &quot;alternating&quot;, backfit.order = &quot;dropout&quot;,
+                      backfit.maxiter = 5, backfit.reltol = 10,
+                      verbose = 3)
+# saveRDS(flash.fit, &quot;./tmp.rds&quot;)
+
+flash.fit2 &lt;- flashier(pseudodata, flash.init = flash.fit,
+                       prior.type = c(&quot;normal.mix&quot;, &quot;nonnegative&quot;),
+                       greedy.Kmax = 25,
+                       backfit = &quot;alternating&quot;, backfit.order = &quot;dropout&quot;,
+                       backfit.maxiter = 3, backfit.reltol = 10,
+                       verbose = 3)
+# saveRDS(flash.fit2, &quot;./tmp2.rds&quot;)
+# rm(flash.fit)
+
+flash.fit3 &lt;- flashier(pseudodata, flash.init = flash.fit2,
+                       prior.type = c(&quot;normal.mix&quot;, &quot;nonnegative&quot;),
+                       greedy.Kmax = 50,
+                       backfit.every = 3, backfit.order = &quot;dropout&quot;,
+                       backfit.maxiter = 5, backfit.reltol = 10,
+                       verbose = 3)
+# saveRDS(flash.fit3, &quot;./data/tmp3.rds&quot;)
+# rm(flash.fit2)
+
+flash.fit4 &lt;- flashier(pseudodata, flash.init = flash.fit3,
+                       prior.type = c(&quot;normal.mix&quot;, &quot;nonnegative&quot;),
+                       greedy.Kmax = 50,
+                       final.backfit = TRUE, backfit.order = &quot;dropout&quot;,
+                       backfit.maxiter = 100, backfit.reltol = 10,
+                       verbose = 3)
+# saveRDS(flash.fit4, &quot;./data/pseudo50.rds&quot;)
+# rm(flash.fit3)
+
+fl &lt;- flash.fit4
+gene.signs &lt;- sign(fl$loadings$normalized.loadings[[1]])
+lfsr &lt;- array(0, dim = dim(gene.signs))
+set.seed(666)
+for (i in 1:n.rounds) {
+  cat(paste(&quot;Sampling round&quot;, i, &quot;\n&quot;))
+  samp &lt;- fl$sampler(samps.per.round)
+  samp &lt;- lapply(samp, `[[`, 1)
+  samp &lt;- lapply(samp, sign)
+  samp &lt;- lapply(samp, function(x) x == gene.signs)
+  lfsr &lt;- lfsr + Reduce(`+`, samp)
+}
+lfsr &lt;- lfsr / (n.rounds * samps.per.round)
+# saveRDS(lfsr, &quot;./data/pseudoLFSR.rds&quot;)</code></pre>
+<p>I pre-run the code and load the results from file.</p>
+<pre class="r"><code>library(ggplot2)
+library(clusterProfiler)
+
+fl.anscombe &lt;- readRDS(&quot;./data/trachea3/Anscombe50nodata.rds&quot;)
+lfsr.anscombe &lt;- readRDS(&quot;./data/trachea3/AnscombeLFSR.rds&quot;)
+fl.log1p &lt;- readRDS(&quot;./data/trachea3/log1p39nodata.rds&quot;)
+lfsr.log1p &lt;- readRDS(&quot;./data/trachea3/log1pLFSR.rds&quot;)
+fl.pseudo &lt;- readRDS(&quot;./data/trachea3/pseudo50nodata.rds&quot;)
+lfsr.pseudo &lt;- readRDS(&quot;./data/trachea3/pseudoLFSR.rds&quot;)</code></pre>
+</div>
+<div id="pve" class="section level2">
+<h2>PVE</h2>
+<p>The most important thing to note here is that the “log1p” method halts after adding 39 factors, whereas the other two methods add a full 50 factors. A smaller number of factors is certainly desirable for interpretability, but it’s not at all implausible that more than 50 factors are “really” in play.</p>
+<pre class="r"><code>all.fl &lt;- list(fl.anscombe, fl.log1p, fl.pseudo)
+all.pve &lt;- unlist(lapply(all.fl, function(fl) sort(fl$pve, decreasing = TRUE)))
+all.nfactors &lt;- sapply(all.fl, `[[`, &quot;n.factors&quot;)
+
+factor.idx &lt;- unlist(lapply(all.nfactors, function(n) 1:n))
+trans.names &lt;- c(&quot;Anscombe&quot;, &quot;log1p&quot;, &quot;pseudodata&quot;)
+pve.df &lt;- data.frame(trans = rep(trans.names, times = all.nfactors),
+                     idx = factor.idx,
+                     pve = all.pve)
+
+ggplot(pve.df, aes(x = idx, y = pve, color = trans)) + 
+  geom_line() +
+  labs(x = &quot;Factor index (sorted)&quot;, color = &quot;Transformation&quot;) +
+  scale_y_continuous(name = &quot;PVE&quot;, trans = &quot;log10&quot;)</code></pre>
+<p><img src="figure/trachea3.Rmd/pve-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="sparsity" class="section level2">
+<h2>Sparsity</h2>
+<p>For some reason, the “log1p” method produces many more factors that have sparse cell loadings, and a few more factors with very sparse gene loadings.</p>
+<pre class="r"><code>gene.sparsity &lt;- unlist(lapply(all.fl, function(fl) {
+  sapply(fl$fit$g, function(x) x[[1]]$pi[1])
+}))
+cell.sparsity &lt;- unlist(lapply(all.fl, function(fl) {
+  sapply(fl$fit$g, function(x) x[[2]]$pi[1])
+}))
+sparsity.df &lt;- data.frame(trans = rep(trans.names, times = all.nfactors),
+                          idx = factor.idx,
+                          cell.sparsity = cell.sparsity,
+                          gene.sparsity = gene.sparsity)
+
+ggplot(sparsity.df, aes(x = trans, y = cell.sparsity)) +
+  geom_violin(aes(color = trans)) + 
+  geom_jitter(width = 0.1, cex = 0.5) +
+  labs(x = NULL, y = &quot;Cell loadings sparsity&quot;) +
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="figure/trachea3.Rmd/spars-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(subset(sparsity.df, gene.sparsity &gt; 0), 
+       aes(x = trans, y = gene.sparsity)) + 
+  geom_violin(aes(color = trans)) + 
+  geom_jitter(width = 0.2, cex = 0.5) +
+  scale_y_continuous(name = &quot;Gene loadings sparsity (logit scale)&quot;, 
+                     trans = &quot;logit&quot;) + 
+  labs(x = NULL) +
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="figure/trachea3.Rmd/spars-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="ciliated-specific-factors" class="section level2">
+<h2>Ciliated-specific factors</h2>
+<p>Since the cells were labeled using a clustering of log-transformed data, it’s probably unfair to judge the other two methods based on how well they cluster the data. Still, the “pseudodata” approach produces at least one clean ciliated-specific factor, whereas the “Anscombe” approach doesn’t produce any bimodal factors that are predominantly weighted on ciliated cells.</p>
+<pre class="r"><code>n &lt;- nrow(fl.log1p$loadings$normalized.loadings[[2]])
+cell.names &lt;- rownames(fl.log1p$loadings$normalized.loadings[[2]])
+mouse &lt;- as.factor(sapply(strsplit(cell.names, &quot;_&quot;), `[`, 1))
+cell.types &lt;- as.factor(sapply(strsplit(cell.names, &quot;_&quot;), `[`, 3))
+
+find.factors &lt;- function(fl, cell.type, top.n) {
+  cell.loadings &lt;- fl$loadings$normalized.loadings[[2]]
+  which.cells &lt;- which(cell.types == cell.type)
+  ks.tests &lt;- apply(cell.loadings, 2, function(LL) {
+    ks.test(LL[which.cells], LL[-which.cells], alternative = &quot;less&quot;)
+  })
+  p.vals &lt;- sapply(ks.tests, `[[`, &quot;p.value&quot;)
+  which.k &lt;- order(p.vals)[1:top.n]
+  return(list(k = which.k, p = signif(p.vals[which.k], digits = 2)))
+}
+
+cell.type.df &lt;- function(cell.type, top.n) {
+  factors &lt;- lapply(all.fl, find.factors, cell.type, top.n)
+  loadings &lt;- as.vector(mapply(function(fl, factors) {
+    fl$loadings$normalized.loadings[[2]][, factors$k]
+  }, all.fl, factors))
+  df &lt;- data.frame(trans = rep(trans.names, each = top.n * n),
+                   k = paste(&quot;factor&quot;,
+                             rep(unlist(lapply(factors, `[[`, &quot;k&quot;)), each = n)),
+                   loading = loadings,
+                   cell.type = rep(cell.types, times = 3 * top.n))
+}
+
+plot.top.n &lt;- function(cell.type, top.n) {
+  df &lt;- cell.type.df(cell.type, top.n)
+
+  plot(ggplot(df, aes_string(x = &quot;cell.type&quot;, y = &quot;loading&quot;)) +
+         geom_violin(aes(color = cell.type), 
+                     scale = &quot;width&quot;, draw_quantiles = 0.5) +
+         geom_jitter(width = 0.15, cex = 0.1) +
+         facet_wrap(facets = vars(trans, k), nrow = top.n, ncol = 3, 
+                    dir = &quot;v&quot;, scales = &quot;free_y&quot;, 
+                    labeller = labeller(.multi_line = FALSE)) +
+         labs(x = NULL, y = NULL, color = &quot;Cell Type&quot;) + 
+         theme(axis.text.x = element_blank(),
+               axis.text.y = element_blank()))
+}
+
+plot.top.n(&quot;Ciliated&quot;, 3)</code></pre>
+<p><img src="figure/trachea3.Rmd/cil-1.png" width="672" style="display: block; margin: auto;" /></p>
+<div id="pathways-over-expressed-genes" class="section level3">
+<h3>Pathways (over-expressed genes)</h3>
+<pre class="r"><code>all.genes &lt;- rownames(fl.log1p$loadings$normalized.loadings[[1]])
+all.entrez &lt;- bitr(all.genes, 
+                   fromType = &quot;SYMBOL&quot;, 
+                   toType = &quot;ENTREZID&quot;,
+                   OrgDb = &quot;org.Mm.eg.db&quot;)$ENTREZID
+
+find.pathways &lt;- function(fl, lfsr, k, 
+                          lfsr.cutoff = .995, 
+                          over = TRUE, 
+                          top.n = 5) {
+  if (over)
+    idx &lt;- which((lfsr[, k] &gt; lfsr.cutoff) 
+                 &amp; (fl$loadings$normalized.loadings[[1]][, k] &gt; 0))
+  else
+    idx &lt;- which((lfsr[, k] &gt; lfsr.cutoff) 
+                 &amp; (fl$loadings$normalized.loadings[[1]][, k] &lt; 0))
+  genes &lt;- all.genes[idx]
+  entrez &lt;- bitr(genes, 
+                 fromType = &quot;SYMBOL&quot;, 
+                 toType = &quot;ENTREZID&quot;,
+                 OrgDb = &quot;org.Mm.eg.db&quot;)$ENTREZID
+  enrich.res &lt;- enrichGO(entrez,
+                         universe = all.entrez,
+                         OrgDb = &quot;org.Mm.eg.db&quot;,
+                         ont = &quot;BP&quot;,
+                         pAdjustMethod = &quot;BH&quot;,
+                         pvalueCutoff = 0.001,
+                         readable = TRUE)
+  n.rows &lt;- min(top.n, nrow(enrich.res@result))
+  if (n.rows &gt; 0) {
+    simp.res &lt;- simplify(enrich.res)@result[1:n.rows, 
+                                            c(&quot;Description&quot;, &quot;p.adjust&quot;)]
+  } else {
+    simp.res &lt;- &quot;No pathways were found.&quot;
+  }
+  return(simp.res)
+}
+
+knitr::kable(find.pathways(fl.anscombe, lfsr.anscombe, 9), 
+             caption = &quot;Anscombe (factor 9)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>Anscombe (factor 9)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0044782" class="uri">GO:0044782</a></td>
+<td align="left">cilium organization</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0060271" class="uri">GO:0060271</a></td>
+<td align="left">cilium assembly</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0030031" class="uri">GO:0030031</a></td>
+<td align="left">cell projection assembly</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0120031" class="uri">GO:0120031</a></td>
+<td align="left">plasma membrane bounded cell projection assembly</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0007018" class="uri">GO:0007018</a></td>
+<td align="left">microtubule-based movement</td>
+<td align="right">0e+00</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 19), 
+             caption = &quot;log1p (factor 19)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>log1p (factor 19)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0044782" class="uri">GO:0044782</a></td>
+<td align="left">cilium organization</td>
+<td align="right">0.0e+00</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0060271" class="uri">GO:0060271</a></td>
+<td align="left">cilium assembly</td>
+<td align="right">0.0e+00</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0120031" class="uri">GO:0120031</a></td>
+<td align="left">plasma membrane bounded cell projection assembly</td>
+<td align="right">5.0e-07</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0030031" class="uri">GO:0030031</a></td>
+<td align="left">cell projection assembly</td>
+<td align="right">5.0e-07</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:1904874" class="uri">GO:1904874</a></td>
+<td align="left">positive regulation of telomerase RNA localization to Cajal body</td>
+<td align="right">3.6e-06</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 4), 
+             caption = &quot;log1p (factor 4)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>log1p (factor 4)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0044782" class="uri">GO:0044782</a></td>
+<td align="left">cilium organization</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0060271" class="uri">GO:0060271</a></td>
+<td align="left">cilium assembly</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0030031" class="uri">GO:0030031</a></td>
+<td align="left">cell projection assembly</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0120031" class="uri">GO:0120031</a></td>
+<td align="left">plasma membrane bounded cell projection assembly</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0007018" class="uri">GO:0007018</a></td>
+<td align="left">microtubule-based movement</td>
+<td align="right">0e+00</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.pseudo, lfsr.pseudo, 11), 
+             caption = &quot;Pseudodata (factor 11)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>Pseudodata (factor 11)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0044782" class="uri">GO:0044782</a></td>
+<td align="left">cilium organization</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0060271" class="uri">GO:0060271</a></td>
+<td align="left">cilium assembly</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0030031" class="uri">GO:0030031</a></td>
+<td align="left">cell projection assembly</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0120031" class="uri">GO:0120031</a></td>
+<td align="left">plasma membrane bounded cell projection assembly</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0007018" class="uri">GO:0007018</a></td>
+<td align="left">microtubule-based movement</td>
+<td align="right">0e+00</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="pathways-under-expressed-genes" class="section level3">
+<h3>Pathways (under-expressed genes)</h3>
+<pre class="r"><code>knitr::kable(find.pathways(fl.anscombe, lfsr.anscombe, 9, over = FALSE), 
+             caption = &quot;Anscombe (factor 9)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>Anscombe (factor 9)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0045807" class="uri">GO:0045807</a></td>
+<td align="left">positive regulation of endocytosis</td>
+<td align="right">3.03e-05</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0009617" class="uri">GO:0009617</a></td>
+<td align="left">response to bacterium</td>
+<td align="right">8.60e-05</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0050678" class="uri">GO:0050678</a></td>
+<td align="left">regulation of epithelial cell proliferation</td>
+<td align="right">8.60e-05</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0042742" class="uri">GO:0042742</a></td>
+<td align="left">defense response to bacterium</td>
+<td align="right">8.60e-05</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0050673" class="uri">GO:0050673</a></td>
+<td align="left">epithelial cell proliferation</td>
+<td align="right">8.60e-05</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 19, over = FALSE), 
+             caption = &quot;log1p (factor 19)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>log1p (factor 19)</caption>
+<thead>
+<tr class="header">
+<th align="left">x</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">No pathways were found.</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 4, over = FALSE), 
+             caption = &quot;log1p (factor 4)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>log1p (factor 4)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0002181" class="uri">GO:0002181</a></td>
+<td align="left">cytoplasmic translation</td>
+<td align="right">0.000e+00</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0000028" class="uri">GO:0000028</a></td>
+<td align="left">ribosomal small subunit assembly</td>
+<td align="right">3.630e-05</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0006081" class="uri">GO:0006081</a></td>
+<td align="left">cellular aldehyde metabolic process</td>
+<td align="right">1.817e-04</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.pseudo, lfsr.pseudo, 11, over = FALSE), 
+             caption = &quot;Pseudodata (factor 11)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>Pseudodata (factor 11)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0002181" class="uri">GO:0002181</a></td>
+<td align="left">cytoplasmic translation</td>
+<td align="right">7.000e-07</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0070972" class="uri">GO:0070972</a></td>
+<td align="left">protein localization to endoplasmic reticulum</td>
+<td align="right">6.184e-04</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0000028" class="uri">GO:0000028</a></td>
+<td align="left">ribosomal small subunit assembly</td>
+<td align="right">6.184e-04</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0009410" class="uri">GO:0009410</a></td>
+<td align="left">response to xenobiotic stimulus</td>
+<td align="right">6.184e-04</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0006805" class="uri">GO:0006805</a></td>
+<td align="left">xenobiotic metabolic process</td>
+<td align="right">6.184e-04</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="ionocyte-specific-factors" class="section level2">
+<h2>Ionocyte-specific factors</h2>
+<p>If ionocytes are in fact a distinct cell type, and if the clustering is at all close to reality, then both the Anscombe and pseudodata approaches have trouble picking them out.</p>
+<pre class="r"><code>plot.top.n(&quot;Ionocyte&quot;, 3)</code></pre>
+<p><img src="figure/trachea3.Rmd/ion-1.png" width="672" style="display: block; margin: auto;" /></p>
+<div id="pathways-over-expressed-genes-1" class="section level3">
+<h3>Pathways (over-expressed genes)</h3>
+<pre class="r"><code>knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 31), 
+             caption = &quot;log1p (factor 31)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>log1p (factor 31)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0035821" class="uri">GO:0035821</a></td>
+<td align="left">modification of morphology or physiology of other organism</td>
+<td align="right">5.103e-04</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 32), 
+             caption = &quot;log1p (factor 32)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>log1p (factor 32)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:1902600" class="uri">GO:1902600</a></td>
+<td align="left">hydrogen ion transmembrane transport</td>
+<td align="right">4.1e-06</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0015992" class="uri">GO:0015992</a></td>
+<td align="left">proton transport</td>
+<td align="right">4.1e-06</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0006818" class="uri">GO:0006818</a></td>
+<td align="left">hydrogen transport</td>
+<td align="right">4.1e-06</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0046034" class="uri">GO:0046034</a></td>
+<td align="left">ATP metabolic process</td>
+<td align="right">4.1e-06</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0009205" class="uri">GO:0009205</a></td>
+<td align="left">purine ribonucleoside triphosphate metabolic process</td>
+<td align="right">7.0e-06</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.pseudo, lfsr.pseudo, 40), 
+             caption = &quot;Pseudodata (factor 40)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>Pseudodata (factor 40)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0044782" class="uri">GO:0044782</a></td>
+<td align="left">cilium organization</td>
+<td align="right">0.00e+00</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0060271" class="uri">GO:0060271</a></td>
+<td align="left">cilium assembly</td>
+<td align="right">2.00e-07</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0120031" class="uri">GO:0120031</a></td>
+<td align="left">plasma membrane bounded cell projection assembly</td>
+<td align="right">1.14e-05</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0030031" class="uri">GO:0030031</a></td>
+<td align="left">cell projection assembly</td>
+<td align="right">1.22e-05</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="pathways-under-expressed-genes-1" class="section level3">
+<h3>Pathways (under-expressed genes)</h3>
+<pre class="r"><code>knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 31, over = FALSE), 
+             caption = &quot;log1p (factor 31)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>log1p (factor 31)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0045668" class="uri">GO:0045668</a></td>
+<td align="left">negative regulation of osteoblast differentiation</td>
+<td align="right">1.702e-04</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0071248" class="uri">GO:0071248</a></td>
+<td align="left">cellular response to metal ion</td>
+<td align="right">1.702e-04</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0010038" class="uri">GO:0010038</a></td>
+<td align="left">response to metal ion</td>
+<td align="right">1.702e-04</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0030279" class="uri">GO:0030279</a></td>
+<td align="left">negative regulation of ossification</td>
+<td align="right">6.072e-04</td>
+</tr>
+<tr class="odd">
+<td>NA</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 32, over = FALSE), 
+             caption = &quot;log1p (factor 32)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>log1p (factor 32)</caption>
+<thead>
+<tr class="header">
+<th align="left">x</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">No pathways were found.</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.pseudo, lfsr.pseudo, 40, over = FALSE), 
+             caption = &quot;Pseudodata (factor 40)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>Pseudodata (factor 40)</caption>
+<thead>
+<tr class="header">
+<th align="left">x</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">No pathways were found.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="tuft-specific-factors" class="section level2">
+<h2>Tuft-specific factors</h2>
+<p>If the given clustering is accurate, then the Anscombe transform again has difficulty.</p>
+<pre class="r"><code>plot.top.n(&quot;Tuft&quot;, 3)</code></pre>
+<p><img src="figure/trachea3.Rmd/tuft-1.png" width="672" style="display: block; margin: auto;" /></p>
+<div id="pathways-over-expressed-genes-2" class="section level3">
+<h3>Pathways (over-expressed genes)</h3>
+<pre class="r"><code>knitr::kable(find.pathways(fl.anscombe, lfsr.anscombe, 13), 
+             caption = &quot;Anscombe (factor 13)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>Anscombe (factor 13)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0046034" class="uri">GO:0046034</a></td>
+<td align="left">ATP metabolic process</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0009205" class="uri">GO:0009205</a></td>
+<td align="left">purine ribonucleoside triphosphate metabolic process</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0033108" class="uri">GO:0033108</a></td>
+<td align="left">mitochondrial respiratory chain complex assembly</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0007005" class="uri">GO:0007005</a></td>
+<td align="left">mitochondrion organization</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0097031" class="uri">GO:0097031</a></td>
+<td align="left">mitochondrial respiratory chain complex I biogenesis</td>
+<td align="right">0e+00</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 7), 
+             caption = &quot;log1p (factor 7)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>log1p (factor 7)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0002181" class="uri">GO:0002181</a></td>
+<td align="left">cytoplasmic translation</td>
+<td align="right">2.10e-06</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0072593" class="uri">GO:0072593</a></td>
+<td align="left">reactive oxygen species metabolic process</td>
+<td align="right">5.70e-06</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0009617" class="uri">GO:0009617</a></td>
+<td align="left">response to bacterium</td>
+<td align="right">6.10e-06</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0046034" class="uri">GO:0046034</a></td>
+<td align="left">ATP metabolic process</td>
+<td align="right">1.14e-05</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0043618" class="uri">GO:0043618</a></td>
+<td align="left">regulation of transcription from RNA polymerase II promoter in response to stress</td>
+<td align="right">1.41e-05</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 9), 
+             caption = &quot;log1p (factor 9)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>log1p (factor 9)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0046034" class="uri">GO:0046034</a></td>
+<td align="left">ATP metabolic process</td>
+<td align="right">3.31e-05</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0009205" class="uri">GO:0009205</a></td>
+<td align="left">purine ribonucleoside triphosphate metabolic process</td>
+<td align="right">4.64e-05</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0009126" class="uri">GO:0009126</a></td>
+<td align="left">purine nucleoside monophosphate metabolic process</td>
+<td align="right">4.64e-05</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0009167" class="uri">GO:0009167</a></td>
+<td align="left">purine ribonucleoside monophosphate metabolic process</td>
+<td align="right">4.64e-05</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0009199" class="uri">GO:0009199</a></td>
+<td align="left">ribonucleoside triphosphate metabolic process</td>
+<td align="right">4.64e-05</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.pseudo, lfsr.pseudo, 15), 
+             caption = &quot;Pseudodata (factor 15)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>Pseudodata (factor 15)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0015992" class="uri">GO:0015992</a></td>
+<td align="left">proton transport</td>
+<td align="right">1.249e-04</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0006818" class="uri">GO:0006818</a></td>
+<td align="left">hydrogen transport</td>
+<td align="right">1.249e-04</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0042775" class="uri">GO:0042775</a></td>
+<td align="left">mitochondrial ATP synthesis coupled electron transport</td>
+<td align="right">4.264e-04</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0042773" class="uri">GO:0042773</a></td>
+<td align="left">ATP synthesis coupled electron transport</td>
+<td align="right">4.264e-04</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0009141" class="uri">GO:0009141</a></td>
+<td align="left">nucleoside triphosphate metabolic process</td>
+<td align="right">6.498e-04</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.pseudo, lfsr.pseudo, 28), 
+             caption = &quot;Pseudodata (factor 28)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>Pseudodata (factor 28)</caption>
+<thead>
+<tr class="header">
+<th align="left">x</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">No pathways were found.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="pathways-under-expressed-genes-2" class="section level3">
+<h3>Pathways (under-expressed genes)</h3>
+<pre class="r"><code>knitr::kable(find.pathways(fl.anscombe, lfsr.anscombe, 13, over = FALSE), 
+             caption = &quot;Anscombe (factor 13)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>Anscombe (factor 13)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0032787" class="uri">GO:0032787</a></td>
+<td align="left">monocarboxylic acid metabolic process</td>
+<td align="right">7.000e-07</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0006805" class="uri">GO:0006805</a></td>
+<td align="left">xenobiotic metabolic process</td>
+<td align="right">2.312e-04</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0009636" class="uri">GO:0009636</a></td>
+<td align="left">response to toxic substance</td>
+<td align="right">6.002e-04</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0009410" class="uri">GO:0009410</a></td>
+<td align="left">response to xenobiotic stimulus</td>
+<td align="right">7.288e-04</td>
+</tr>
+<tr class="odd">
+<td>NA</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 7, over = FALSE), 
+             caption = &quot;log1p (factor 7)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>log1p (factor 7)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0045333" class="uri">GO:0045333</a></td>
+<td align="left">cellular respiration</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0006099" class="uri">GO:0006099</a></td>
+<td align="left">tricarboxylic acid cycle</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0051186" class="uri">GO:0051186</a></td>
+<td align="left">cofactor metabolic process</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0044282" class="uri">GO:0044282</a></td>
+<td align="left">small molecule catabolic process</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0009126" class="uri">GO:0009126</a></td>
+<td align="left">purine nucleoside monophosphate metabolic process</td>
+<td align="right">0e+00</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.log1p, lfsr.log1p, 9, over = FALSE), 
+             caption = &quot;log1p (factor 9)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>log1p (factor 9)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0042060" class="uri">GO:0042060</a></td>
+<td align="left">wound healing</td>
+<td align="right">2.30e-06</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0006897" class="uri">GO:0006897</a></td>
+<td align="left">endocytosis</td>
+<td align="right">2.30e-06</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0045807" class="uri">GO:0045807</a></td>
+<td align="left">positive regulation of endocytosis</td>
+<td align="right">3.80e-06</td>
+</tr>
+<tr class="even">
+<td><a href="GO:0031589" class="uri">GO:0031589</a></td>
+<td align="left">cell-substrate adhesion</td>
+<td align="right">2.14e-05</td>
+</tr>
+<tr class="odd">
+<td><a href="GO:0052547" class="uri">GO:0052547</a></td>
+<td align="left">regulation of peptidase activity</td>
+<td align="right">3.06e-05</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.pseudo, lfsr.pseudo, 15, over = FALSE), 
+             caption = &quot;Pseudodata (factor 15)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>Pseudodata (factor 15)</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Description</th>
+<th align="right">p.adjust</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="GO:0006457" class="uri">GO:0006457</a></td>
+<td align="left">protein folding</td>
+<td align="right">5.49e-05</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(find.pathways(fl.pseudo, lfsr.pseudo, 28, over = FALSE), 
+             caption = &quot;Pseudodata (factor 28)&quot;, 
+             format.args = list(scientific = TRUE))</code></pre>
+<table>
+<caption>Pseudodata (factor 28)</caption>
+<thead>
+<tr class="header">
+<th align="left">x</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">No pathways were found.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS High Sierra 10.13.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] parallel  stats4    stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+[1] org.Mm.eg.db_3.5.0    AnnotationDbi_1.40.0  IRanges_2.12.0       
+[4] S4Vectors_0.16.0      Biobase_2.38.0        BiocGenerics_0.24.0  
+[7] clusterProfiler_3.6.0 DOSE_3.4.0            ggplot2_3.1.0        
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.0          GO.db_3.5.0         tidyr_0.7.2        
+ [4] assertthat_0.2.0    rprojroot_1.3-2     digest_0.6.18      
+ [7] R6_2.3.0            plyr_1.8.4          backports_1.1.2    
+[10] RSQLite_2.0         evaluate_0.12       highr_0.7          
+[13] pillar_1.2.1        rlang_0.3.0.1       lazyeval_0.2.1     
+[16] data.table_1.12.0   whisker_0.3-2       blob_1.1.0         
+[19] R.utils_2.6.0       R.oo_1.21.0         qvalue_2.10.0      
+[22] rmarkdown_1.11      labeling_0.3        splines_3.4.3      
+[25] BiocParallel_1.12.0 stringr_1.3.1       igraph_1.1.2       
+[28] bit_1.1-12          munsell_0.5.0       fgsea_1.4.1        
+[31] compiler_3.4.3      xfun_0.4            pkgconfig_2.0.1    
+[34] htmltools_0.3.6     tidyselect_0.2.3    tibble_1.4.2       
+[37] gridExtra_2.3       workflowr_1.0.1     dplyr_0.7.4        
+[40] withr_2.1.2.9000    R.methodsS3_1.7.1   grid_3.4.3         
+[43] gtable_0.2.0        DBI_0.7             git2r_0.21.0       
+[46] magrittr_1.5        scales_1.0.0        stringi_1.2.4      
+[49] GOSemSim_2.4.1      reshape2_1.4.3      bindrcpp_0.2       
+[52] DO.db_2.9           flashier_0.1.0      rvcheck_0.1.3      
+[55] fastmatch_1.1-0     tools_3.4.3         bit64_0.9-7        
+[58] glue_1.3.0          purrr_0.2.4         yaml_2.2.0         
+[61] colorspace_1.3-2    memoise_1.1.0       knitr_1.21.6       
+[64] bindr_0.1          </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
