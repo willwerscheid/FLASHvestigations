@@ -57,6 +57,7 @@ Investigations 24 and 25 explore approaches to count data.
 
 * [Investigation 25.](count_preproc_r1.html) I compare three different data transformations, three approaches to handling the heteroskedacity of the `log1p` transformation, and two approaches to dealing with row- and column-specific scaling.
 
+* [Investigation 26.](trachea3.html) I compare FLASH fits to the "droplet" dataset in Montoro et al. using three different data transformations. 
 
 ## Still Relevant
 
