@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Pathway analysis of data from Montoro et al.</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Pathway analysis of data from Montoro et al.</h1>
+<h4 class="author"><em>Jason Willwerscheid</em></h4>
+<h4 class="date"><em>2/27/2019</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2019-03-02</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180714)</code> </summary></p>
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/a32cd246647a9be78c24fe2b102f12bd4da197ea" target="_blank">a32cd24</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    data/.DS_Store
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/figure/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/gd_notes.Rmd
+    Untracked:  code/count_sim.R
+    Untracked:  code/pathways.R
+    Untracked:  code/trachea4.R
+    Untracked:  data/lowrank/
+    Untracked:  data/tmp.rds
+    Untracked:  data/tmp14.rds
+    Untracked:  data/tmpdata.rds
+    Untracked:  data/tmplfsr.rds
+    Untracked:  docs/figure/count_notes.Rmd/
+
+Unstaged changes:
+    Deleted:    data/before_bad.Rdata
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/a32cd246647a9be78c24fe2b102f12bd4da197ea/analysis/trachea4.Rmd" target="_blank">a32cd24</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-02
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/trachea4.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>The usual way to do a pathway analysis of a gene expression dataset is to do a factor analysis and then annotate the resulting factors. Here I explore a reverse approach: instead of getting pathways from factors, I get factors from pathways.</p>
+<p>In detail, the method is as follows. At each step, I have an EBMF decomposition <span class="math inline">\(\log(Y + 1) = GC&#39; + E\)</span>, where <span class="math inline">\(Y\)</span> is an <span class="math inline">\(g \times c\)</span> matrix of counts, <span class="math inline">\(G\)</span> is an <span class="math inline">\(g \times p\)</span> matrix whose columns give gene loadings for each of <span class="math inline">\(p\)</span> pathways, and <span class="math inline">\(C\)</span> is a <span class="math inline">\(c \times p\)</span> matrix whose columns give cell loadings for the same pathways. I use <code>flashier</code> to add a single greedy factor to the decomposition. I then extract the factor and use <code>SuSiE</code> to find a set of candidate pathways that best describe the factor. More precisely, I fit the SER model described in <a href="https://www.biorxiv.org/content/biorxiv/early/2018/12/19/501114.full.pdf">Wang, Sarkar, Carbonetto, and Stephens</a>, with <span class="math inline">\(y\)</span> the vector of expected gene loadings for the greedily added factor and <span class="math inline">\(X\)</span> an <span class="math inline">\(n \times m\)</span> matrix of ones and zeros indicating which genes are included in which pathways. I take the resulting 95% credible set as my set of candidate pathways. Finally, I use <code>flashier</code> to fit each of the candidate pathways to the current EBMF decomposition, fixing loadings of genes that aren’t in the pathway at zero. This gives a different decomposition for each candidate pathway. I retain the pathway that gives the best EBMF objective.</p>
+<p>The dataset analyzed here is the 3’ droplet-based dataset from <a href="https://www.nature.com/articles/s41586-018-0393-7">Montoro et al.</a>. I remove genes that have nonzero counts in five or fewer cells. I use the set of <em>mus musculus</em> pathways from Reactome, removing pathways comprised of five or fewer genes (after removing genes that don’t appear in my dataset). After preprocessing, the dataset includes counts for 6382 genes and 7193 cells, and the pathway matrix includes 824 pathways.</p>
+<p>Click “Code” to view the code used to preprocess the data and fit the pathways.</p>
+<pre class="r"><code># Download and pre-process pathways -----------------------------------------
+
+# I want the pathways matrix to be a matrix of ones and zeros, with rows
+#   corresponding to genes and columns corresponding to pathways.
+# I download the following file from reactome.org:
+#   wget https://reactome.org/download/current/Ensembl2Reactome.txt
+setwd(&quot;/project2/mstephens/willwerscheid/&quot;)
+pathways &lt;- data.table::fread(&quot;Ensembl2Reactome.txt&quot;,
+                              header = FALSE,
+                              stringsAsFactors = TRUE)
+pathways &lt;- subset(pathways, V6 == &quot;Mus musculus&quot;)
+pw.mat &lt;- reshape2::acast(pathways, V1 ~ V4, length)
+pw.mat &lt;- Matrix::Matrix(pw.mat)
+saveRDS(pw.mat, &quot;mus_pathways.rds&quot;)
+
+
+# Download and pre-process data ---------------------------------------------
+
+# File GSE103354_Trachea_droplet_UMIcounts.txt.gz was downloaded at
+#   https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE103354
+trachea &lt;- read.table(&quot;droplet.txt&quot;)
+trachea &lt;- Matrix::Matrix(as.matrix(trachea))
+# scale.constants &lt;- 1e6 / Matrix::colSums(trachea)
+# saveRDS(scale.constants, &quot;trachea_scale.rds&quot;)
+
+# Convert the MGI gene symbols to Ensembl IDs.
+gene.symbols &lt;- rownames(trachea)
+ensembl &lt;- biomaRt::useMart(&quot;ensembl&quot;, dataset = &quot;mmusculus_gene_ensembl&quot;)
+bm &lt;- biomaRt::getBM(filters = &quot;mgi_symbol&quot;,
+                     attributes = c(&quot;mgi_symbol&quot;, &quot;ensembl_gene_id&quot;),
+                     values = gene.symbols,
+                     mart = ensembl)
+saveRDS(bm, &quot;pw_bm.rds&quot;)
+
+trachea &lt;- trachea[which(gene.symbols %in% bm$mgi_symbol), ]
+gene.symbols &lt;- rownames(trachea)
+ensembl.ids &lt;- bm$ensembl_gene_id[match(gene.symbols, bm$mgi_symbol)]
+rownames(trachea) &lt;- ensembl.ids
+
+# I drop genes that have nonzero counts in five or fewer cells.
+gene.cts &lt;- Matrix::rowSums(trachea &gt; 0)
+trachea &lt;- trachea[which(gene.cts &gt; 5), ]
+saveRDS(trachea, &quot;trachea.rds&quot;)
+
+
+# Fit the pathways to the data ----------------------------------------------
+
+setwd(&quot;/project2/mstephens/willwerscheid/&quot;)
+trachea &lt;- readRDS(&quot;trachea.rds&quot;)
+pw.mat &lt;- readRDS(&quot;mus_pathways.rds&quot;)
+
+library(ashr)
+library(flashier)
+library(ebnm)
+library(Matrix)
+library(susieR)
+
+common.genes &lt;- rownames(trachea)[rownames(trachea) %in% rownames(pw.mat)]
+trachea &lt;- trachea[common.genes, ]
+pw.mat &lt;- pw.mat[common.genes, ]
+
+# Remove pathways with five or fewer genes.
+pw.mat &lt;- pw.mat[, colSums(pw.mat) &gt; 5]
+# Some genes no longer belong to any pathway. Remove them.
+to.remove &lt;- which(rowSums(pw.mat) == 0)
+trachea &lt;- trachea[-to.remove, ]
+pw.mat &lt;- pw.mat[-to.remove, ]
+
+# Log-transform the data and set it for flash.
+data &lt;- log1p(trachea)
+S &lt;- sqrt(data) / (data + 1)
+S[S == 0] &lt;- 0.5
+fl.data &lt;- set.flash.data(data, S, var.type = NULL)
+rm(S)
+
+# Time to flash. First, fit the mean factors. For genes, a &quot;nonnegative&quot; prior
+#   (which is unimodal at zero) works best. I don&#39;t expect cell sizes to be
+#   unimodal at zero, so I use a &quot;nonzero.mode&quot; prior for cells.
+fl &lt;- flashier(fl.data,
+               var.type = NULL,
+               prior.type = c(&quot;nonnegative&quot;, &quot;nonzero.mode&quot;),
+               fixed.factors = c(ones.factor(2), ones.factor(1)),
+               backfit = &quot;only&quot;,
+               verbose.lvl = 3)
+saveRDS(fl, &quot;/scratch/midway2/willwerscheid/pw_tmp.rds&quot;)
+
+# I add a pathway as follows: First, I add a factor greedily with a nonnegative
+#   prior on genes (since one expects genes in a pathway to be regulated in the
+#   same direction).
+get.next.greedy &lt;- function(flash.init) {
+  next.greedy &lt;- flashier(flash.init = flash.init,
+                          prior.type = c(&quot;nonnegative&quot;, &quot;normal.mix&quot;),
+                          ash.param = list(method = &quot;fdr&quot;),
+                          greedy.Kmax = 1,
+                          verbose.lvl = 3)
+  return(next.greedy$loadings$normalized.loadings[[1]][, next.greedy$n.factors])
+}
+
+# I then use SuSiE to find the pathways that best match the new factor.
+get.candidate.pathways &lt;- function(next.greedy, level = 0.95) {
+  suz &lt;- susie(pw.mat, next.greedy, L = 1)
+  suz.order &lt;- order(suz$alpha, decreasing = TRUE)
+  levels &lt;- cumsum(suz$alpha[suz.order])
+  n.candidates &lt;- sum(levels &lt; level) + 1
+  return(suz.order[1:n.candidates])
+}
+
+# For each candidate pathway, I run flash to add the pathway as a fixed sparse
+#   factor (i.e., all genes not in the pathway are fixed at zero). I keep the
+#   pathway that gives the best flash objective.
+fit.pathway &lt;- function(next.pathway) {
+  pathway.idx &lt;- which(pw.mat[, next.pathway] == 1)
+  fl &lt;- flashier(flash.init = fl,
+                 prior.type = c(&quot;nonnegative&quot;, &quot;normal.mix&quot;),
+                 fixed.factors = sparse.factors(1, pathway.idx),
+                 greedy.Kmax = 0,
+                 ash.param = list(method = &quot;fdr&quot;),
+                 verbose.lvl = 3)
+  return(fl)
+}
+
+# Add 10 pathways.
+for (j in 1:10) {
+  cat(&quot;FITTING NEXT GREEDY FACTOR \n&quot;)
+  Y &lt;- get.next.greedy(fl)
+
+  cat(&quot;FINDING CANDIDATE PATHWAYS \n&quot;)
+  candidates &lt;- get.candidate.pathways(Y)
+  n.candidates &lt;- length(candidates)
+
+  if (n.candidates &gt; 20)
+    break
+
+  for (i in 1:n.candidates)
+    cat(&quot;CANDIDATE PATHWAY:&quot;, colnames(pw.mat)[candidates[i]], &quot;\n&quot;)
+
+  best.obj &lt;- -Inf
+  for (i in 1:n.candidates) {
+    cat(&quot;FITTING PATHWAY:&quot;, colnames(pw.mat)[candidates[i]], &quot;\n&quot;)
+    next.fl &lt;- fit.pathway(candidates[i])
+    if (next.fl$objective &gt; best.obj) {
+      best.obj &lt;- next.fl$objective
+      best.fl &lt;- next.fl
+      cat(&quot;NEW BEST PATHWAY:&quot;, colnames(pw.mat)[candidates[i]], &quot;\n&quot;)
+    }
+  }
+  best.pathway &lt;- candidates[best.fl]
+
+  # Check that the pathway improves the objective before adding.
+  if (best.fl$objective &lt;= fl$objective)
+    break
+
+  cat(&quot;ADDING PATHWAY:&quot;, colnames(pw.mat)[best.pathway], &quot;\n&quot;)
+  fl &lt;- best.fl
+
+  saveRDS(fl, &quot;/scratch/midway2/willwerscheid/fl_tmp.rds&quot;)
+}
+
+# Backfit.
+fl &lt;- flashier(flash.init = fl,
+               backfit = &quot;only&quot;, backfit.reltol = 5,
+               verbose.lvl = 3, output.lvl = 4)
+
+saveRDS(fl, &quot;pw_fl10.rds&quot;)
+
+# Repeat. Add 10 factors and backfit, add 10 more and backfit, etc.
+
+saveRDS(fl, &quot;pw_fl20.rds&quot;)
+saveRDS(fl, &quot;pw_fl23.rds&quot;) # didn&#39;t find a pathway that increased the objective
+saveRDS(fl, &quot;pw_fl33.rds&quot;)
+saveRDS(fl, &quot;pw_fl41.rds&quot;) # too many candidate factors
+
+
+# Recover pathways from flash object.
+pathway.idx &lt;- lapply(fl$fit$fix.idx[3:fl$n.factors], function(f) {
+  setdiff(1:nrow(fl$fit$EF[[1]]), f)
+})
+pathways &lt;- apply(pw.mat, 2, function(x) which(x == 1))
+added.idx &lt;- match(pathway.idx, pathways)
+pathways.added &lt;- names(pathways)[added.idx]</code></pre>
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<p>Each pair of plots corresponds to a pathway, and results are organized according to the proportion of variance explained by each pathway. The plots on the left-hand side give cell loadings broken down by cell type (the cell type annotations are given by Montoro et al.). The plots on the right give gene loadings for all genes in the pathway, with a maximum of 50 genes displayed so that gene labels are readable. The loadings are scaled so that the maximum gene loading is equal to one. Thus, a cell loading of, say, 0.5, can be interpreted as increasing the expected count of the most highly loaded gene in the pathway by a multiplicative factor of <span class="math inline">\(\exp(0.5)\)</span>.</p>
+<pre class="r"><code>library(ggplot2)
+library(gridExtra)
+library(Matrix)
+
+fl &lt;- readRDS(&quot;~/Downloads/pw_fl41.rds&quot;)
+pw.mat &lt;- readRDS(&quot;~/Downloads/pw_mat.rds&quot;)
+bm &lt;- readRDS(&quot;~/Downloads/pw_bm.rds&quot;)
+
+pathway.idx &lt;- lapply(fl$fit$fix.idx[3:fl$n.factors], function(f) {
+  setdiff(1:nrow(fl$fit$EF[[1]]), f)
+})
+pathways &lt;- apply(pw.mat, 2, function(x) which(x == 1))
+added.idx &lt;- match(pathway.idx, pathways)
+pathways.added &lt;- names(pathways)[added.idx]
+
+K &lt;- fl$n.factors
+gene.loadings &lt;- fl$loadings$normalized.loadings[[1]]
+cell.loadings &lt;- fl$loadings$normalized.loadings[[2]]
+scale.const &lt;- fl$loadings$scale.constant
+
+# Scale loadings so that the maximum gene loading is 1.
+max.gene.l &lt;- apply(gene.loadings, 2, max)
+gene.loadings &lt;- gene.loadings / rep(max.gene.l, each = nrow(gene.loadings))
+cell.loadings &lt;- cell.loadings * rep(max.gene.l * scale.const, 
+                                     each = nrow(cell.loadings))
+
+cell.names &lt;- rownames(cell.loadings)
+cell.types &lt;- as.factor(sapply(strsplit(cell.names, &quot;_&quot;), `[`, 3))
+# mouse &lt;- as.factor(sapply(strsplit(cell.names, &quot;_&quot;), `[`, 1))
+
+df &lt;- data.frame(cell.loadings[, 3:K])
+names(df) &lt;- paste0(&quot;F&quot;, (3:K), &quot;: &quot;, pathways.added)
+df$`Cell Type` &lt;- cell.types
+# df$Mouse &lt;- mouse
+
+plot.celltypes &lt;- function(df, k) {
+  pw &lt;- paste0(&quot;`&quot;, names(df)[k], &quot;`&quot;)
+  the.plot &lt;- ggplot(df, aes_string(x = &quot;`Cell Type`&quot;, y = pw)) +
+    geom_violin(aes_string(color = &quot;`Cell Type`&quot;),
+                scale = &quot;width&quot;, draw_quantiles = 0.5) +
+    labs(x = NULL, y = &quot;Scaled loading&quot;, color = &quot;Cell Type&quot;) +
+    theme(legend.position=&quot;none&quot;,
+          axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5))
+  return(the.plot)
+}
+
+plot.geneset &lt;- function(gene.loadings, k, offset = 2) {
+  all.loadings &lt;- gene.loadings[, k + offset]
+  pw.loadings &lt;- data.frame(all.loadings[all.loadings &gt; 0])
+  names(pw.loadings) &lt;- &quot;Loading&quot;
+  if (nrow(pw.loadings) &gt; 50) {
+    cutoff &lt;- pw.loadings$Loading[order(pw.loadings, decreasing = TRUE)[50]]
+    pw.loadings &lt;- subset(pw.loadings, Loading &gt;= cutoff)
+  }
+  pw.loadings$Gene &lt;- bm$mgi_symbol[match(rownames(pw.loadings),
+                                          bm$ensembl_gene_id)]
+  the.plot &lt;- ggplot(pw.loadings, 
+                     aes(x = reorder(Gene, -Loading), y = Loading)) +
+    geom_bar(stat = &quot;identity&quot;) +
+    labs(x = NULL, y = &quot;Scaled loading&quot;)
+  if (nrow(pw.loadings) &gt; 30) {
+    the.plot &lt;- the.plot + 
+      theme(axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5, 
+                                       size = 6)) 
+  } else {
+    the.plot &lt;- the.plot + 
+      theme(axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5)) 
+  }
+  return(the.plot)
+}
+
+pve &lt;- fl$pve[3:K]
+k.order &lt;- order(pve, decreasing = TRUE)
+for (k in k.order) {
+  plot.title &lt;- paste0(names(df)[k], &quot; (PVE: &quot;, 
+                       signif(pve[k], digits = 2), &quot;)&quot;)
+  plot1 &lt;- plot.celltypes(df, k)
+  plot2 &lt;- plot.geneset(gene.loadings, k)
+  grid.arrange(plot1, plot2, ncol = 2, top = plot.title)
+}</code></pre>
+<p><img src="figure/trachea4.Rmd/the.res-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-5.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-6.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-7.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-8.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-9.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-10.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-11.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-12.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-13.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-14.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-15.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-16.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-17.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-18.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-19.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-20.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-21.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-22.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-23.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-24.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-25.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-26.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-27.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-28.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-29.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-30.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-31.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-32.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-33.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-34.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-35.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-36.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-37.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-38.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-39.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-40.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-41.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS High Sierra 10.13.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] Matrix_1.2-14 gridExtra_2.3 ggplot2_3.1.0
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.0        compiler_3.4.3    pillar_1.2.1     
+ [4] git2r_0.21.0      plyr_1.8.4        workflowr_1.0.1  
+ [7] bindr_0.1         R.methodsS3_1.7.1 R.utils_2.6.0    
+[10] tools_3.4.3       digest_0.6.18     lattice_0.20-35  
+[13] evaluate_0.12     tibble_1.4.2      gtable_0.2.0     
+[16] pkgconfig_2.0.1   rlang_0.3.0.1     yaml_2.2.0       
+[19] xfun_0.4          bindrcpp_0.2      flashier_0.1.0   
+[22] withr_2.1.2.9000  stringr_1.3.1     dplyr_0.7.4      
+[25] knitr_1.21.6      rprojroot_1.3-2   grid_3.4.3       
+[28] glue_1.3.0        R6_2.3.0          rmarkdown_1.11   
+[31] magrittr_1.5      whisker_0.3-2     backports_1.1.2  
+[34] scales_1.0.0      htmltools_0.3.6   assertthat_0.2.0 
+[37] colorspace_1.3-2  labeling_0.3      stringi_1.2.4    
+[40] lazyeval_0.2.1    munsell_0.5.0     R.oo_1.21.0      </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
