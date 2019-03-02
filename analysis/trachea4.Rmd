@@ -1,0 +1,111 @@
+---
+title: "Pathway analysis of data from Montoro et al."
+author: "Jason Willwerscheid"
+date: "2/27/2019"
+output: 
+  workflowr::wflow_html:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Introduction
+
+The usual way to do a pathway analysis of a gene expression dataset is to do a factor analysis and then annotate the resulting factors. Here I explore a reverse approach: instead of getting pathways from factors, I get factors from pathways.
+
+In detail, the method is as follows. At each step, I have an EBMF decomposition $\log(Y + 1) = GC' + E$, where $Y$ is an $g \times c$ matrix of counts, $G$ is an $g \times p$ matrix whose columns give gene loadings for each of $p$ pathways, and $C$ is a $c \times p$ matrix whose columns give cell loadings for the same pathways. I use `flashier` to add a single greedy factor to the decomposition. I then extract the factor and use `SuSiE` to find a set of candidate pathways that best describe the factor. More precisely, I fit the SER model described in [Wang, Sarkar, Carbonetto, and Stephens](https://www.biorxiv.org/content/biorxiv/early/2018/12/19/501114.full.pdf), with $y$ the vector of expected gene loadings for the greedily added factor and $X$ an $n \times m$ matrix of ones and zeros indicating which genes are included in which pathways. I take the resulting 95% credible set as my set of candidate pathways. Finally, I use `flashier` to fit each of the candidate pathways to the current EBMF decomposition, fixing loadings of genes that aren't in the pathway at zero. This gives a different decomposition for each candidate pathway. I retain the pathway that gives the best EBMF objective.
+
+The dataset analyzed here is the 3' droplet-based dataset from [Montoro et al.](https://www.nature.com/articles/s41586-018-0393-7). I remove genes that have nonzero counts in five or fewer cells. I use the set of *mus musculus* pathways from Reactome, removing pathways comprised of five or fewer genes (after removing genes that don't appear in my dataset). After preprocessing, the dataset includes counts for 6382 genes and 7193 cells, and the pathway matrix includes 824 pathways.
+
+Click "Code" to view the code used to preprocess the data and fit the pathways.
+```{r the.code, code = readLines("../code/trachea4.R"), eval = FALSE}
+```
+
+## Results
+
+Each pair of plots corresponds to a pathway, and results are organized according to the proportion of variance explained by each pathway. The plots on the left-hand side give cell loadings broken down by cell type (the cell type annotations are given by Montoro et al.). The plots on the right give gene loadings for all genes in the pathway, with a maximum of 50 genes displayed so that gene labels are readable. The loadings are scaled so that the maximum gene loading is equal to one. Thus, a cell loading of, say, 0.5, can be interpreted as increasing the expected count of the most highly loaded gene in the pathway by a multiplicative factor of $\exp(0.5)$.
+
+```{r the.res}
+library(ggplot2)
+library(gridExtra)
+library(Matrix)
+
+fl <- readRDS("~/Downloads/pw_fl41.rds")
+pw.mat <- readRDS("~/Downloads/pw_mat.rds")
+bm <- readRDS("~/Downloads/pw_bm.rds")
+
+pathway.idx <- lapply(fl$fit$fix.idx[3:fl$n.factors], function(f) {
+  setdiff(1:nrow(fl$fit$EF[[1]]), f)
+})
+pathways <- apply(pw.mat, 2, function(x) which(x == 1))
+added.idx <- match(pathway.idx, pathways)
+pathways.added <- names(pathways)[added.idx]
+
+K <- fl$n.factors
+gene.loadings <- fl$loadings$normalized.loadings[[1]]
+cell.loadings <- fl$loadings$normalized.loadings[[2]]
+scale.const <- fl$loadings$scale.constant
+
+# Scale loadings so that the maximum gene loading is 1.
+max.gene.l <- apply(gene.loadings, 2, max)
+gene.loadings <- gene.loadings / rep(max.gene.l, each = nrow(gene.loadings))
+cell.loadings <- cell.loadings * rep(max.gene.l * scale.const, 
+                                     each = nrow(cell.loadings))
+
+cell.names <- rownames(cell.loadings)
+cell.types <- as.factor(sapply(strsplit(cell.names, "_"), `[`, 3))
+# mouse <- as.factor(sapply(strsplit(cell.names, "_"), `[`, 1))
+
+df <- data.frame(cell.loadings[, 3:K])
+names(df) <- paste0("F", (3:K), ": ", pathways.added)
+df$`Cell Type` <- cell.types
+# df$Mouse <- mouse
+
+plot.celltypes <- function(df, k) {
+  pw <- paste0("`", names(df)[k], "`")
+  the.plot <- ggplot(df, aes_string(x = "`Cell Type`", y = pw)) +
+    geom_violin(aes_string(color = "`Cell Type`"),
+                scale = "width", draw_quantiles = 0.5) +
+    labs(x = NULL, y = "Scaled loading", color = "Cell Type") +
+    theme(legend.position="none",
+          axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5))
+  return(the.plot)
+}
+
+plot.geneset <- function(gene.loadings, k, offset = 2) {
+  all.loadings <- gene.loadings[, k + offset]
+  pw.loadings <- data.frame(all.loadings[all.loadings > 0])
+  names(pw.loadings) <- "Loading"
+  if (nrow(pw.loadings) > 50) {
+    cutoff <- pw.loadings$Loading[order(pw.loadings, decreasing = TRUE)[50]]
+    pw.loadings <- subset(pw.loadings, Loading >= cutoff)
+  }
+  pw.loadings$Gene <- bm$mgi_symbol[match(rownames(pw.loadings),
+                                          bm$ensembl_gene_id)]
+  the.plot <- ggplot(pw.loadings, 
+                     aes(x = reorder(Gene, -Loading), y = Loading)) +
+    geom_bar(stat = "identity") +
+    labs(x = NULL, y = "Scaled loading")
+  if (nrow(pw.loadings) > 30) {
+    the.plot <- the.plot + 
+      theme(axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5, 
+                                       size = 6)) 
+  } else {
+    the.plot <- the.plot + 
+      theme(axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5)) 
+  }
+  return(the.plot)
+}
+
+pve <- fl$pve[3:K]
+k.order <- order(pve, decreasing = TRUE)
+for (k in k.order) {
+  plot.title <- paste0(names(df)[k], " (PVE: ", 
+                       signif(pve[k], digits = 2), ")")
+  plot1 <- plot.celltypes(df, k)
+  plot2 <- plot.geneset(gene.loadings, k)
+  grid.arrange(plot1, plot2, ncol = 2, top = plot.title)
+}
+```
