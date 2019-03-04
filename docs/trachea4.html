@@ -433,7 +433,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2019-03-02</p>
+<p><strong>Last updated:</strong> 2019-03-04</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -457,7 +457,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/867f28b73cfeefdd7e9cb92a686faa7f6f025377" target="_blank">867f28b</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/6e771898e02ba32b58dfaa304913718dd8093628" target="_blank">6e77189</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -472,6 +472,7 @@ Untracked files:
     Untracked:  analysis/gd_notes.Rmd
     Untracked:  code/count_sim.R
     Untracked:  code/pathways.R
+    Untracked:  code/trachea3_anno.R
     Untracked:  code/trachea4.R
     Untracked:  data/lowrank/
     Untracked:  data/tmp.rds
@@ -510,6 +511,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/6e771898e02ba32b58dfaa304913718dd8093628/analysis/trachea4.Rmd" target="_blank">6e77189</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/trachea4.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/333588180e01ec3cae68758ed2a8ffdb34e34587/docs/trachea4.html" target="_blank">3335881</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-02
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 html
@@ -552,8 +587,9 @@ wflow_publish(“analysis/trachea4.Rmd”)
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
 <p>The usual way to do a pathway analysis of a gene expression dataset is to do a factor analysis and then annotate the resulting factors. Here I explore a reverse approach: instead of getting pathways from factors, I get factors from pathways.</p>
-<p>In detail, the method is as follows. At each step, I have an EBMF decomposition <span class="math inline">\(\log(Y + 1) = GC&#39; + E\)</span>, where <span class="math inline">\(Y\)</span> is an <span class="math inline">\(g \times c\)</span> matrix of counts, <span class="math inline">\(G\)</span> is an <span class="math inline">\(g \times p\)</span> matrix whose columns give gene loadings for each of <span class="math inline">\(p\)</span> pathways, and <span class="math inline">\(C\)</span> is a <span class="math inline">\(c \times p\)</span> matrix whose columns give cell loadings for the same pathways. I use <code>flashier</code> to add a single greedy factor to the decomposition. I then extract the factor and use <code>SuSiE</code> to find a set of candidate pathways that best describe the factor. More precisely, I fit the SER model described in <a href="https://www.biorxiv.org/content/biorxiv/early/2018/12/19/501114.full.pdf">Wang, Sarkar, Carbonetto, and Stephens</a>, with <span class="math inline">\(y\)</span> the vector of expected gene loadings for the greedily added factor and <span class="math inline">\(X\)</span> an <span class="math inline">\(n \times m\)</span> matrix of ones and zeros indicating which genes are included in which pathways. I take the resulting 95% credible set as my set of candidate pathways. Finally, I use <code>flashier</code> to fit each of the candidate pathways to the current EBMF decomposition, fixing loadings of genes that aren’t in the pathway at zero. This gives a different decomposition for each candidate pathway. I retain the pathway that gives the best EBMF objective.</p>
+<p>In detail, the method is as follows. At each step, I have an EBMF decomposition <span class="math inline">\(\log(Y + 1) = GC&#39; + E\)</span>, where <span class="math inline">\(Y\)</span> is a <span class="math inline">\(g \times c\)</span> matrix of counts, <span class="math inline">\(G\)</span> is a <span class="math inline">\(g \times p\)</span> matrix whose columns give gene loadings for each of <span class="math inline">\(p\)</span> pathways, and <span class="math inline">\(C\)</span> is a <span class="math inline">\(c \times p\)</span> matrix whose columns give cell loadings for the same pathways. I use <code>flashier</code> to add a single greedy factor to the decomposition. I then extract the factor and use <code>SuSiE</code> to find a set of candidate pathways that best describe the factor. More precisely, I fit the SER model described in <a href="https://www.biorxiv.org/content/biorxiv/early/2018/12/19/501114.full.pdf">Wang, Sarkar, Carbonetto, and Stephens</a>, with <span class="math inline">\(y\)</span> the vector of expected gene loadings for the greedily added factor and <span class="math inline">\(X\)</span> a <span class="math inline">\(g \times m\)</span> matrix of ones and zeros indicating which genes are included in which pathways. I take the resulting 95% credible set as my set of candidate pathways. Finally, I use <code>flashier</code> to fit each of the candidate pathways to the current EBMF decomposition, fixing loadings of genes that aren’t in the pathway at zero. This gives a different decomposition for each candidate pathway. I retain the pathway that gives the best EBMF objective.</p>
 <p>The dataset analyzed here is the 3’ droplet-based dataset from <a href="https://www.nature.com/articles/s41586-018-0393-7">Montoro et al.</a>. I remove genes that have nonzero counts in five or fewer cells. I use the set of <em>mus musculus</em> pathways from Reactome, removing pathways comprised of five or fewer genes (after removing genes that don’t appear in my dataset). After preprocessing, the dataset includes counts for 6382 genes and 7193 cells, and the pathway matrix includes 824 pathways.</p>
+<p>I analyze the full dataset first, but I’m also interested in whether a pathway analysis might be able to highlight the specific functions of ionocytes, so I subsequently analyze the subset of 26 ionocyte cells.</p>
 <p>Click “Code” to view the code used to preprocess the data and fit the pathways.</p>
 <pre class="r"><code># Download and pre-process pathways -----------------------------------------
 
@@ -622,12 +658,26 @@ pw.mat &lt;- pw.mat[, colSums(pw.mat) &gt; 5]
 to.remove &lt;- which(rowSums(pw.mat) == 0)
 trachea &lt;- trachea[-to.remove, ]
 pw.mat &lt;- pw.mat[-to.remove, ]
+saveRDS(trachea, &quot;pw_trachea.rds&quot;)
+saveRDS(pw.mat, &quot;pw_mat.rds&quot;)
 
 # Log-transform the data and set it for flash.
 data &lt;- log1p(trachea)
 S &lt;- sqrt(data) / (data + 1)
 S[S == 0] &lt;- 0.5
 fl.data &lt;- set.flash.data(data, S, var.type = NULL)
+rm(S)
+
+# Subset ionocytes and set for flash.
+ion.idx &lt;- (sapply(strsplit(colnames(trachea), &quot;_&quot;), `[`, 3) == &quot;Ionocyte&quot;)
+ionocytes &lt;- trachea[, ion.idx]
+saveRDS(ionocytes, &quot;ionocytes.rds&quot;)
+# all-zero rows need to be removed (for flash only, not SuSiE):
+nz.idx &lt;- (rowSums(ionocytes) &gt; 0)
+ionocytes &lt;- log1p(ionocytes[nz.idx, ])
+S &lt;- sqrt(ionocytes) / (ionocytes + 1)
+S[S == 0] &lt;- 0.5
+ion.data &lt;- set.flash.data(ionocytes, S, var.type = NULL)
 rm(S)
 
 # Time to flash. First, fit the mean factors. For genes, a &quot;nonnegative&quot; prior
@@ -640,6 +690,15 @@ fl &lt;- flashier(fl.data,
                backfit = &quot;only&quot;,
                verbose.lvl = 3)
 saveRDS(fl, &quot;/scratch/midway2/willwerscheid/pw_tmp.rds&quot;)
+
+# For the cell type subsets, I only want a mean factor for cells.
+ion.fl &lt;- flashier(ion.data,
+                   var.type = NULL,
+                   prior.type = c(&quot;nonnegative&quot;, &quot;nonzero.mode&quot;),
+                   fixed.factors = ones.factor(2),
+                   greedy.Kmax = 0,
+                   verbose.lvl = 3)
+saveRDS(ion.fl, &quot;/scratch/midway2/willwerscheid/ion_tmp.rds&quot;)
 
 # I add a pathway as follows: First, I add a factor greedily with a nonnegative
 #   prior on genes (since one expects genes in a pathway to be regulated in the
@@ -654,8 +713,12 @@ get.next.greedy &lt;- function(flash.init) {
 }
 
 # I then use SuSiE to find the pathways that best match the new factor.
-get.candidate.pathways &lt;- function(next.greedy, level = 0.95) {
-  suz &lt;- susie(pw.mat, next.greedy, L = 1)
+get.candidate.pathways &lt;- function(next.greedy, pw.mat, idx = NULL, level = 0.95) {
+  if (!is.null(idx)) {
+    Y &lt;- rep(0, nrow(pw.mat))
+    Y[idx] &lt;- next.greedy
+  }
+  suz &lt;- susie(pw.mat, Y, L = 1)
   suz.order &lt;- order(suz$alpha, decreasing = TRUE)
   levels &lt;- cumsum(suz$alpha[suz.order])
   n.candidates &lt;- sum(levels &lt; level) + 1
@@ -665,8 +728,10 @@ get.candidate.pathways &lt;- function(next.greedy, level = 0.95) {
 # For each candidate pathway, I run flash to add the pathway as a fixed sparse
 #   factor (i.e., all genes not in the pathway are fixed at zero). I keep the
 #   pathway that gives the best flash objective.
-fit.pathway &lt;- function(next.pathway) {
-  pathway.idx &lt;- which(pw.mat[, next.pathway] == 1)
+fit.pathway &lt;- function(fl, pw.mat, next.pathway, idx = NULL) {
+  if (is.null(idx))
+    idx &lt;- 1:nrow(pw.mat)
+  pathway.idx &lt;- which(pw.mat[idx, next.pathway] == 1)
   fl &lt;- flashier(flash.init = fl,
                  prior.type = c(&quot;nonnegative&quot;, &quot;normal.mix&quot;),
                  fixed.factors = sparse.factors(1, pathway.idx),
@@ -676,17 +741,13 @@ fit.pathway &lt;- function(next.pathway) {
   return(fl)
 }
 
-# Add 10 pathways.
-for (j in 1:10) {
+add.pathway &lt;- function(fl, pw.mat, nz.idx = NULL, level = 0.95, save.fl = TRUE) {
   cat(&quot;FITTING NEXT GREEDY FACTOR \n&quot;)
   Y &lt;- get.next.greedy(fl)
 
   cat(&quot;FINDING CANDIDATE PATHWAYS \n&quot;)
-  candidates &lt;- get.candidate.pathways(Y)
+  candidates &lt;- get.candidate.pathways(Y, pw.mat, nz.idx, level)
   n.candidates &lt;- length(candidates)
-
-  if (n.candidates &gt; 20)
-    break
 
   for (i in 1:n.candidates)
     cat(&quot;CANDIDATE PATHWAY:&quot;, colnames(pw.mat)[candidates[i]], &quot;\n&quot;)
@@ -694,56 +755,95 @@ for (j in 1:10) {
   best.obj &lt;- -Inf
   for (i in 1:n.candidates) {
     cat(&quot;FITTING PATHWAY:&quot;, colnames(pw.mat)[candidates[i]], &quot;\n&quot;)
-    next.fl &lt;- fit.pathway(candidates[i])
+    next.fl &lt;- fit.pathway(fl, pw.mat, candidates[i], nz.idx)
     if (next.fl$objective &gt; best.obj) {
       best.obj &lt;- next.fl$objective
       best.fl &lt;- next.fl
-      cat(&quot;NEW BEST PATHWAY:&quot;, colnames(pw.mat)[candidates[i]], &quot;\n&quot;)
+      best.pathway &lt;- candidates[i]
+      cat(&quot;NEW BEST PATHWAY:&quot;, colnames(pw.mat)[best.pathway], &quot;\n&quot;)
     }
   }
-  best.pathway &lt;- candidates[best.fl]
 
   # Check that the pathway improves the objective before adding.
   if (best.fl$objective &lt;= fl$objective)
-    break
+    return(fl)
 
   cat(&quot;ADDING PATHWAY:&quot;, colnames(pw.mat)[best.pathway], &quot;\n&quot;)
-  fl &lt;- best.fl
-
-  saveRDS(fl, &quot;/scratch/midway2/willwerscheid/fl_tmp.rds&quot;)
+  if (save.fl)
+    saveRDS(best.fl, &quot;/scratch/midway2/willwerscheid/fl_tmp.rds&quot;)
+  return(best.fl)
 }
 
-# Backfit.
-fl &lt;- flashier(flash.init = fl,
-               backfit = &quot;only&quot;, backfit.reltol = 5,
-               verbose.lvl = 3, output.lvl = 4)
+add.n.pathways &lt;- function(fl, pw.mat, n, nz.idx = NULL, level = 0.95, save.fl = TRUE) {
+  for (i in 1:n) {
+    new.fl &lt;- add.pathway(fl, pw.mat, nz.idx, level, save.fl)
+    if (identical(fl, new.fl))
+      break
+    fl &lt;- new.fl
+  }
+  return(fl)
+}
 
+backfit.fl &lt;- function(fl) {
+  return(flashier(flash.init = fl,
+                  backfit = &quot;only&quot;, backfit.reltol = 5,
+                  verbose.lvl = 3, output.lvl = 4))
+}
+
+# Full data.
+fl &lt;- add.n.pathways(fl, pw.mat, 10)
+fl &lt;- backfit.fl(fl)
 saveRDS(fl, &quot;pw_fl10.rds&quot;)
 
-# Repeat. Add 10 factors and backfit, add 10 more and backfit, etc.
-
+fl &lt;- add.n.pathways(fl, pw.mat, 10)
+fl &lt;- backfit.fl(fl)
 saveRDS(fl, &quot;pw_fl20.rds&quot;)
+
+fl &lt;- add.n.pathways(fl, pw.mat, 10)
+fl &lt;- backfit.fl(fl)
 saveRDS(fl, &quot;pw_fl23.rds&quot;) # didn&#39;t find a pathway that increased the objective
+
+fl &lt;- add.n.pathways(fl, pw.mat, 10)
+fl &lt;- backfit.fl(fl)
 saveRDS(fl, &quot;pw_fl33.rds&quot;)
+
+fl &lt;- add.n.pathways(fl, pw.mat, 10)
+fl &lt;- backfit.fl(fl)
 saveRDS(fl, &quot;pw_fl41.rds&quot;) # too many candidate factors
 
+fl &lt;- add.n.pathways(fl, pw.mat, 9)
+fl &lt;- backfit.fl(fl)
+saveRDS(fl, &quot;pw_fl50.rds&quot;)
+
+# Ionocytes.
+ion.fl &lt;- add.n.pathways(ion.fl, pw.mat, 10, nz.idx, save.fl = FALSE)
+ion.fl &lt;- backfit.fl(ion.fl)
+saveRDS(ion.fl, &quot;ion_fl10.rds&quot;)
+
+ion.fl &lt;- add.n.pathways(ion.fl, pw.mat, 10, nz.idx, save.fl = FALSE)
+ion.fl &lt;- backfit.fl(ion.fl)
+saveRDS(ion.fl, &quot;ion_fl12.rds&quot;) # didn&#39;t find a pathway that increased obj
+
+# This subsequent fit is unable to add any other pathways.
+ion.fl &lt;- add.n.pathways(ion.fl, pw.mat, 10, nz.idx, save.fl = FALSE)
 
 # Recover pathways from flash object.
-pathway.idx &lt;- lapply(fl$fit$fix.idx[3:fl$n.factors], function(f) {
+pathway.idx &lt;- lapply(fl$fit$fix.idx[1:fl$n.factors], function(f) {
   setdiff(1:nrow(fl$fit$EF[[1]]), f)
 })
 pathways &lt;- apply(pw.mat, 2, function(x) which(x == 1))
 added.idx &lt;- match(pathway.idx, pathways)
 pathways.added &lt;- names(pathways)[added.idx]</code></pre>
 </div>
-<div id="results" class="section level2">
-<h2>Results</h2>
+<div id="results-full-dataset" class="section level2">
+<h2>Results: full dataset</h2>
 <p>Each pair of plots corresponds to a pathway, and results are organized according to the proportion of variance explained by each pathway. The plots on the left-hand side give cell loadings broken down by cell type (the cell type annotations are given by Montoro et al.). The plots on the right give gene loadings for all genes in the pathway, with a maximum of 50 genes displayed so that gene labels are readable. The loadings are scaled so that the maximum gene loading is equal to one. Thus, a cell loading of, say, 0.5, can be interpreted as increasing the expected count of the most highly loaded gene in the pathway by a multiplicative factor of <span class="math inline">\(\exp(0.5)\)</span>.</p>
+<p>One especially interesting thing to note is that some pathways appear in more than one factor, but when they do, they tend to be loaded on different gene sets. For example, one keratinization factor (factor 9, PVE = 0.001) is primarily loaded on Krt17, Krt5, and Krt15, and is positively loaded primarily on basal cells, while another (factor 22, PVE = 8e-04) is loaded on Krt4, Krt8, and others (with very small loadings on Krt17 and Krt5), and positively loaded primarily on club cells.</p>
 <pre class="r"><code>library(ggplot2)
 library(gridExtra)
 library(Matrix)
 
-fl &lt;- readRDS(&quot;~/Downloads/pw_fl41.rds&quot;)
+fl &lt;- readRDS(&quot;~/Downloads/pw_fl50.rds&quot;)
 pw.mat &lt;- readRDS(&quot;~/Downloads/pw_mat.rds&quot;)
 bm &lt;- readRDS(&quot;~/Downloads/pw_bm.rds&quot;)
 
@@ -785,7 +885,7 @@ plot.celltypes &lt;- function(df, k) {
   return(the.plot)
 }
 
-plot.geneset &lt;- function(gene.loadings, k, offset = 2) {
+plot.geneset &lt;- function(gene.loadings, k, offset = 2, title = NULL) {
   all.loadings &lt;- gene.loadings[, k + offset]
   pw.loadings &lt;- data.frame(all.loadings[all.loadings &gt; 0])
   names(pw.loadings) &lt;- &quot;Loading&quot;
@@ -798,7 +898,12 @@ plot.geneset &lt;- function(gene.loadings, k, offset = 2) {
   the.plot &lt;- ggplot(pw.loadings, 
                      aes(x = reorder(Gene, -Loading), y = Loading)) +
     geom_bar(stat = &quot;identity&quot;) +
-    labs(x = NULL, y = &quot;Scaled loading&quot;)
+    theme(axis.text.y = element_text(size = 7))
+  if (!is.null(title)) {
+    the.plot &lt;- the.plot + labs(x = NULL, y = title)
+  } else {
+    the.plot &lt;- the.plot + labs(x = NULL, y = &quot;Scaled loading&quot;)
+  }
   if (nrow(pw.loadings) &gt; 30) {
     the.plot &lt;- the.plot + 
       theme(axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5, 
@@ -2049,7 +2154,303 @@ Jason Willwerscheid
 </tr>
 </tbody>
 </table>
-<p></details></p>
+<p></details> <img src="figure/trachea4.Rmd/the.res-42.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-43.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-44.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-45.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-46.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-47.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-48.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-49.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-50.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="results-ionocytes" class="section level2">
+<h2>Results: ionocytes</h2>
+<p>I don’t fit a mean factor for genes here because I’m interested in overall expression rather than how expression differs from the mean.</p>
+<p>It’s encouraging to note that the process halts after adding a relatively small number of pathways (12). Disappointingly, however, Cftr doesn’t show up here. Nor does the “transferrin endocytosis and recycling” pathway, which appears above as factor 43 (PVE: 6.7e-05) and seems like it should be able to capture what Montoro et al. describe as a V-ATPase expression profile that is particular to pulmonary ionocytes.</p>
+<pre class="r"><code>ion.fl &lt;- readRDS(&quot;~/Downloads/ion_fl12.rds&quot;)
+ion.nz.idx &lt;- readRDS(&quot;~/Downloads/ion_nzidx.rds&quot;)
+
+ion.pathway.idx &lt;- lapply(ion.fl$fit$fix.idx[2:ion.fl$n.factors], function(f) {
+  setdiff(1:nrow(ion.fl$fit$EF[[1]]), f)
+})
+pathways &lt;- apply(pw.mat[ion.nz.idx, ], 2, function(x) which(x == 1))
+added.idx &lt;- match(ion.pathway.idx, pathways)
+ion.pathways.added &lt;- names(pathways)[added.idx]
+
+ion.gene.l &lt;- matrix(0, nrow = nrow(pw.mat), 
+                     ncol = ncol(ion.fl$loadings$normalized.loadings[[1]]))
+ion.gene.l[ion.nz.idx, ] &lt;- ion.fl$loadings$normalized.loadings[[1]]
+rownames(ion.gene.l) &lt;- rownames(pw.mat)
+max.gene.l &lt;- apply(ion.gene.l, 2, max)
+ion.gene.l &lt;- ion.gene.l / rep(max.gene.l, each = nrow(ion.gene.l))
+
+ion.pve &lt;- ion.fl$pve[2:ion.fl$n.factors]
+k.order &lt;- order(ion.pve, decreasing = TRUE)
+for (i in 1:(length(ion.pve) / 2)) {
+  k1 &lt;- k.order[2 * i - 1]
+  k2 &lt;- k.order[2 * i]
+  title1 &lt;- paste0(ion.pathways.added[k1], &quot; (PVE: &quot;, 
+                   signif(ion.pve[k1], digits = 2), &quot;)&quot;)
+  title2 &lt;- paste0(ion.pathways.added[k2], &quot; (PVE: &quot;, 
+                   signif(ion.pve[k2], digits = 2), &quot;)&quot;)
+  plot1 &lt;- plot.geneset(ion.gene.l, k1, offset = 1, title = title1)
+  plot2 &lt;- plot.geneset(ion.gene.l, k2, offset = 1, title = title2)
+  grid.arrange(plot1, plot2, ncol = 2)
+}</code></pre>
+<p><img src="figure/trachea4.Rmd/ion-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-5.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-6.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="results-summary" class="section level2">
+<h2>Results summary</h2>
+<pre class="r"><code>all.pathways &lt;- unique(c(pathways.added, ion.pathways.added))
+full.idx &lt;- lapply(all.pathways, function(pw) which(pathways.added == pw))
+ion.idx &lt;- lapply(all.pathways, function(pw) which(ion.pathways.added == pw))
+full.sort &lt;- sapply(full.idx, function(idx) {
+  k.pve &lt;- sapply(idx, function(k) pve[k])
+  if (length(k.pve) == 0)
+    k.pve &lt;- 0
+  max(k.pve)
+})
+ion.sort &lt;- sapply(ion.idx, function(idx) {
+  k.pve &lt;- sapply(idx, function(k) ion.pve[k])
+  if (length(k.pve) == 0)
+    k.pve &lt;- 0
+  max(k.pve)
+})
+full.pve.rank &lt;- sapply(full.idx, function(idx) {
+  ranks &lt;- sapply(idx, function(k) rank(-pve)[k])
+  if (length(ranks &gt; 0))
+    ranks &lt;- sort(ranks)
+  paste(ranks, collapse = &quot;, &quot;)
+})
+ion.pve.rank &lt;- sapply(ion.idx, function(idx) {
+  ranks &lt;- sapply(idx, function(k) rank(-ion.pve)[k])
+  if (length(ranks &gt; 0))
+    ranks &lt;- sort(ranks)
+  paste(ranks, collapse = &quot;, &quot;)
+})
+df &lt;- data.frame(pathway = all.pathways,
+                 ion.rank = ion.pve.rank,
+                 full.rank = full.pve.rank,
+                 sort.order = 1000 * ion.sort + full.sort)
+df &lt;- df[order(df$sort.order, decreasing = TRUE), ]
+df$sort.order &lt;- NULL
+rownames(df) &lt;- NULL
+knitr::kable(df, 
+             col.names = c(&quot;Pathway&quot;, &quot;Rank (ionocytes)&quot;, &quot;Rank (all cells)&quot;))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Pathway</th>
+<th align="left">Rank (ionocytes)</th>
+<th align="left">Rank (all cells)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Formation of a pool of free 40S subunits</td>
+<td align="left">1</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Keratinization</td>
+<td align="left">2</td>
+<td align="left">6, 10</td>
+</tr>
+<tr class="odd">
+<td align="left">Passive transport by Aquaporins</td>
+<td align="left">3</td>
+<td align="left">18, 36</td>
+</tr>
+<tr class="even">
+<td align="left">Scavenging by Class A Receptors</td>
+<td align="left">4</td>
+<td align="left">7</td>
+</tr>
+<tr class="odd">
+<td align="left">Antimicrobial peptides</td>
+<td align="left">5</td>
+<td align="left">2</td>
+</tr>
+<tr class="even">
+<td align="left">RAF-independent MAPK1/3 activation</td>
+<td align="left">6</td>
+<td align="left">30</td>
+</tr>
+<tr class="odd">
+<td align="left">AUF1 (hnRNP D0) binds and destabilizes mRNA</td>
+<td align="left">7</td>
+<td align="left">13</td>
+</tr>
+<tr class="even">
+<td align="left">Ethanol oxidation</td>
+<td align="left">8</td>
+<td align="left">19</td>
+</tr>
+<tr class="odd">
+<td align="left">Activation of the AP-1 family of transcription factors</td>
+<td align="left">9</td>
+<td align="left">14</td>
+</tr>
+<tr class="even">
+<td align="left">Vitamin C (ascorbate) metabolism</td>
+<td align="left">10</td>
+<td align="left">25</td>
+</tr>
+<tr class="odd">
+<td align="left">Fatty acids</td>
+<td align="left">11</td>
+<td align="left">5</td>
+</tr>
+<tr class="even">
+<td align="left">Degradation of cysteine and homocysteine</td>
+<td align="left">12</td>
+<td align="left">28</td>
+</tr>
+<tr class="odd">
+<td align="left">Neutrophil degranulation</td>
+<td align="left"></td>
+<td align="left">1, 4, 11, 15, 22, 26</td>
+</tr>
+<tr class="even">
+<td align="left">L13a-mediated translational silencing of Ceruloplasmin expression</td>
+<td align="left"></td>
+<td align="left">3</td>
+</tr>
+<tr class="odd">
+<td align="left">Post-translational modification: synthesis of GPI-anchored proteins</td>
+<td align="left"></td>
+<td align="left">8</td>
+</tr>
+<tr class="even">
+<td align="left">Respiratory electron transport</td>
+<td align="left"></td>
+<td align="left">9, 12</td>
+</tr>
+<tr class="odd">
+<td align="left">HSP90 chaperone cycle for steroid hormone receptors (SHR)</td>
+<td align="left"></td>
+<td align="left">16</td>
+</tr>
+<tr class="even">
+<td align="left">Regulation of TLR by endogenous ligand</td>
+<td align="left"></td>
+<td align="left">17</td>
+</tr>
+<tr class="odd">
+<td align="left">RHO GTPases activate IQGAPs</td>
+<td align="left"></td>
+<td align="left">20</td>
+</tr>
+<tr class="even">
+<td align="left">Senescence-Associated Secretory Phenotype (SASP)</td>
+<td align="left"></td>
+<td align="left">21</td>
+</tr>
+<tr class="odd">
+<td align="left">RHO GTPases activate PKNs</td>
+<td align="left"></td>
+<td align="left">23</td>
+</tr>
+<tr class="even">
+<td align="left">Detoxification of Reactive Oxygen Species</td>
+<td align="left"></td>
+<td align="left">24</td>
+</tr>
+<tr class="odd">
+<td align="left">Autodegradation of Cdh1 by Cdh1:APC/C</td>
+<td align="left"></td>
+<td align="left">27</td>
+</tr>
+<tr class="even">
+<td align="left">Platelet degranulation</td>
+<td align="left"></td>
+<td align="left">29</td>
+</tr>
+<tr class="odd">
+<td align="left">Cristae formation</td>
+<td align="left"></td>
+<td align="left">31</td>
+</tr>
+<tr class="even">
+<td align="left">mRNA Splicing - Major Pathway</td>
+<td align="left"></td>
+<td align="left">32, 40</td>
+</tr>
+<tr class="odd">
+<td align="left">COPI-mediated anterograde transport</td>
+<td align="left"></td>
+<td align="left">33</td>
+</tr>
+<tr class="even">
+<td align="left">RHO GTPases Activate WASPs and WAVEs</td>
+<td align="left"></td>
+<td align="left">34</td>
+</tr>
+<tr class="odd">
+<td align="left">Antigen Presentation: Folding, assembly and peptide loading of class I MHC</td>
+<td align="left"></td>
+<td align="left">35</td>
+</tr>
+<tr class="even">
+<td align="left">Mitochondrial translation elongation</td>
+<td align="left"></td>
+<td align="left">37</td>
+</tr>
+<tr class="odd">
+<td align="left">Phase I - Functionalization of compounds</td>
+<td align="left"></td>
+<td align="left">38</td>
+</tr>
+<tr class="even">
+<td align="left">Synthesis of 5-eicosatetraenoic acids</td>
+<td align="left"></td>
+<td align="left">39</td>
+</tr>
+<tr class="odd">
+<td align="left">Glutathione conjugation</td>
+<td align="left"></td>
+<td align="left">41</td>
+</tr>
+<tr class="even">
+<td align="left">Synthesis of 12-eicosatetraenoic acid derivatives</td>
+<td align="left"></td>
+<td align="left">42</td>
+</tr>
+<tr class="odd">
+<td align="left">Regulation of gene expression by Hypoxia-inducible Factor</td>
+<td align="left"></td>
+<td align="left">43</td>
+</tr>
+<tr class="even">
+<td align="left">SUMOylation of immune response proteins</td>
+<td align="left"></td>
+<td align="left">44</td>
+</tr>
+<tr class="odd">
+<td align="left">Pink/Parkin Mediated Mitophagy</td>
+<td align="left"></td>
+<td align="left">45</td>
+</tr>
+<tr class="even">
+<td align="left">Pentose phosphate pathway</td>
+<td align="left"></td>
+<td align="left">46</td>
+</tr>
+<tr class="odd">
+<td align="left">Pyruvate metabolism</td>
+<td align="left"></td>
+<td align="left">47</td>
+</tr>
+<tr class="even">
+<td align="left">Citric acid cycle (TCA cycle)</td>
+<td align="left"></td>
+<td align="left">48</td>
+</tr>
+<tr class="odd">
+<td align="left">Transferrin endocytosis and recycling</td>
+<td align="left"></td>
+<td align="left">49</td>
+</tr>
+<tr class="even">
+<td align="left">XBP1(S) activates chaperone genes</td>
+<td align="left"></td>
+<td align="left">50</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
@@ -2072,20 +2473,21 @@ other attached packages:
 [1] Matrix_1.2-14 gridExtra_2.3 ggplot2_3.1.0
 
 loaded via a namespace (and not attached):
- [1] Rcpp_1.0.0        compiler_3.4.3    pillar_1.2.1     
- [4] git2r_0.21.0      plyr_1.8.4        workflowr_1.0.1  
- [7] bindr_0.1         R.methodsS3_1.7.1 R.utils_2.6.0    
-[10] tools_3.4.3       digest_0.6.18     lattice_0.20-35  
-[13] evaluate_0.12     tibble_1.4.2      gtable_0.2.0     
-[16] pkgconfig_2.0.1   rlang_0.3.0.1     yaml_2.2.0       
-[19] xfun_0.4          bindrcpp_0.2      flashier_0.1.0   
-[22] withr_2.1.2.9000  stringr_1.3.1     dplyr_0.7.4      
-[25] knitr_1.21.6      rprojroot_1.3-2   grid_3.4.3       
-[28] glue_1.3.0        R6_2.3.0          rmarkdown_1.11   
-[31] magrittr_1.5      whisker_0.3-2     backports_1.1.2  
-[34] scales_1.0.0      htmltools_0.3.6   assertthat_0.2.0 
-[37] colorspace_1.3-2  labeling_0.3      stringi_1.2.4    
-[40] lazyeval_0.2.1    munsell_0.5.0     R.oo_1.21.0      </code></pre>
+ [1] Rcpp_1.0.0        highr_0.7         compiler_3.4.3   
+ [4] pillar_1.2.1      git2r_0.21.0      plyr_1.8.4       
+ [7] workflowr_1.0.1   bindr_0.1         R.methodsS3_1.7.1
+[10] R.utils_2.6.0     tools_3.4.3       digest_0.6.18    
+[13] lattice_0.20-35   evaluate_0.12     tibble_1.4.2     
+[16] gtable_0.2.0      pkgconfig_2.0.1   rlang_0.3.0.1    
+[19] yaml_2.2.0        xfun_0.4          bindrcpp_0.2     
+[22] flashier_0.1.0    withr_2.1.2.9000  stringr_1.3.1    
+[25] dplyr_0.7.4       knitr_1.21.6      rprojroot_1.3-2  
+[28] grid_3.4.3        glue_1.3.0        R6_2.3.0         
+[31] rmarkdown_1.11    magrittr_1.5      whisker_0.3-2    
+[34] backports_1.1.2   scales_1.0.0      htmltools_0.3.6  
+[37] assertthat_0.2.0  colorspace_1.3-2  labeling_0.3     
+[40] stringi_1.2.4     lazyeval_0.2.1    munsell_0.5.0    
+[43] R.oo_1.21.0      </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
