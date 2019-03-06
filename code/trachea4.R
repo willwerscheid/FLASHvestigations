@@ -43,17 +43,13 @@ trachea <- trachea[which(gene.cts > 5), ]
 saveRDS(trachea, "trachea.rds")
 
 
-# Fit the pathways to the data ----------------------------------------------
+# Transform data and set for flash ------------------------------------------
+
+library(Matrix)
 
 setwd("/project2/mstephens/willwerscheid/")
 trachea <- readRDS("trachea.rds")
 pw.mat <- readRDS("mus_pathways.rds")
-
-library(ashr)
-library(flashier)
-library(ebnm)
-library(Matrix)
-library(susieR)
 
 common.genes <- rownames(trachea)[rownames(trachea) %in% rownames(pw.mat)]
 trachea <- trachea[common.genes, ]
@@ -65,51 +61,23 @@ pw.mat <- pw.mat[, colSums(pw.mat) > 5]
 to.remove <- which(rowSums(pw.mat) == 0)
 trachea <- trachea[-to.remove, ]
 pw.mat <- pw.mat[-to.remove, ]
-saveRDS(trachea, "pw_trachea.rds")
 saveRDS(pw.mat, "pw_mat.rds")
 
 # Log-transform the data and set it for flash.
 data <- log1p(trachea)
-S <- sqrt(data) / (data + 1)
+S <- sqrt(trachea) / (trachea + 1)
 S[S == 0] <- 0.5
 fl.data <- set.flash.data(data, S, var.type = NULL)
+rm(data)
 rm(S)
+saveRDS(fl.data, "pw_fldata.rds")
 
-# Subset ionocytes and set for flash.
-ion.idx <- (sapply(strsplit(colnames(trachea), "_"), `[`, 3) == "Ionocyte")
-ionocytes <- trachea[, ion.idx]
-saveRDS(ionocytes, "ionocytes.rds")
-# all-zero rows need to be removed (for flash only, not SuSiE):
-nz.idx <- (rowSums(ionocytes) > 0)
-ionocytes <- log1p(ionocytes[nz.idx, ])
-S <- sqrt(ionocytes) / (ionocytes + 1)
-S[S == 0] <- 0.5
-ion.data <- set.flash.data(ionocytes, S, var.type = NULL)
-rm(S)
 
-# Time to flash. First, fit the mean factors. For genes, a "nonnegative" prior
-#   (which is unimodal at zero) works best. I don't expect cell sizes to be
-#   unimodal at zero, so I use a "nonzero.mode" prior for cells.
-fl <- flashier(fl.data,
-               var.type = NULL,
-               prior.type = c("nonnegative", "nonzero.mode"),
-               fixed.factors = c(ones.factor(2), ones.factor(1)),
-               backfit = "only",
-               verbose.lvl = 3)
-saveRDS(fl, "/scratch/midway2/willwerscheid/pw_tmp.rds")
+# Functions for adding pathways ---------------------------------------------
 
-# For the cell type subsets, I only want a mean factor for cells.
-ion.fl <- flashier(ion.data,
-                   var.type = NULL,
-                   prior.type = c("nonnegative", "nonzero.mode"),
-                   fixed.factors = ones.factor(2),
-                   greedy.Kmax = 0,
-                   verbose.lvl = 3)
-saveRDS(ion.fl, "/scratch/midway2/willwerscheid/ion_tmp.rds")
-
-# I add a pathway as follows: First, I add a factor greedily with a nonnegative
-#   prior on genes (since one expects genes in a pathway to be regulated in the
-#   same direction).
+# I add a pathway as follows: First, I add a factor greedily with a
+#   nonnegative prior on genes (since one expects genes in a pathway to be
+#   regulated in the same direction).
 get.next.greedy <- function(flash.init) {
   next.greedy <- flashier(flash.init = flash.init,
                           prior.type = c("nonnegative", "normal.mix"),
@@ -124,6 +92,8 @@ get.candidate.pathways <- function(next.greedy, pw.mat, idx = NULL, level = 0.95
   if (!is.null(idx)) {
     Y <- rep(0, nrow(pw.mat))
     Y[idx] <- next.greedy
+  } else {
+    Y <- next.greedy
   }
   suz <- susie(pw.mat, Y, L = 1)
   suz.order <- order(suz$alpha, decreasing = TRUE)
@@ -197,7 +167,31 @@ backfit.fl <- function(fl) {
                   verbose.lvl = 3, output.lvl = 4))
 }
 
-# Full data.
+
+# Do the dirty work ---------------------------------------------------------
+
+library(Matrix)
+library(ashr)
+library(flashier)
+library(ebnm)
+library(susieR)
+
+setwd("/project2/mstephens/willwerscheid/")
+pw.mat <- readRDS("pw_mat.rds")
+fl.data <- readRDS("pw_fldata.rds")
+
+# Time to flash. First, fit the mean factors. For genes, a "nonnegative" prior
+#   (which is unimodal at zero) works best. I don't expect cell sizes to be
+#   unimodal at zero, so I use a "nonzero.mode" prior for cells.
+fl <- flashier(fl.data,
+               var.type = NULL,
+               prior.type = c("nonnegative", "nonzero.mode"),
+               fixed.factors = c(ones.factor(2), ones.factor(1)),
+               backfit = "only",
+               verbose.lvl = 3)
+saveRDS(fl, "/scratch/midway2/willwerscheid/pw_tmp.rds")
+
+# Now add pathways 10 at a time, backfitting after each set.
 fl <- add.n.pathways(fl, pw.mat, 10)
 fl <- backfit.fl(fl)
 saveRDS(fl, "pw_fl10.rds")
@@ -208,31 +202,61 @@ saveRDS(fl, "pw_fl20.rds")
 
 fl <- add.n.pathways(fl, pw.mat, 10)
 fl <- backfit.fl(fl)
-saveRDS(fl, "pw_fl23.rds") # didn't find a pathway that increased the objective
+saveRDS(fl, "pw_fl30.rds")
 
 fl <- add.n.pathways(fl, pw.mat, 10)
 fl <- backfit.fl(fl)
-saveRDS(fl, "pw_fl33.rds")
+saveRDS(fl, "pw_fl40.rds")
 
-fl <- add.n.pathways(fl, pw.mat, 10)
-fl <- backfit.fl(fl)
-saveRDS(fl, "pw_fl41.rds") # too many candidate factors
 
-fl <- add.n.pathways(fl, pw.mat, 9)
-fl <- backfit.fl(fl)
-saveRDS(fl, "pw_fl50.rds")
+# Next I want to analyze the subset of ionocytes. Since I'm interested in how
+#   ionocyte expression differs from mean epithelial expression (not in
+#   overall ionocyte expression), I residualize the ionocyte expression data
+#   using the mean factors obtained from the previous fit.
+trachea <- readRDS("pw_fldata.rds")$Y
+ion.idx <- (sapply(strsplit(colnames(trachea), "_"), `[`, 3) == "Ionocyte")
+ionocytes <- trachea[, ion.idx]
+# all-zero rows need to be removed (for flash only, not SuSiE):
+nz.idx <- (rowSums(ionocytes) > 0)
+ionocytes <- ionocytes[nz.idx, ]
+ion.means <- (fl$loadings$normalized.loadings[[1]][nz.idx, 1:2]
+              %*% diag(fl$loadings$scale.constant[1:2])
+              %*% t(fl$loadings$normalized.loadings[[2]][ion.idx, 1:2]))
+ion.data <- log1p(ionocytes) - ion.means
+S <- sqrt(ionocytes) / (ionocytes + 1)
+S[S == 0] <- 0.5
+ion.data <- set.flash.data(ion.data, S, var.type = NULL)
+rm(ionocytes)
+rm(S)
+saveRDS(ion.data, "ion_data.rds")
 
-# Ionocytes.
+ion.subset <- list(rows = nz.idx, cols = ion.idx)
+saveRDS(ion.subset, "ion_subset.rds")
+
+# Initialize the flash object without adding any factors.
+ion.fl <- flashier(ion.data,
+                   var.type = NULL,
+                   prior.type = c("nonnegative", "nonzero.mode"),
+                   greedy.Kmax = 0,
+                   verbose.lvl = 3,
+                   final.nullchk = FALSE)
+
 ion.fl <- add.n.pathways(ion.fl, pw.mat, 10, nz.idx, save.fl = FALSE)
 ion.fl <- backfit.fl(ion.fl)
 saveRDS(ion.fl, "ion_fl10.rds")
 
 ion.fl <- add.n.pathways(ion.fl, pw.mat, 10, nz.idx, save.fl = FALSE)
 ion.fl <- backfit.fl(ion.fl)
-saveRDS(ion.fl, "ion_fl12.rds") # didn't find a pathway that increased obj
+saveRDS(ion.fl, "ion_fl20.rds")
 
-# This subsequent fit is unable to add any other pathways.
 ion.fl <- add.n.pathways(ion.fl, pw.mat, 10, nz.idx, save.fl = FALSE)
+ion.fl <- backfit.fl(ion.fl)
+saveRDS(ion.fl, "ion_fl30.rds")
+
+ion.fl <- add.n.pathways(ion.fl, pw.mat, 10, nz.idx, save.fl = FALSE)
+ion.fl <- backfit.fl(ion.fl)
+saveRDS(ion.fl, "ion_fl40.rds")
+
 
 # Recover pathways from flash object.
 pathway.idx <- lapply(fl$fit$fix.idx[1:fl$n.factors], function(f) {
