@@ -27,16 +27,16 @@ Click "Code" to view the code used to preprocess the data and fit the pathways.
 
 ## Results: full dataset
 
-Each pair of plots corresponds to a pathway, and results are organized according to the proportion of variance explained by each pathway. The plots on the left-hand side give cell loadings broken down by cell type (the cell type annotations are given by Montoro et al.). The plots on the right give gene loadings for all genes in the pathway, with a maximum of 50 genes displayed so that gene labels are readable. The loadings are scaled so that the maximum gene loading is equal to one. Thus, a cell loading of, say, 0.5, can be interpreted as increasing the expected count of the most highly loaded gene in the pathway by a multiplicative factor of $\exp(0.5)$.
+I fit 40 pathways using the method outlined above. Each pair of plots corresponds to a pathway, and results are organized according to the proportion of variance explained by each pathway. The plots on the left-hand side give cell loadings broken down by cell type (the cell type annotations are given by Montoro et al.). The plots on the right give gene loadings for all genes in the pathway, with a maximum of 50 genes displayed so that gene labels are readable. The loadings are scaled so that the maximum gene loading is equal to one. Thus, a cell loading of, say, 0.5, can be interpreted as increasing the expected count of the most highly loaded gene in the pathway by a multiplicative factor of $\exp(0.5)$.
 
-One especially interesting thing to note is that some pathways appear in more than one factor, but when they do, they tend to be loaded on different gene sets. For example, one keratinization factor (factor 9, PVE = 0.001) is primarily loaded on Krt17, Krt5, and Krt15, and is positively loaded primarily on basal cells, while another (factor 22, PVE = 8e-04) is loaded on Krt4, Krt8, and others (with very small loadings on Krt17 and Krt5), and positively loaded primarily on club cells.
+One especially interesting thing to note is that some pathways appear in more than one factor, but when they do, they tend to be loaded on different gene sets. For example, one neutrophil degranulation factor (factor 13, PVE = 0.0063) is most heavily loaded on Ltf, and is positively loaded primarily on goblet and club cells, while another (factor 36, PVE = 0.0016) is most heavily loaded on Lgals3 and positively loaded primarily on ciliated cells.
 
 ```{r the.res}
 library(ggplot2)
 library(gridExtra)
 library(Matrix)
 
-fl <- readRDS("~/Downloads/pw_fl50.rds")
+fl <- readRDS("~/Downloads/pw_fl.rds")
 pw.mat <- readRDS("~/Downloads/pw_mat.rds")
 bm <- readRDS("~/Downloads/pw_bm.rds")
 
@@ -47,7 +47,6 @@ pathways <- apply(pw.mat, 2, function(x) which(x == 1))
 added.idx <- match(pathway.idx, pathways)
 pathways.added <- names(pathways)[added.idx]
 
-K <- fl$n.factors
 gene.loadings <- fl$loadings$normalized.loadings[[1]]
 cell.loadings <- fl$loadings$normalized.loadings[[2]]
 scale.const <- fl$loadings$scale.constant
@@ -62,6 +61,7 @@ cell.names <- rownames(cell.loadings)
 cell.types <- as.factor(sapply(strsplit(cell.names, "_"), `[`, 3))
 # mouse <- as.factor(sapply(strsplit(cell.names, "_"), `[`, 1))
 
+K <- fl$n.factors
 df <- data.frame(cell.loadings[, 3:K])
 names(df) <- paste0("F", (3:K), ": ", pathways.added)
 df$`Cell Type` <- cell.types
@@ -78,7 +78,7 @@ plot.celltypes <- function(df, k) {
   return(the.plot)
 }
 
-plot.geneset <- function(gene.loadings, k, offset = 2, title = NULL) {
+plot.geneset <- function(gene.loadings, k, offset = 0) {
   all.loadings <- gene.loadings[, k + offset]
   pw.loadings <- data.frame(all.loadings[all.loadings > 0])
   names(pw.loadings) <- "Loading"
@@ -91,12 +91,8 @@ plot.geneset <- function(gene.loadings, k, offset = 2, title = NULL) {
   the.plot <- ggplot(pw.loadings, 
                      aes(x = reorder(Gene, -Loading), y = Loading)) +
     geom_bar(stat = "identity") +
-    theme(axis.text.y = element_text(size = 7))
-  if (!is.null(title)) {
-    the.plot <- the.plot + labs(x = NULL, y = title)
-  } else {
-    the.plot <- the.plot + labs(x = NULL, y = "Scaled loading")
-  }
+    theme(axis.text.y = element_text(size = 7)) + 
+    labs(x = NULL, y = "Scaled loading")
   if (nrow(pw.loadings) > 30) {
     the.plot <- the.plot + 
       theme(axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5, 
@@ -114,22 +110,26 @@ for (k in k.order) {
   plot.title <- paste0(names(df)[k], " (PVE: ", 
                        signif(pve[k], digits = 2), ")")
   plot1 <- plot.celltypes(df, k)
-  plot2 <- plot.geneset(gene.loadings, k)
+  plot2 <- plot.geneset(gene.loadings, k, offset = 2)
   grid.arrange(plot1, plot2, ncol = 2, top = plot.title)
 }
 ```
 
 ## Results: ionocytes
 
-I don't fit a mean factor for genes here because I'm interested in overall expression rather than how expression differs from the mean.
+To analyze the subset of ionocytes, I residualize out the mean factors from the above fit (the idea is to see how ionocyte expression differs from mean epithelial expression). I again fit 40 factors.
 
-It's encouraging to note that the process halts after adding a relatively small number of pathways (12). Disappointingly, however, Cftr doesn't show up here. Nor does the "transferrin endocytosis and recycling" pathway, which appears above as factor 43 (PVE: 6.7e-05) and seems like it should be able to capture what Montoro et al. describe as a V-ATPase expression profile that is particular to pulmonary ionocytes.
+The approach doesn't give me what I want. I've only been able to find factors that say something about what ionocytes don't express, not what they do (all cell loadings are negative). It might be simply a matter of adding more factors, but most likely the overall approach needs to be rethought.
+
+Most disappointingly, Cftr doesn't show up here. It's worth considering why. In the full dataset (7193 cells), there is 1 cell (an ionocyte) with 6 Cftr transcripts, 1 with 3 transcripts, 5 with 2, and 12 with 1. Of the 26 ionocytes, 17 don't have any Cftr transcripts, but of the 19 total cells that have any Cftr transcripts, 9 are ionocytes. Further, I've set standard errors as
+$$ S_{ij} = \frac{\sqrt{Y_{ij}}}{Y_{ij} + 1} $$
+with $S_{ij} = 1/2$ when $Y_{ij} = 0$, so when the clustering is not given in advance, $Y_{ij} = \log(Y_{ij} + 1) = 0$ does not look much different from $Y_{ij} = 1$ (i.e., $\log(Y_{ij} + 1) \approx 0.69$). ($Y_{ij} = 2$ is also only slightly more than one standard error away from zero.) So the way I've transformed the data and set standard errors will not have much power to detect changes in expression when all counts are low.
 
 ```{r ion}
-ion.fl <- readRDS("~/Downloads/ion_fl12.rds")
-ion.nz.idx <- readRDS("~/Downloads/ion_nzidx.rds")
+ion.fl <- readRDS("~/Downloads/ion_fl40.rds")
+ion.nz.idx <- readRDS("~/Downloads/ion_subset.rds")$rows
 
-ion.pathway.idx <- lapply(ion.fl$fit$fix.idx[2:ion.fl$n.factors], function(f) {
+ion.pathway.idx <- lapply(ion.fl$fit$fix.idx, function(f) {
   setdiff(1:nrow(ion.fl$fit$EF[[1]]), f)
 })
 pathways <- apply(pw.mat[ion.nz.idx, ], 2, function(x) which(x == 1))
@@ -140,21 +140,32 @@ ion.gene.l <- matrix(0, nrow = nrow(pw.mat),
                      ncol = ncol(ion.fl$loadings$normalized.loadings[[1]]))
 ion.gene.l[ion.nz.idx, ] <- ion.fl$loadings$normalized.loadings[[1]]
 rownames(ion.gene.l) <- rownames(pw.mat)
+ion.cell.l <- ion.fl$loadings$normalized.loadings[[2]]
+ion.scale <- ion.fl$loadings$scale.constant
+
 max.gene.l <- apply(ion.gene.l, 2, max)
 ion.gene.l <- ion.gene.l / rep(max.gene.l, each = nrow(ion.gene.l))
+ion.cell.l <- ion.cell.l * rep(max.gene.l * ion.scale, each = nrow(ion.cell.l))
+  
+plot.cellloadings <- function(cell.loadings, k) {
+  df <- data.frame(cell.loadings[, k])
+  names(df) <- "Loading"
+  df$Cell <- 1:nrow(cell.loadings)
+  the.plot <- ggplot(df, aes(x = reorder(Cell, -Loading), y = Loading)) +
+    geom_bar(stat = "identity") +
+    labs(x = "Cells", y = "Scaled Loading") +
+    theme(axis.text.x = element_blank())
+  return(the.plot)
+}
 
-ion.pve <- ion.fl$pve[2:ion.fl$n.factors]
+ion.pve <- ion.fl$pve
 k.order <- order(ion.pve, decreasing = TRUE)
-for (i in 1:(length(ion.pve) / 2)) {
-  k1 <- k.order[2 * i - 1]
-  k2 <- k.order[2 * i]
-  title1 <- paste0(ion.pathways.added[k1], " (PVE: ", 
-                   signif(ion.pve[k1], digits = 2), ")")
-  title2 <- paste0(ion.pathways.added[k2], " (PVE: ", 
-                   signif(ion.pve[k2], digits = 2), ")")
-  plot1 <- plot.geneset(ion.gene.l, k1, offset = 1, title = title1)
-  plot2 <- plot.geneset(ion.gene.l, k2, offset = 1, title = title2)
-  grid.arrange(plot1, plot2, ncol = 2)
+for (k in k.order) {
+  plot.title <- paste0(ion.pathways.added[k], " (PVE: ", 
+                       signif(ion.pve[k], digits = 2), ")")
+  plot1 <- plot.cellloadings(ion.cell.l, k)
+  plot2 <- plot.geneset(ion.gene.l, k)
+  grid.arrange(plot1, plot2, ncol = 2, top = plot.title)
 }
 ```
 
@@ -195,6 +206,7 @@ df <- data.frame(pathway = all.pathways,
 df <- df[order(df$sort.order, decreasing = TRUE), ]
 df$sort.order <- NULL
 rownames(df) <- NULL
-knitr::kable(df, 
-             col.names = c("Pathway", "Rank (ionocytes)", "Rank (all cells)"))
+knitr::kable(df, col.names = c("Pathway", 
+                               "Rank (ionocytes)", 
+                               "Rank (all cells)"))
 ```
