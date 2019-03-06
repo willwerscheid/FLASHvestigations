@@ -433,7 +433,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2019-03-04</p>
+<p><strong>Last updated:</strong> 2019-03-06</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -457,7 +457,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/6e771898e02ba32b58dfaa304913718dd8093628" target="_blank">6e77189</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/24e9454f04159162bedf72e47ed93cafbf4edad9" target="_blank">24e9454</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -473,7 +473,6 @@ Untracked files:
     Untracked:  code/count_sim.R
     Untracked:  code/pathways.R
     Untracked:  code/trachea3_anno.R
-    Untracked:  code/trachea4.R
     Untracked:  data/lowrank/
     Untracked:  data/tmp.rds
     Untracked:  data/tmp14.rds
@@ -482,6 +481,7 @@ Untracked files:
     Untracked:  docs/figure/count_notes.Rmd/
 
 Unstaged changes:
+    Modified:   code/trachea4.R
     Deleted:    data/before_bad.Rdata
 
 </code></pre>
@@ -511,6 +511,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/24e9454f04159162bedf72e47ed93cafbf4edad9/analysis/trachea4.Rmd" target="_blank">24e9454</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-06
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/trachea4.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/trachea4.html" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -636,17 +670,13 @@ trachea &lt;- trachea[which(gene.cts &gt; 5), ]
 saveRDS(trachea, &quot;trachea.rds&quot;)
 
 
-# Fit the pathways to the data ----------------------------------------------
+# Transform data and set for flash ------------------------------------------
+
+library(Matrix)
 
 setwd(&quot;/project2/mstephens/willwerscheid/&quot;)
 trachea &lt;- readRDS(&quot;trachea.rds&quot;)
 pw.mat &lt;- readRDS(&quot;mus_pathways.rds&quot;)
-
-library(ashr)
-library(flashier)
-library(ebnm)
-library(Matrix)
-library(susieR)
 
 common.genes &lt;- rownames(trachea)[rownames(trachea) %in% rownames(pw.mat)]
 trachea &lt;- trachea[common.genes, ]
@@ -658,51 +688,23 @@ pw.mat &lt;- pw.mat[, colSums(pw.mat) &gt; 5]
 to.remove &lt;- which(rowSums(pw.mat) == 0)
 trachea &lt;- trachea[-to.remove, ]
 pw.mat &lt;- pw.mat[-to.remove, ]
-saveRDS(trachea, &quot;pw_trachea.rds&quot;)
 saveRDS(pw.mat, &quot;pw_mat.rds&quot;)
 
 # Log-transform the data and set it for flash.
 data &lt;- log1p(trachea)
-S &lt;- sqrt(data) / (data + 1)
+S &lt;- sqrt(trachea) / (trachea + 1)
 S[S == 0] &lt;- 0.5
 fl.data &lt;- set.flash.data(data, S, var.type = NULL)
+rm(data)
 rm(S)
+saveRDS(fl.data, &quot;pw_fldata.rds&quot;)
 
-# Subset ionocytes and set for flash.
-ion.idx &lt;- (sapply(strsplit(colnames(trachea), &quot;_&quot;), `[`, 3) == &quot;Ionocyte&quot;)
-ionocytes &lt;- trachea[, ion.idx]
-saveRDS(ionocytes, &quot;ionocytes.rds&quot;)
-# all-zero rows need to be removed (for flash only, not SuSiE):
-nz.idx &lt;- (rowSums(ionocytes) &gt; 0)
-ionocytes &lt;- log1p(ionocytes[nz.idx, ])
-S &lt;- sqrt(ionocytes) / (ionocytes + 1)
-S[S == 0] &lt;- 0.5
-ion.data &lt;- set.flash.data(ionocytes, S, var.type = NULL)
-rm(S)
 
-# Time to flash. First, fit the mean factors. For genes, a &quot;nonnegative&quot; prior
-#   (which is unimodal at zero) works best. I don&#39;t expect cell sizes to be
-#   unimodal at zero, so I use a &quot;nonzero.mode&quot; prior for cells.
-fl &lt;- flashier(fl.data,
-               var.type = NULL,
-               prior.type = c(&quot;nonnegative&quot;, &quot;nonzero.mode&quot;),
-               fixed.factors = c(ones.factor(2), ones.factor(1)),
-               backfit = &quot;only&quot;,
-               verbose.lvl = 3)
-saveRDS(fl, &quot;/scratch/midway2/willwerscheid/pw_tmp.rds&quot;)
+# Functions for adding pathways ---------------------------------------------
 
-# For the cell type subsets, I only want a mean factor for cells.
-ion.fl &lt;- flashier(ion.data,
-                   var.type = NULL,
-                   prior.type = c(&quot;nonnegative&quot;, &quot;nonzero.mode&quot;),
-                   fixed.factors = ones.factor(2),
-                   greedy.Kmax = 0,
-                   verbose.lvl = 3)
-saveRDS(ion.fl, &quot;/scratch/midway2/willwerscheid/ion_tmp.rds&quot;)
-
-# I add a pathway as follows: First, I add a factor greedily with a nonnegative
-#   prior on genes (since one expects genes in a pathway to be regulated in the
-#   same direction).
+# I add a pathway as follows: First, I add a factor greedily with a
+#   nonnegative prior on genes (since one expects genes in a pathway to be
+#   regulated in the same direction).
 get.next.greedy &lt;- function(flash.init) {
   next.greedy &lt;- flashier(flash.init = flash.init,
                           prior.type = c(&quot;nonnegative&quot;, &quot;normal.mix&quot;),
@@ -717,6 +719,8 @@ get.candidate.pathways &lt;- function(next.greedy, pw.mat, idx = NULL, level = 0
   if (!is.null(idx)) {
     Y &lt;- rep(0, nrow(pw.mat))
     Y[idx] &lt;- next.greedy
+  } else {
+    Y &lt;- next.greedy
   }
   suz &lt;- susie(pw.mat, Y, L = 1)
   suz.order &lt;- order(suz$alpha, decreasing = TRUE)
@@ -790,7 +794,31 @@ backfit.fl &lt;- function(fl) {
                   verbose.lvl = 3, output.lvl = 4))
 }
 
-# Full data.
+
+# Do the dirty work ---------------------------------------------------------
+
+library(Matrix)
+library(ashr)
+library(flashier)
+library(ebnm)
+library(susieR)
+
+setwd(&quot;/project2/mstephens/willwerscheid/&quot;)
+pw.mat &lt;- readRDS(&quot;pw_mat.rds&quot;)
+fl.data &lt;- readRDS(&quot;pw_fldata.rds&quot;)
+
+# Time to flash. First, fit the mean factors. For genes, a &quot;nonnegative&quot; prior
+#   (which is unimodal at zero) works best. I don&#39;t expect cell sizes to be
+#   unimodal at zero, so I use a &quot;nonzero.mode&quot; prior for cells.
+fl &lt;- flashier(fl.data,
+               var.type = NULL,
+               prior.type = c(&quot;nonnegative&quot;, &quot;nonzero.mode&quot;),
+               fixed.factors = c(ones.factor(2), ones.factor(1)),
+               backfit = &quot;only&quot;,
+               verbose.lvl = 3)
+saveRDS(fl, &quot;/scratch/midway2/willwerscheid/pw_tmp.rds&quot;)
+
+# Now add pathways 10 at a time, backfitting after each set.
 fl &lt;- add.n.pathways(fl, pw.mat, 10)
 fl &lt;- backfit.fl(fl)
 saveRDS(fl, &quot;pw_fl10.rds&quot;)
@@ -801,31 +829,61 @@ saveRDS(fl, &quot;pw_fl20.rds&quot;)
 
 fl &lt;- add.n.pathways(fl, pw.mat, 10)
 fl &lt;- backfit.fl(fl)
-saveRDS(fl, &quot;pw_fl23.rds&quot;) # didn&#39;t find a pathway that increased the objective
+saveRDS(fl, &quot;pw_fl30.rds&quot;)
 
 fl &lt;- add.n.pathways(fl, pw.mat, 10)
 fl &lt;- backfit.fl(fl)
-saveRDS(fl, &quot;pw_fl33.rds&quot;)
+saveRDS(fl, &quot;pw_fl40.rds&quot;)
 
-fl &lt;- add.n.pathways(fl, pw.mat, 10)
-fl &lt;- backfit.fl(fl)
-saveRDS(fl, &quot;pw_fl41.rds&quot;) # too many candidate factors
 
-fl &lt;- add.n.pathways(fl, pw.mat, 9)
-fl &lt;- backfit.fl(fl)
-saveRDS(fl, &quot;pw_fl50.rds&quot;)
+# Next I want to analyze the subset of ionocytes. Since I&#39;m interested in how
+#   ionocyte expression differs from mean epithelial expression (not in
+#   overall ionocyte expression), I residualize the ionocyte expression data
+#   using the mean factors obtained from the previous fit.
+trachea &lt;- readRDS(&quot;pw_fldata.rds&quot;)$Y
+ion.idx &lt;- (sapply(strsplit(colnames(trachea), &quot;_&quot;), `[`, 3) == &quot;Ionocyte&quot;)
+ionocytes &lt;- trachea[, ion.idx]
+# all-zero rows need to be removed (for flash only, not SuSiE):
+nz.idx &lt;- (rowSums(ionocytes) &gt; 0)
+ionocytes &lt;- ionocytes[nz.idx, ]
+ion.means &lt;- (fl$loadings$normalized.loadings[[1]][nz.idx, 1:2]
+              %*% diag(fl$loadings$scale.constant[1:2])
+              %*% t(fl$loadings$normalized.loadings[[2]][ion.idx, 1:2]))
+ion.data &lt;- log1p(ionocytes) - ion.means
+S &lt;- sqrt(ionocytes) / (ionocytes + 1)
+S[S == 0] &lt;- 0.5
+ion.data &lt;- set.flash.data(ion.data, S, var.type = NULL)
+rm(ionocytes)
+rm(S)
+saveRDS(ion.data, &quot;ion_data.rds&quot;)
 
-# Ionocytes.
+ion.subset &lt;- list(rows = nz.idx, cols = ion.idx)
+saveRDS(ion.subset, &quot;ion_subset.rds&quot;)
+
+# Initialize the flash object without adding any factors.
+ion.fl &lt;- flashier(ion.data,
+                   var.type = NULL,
+                   prior.type = c(&quot;nonnegative&quot;, &quot;nonzero.mode&quot;),
+                   greedy.Kmax = 0,
+                   verbose.lvl = 3,
+                   final.nullchk = FALSE)
+
 ion.fl &lt;- add.n.pathways(ion.fl, pw.mat, 10, nz.idx, save.fl = FALSE)
 ion.fl &lt;- backfit.fl(ion.fl)
 saveRDS(ion.fl, &quot;ion_fl10.rds&quot;)
 
 ion.fl &lt;- add.n.pathways(ion.fl, pw.mat, 10, nz.idx, save.fl = FALSE)
 ion.fl &lt;- backfit.fl(ion.fl)
-saveRDS(ion.fl, &quot;ion_fl12.rds&quot;) # didn&#39;t find a pathway that increased obj
+saveRDS(ion.fl, &quot;ion_fl20.rds&quot;)
 
-# This subsequent fit is unable to add any other pathways.
 ion.fl &lt;- add.n.pathways(ion.fl, pw.mat, 10, nz.idx, save.fl = FALSE)
+ion.fl &lt;- backfit.fl(ion.fl)
+saveRDS(ion.fl, &quot;ion_fl30.rds&quot;)
+
+ion.fl &lt;- add.n.pathways(ion.fl, pw.mat, 10, nz.idx, save.fl = FALSE)
+ion.fl &lt;- backfit.fl(ion.fl)
+saveRDS(ion.fl, &quot;ion_fl40.rds&quot;)
+
 
 # Recover pathways from flash object.
 pathway.idx &lt;- lapply(fl$fit$fix.idx[1:fl$n.factors], function(f) {
@@ -837,13 +895,13 @@ pathways.added &lt;- names(pathways)[added.idx]</code></pre>
 </div>
 <div id="results-full-dataset" class="section level2">
 <h2>Results: full dataset</h2>
-<p>Each pair of plots corresponds to a pathway, and results are organized according to the proportion of variance explained by each pathway. The plots on the left-hand side give cell loadings broken down by cell type (the cell type annotations are given by Montoro et al.). The plots on the right give gene loadings for all genes in the pathway, with a maximum of 50 genes displayed so that gene labels are readable. The loadings are scaled so that the maximum gene loading is equal to one. Thus, a cell loading of, say, 0.5, can be interpreted as increasing the expected count of the most highly loaded gene in the pathway by a multiplicative factor of <span class="math inline">\(\exp(0.5)\)</span>.</p>
-<p>One especially interesting thing to note is that some pathways appear in more than one factor, but when they do, they tend to be loaded on different gene sets. For example, one keratinization factor (factor 9, PVE = 0.001) is primarily loaded on Krt17, Krt5, and Krt15, and is positively loaded primarily on basal cells, while another (factor 22, PVE = 8e-04) is loaded on Krt4, Krt8, and others (with very small loadings on Krt17 and Krt5), and positively loaded primarily on club cells.</p>
+<p>I fit 40 pathways using the method outlined above. Each pair of plots corresponds to a pathway, and results are organized according to the proportion of variance explained by each pathway. The plots on the left-hand side give cell loadings broken down by cell type (the cell type annotations are given by Montoro et al.). The plots on the right give gene loadings for all genes in the pathway, with a maximum of 50 genes displayed so that gene labels are readable. The loadings are scaled so that the maximum gene loading is equal to one. Thus, a cell loading of, say, 0.5, can be interpreted as increasing the expected count of the most highly loaded gene in the pathway by a multiplicative factor of <span class="math inline">\(\exp(0.5)\)</span>.</p>
+<p>One especially interesting thing to note is that some pathways appear in more than one factor, but when they do, they tend to be loaded on different gene sets. For example, one neutrophil degranulation factor (factor 13, PVE = 0.0063) is most heavily loaded on Ltf, and is positively loaded primarily on goblet and club cells, while another (factor 36, PVE = 0.0016) is most heavily loaded on Lgals3 and positively loaded primarily on ciliated cells.</p>
 <pre class="r"><code>library(ggplot2)
 library(gridExtra)
 library(Matrix)
 
-fl &lt;- readRDS(&quot;~/Downloads/pw_fl50.rds&quot;)
+fl &lt;- readRDS(&quot;~/Downloads/pw_fl.rds&quot;)
 pw.mat &lt;- readRDS(&quot;~/Downloads/pw_mat.rds&quot;)
 bm &lt;- readRDS(&quot;~/Downloads/pw_bm.rds&quot;)
 
@@ -854,7 +912,6 @@ pathways &lt;- apply(pw.mat, 2, function(x) which(x == 1))
 added.idx &lt;- match(pathway.idx, pathways)
 pathways.added &lt;- names(pathways)[added.idx]
 
-K &lt;- fl$n.factors
 gene.loadings &lt;- fl$loadings$normalized.loadings[[1]]
 cell.loadings &lt;- fl$loadings$normalized.loadings[[2]]
 scale.const &lt;- fl$loadings$scale.constant
@@ -869,6 +926,7 @@ cell.names &lt;- rownames(cell.loadings)
 cell.types &lt;- as.factor(sapply(strsplit(cell.names, &quot;_&quot;), `[`, 3))
 # mouse &lt;- as.factor(sapply(strsplit(cell.names, &quot;_&quot;), `[`, 1))
 
+K &lt;- fl$n.factors
 df &lt;- data.frame(cell.loadings[, 3:K])
 names(df) &lt;- paste0(&quot;F&quot;, (3:K), &quot;: &quot;, pathways.added)
 df$`Cell Type` &lt;- cell.types
@@ -885,7 +943,7 @@ plot.celltypes &lt;- function(df, k) {
   return(the.plot)
 }
 
-plot.geneset &lt;- function(gene.loadings, k, offset = 2, title = NULL) {
+plot.geneset &lt;- function(gene.loadings, k, offset = 0) {
   all.loadings &lt;- gene.loadings[, k + offset]
   pw.loadings &lt;- data.frame(all.loadings[all.loadings &gt; 0])
   names(pw.loadings) &lt;- &quot;Loading&quot;
@@ -898,12 +956,8 @@ plot.geneset &lt;- function(gene.loadings, k, offset = 2, title = NULL) {
   the.plot &lt;- ggplot(pw.loadings, 
                      aes(x = reorder(Gene, -Loading), y = Loading)) +
     geom_bar(stat = &quot;identity&quot;) +
-    theme(axis.text.y = element_text(size = 7))
-  if (!is.null(title)) {
-    the.plot &lt;- the.plot + labs(x = NULL, y = title)
-  } else {
-    the.plot &lt;- the.plot + labs(x = NULL, y = &quot;Scaled loading&quot;)
-  }
+    theme(axis.text.y = element_text(size = 7)) + 
+    labs(x = NULL, y = &quot;Scaled loading&quot;)
   if (nrow(pw.loadings) &gt; 30) {
     the.plot &lt;- the.plot + 
       theme(axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5, 
@@ -921,7 +975,7 @@ for (k in k.order) {
   plot.title &lt;- paste0(names(df)[k], &quot; (PVE: &quot;, 
                        signif(pve[k], digits = 2), &quot;)&quot;)
   plot1 &lt;- plot.celltypes(df, k)
-  plot2 &lt;- plot.geneset(gene.loadings, k)
+  plot2 &lt;- plot.geneset(gene.loadings, k, offset = 2)
   grid.arrange(plot1, plot2, ncol = 2, top = plot.title)
 }</code></pre>
 <p><img src="figure/trachea4.Rmd/the.res-1.png" width="672" style="display: block; margin: auto;" /></p>
@@ -941,6 +995,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-1.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-1.png" target="_blank">867f28b</a>
@@ -973,6 +1038,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-2.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-2.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1001,6 +1077,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-3.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-3.png" target="_blank">867f28b</a>
@@ -1033,6 +1120,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-4.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-4.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1061,6 +1159,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-5.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-5.png" target="_blank">867f28b</a>
@@ -1093,6 +1202,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-6.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-6.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1121,6 +1241,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-7.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-7.png" target="_blank">867f28b</a>
@@ -1153,6 +1284,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-8.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-8.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1181,6 +1323,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-9.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-9.png" target="_blank">867f28b</a>
@@ -1213,6 +1366,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-10.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-10.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1241,6 +1405,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-11.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-11.png" target="_blank">867f28b</a>
@@ -1273,6 +1448,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-12.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-12.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1301,6 +1487,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-13.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-13.png" target="_blank">867f28b</a>
@@ -1333,6 +1530,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-14.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-14.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1361,6 +1569,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-15.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-15.png" target="_blank">867f28b</a>
@@ -1393,6 +1612,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-16.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-16.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1421,6 +1651,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-17.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-17.png" target="_blank">867f28b</a>
@@ -1453,6 +1694,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-18.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-18.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1481,6 +1733,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-19.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-19.png" target="_blank">867f28b</a>
@@ -1513,6 +1776,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-20.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-20.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1541,6 +1815,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-21.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-21.png" target="_blank">867f28b</a>
@@ -1573,6 +1858,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-22.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-22.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1601,6 +1897,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-23.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-23.png" target="_blank">867f28b</a>
@@ -1633,6 +1940,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-24.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-24.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1661,6 +1979,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-25.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-25.png" target="_blank">867f28b</a>
@@ -1693,6 +2022,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-26.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-26.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1721,6 +2061,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-27.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-27.png" target="_blank">867f28b</a>
@@ -1753,6 +2104,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-28.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-28.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1781,6 +2143,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-29.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-29.png" target="_blank">867f28b</a>
@@ -1813,6 +2186,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-30.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-30.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1841,6 +2225,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-31.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-31.png" target="_blank">867f28b</a>
@@ -1873,6 +2268,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-32.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-32.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1901,6 +2307,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-33.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-33.png" target="_blank">867f28b</a>
@@ -1933,6 +2350,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-34.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-34.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -1961,6 +2389,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-35.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-35.png" target="_blank">867f28b</a>
@@ -1993,6 +2432,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-36.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-36.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -2021,6 +2471,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-37.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-37.png" target="_blank">867f28b</a>
@@ -2053,6 +2514,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-38.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-38.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -2081,6 +2553,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-39.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-39.png" target="_blank">867f28b</a>
@@ -2113,6 +2596,17 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/the.res-40.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-40.png" target="_blank">867f28b</a>
 </td>
 <td style="text-align:left;">
@@ -2124,8 +2618,56 @@ Jason Willwerscheid
 </tr>
 </tbody>
 </table>
-<p></details> <img src="figure/trachea4.Rmd/the.res-41.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of the.res-41.png:</em></summary>
+<p></details></p>
+</div>
+<div id="results-ionocytes" class="section level2">
+<h2>Results: ionocytes</h2>
+<p>To analyze the subset of ionocytes, I residualize out the mean factors from the above fit (the idea is to see how ionocyte expression differs from mean epithelial expression). I again fit 40 factors.</p>
+<p>The approach doesn’t give me what I want. I’ve only been able to find factors that say something about what ionocytes don’t express, not what they do (all cell loadings are negative). It might be simply a matter of adding more factors, but most likely the overall approach needs to be rethought.</p>
+<p>Most disappointingly, Cftr doesn’t show up here. It’s worth considering why. In the full dataset (7193 cells), there is 1 cell (an ionocyte) with 6 Cftr transcripts, 1 with 3 transcripts, 5 with 2, and 12 with 1. Of the 26 ionocytes, 17 don’t have any Cftr transcripts, but of the 19 total cells that have any Cftr transcripts, 9 are ionocytes. Further, I’ve set standard errors as <span class="math display">\[ S_{ij} = \frac{\sqrt{Y_{ij}}}{Y_{ij} + 1} \]</span> with <span class="math inline">\(S_{ij} = 1/2\)</span> when <span class="math inline">\(Y_{ij} = 0\)</span>, so when the clustering is not given in advance, <span class="math inline">\(Y_{ij} = \log(Y_{ij} + 1) = 0\)</span> does not look much different from <span class="math inline">\(Y_{ij} = 1\)</span> (i.e., <span class="math inline">\(\log(Y_{ij} + 1) \approx 0.69\)</span>). (<span class="math inline">\(Y_{ij} = 2\)</span> is also only slightly more than one standard error away from zero.) So the way I’ve transformed the data and set standard errors will not have much power to detect changes in expression when all counts are low.</p>
+<pre class="r"><code>ion.fl &lt;- readRDS(&quot;~/Downloads/ion_fl40.rds&quot;)
+ion.nz.idx &lt;- readRDS(&quot;~/Downloads/ion_subset.rds&quot;)$rows
+
+ion.pathway.idx &lt;- lapply(ion.fl$fit$fix.idx, function(f) {
+  setdiff(1:nrow(ion.fl$fit$EF[[1]]), f)
+})
+pathways &lt;- apply(pw.mat[ion.nz.idx, ], 2, function(x) which(x == 1))
+added.idx &lt;- match(ion.pathway.idx, pathways)
+ion.pathways.added &lt;- names(pathways)[added.idx]
+
+ion.gene.l &lt;- matrix(0, nrow = nrow(pw.mat), 
+                     ncol = ncol(ion.fl$loadings$normalized.loadings[[1]]))
+ion.gene.l[ion.nz.idx, ] &lt;- ion.fl$loadings$normalized.loadings[[1]]
+rownames(ion.gene.l) &lt;- rownames(pw.mat)
+ion.cell.l &lt;- ion.fl$loadings$normalized.loadings[[2]]
+ion.scale &lt;- ion.fl$loadings$scale.constant
+
+max.gene.l &lt;- apply(ion.gene.l, 2, max)
+ion.gene.l &lt;- ion.gene.l / rep(max.gene.l, each = nrow(ion.gene.l))
+ion.cell.l &lt;- ion.cell.l * rep(max.gene.l * ion.scale, each = nrow(ion.cell.l))
+  
+plot.cellloadings &lt;- function(cell.loadings, k) {
+  df &lt;- data.frame(cell.loadings[, k])
+  names(df) &lt;- &quot;Loading&quot;
+  df$Cell &lt;- 1:nrow(cell.loadings)
+  the.plot &lt;- ggplot(df, aes(x = reorder(Cell, -Loading), y = Loading)) +
+    geom_bar(stat = &quot;identity&quot;) +
+    labs(x = &quot;Cells&quot;, y = &quot;Scaled Loading&quot;) +
+    theme(axis.text.x = element_blank())
+  return(the.plot)
+}
+
+ion.pve &lt;- ion.fl$pve
+k.order &lt;- order(ion.pve, decreasing = TRUE)
+for (k in k.order) {
+  plot.title &lt;- paste0(ion.pathways.added[k], &quot; (PVE: &quot;, 
+                       signif(ion.pve[k], digits = 2), &quot;)&quot;)
+  plot1 &lt;- plot.cellloadings(ion.cell.l, k)
+  plot2 &lt;- plot.geneset(ion.gene.l, k)
+  grid.arrange(plot1, plot2, ncol = 2, top = plot.title)
+}</code></pre>
+<p><img src="figure/trachea4.Rmd/ion-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of ion-1.png:</em></summary>
 <table style="border-collapse:separate; border-spacing:5px;">
 <thead>
 <tr>
@@ -2143,54 +2685,168 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
-<a href="https://github.com/willwerscheid/FLASHvestigations/blob/867f28b73cfeefdd7e9cb92a686faa7f6f025377/docs/figure/trachea4.Rmd/the.res-41.png" target="_blank">867f28b</a>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/ion-1.png" target="_blank">4d7c397</a>
 </td>
 <td style="text-align:left;">
 Jason Willwerscheid
 </td>
 <td style="text-align:left;">
-2019-03-02
+2019-03-04
 </td>
 </tr>
 </tbody>
 </table>
-<p></details> <img src="figure/trachea4.Rmd/the.res-42.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-43.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-44.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-45.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-46.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-47.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-48.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-49.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/the.res-50.png" width="672" style="display: block; margin: auto;" /></p>
-</div>
-<div id="results-ionocytes" class="section level2">
-<h2>Results: ionocytes</h2>
-<p>I don’t fit a mean factor for genes here because I’m interested in overall expression rather than how expression differs from the mean.</p>
-<p>It’s encouraging to note that the process halts after adding a relatively small number of pathways (12). Disappointingly, however, Cftr doesn’t show up here. Nor does the “transferrin endocytosis and recycling” pathway, which appears above as factor 43 (PVE: 6.7e-05) and seems like it should be able to capture what Montoro et al. describe as a V-ATPase expression profile that is particular to pulmonary ionocytes.</p>
-<pre class="r"><code>ion.fl &lt;- readRDS(&quot;~/Downloads/ion_fl12.rds&quot;)
-ion.nz.idx &lt;- readRDS(&quot;~/Downloads/ion_nzidx.rds&quot;)
-
-ion.pathway.idx &lt;- lapply(ion.fl$fit$fix.idx[2:ion.fl$n.factors], function(f) {
-  setdiff(1:nrow(ion.fl$fit$EF[[1]]), f)
-})
-pathways &lt;- apply(pw.mat[ion.nz.idx, ], 2, function(x) which(x == 1))
-added.idx &lt;- match(ion.pathway.idx, pathways)
-ion.pathways.added &lt;- names(pathways)[added.idx]
-
-ion.gene.l &lt;- matrix(0, nrow = nrow(pw.mat), 
-                     ncol = ncol(ion.fl$loadings$normalized.loadings[[1]]))
-ion.gene.l[ion.nz.idx, ] &lt;- ion.fl$loadings$normalized.loadings[[1]]
-rownames(ion.gene.l) &lt;- rownames(pw.mat)
-max.gene.l &lt;- apply(ion.gene.l, 2, max)
-ion.gene.l &lt;- ion.gene.l / rep(max.gene.l, each = nrow(ion.gene.l))
-
-ion.pve &lt;- ion.fl$pve[2:ion.fl$n.factors]
-k.order &lt;- order(ion.pve, decreasing = TRUE)
-for (i in 1:(length(ion.pve) / 2)) {
-  k1 &lt;- k.order[2 * i - 1]
-  k2 &lt;- k.order[2 * i]
-  title1 &lt;- paste0(ion.pathways.added[k1], &quot; (PVE: &quot;, 
-                   signif(ion.pve[k1], digits = 2), &quot;)&quot;)
-  title2 &lt;- paste0(ion.pathways.added[k2], &quot; (PVE: &quot;, 
-                   signif(ion.pve[k2], digits = 2), &quot;)&quot;)
-  plot1 &lt;- plot.geneset(ion.gene.l, k1, offset = 1, title = title1)
-  plot2 &lt;- plot.geneset(ion.gene.l, k2, offset = 1, title = title2)
-  grid.arrange(plot1, plot2, ncol = 2)
-}</code></pre>
-<p><img src="figure/trachea4.Rmd/ion-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-5.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-6.png" width="672" style="display: block; margin: auto;" /></p>
+<p></details> <img src="figure/trachea4.Rmd/ion-2.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of ion-2.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/ion-2.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> <img src="figure/trachea4.Rmd/ion-3.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of ion-3.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/ion-3.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> <img src="figure/trachea4.Rmd/ion-4.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of ion-4.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/ion-4.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> <img src="figure/trachea4.Rmd/ion-5.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of ion-5.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/ion-5.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> <img src="figure/trachea4.Rmd/ion-6.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of ion-6.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/4d7c397e31f65e8b1c8691e20eb1705a5cd54e78/docs/figure/trachea4.Rmd/ion-6.png" target="_blank">4d7c397</a>
+</td>
+<td style="text-align:left;">
+Jason Willwerscheid
+</td>
+<td style="text-align:left;">
+2019-03-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details> <img src="figure/trachea4.Rmd/ion-7.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-8.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-9.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-10.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-11.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-12.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-13.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-14.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-15.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-16.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-17.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-18.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-19.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-20.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-21.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-22.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-23.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-24.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-25.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-26.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-27.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-28.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-29.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-30.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-31.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-32.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-33.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-34.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-35.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-36.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-37.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-38.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-39.png" width="672" style="display: block; margin: auto;" /><img src="figure/trachea4.Rmd/ion-40.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="results-summary" class="section level2">
 <h2>Results summary</h2>
@@ -2228,8 +2884,9 @@ df &lt;- data.frame(pathway = all.pathways,
 df &lt;- df[order(df$sort.order, decreasing = TRUE), ]
 df$sort.order &lt;- NULL
 rownames(df) &lt;- NULL
-knitr::kable(df, 
-             col.names = c(&quot;Pathway&quot;, &quot;Rank (ionocytes)&quot;, &quot;Rank (all cells)&quot;))</code></pre>
+knitr::kable(df, col.names = c(&quot;Pathway&quot;, 
+                               &quot;Rank (ionocytes)&quot;, 
+                               &quot;Rank (all cells)&quot;))</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -2240,214 +2897,279 @@ knitr::kable(df,
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Formation of a pool of free 40S subunits</td>
+<td align="left">Antimicrobial peptides</td>
 <td align="left">1</td>
+<td align="left">1, 7</td>
+</tr>
+<tr class="even">
+<td align="left">Neutrophil degranulation</td>
+<td align="left">2</td>
+<td align="left">2, 4</td>
+</tr>
+<tr class="odd">
+<td align="left">Formation of a pool of free 40S subunits</td>
+<td align="left">3</td>
 <td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left">Keratinization</td>
-<td align="left">2</td>
-<td align="left">6, 10</td>
-</tr>
-<tr class="odd">
-<td align="left">Passive transport by Aquaporins</td>
-<td align="left">3</td>
-<td align="left">18, 36</td>
-</tr>
-<tr class="even">
-<td align="left">Scavenging by Class A Receptors</td>
 <td align="left">4</td>
-<td align="left">7</td>
-</tr>
-<tr class="odd">
-<td align="left">Antimicrobial peptides</td>
-<td align="left">5</td>
-<td align="left">2</td>
-</tr>
-<tr class="even">
-<td align="left">RAF-independent MAPK1/3 activation</td>
 <td align="left">6</td>
-<td align="left">30</td>
 </tr>
 <tr class="odd">
-<td align="left">AUF1 (hnRNP D0) binds and destabilizes mRNA</td>
-<td align="left">7</td>
-<td align="left">13</td>
-</tr>
-<tr class="even">
-<td align="left">Ethanol oxidation</td>
-<td align="left">8</td>
-<td align="left">19</td>
-</tr>
-<tr class="odd">
-<td align="left">Activation of the AP-1 family of transcription factors</td>
-<td align="left">9</td>
-<td align="left">14</td>
-</tr>
-<tr class="even">
-<td align="left">Vitamin C (ascorbate) metabolism</td>
-<td align="left">10</td>
-<td align="left">25</td>
-</tr>
-<tr class="odd">
-<td align="left">Fatty acids</td>
-<td align="left">11</td>
+<td align="left">Scavenging by Class A Receptors</td>
 <td align="left">5</td>
-</tr>
-<tr class="even">
-<td align="left">Degradation of cysteine and homocysteine</td>
-<td align="left">12</td>
-<td align="left">28</td>
-</tr>
-<tr class="odd">
-<td align="left">Neutrophil degranulation</td>
-<td align="left"></td>
-<td align="left">1, 4, 11, 15, 22, 26</td>
-</tr>
-<tr class="even">
-<td align="left">L13a-mediated translational silencing of Ceruloplasmin expression</td>
-<td align="left"></td>
 <td align="left">3</td>
 </tr>
-<tr class="odd">
-<td align="left">Post-translational modification: synthesis of GPI-anchored proteins</td>
-<td align="left"></td>
-<td align="left">8</td>
-</tr>
 <tr class="even">
-<td align="left">Respiratory electron transport</td>
+<td align="left">Fatty acids</td>
+<td align="left">6</td>
 <td align="left"></td>
-<td align="left">9, 12</td>
 </tr>
 <tr class="odd">
-<td align="left">HSP90 chaperone cycle for steroid hormone receptors (SHR)</td>
-<td align="left"></td>
-<td align="left">16</td>
-</tr>
-<tr class="even">
-<td align="left">Regulation of TLR by endogenous ligand</td>
-<td align="left"></td>
-<td align="left">17</td>
-</tr>
-<tr class="odd">
-<td align="left">RHO GTPases activate IQGAPs</td>
-<td align="left"></td>
+<td align="left">Vitamin C (ascorbate) metabolism</td>
+<td align="left">7</td>
 <td align="left">20</td>
 </tr>
 <tr class="even">
+<td align="left">Passive transport by Aquaporins</td>
+<td align="left">8</td>
+<td align="left">15</td>
+</tr>
+<tr class="odd">
+<td align="left">Post-translational modification: synthesis of GPI-anchored proteins</td>
+<td align="left">9</td>
+<td align="left">8</td>
+</tr>
+<tr class="even">
+<td align="left">Platelet degranulation</td>
+<td align="left">10</td>
+<td align="left">23</td>
+</tr>
+<tr class="odd">
 <td align="left">Senescence-Associated Secretory Phenotype (SASP)</td>
+<td align="left">11</td>
 <td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Immunoregulatory interactions between a Lymphoid and a non-Lymphoid cell</td>
+<td align="left">12</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Ethanol oxidation</td>
+<td align="left">13</td>
+<td align="left">17</td>
+</tr>
+<tr class="even">
+<td align="left">Respiratory electron transport</td>
+<td align="left">14</td>
+<td align="left">9, 12, 38, 40</td>
+</tr>
+<tr class="odd">
+<td align="left">Activation of the AP-1 family of transcription factors</td>
+<td align="left">15</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">RAF-independent MAPK1/3 activation</td>
+<td align="left">16</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Detoxification of Reactive Oxygen Species</td>
+<td align="left">17</td>
+<td align="left">16</td>
+</tr>
+<tr class="even">
+<td align="left">mRNA Splicing - Major Pathway</td>
+<td align="left">18</td>
+<td align="left">24</td>
+</tr>
+<tr class="odd">
+<td align="left">AUF1 (hnRNP D0) binds and destabilizes mRNA</td>
+<td align="left">19</td>
+<td align="left">11</td>
+</tr>
+<tr class="even">
+<td align="left">Post-translational protein phosphorylation</td>
+<td align="left">20</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Phase I - Functionalization of compounds</td>
 <td align="left">21</td>
+<td align="left">32</td>
+</tr>
+<tr class="even">
+<td align="left">RHO GTPases activate IQGAPs</td>
+<td align="left">22</td>
+<td align="left">18</td>
+</tr>
+<tr class="odd">
+<td align="left">Ion homeostasis</td>
+<td align="left">23</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Pink/Parkin Mediated Mitophagy</td>
+<td align="left">24</td>
+<td align="left">36</td>
+</tr>
+<tr class="odd">
+<td align="left">Cristae formation</td>
+<td align="left">25</td>
+<td align="left">29</td>
+</tr>
+<tr class="even">
+<td align="left">Translocation of SLC2A4 (GLUT4) to the plasma membrane</td>
+<td align="left">26</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">COPI-mediated anterograde transport</td>
+<td align="left">27</td>
+<td align="left">26</td>
+</tr>
+<tr class="even">
+<td align="left">Degradation of cysteine and homocysteine</td>
+<td align="left">28</td>
+<td align="left">28</td>
+</tr>
+<tr class="odd">
+<td align="left">Regulation of gene expression by Hypoxia-inducible Factor</td>
+<td align="left">29</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Glutathione conjugation</td>
+<td align="left">30</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Proton-coupled monocarboxylate transport</td>
+<td align="left">31</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">CDT1 association with the CDC6:ORC:origin complex</td>
+<td align="left">32</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">RHO GTPases Activate WASPs and WAVEs</td>
+<td align="left">33</td>
+<td align="left">31</td>
+</tr>
+<tr class="even">
+<td align="left">MET Receptor Activation</td>
+<td align="left">34</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">HSF1-dependent transactivation</td>
+<td align="left">35</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">SUMOylation of immune response proteins</td>
+<td align="left">36</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Regulation of ornithine decarboxylase (ODC)</td>
+<td align="left">37</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">XBP1(S) activates chaperone genes</td>
+<td align="left">38</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Pentose phosphate pathway</td>
+<td align="left">39</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Pregnenolone biosynthesis</td>
+<td align="left">40</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">L13a-mediated translational silencing of Ceruloplasmin expression</td>
+<td align="left"></td>
+<td align="left">5</td>
+</tr>
+<tr class="even">
+<td align="left">CYP2E1 reactions</td>
+<td align="left"></td>
+<td align="left">10</td>
+</tr>
+<tr class="odd">
+<td align="left">Regulation of TLR by endogenous ligand</td>
+<td align="left"></td>
+<td align="left">13</td>
+</tr>
+<tr class="even">
+<td align="left">Estrogen-dependent gene expression</td>
+<td align="left"></td>
+<td align="left">14</td>
 </tr>
 <tr class="odd">
 <td align="left">RHO GTPases activate PKNs</td>
 <td align="left"></td>
-<td align="left">23</td>
+<td align="left">19</td>
 </tr>
 <tr class="even">
-<td align="left">Detoxification of Reactive Oxygen Species</td>
+<td align="left">Attenuation phase</td>
 <td align="left"></td>
-<td align="left">24</td>
+<td align="left">21</td>
 </tr>
 <tr class="odd">
 <td align="left">Autodegradation of Cdh1 by Cdh1:APC/C</td>
 <td align="left"></td>
-<td align="left">27</td>
+<td align="left">22</td>
 </tr>
 <tr class="even">
-<td align="left">Platelet degranulation</td>
-<td align="left"></td>
-<td align="left">29</td>
-</tr>
-<tr class="odd">
-<td align="left">Cristae formation</td>
-<td align="left"></td>
-<td align="left">31</td>
-</tr>
-<tr class="even">
-<td align="left">mRNA Splicing - Major Pathway</td>
-<td align="left"></td>
-<td align="left">32, 40</td>
-</tr>
-<tr class="odd">
-<td align="left">COPI-mediated anterograde transport</td>
-<td align="left"></td>
-<td align="left">33</td>
-</tr>
-<tr class="even">
-<td align="left">RHO GTPases Activate WASPs and WAVEs</td>
-<td align="left"></td>
-<td align="left">34</td>
-</tr>
-<tr class="odd">
 <td align="left">Antigen Presentation: Folding, assembly and peptide loading of class I MHC</td>
 <td align="left"></td>
-<td align="left">35</td>
+<td align="left">25</td>
+</tr>
+<tr class="odd">
+<td align="left">Termination of O-glycan biosynthesis</td>
+<td align="left"></td>
+<td align="left">27</td>
 </tr>
 <tr class="even">
 <td align="left">Mitochondrial translation elongation</td>
 <td align="left"></td>
-<td align="left">37</td>
+<td align="left">30</td>
 </tr>
 <tr class="odd">
-<td align="left">Phase I - Functionalization of compounds</td>
-<td align="left"></td>
-<td align="left">38</td>
-</tr>
-<tr class="even">
 <td align="left">Synthesis of 5-eicosatetraenoic acids</td>
 <td align="left"></td>
-<td align="left">39</td>
-</tr>
-<tr class="odd">
-<td align="left">Glutathione conjugation</td>
-<td align="left"></td>
-<td align="left">41</td>
+<td align="left">33</td>
 </tr>
 <tr class="even">
 <td align="left">Synthesis of 12-eicosatetraenoic acid derivatives</td>
 <td align="left"></td>
-<td align="left">42</td>
+<td align="left">34</td>
 </tr>
 <tr class="odd">
-<td align="left">Regulation of gene expression by Hypoxia-inducible Factor</td>
+<td align="left">Dissolution of Fibrin Clot</td>
 <td align="left"></td>
-<td align="left">43</td>
-</tr>
-<tr class="even">
-<td align="left">SUMOylation of immune response proteins</td>
-<td align="left"></td>
-<td align="left">44</td>
-</tr>
-<tr class="odd">
-<td align="left">Pink/Parkin Mediated Mitophagy</td>
-<td align="left"></td>
-<td align="left">45</td>
-</tr>
-<tr class="even">
-<td align="left">Pentose phosphate pathway</td>
-<td align="left"></td>
-<td align="left">46</td>
-</tr>
-<tr class="odd">
-<td align="left">Pyruvate metabolism</td>
-<td align="left"></td>
-<td align="left">47</td>
+<td align="left">35</td>
 </tr>
 <tr class="even">
 <td align="left">Citric acid cycle (TCA cycle)</td>
 <td align="left"></td>
-<td align="left">48</td>
+<td align="left">37</td>
 </tr>
 <tr class="odd">
-<td align="left">Transferrin endocytosis and recycling</td>
+<td align="left">Erythrocytes take up carbon dioxide and release oxygen</td>
 <td align="left"></td>
-<td align="left">49</td>
-</tr>
-<tr class="even">
-<td align="left">XBP1(S) activates chaperone genes</td>
-<td align="left"></td>
-<td align="left">50</td>
+<td align="left">39</td>
 </tr>
 </tbody>
 </table>
