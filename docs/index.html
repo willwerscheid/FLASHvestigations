@@ -71,9 +71,7 @@ h6 {
 </style>
 
 
-</head>
 
-<body>
 
 <style type = "text/css">
 .main-container {
@@ -192,8 +190,6 @@ $(document).ready(function () {
 });
 </script>
 
-<div class="container-fluid main-container">
-
 <!-- tabsets -->
 
 <style type="text/css">
@@ -267,6 +263,15 @@ $(document).ready(function () {
 
 
 
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
 
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
   <div class="container">
@@ -315,1860 +320,1940 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2019-02-26</p>
-<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
-<ul>
-<li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
-<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
-</details>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/314e7ea40690bb668b428715fc8d6c87deecd420" target="_blank">314e7ea</a> </summary></p>
-Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
-<pre><code>
-Ignored files:
-    Ignored:    .DS_Store
-    Ignored:    .Rhistory
-    Ignored:    .Rproj.user/
-    Ignored:    data/.DS_Store
-    Ignored:    docs/.DS_Store
-    Ignored:    docs/figure/.DS_Store
-
-Untracked files:
-    Untracked:  analysis/gd_notes.Rmd
-    Untracked:  code/count_sim.R
-    Untracked:  code/pathways.R
-    Untracked:  data/lowrank/
-    Untracked:  data/tmp14.rds
-    Untracked:  data/tmpdata.rds
-    Untracked:  data/tmplfsr.rds
-    Untracked:  docs/figure/count_notes.Rmd/
-
-Unstaged changes:
-    Deleted:    data/before_bad.Rdata
-
-</code></pre>
-Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+<a data-toggle="tab" href="#report"> Report <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
 </li>
 </ul>
-<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
-<ul>
-<table style="border-collapse:separate; border-spacing:5px;">
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2019-05-19
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>FLASHvestigations/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.2.0). The <em>Report</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="report" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstreecdfcea96f8c395a69003e5309818c557e6790factargetblankcdfcea9a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/cdfcea96f8c395a69003e5309818c557e6790fac" target="_blank">cdfcea9</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstreecdfcea96f8c395a69003e5309818c557e6790factargetblankcdfcea9a" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rproj.user/
+
+Untracked files:
+    Untracked:  code/lowrank.R
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
 <thead>
 <tr>
-<th style="text-align:left;">
+<th>
 File
 </th>
-<th style="text-align:left;">
+<th>
 Version
 </th>
-<th style="text-align:left;">
+<th>
 Author
 </th>
-<th style="text-align:left;">
+<th>
 Date
 </th>
-<th style="text-align:left;">
+<th>
 Message
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
-<a href="https://github.com/willwerscheid/FLASHvestigations/blob/314e7ea40690bb668b428715fc8d6c87deecd420/analysis/index.Rmd" target="_blank">314e7ea</a>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/cdfcea96f8c395a69003e5309818c557e6790fac/analysis/index.Rmd" target="_blank">cdfcea9</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
+2019-05-19
+</td>
+<td>
+wflow_publish(“analysis/index.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/872fae598996f66e5ed67b30de11f85dabd063df/docs/index.html" target="_blank">872fae5</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
 2019-02-26
 </td>
-<td style="text-align:left;">
-wflow_publish(“analysis/index.Rmd”)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-html
-</td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/6a701fa7112e00cb5b07d18faee0de5b05aa7310/docs/index.html" target="_blank">6a701fa</a>
-</td>
-<td style="text-align:left;">
-Jason Willwerscheid
-</td>
-<td style="text-align:left;">
-2019-02-25
-</td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/314e7ea40690bb668b428715fc8d6c87deecd420/analysis/index.Rmd" target="_blank">314e7ea</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2019-02-26
+</td>
+<td>
+wflow_publish(“analysis/index.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/6a701fa7112e00cb5b07d18faee0de5b05aa7310/docs/index.html" target="_blank">6a701fa</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2019-02-25
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/3c6502f33292a7f82a84f25cf037017d1ad720df/analysis/index.Rmd" target="_blank">3c6502f</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2019-02-25
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/4693348f0e1853e786dac115b6ab1c6b11a752b2/docs/index.html" target="_blank">4693348</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/4693348f0e1853e786dac115b6ab1c6b11a752b2/docs/index.html" target="_blank">4693348</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2019-02-19
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/223898e6688c3990742aca0791e9ca169c7da214/analysis/index.Rmd" target="_blank">223898e</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2019-02-19
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/57be68cae896d3699ba5c294ad9cad3c4af90c06/docs/index.html" target="_blank">57be68c</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/57be68cae896d3699ba5c294ad9cad3c4af90c06/docs/index.html" target="_blank">57be68c</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2019-02-13
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/0b17dcf0da6d37eab90e8318b97f1b1cab361aa3/analysis/index.Rmd" target="_blank">0b17dcf</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2019-02-13
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/ba4e5750b24aef6ea02b14784914b92eaaa7cd37/docs/index.html" target="_blank">ba4e575</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/ba4e5750b24aef6ea02b14784914b92eaaa7cd37/docs/index.html" target="_blank">ba4e575</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2019-01-28
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/d5bdcbc4e9c645a4dc2238c765f4f6c71d69bbf9/analysis/index.Rmd" target="_blank">d5bdcbc</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2019-01-28
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/8d151ff212de77b50e4c5470fe2fbff15fba09a2/docs/index.html" target="_blank">8d151ff</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/8d151ff212de77b50e4c5470fe2fbff15fba09a2/docs/index.html" target="_blank">8d151ff</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2019-01-15
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/b4218080d4e7c74e17d562acea96f88a182d8329/analysis/index.Rmd" target="_blank">b421808</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2019-01-15
 </td>
-<td style="text-align:left;">
+<td>
 workflowr::wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/a276f8c53db928ce5ff2c3de186193e4c94d4d51/docs/index.html" target="_blank">a276f8c</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/a276f8c53db928ce5ff2c3de186193e4c94d4d51/docs/index.html" target="_blank">a276f8c</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-12-06
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/54fd17d2129f7efadc9d075566ca535617aefb5e/analysis/index.Rmd" target="_blank">54fd17d</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-12-06
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/fa6eeb24b54baf75e538a1fdd2048f960e12b862/docs/index.html" target="_blank">fa6eeb2</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/fa6eeb24b54baf75e538a1fdd2048f960e12b862/docs/index.html" target="_blank">fa6eeb2</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-12-05
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/403051aa25a6aad9894585657dfc1963d8ac5c79/analysis/index.Rmd" target="_blank">403051a</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-12-05
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/7aba87b1a611d3ed6726b185842bb33114dc10c9/docs/index.html" target="_blank">7aba87b</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/7aba87b1a611d3ed6726b185842bb33114dc10c9/docs/index.html" target="_blank">7aba87b</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-12-04
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/6f64deabe6d16d0164f06810586b46b53f652af8/analysis/index.Rmd" target="_blank">6f64dea</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-12-04
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/a0e8cbaebf201dddea57bba206d99d90d3a0d24a/docs/index.html" target="_blank">a0e8cba</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/a0e8cbaebf201dddea57bba206d99d90d3a0d24a/docs/index.html" target="_blank">a0e8cba</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-12-04
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/e33776b3a07b1e8af52d76c15bf02e9f99908a8c/analysis/index.Rmd" target="_blank">e33776b</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-12-04
 </td>
-<td style="text-align:left;">
+<td>
 workflowr::wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/c013c932d5d082d6cf7d8e41b626868dbeee584f/docs/index.html" target="_blank">c013c93</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/c013c932d5d082d6cf7d8e41b626868dbeee584f/docs/index.html" target="_blank">c013c93</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-11-06
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/b93993d2dd1b2fe23f6ff01815b2440816d4b83e/analysis/index.Rmd" target="_blank">b93993d</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-11-06
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/index.Rmd”))
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/5095faf589cecd652e0f37af3a16fc20f2f1763e/docs/index.html" target="_blank">5095faf</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/5095faf589cecd652e0f37af3a16fc20f2f1763e/docs/index.html" target="_blank">5095faf</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-11-06
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/8b95d7973b453ba3ae14e4935db378549c758e32/analysis/index.Rmd" target="_blank">8b95d79</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-11-06
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/index.Rmd”))
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/7ca650c83fccf1e227337b1b2c84cac4c28c62bb/docs/index.html" target="_blank">7ca650c</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/7ca650c83fccf1e227337b1b2c84cac4c28c62bb/docs/index.html" target="_blank">7ca650c</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-11-06
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/83c6dd54a464217fa1f0ae17376a3ad89dadb331/analysis/index.Rmd" target="_blank">83c6dd5</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-11-06
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/matrix_ops.Rmd”, “analysis/index.Rmd”))
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/195021c2b04f3fd318a00b870f2690d120664baf/docs/index.html" target="_blank">195021c</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/195021c2b04f3fd318a00b870f2690d120664baf/docs/index.html" target="_blank">195021c</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-11-05
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/3d91e0dce009a77a24a5e3bd48f0acf66d4901d0/analysis/index.Rmd" target="_blank">3d91e0d</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-11-05
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/5f7219fe4aab08d594b0d4014aeac5f6d2b7a596/docs/index.html" target="_blank">5f7219f</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/5f7219fe4aab08d594b0d4014aeac5f6d2b7a596/docs/index.html" target="_blank">5f7219f</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-10-23
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/a57f09ec239a5e1efd146595811adbe2e9e10bc6/analysis/index.Rmd" target="_blank">a57f09e</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-10-23
 </td>
-<td style="text-align:left;">
+<td>
 workflowr::wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/0201367b188ddf4f1d98cfe8fa3c41cfdb865e48/docs/index.html" target="_blank">0201367</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/0201367b188ddf4f1d98cfe8fa3c41cfdb865e48/docs/index.html" target="_blank">0201367</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-10-02
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/6e4d240f63581db897ef0548b5b78e1994307ddd/analysis/index.Rmd" target="_blank">6e4d240</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-10-02
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/1c6fd5c3d98c0e7d75c211b029d5f6a9eaf54ea9/docs/index.html" target="_blank">1c6fd5c</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/1c6fd5c3d98c0e7d75c211b029d5f6a9eaf54ea9/docs/index.html" target="_blank">1c6fd5c</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-09-28
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/43dbd89cf5bae214b7bd2c9407f0f8f3622a725f/analysis/index.Rmd" target="_blank">43dbd89</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-09-28
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/16d164dd80c48278ad54e8204a33b9ee06e94666/docs/index.html" target="_blank">16d164d</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/16d164dd80c48278ad54e8204a33b9ee06e94666/docs/index.html" target="_blank">16d164d</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-09-25
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/c416b560c08787fd4bd291593fde2de30df90d0c/analysis/index.Rmd" target="_blank">c416b56</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-09-25
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/0d3e65d23f365a9b2b6c817d745e02375555ddbe/docs/index.html" target="_blank">0d3e65d</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/0d3e65d23f365a9b2b6c817d745e02375555ddbe/docs/index.html" target="_blank">0d3e65d</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-09-21
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/382f0f7a4a2a098e2fbd86bd4fac58b4a34ec991/analysis/index.Rmd" target="_blank">382f0f7</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-09-21
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/23eb8cb675cb634a050115b9a74693a658f8b079/docs/index.html" target="_blank">23eb8cb</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/23eb8cb675cb634a050115b9a74693a658f8b079/docs/index.html" target="_blank">23eb8cb</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-09-20
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/73535b4def48644840e780e1a943aa9abe08a62a/analysis/index.Rmd" target="_blank">73535b4</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-09-20
 </td>
-<td style="text-align:left;">
+<td>
 workflowr::wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/61c0e2e6839a237fb15a19bb210ca505d12ac5ca/docs/index.html" target="_blank">61c0e2e</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/61c0e2e6839a237fb15a19bb210ca505d12ac5ca/docs/index.html" target="_blank">61c0e2e</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-09-18
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/fc79d31262986634dfe1b32b02fee3a4bce650e6/analysis/index.Rmd" target="_blank">fc79d31</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-09-18
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/dc193d99e37763cc16d4a3e6eccdd0abeb9f54a8/docs/index.html" target="_blank">dc193d9</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/dc193d99e37763cc16d4a3e6eccdd0abeb9f54a8/docs/index.html" target="_blank">dc193d9</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-09-12
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/5e96e40e78b4b1d2fc2ff9306f666b5cc380b556/analysis/index.Rmd" target="_blank">5e96e40</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-09-12
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/efbae906de11b0902da3737a7bfd2ac2fb90ac54/docs/index.html" target="_blank">efbae90</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/efbae906de11b0902da3737a7bfd2ac2fb90ac54/docs/index.html" target="_blank">efbae90</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-09-11
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/734b172ca600d856cccc2d491cfeeb2494b28326/analysis/index.Rmd" target="_blank">734b172</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-09-11
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/eb78de4d5291707ed7b792b71bd10842b7182e96/docs/index.html" target="_blank">eb78de4</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/eb78de4d5291707ed7b792b71bd10842b7182e96/docs/index.html" target="_blank">eb78de4</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-29
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/9302eccd741ccb37f564b7f98e550a2435d6d7ed/analysis/index.Rmd" target="_blank">9302ecc</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-29
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/10a535ba7c2ace3c56df29336db48a80cf347dce/docs/index.html" target="_blank">10a535b</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/10a535ba7c2ace3c56df29336db48a80cf347dce/docs/index.html" target="_blank">10a535b</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-29
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/47f0b23591d871b300829348865a1c785c469ac6/analysis/index.Rmd" target="_blank">47f0b23</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-29
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/07ffbc28e4a1a06924be9a71d42a695139644a70/docs/index.html" target="_blank">07ffbc2</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/07ffbc28e4a1a06924be9a71d42a695139644a70/docs/index.html" target="_blank">07ffbc2</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-23
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/c73018d8a14e7bfe2e968dc3d0c0901b9164bfea/analysis/index.Rmd" target="_blank">c73018d</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-23
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/9e39a5fa5e3751c1287ff58c7c90d752b29cb165/docs/index.html" target="_blank">9e39a5f</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/9e39a5fa5e3751c1287ff58c7c90d752b29cb165/docs/index.html" target="_blank">9e39a5f</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-22
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/ac09d4b28c85321b073eb3e4eb4bd7d88a929e3a/analysis/index.Rmd" target="_blank">ac09d4b</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-22
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/b0fbbe0da22eea5350f5aaa812f18f5002676d48/docs/index.html" target="_blank">b0fbbe0</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/b0fbbe0da22eea5350f5aaa812f18f5002676d48/docs/index.html" target="_blank">b0fbbe0</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-22
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/4fe662c9d4c2effbebf9c583c777efa651c1c78e/analysis/index.Rmd" target="_blank">4fe662c</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-22
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/02be9e984146edd47c969ee02968eeda2202c415/docs/index.html" target="_blank">02be9e9</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/02be9e984146edd47c969ee02968eeda2202c415/docs/index.html" target="_blank">02be9e9</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-17
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/6e0036f138f36d377c707ce6d0c385fbe7ceb6f0/analysis/index.Rmd" target="_blank">6e0036f</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-17
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/a6d55b672bde78a49630438c6479624be9b271f8/docs/index.html" target="_blank">a6d55b6</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/a6d55b672bde78a49630438c6479624be9b271f8/docs/index.html" target="_blank">a6d55b6</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-16
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/c972927eeeb4e8ab1f01b6bb563a8f63826a35e4/analysis/index.Rmd" target="_blank">c972927</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-16
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/index.Rmd”, “analysis/parallel2.Rmd”))
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/10d46c01b3f7d081b2b3a33a398089a79b9ae379/docs/index.html" target="_blank">10d46c0</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/10d46c01b3f7d081b2b3a33a398089a79b9ae379/docs/index.html" target="_blank">10d46c0</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-15
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/acd7f0cb823dc52faca461b0305a20efa895fcf4/analysis/index.Rmd" target="_blank">acd7f0c</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-15
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/index.Rmd”))
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/86ef31aa8de2c09ba247351608e776c485ea708f/docs/index.html" target="_blank">86ef31a</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/86ef31aa8de2c09ba247351608e776c485ea708f/docs/index.html" target="_blank">86ef31a</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-12
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/73aa339af4771f929c750b57dc6e376f5262fe01/analysis/index.Rmd" target="_blank">73aa339</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-12
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/5a2e2a9601fa2c67d7858623a8f1a021b7bd6774/docs/index.html" target="_blank">5a2e2a9</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/5a2e2a9601fa2c67d7858623a8f1a021b7bd6774/docs/index.html" target="_blank">5a2e2a9</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-12
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/6a9bf1c4cb55f106ec6bfa8279041df485958868/analysis/index.Rmd" target="_blank">6a9bf1c</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-12
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/index.Rmd”, “analysis/parallel.Rmd”))
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/9246c68c81509a23ff8bad9053af3bab2feb9e41/docs/index.html" target="_blank">9246c68</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/9246c68c81509a23ff8bad9053af3bab2feb9e41/docs/index.html" target="_blank">9246c68</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-12
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/eaba09b9681df28c1319325ecf9f96d390be6a39/analysis/index.Rmd" target="_blank">eaba09b</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-08-12
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/index.Rmd”, “analysis/parallel.Rmd”))
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/cfa8e839b23324c7f7fed93e572a4a171bd23528/docs/index.html" target="_blank">cfa8e83</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/cfa8e839b23324c7f7fed93e572a4a171bd23528/docs/index.html" target="_blank">cfa8e83</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-27
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/f497f36b336da9df75073fe017053b5e3795dd6f/analysis/index.Rmd" target="_blank">f497f36</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-27
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/warmstart2.Rmd”,
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/974e1dbb656dfecae013bdbdcb4909d4e2200051/docs/index.html" target="_blank">974e1db</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/974e1dbb656dfecae013bdbdcb4909d4e2200051/docs/index.html" target="_blank">974e1db</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-27
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/2d81ef4ca61839fa284040db904acf36f3261e65/analysis/index.Rmd" target="_blank">2d81ef4</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-27
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/index.Rmd”, “analysis/init_fn2.Rmd”))
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/9fc59e738853b443964d2d9b80ed7ed1b0afd057/docs/index.html" target="_blank">9fc59e7</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/9fc59e738853b443964d2d9b80ed7ed1b0afd057/docs/index.html" target="_blank">9fc59e7</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-26
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/21cbf89a97a8f9dfa29a08cfbbd09b927d37bdd5/analysis/index.Rmd" target="_blank">21cbf89</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-26
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/index.Rmd”))
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/8f471cb5154cd24bddbc304744401f0609d0499b/docs/index.html" target="_blank">8f471cb</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/8f471cb5154cd24bddbc304744401f0609d0499b/docs/index.html" target="_blank">8f471cb</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-26
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/ff417b60a3d432a0b36a187b0b1594abc58a52a4/analysis/index.Rmd" target="_blank">ff417b6</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-26
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/warmstart.Rmd”, “analysis/index.Rmd”))
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/aae4dfcc7a5bca6b9885567d66bc183757fa133a/docs/index.html" target="_blank">aae4dfc</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/aae4dfcc7a5bca6b9885567d66bc183757fa133a/docs/index.html" target="_blank">aae4dfc</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-25
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/6417d4e9ca3d658552b99b7953213af0612c7bd9/analysis/index.Rmd" target="_blank">6417d4e</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-25
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/index.Rmd”, “analysis/init_fn.Rmd”))
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/3983695c16a2c5700be77cb42b5825d0ac874598/docs/index.html" target="_blank">3983695</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/3983695c16a2c5700be77cb42b5825d0ac874598/docs/index.html" target="_blank">3983695</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-25
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/566c2028d736e8ca0d7786a5b3b17b5c46932675/analysis/index.Rmd" target="_blank">566c202</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-25
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/dd91b193f497cdabfcd05b18003620c4e8aa00fe/docs/index.html" target="_blank">dd91b19</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/dd91b193f497cdabfcd05b18003620c4e8aa00fe/docs/index.html" target="_blank">dd91b19</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-20
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/032edd6bab4628d200863b6c50aa54a8da204ece/analysis/index.Rmd" target="_blank">032edd6</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-20
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/index.Rmd”, “analysis/flash_em.Rmd”,
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/f995dbbc6396ea622eec30cc332a8c89f1a0699d/docs/index.html" target="_blank">f995dbb</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/f995dbbc6396ea622eec30cc332a8c89f1a0699d/docs/index.html" target="_blank">f995dbb</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-20
 </td>
-<td style="text-align:left;">
+<td>
 manual commits to remove licence
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/c9f10b03dedc9390af311c0036ed57736766ca0e/docs/index.html" target="_blank">c9f10b0</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/c9f10b03dedc9390af311c0036ed57736766ca0e/docs/index.html" target="_blank">c9f10b0</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-20
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/4fc94bd76eeb18ead30130cc05641c64986868c5/analysis/index.Rmd" target="_blank">4fc94bd</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-20
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/index.Rmd”, “analysis/flash_em.Rmd”))
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/1de2af0deb970a80ac248b3911c8316252f3e6a1/docs/index.html" target="_blank">1de2af0</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/1de2af0deb970a80ac248b3911c8316252f3e6a1/docs/index.html" target="_blank">1de2af0</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-20
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/9ac7bb07c1368b96dac32ffc6d9d1c5a3cdf7557/analysis/index.Rmd" target="_blank">9ac7bb0</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-20
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/f98f61fb0ebcafe4be7c87c6fcef483281f30788/docs/index.html" target="_blank">f98f61f</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/f98f61fb0ebcafe4be7c87c6fcef483281f30788/docs/index.html" target="_blank">f98f61f</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-20
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/8e383cd7c0eafd626b18c4059861342d9d6bfdb1/analysis/index.Rmd" target="_blank">8e383cd</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-20
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/index.Rmd”))
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/58b3ea46fa26104117a808989e2d14a9bc899f2d/docs/index.html" target="_blank">58b3ea4</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/58b3ea46fa26104117a808989e2d14a9bc899f2d/docs/index.html" target="_blank">58b3ea4</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-19
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/eb264b175eab489dc4f703e4e846ac61cc30b924/analysis/index.Rmd" target="_blank">eb264b1</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-19
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/36a6312262223d1418cb2247125ce9332d39b701/docs/index.html" target="_blank">36a6312</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/36a6312262223d1418cb2247125ce9332d39b701/docs/index.html" target="_blank">36a6312</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-19
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/a9f8cc678d25b5ce3e0cbbc0f195eb39809b0bfa/analysis/index.Rmd" target="_blank">a9f8cc6</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-19
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/c420802434b231593bcfeae3f6b10482ca50f108/docs/index.html" target="_blank">c420802</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/c420802434b231593bcfeae3f6b10482ca50f108/docs/index.html" target="_blank">c420802</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-17
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/38942eb81dd60bd3d1b10afd2dabc4aad661df0b/analysis/index.Rmd" target="_blank">38942eb</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-17
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/e2e1286424015e8cbed280a8548f5e9b0d6a723b/docs/index.html" target="_blank">e2e1286</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/e2e1286424015e8cbed280a8548f5e9b0d6a723b/docs/index.html" target="_blank">e2e1286</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-16
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/55f42cad6e56835471c8988e99ce73af56dedb8b/analysis/index.Rmd" target="_blank">55f42ca</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-16
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/de8f82306cc8bec7a369010bc572bc2e794b9544/docs/index.html" target="_blank">de8f823</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/de8f82306cc8bec7a369010bc572bc2e794b9544/docs/index.html" target="_blank">de8f823</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-16
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/f5379fab679055aa1fe5195856876bce376841e0/analysis/index.Rmd" target="_blank">f5379fa</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-16
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(“analysis/index.Rmd”)
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/7db12a1efed12474ff15a3cf6c111dbf946d7107/docs/index.html" target="_blank">7db12a1</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/7db12a1efed12474ff15a3cf6c111dbf946d7107/docs/index.html" target="_blank">7db12a1</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-16
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/873da40adfea91a43fd5eaa922c03ad24ab2d77e/docs/index.html" target="_blank">873da40</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/873da40adfea91a43fd5eaa922c03ad24ab2d77e/docs/index.html" target="_blank">873da40</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-16
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/58e136aec27b1c1414626a3820ac4685c2252dc6/docs/index.html" target="_blank">58e136a</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/58e136aec27b1c1414626a3820ac4685c2252dc6/docs/index.html" target="_blank">58e136a</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-15
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/82c7cdd1d6fe660851f65975e7c1fff62ec60737/analysis/index.Rmd" target="_blank">82c7cdd</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-15
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/index.Rmd”, “analysis/about.Rmd”))
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 html
 </td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/willwerscheid/FLASHvestigations/76eacb75d7f6a19857f7adfe769a3fd76643e3bb/docs/index.html" target="_blank">76eacb7</a>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/76eacb75d7f6a19857f7adfe769a3fd76643e3bb/docs/index.html" target="_blank">76eacb7</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-15
 </td>
-<td style="text-align:left;">
+<td>
 Build site.
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/f6928cc38fc84fe9d0d5ddcf11d954fba36c6910/analysis/index.Rmd" target="_blank">f6928cc</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-15
 </td>
-<td style="text-align:left;">
+<td>
 wflow_publish(c(“analysis/index.Rmd”, “analysis/about.Rmd”))
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/56d7ded8c6138ce9a71293c5e31a2363fa6f0c75/analysis/index.Rmd" target="_blank">56d7ded</a>
 </td>
-<td style="text-align:left;">
+<td>
 Jason Willwerscheid
 </td>
-<td style="text-align:left;">
+<td>
 2018-07-14
 </td>
-<td style="text-align:left;">
+<td>
 Start workflowr project.
 </td>
 </tr>
 </tbody>
 </table>
-</ul>
-<p></details></p>
-<hr />
+</div>
+<hr>
+</div>
+</div>
+</div>
 <div id="featured" class="section level2">
 <h2>Featured</h2>
 <p><a href="flashier_features.html">Note 5.</a> New features included in the <code>flashier</code> implementation of EBMF.</p>
 <p><a href="flashier_bench.html">Investigation 21.</a> Benchmarking <code>flashier</code>.</p>
+<p><a href="lowrank.html">Investigation 27.</a> Using low-rank approximations to the data as input to <code>flashier</code>.</p>
 </div>
 <div id="in-progress" class="section level2">
 <h2>In Progress</h2>
@@ -2202,7 +2287,7 @@ Start workflowr project.
 <ul>
 <li><p><a href="count_shrinkage.html">Investigation 24.</a> I propose a new approach to factorizing count data that uses adaptive shrinkage to estimate the rate matrix.</p></li>
 <li><p><a href="count_preproc_r1.html">Investigation 25.</a> I compare three different data transformations, three approaches to handling the heteroskedacity of the <code>log1p</code> transformation, and two approaches to dealing with row- and column-specific scaling.</p></li>
-<li><p><a href="trachea3.html">Investigation 26.</a> I compare FLASH fits of the “droplet” dataset in Montoro et al. using three different data transformations.</p></li>
+<li><p><a href="trachea3.html">Investigation 26.</a> I compare FLASH fits of the “droplet” dataset in Montoro et al. using three different data transformations.</p></li>
 </ul>
 </div>
 <div id="still-relevant" class="section level2">
@@ -2244,6 +2329,7 @@ Start workflowr project.
 <p><a href="matrix_ops.html">Note 4.</a> An early set of notes that identified key ways to reduce the memory footprint of <code>flashr</code>. The good ideas were implemented in <code>flashier</code>. Not all of the ideas were good.</p>
 </div>
 
+
 <!-- Adjust MathJax settings so that all math formulae are shown using
 TeX fonts only; see
 http://docs.mathjax.org/en/latest/configuration.html.  This will make
@@ -2255,14 +2341,6 @@ footer is added to webpages before the MathJax javascript. -->
     "HTML-CSS": { availableFonts: ["TeX"] }
   });
 </script>
-
-<hr>
-<p>
-  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
-  analysis was created with
-  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
-</p>
-<hr>
 
 
 
