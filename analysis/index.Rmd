@@ -12,6 +12,7 @@ output:
 
 [Investigation 21.](flashier_bench.html) Benchmarking `flashier`.
 
+[Investigation 27.](lowrank.html) Using low-rank approximations to the data as input to `flashier`.
 
 ## In Progress
 
