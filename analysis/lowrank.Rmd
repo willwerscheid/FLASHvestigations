@@ -31,13 +31,6 @@ plot.loadings <- function(LL, title) {
   print(plt)
 }
 
-# Converts rsvd output to a lowrank object for input to flashier.
-svd.to.lr <- function(svd) {
-  lr <- list(t(t(svd$u) * svd$d), svd$v)
-  class(lr) <- "lowrank"
-  return(lr)
-}
-
 # Calculates the variance that remains unexplained by a partial SVD.
 calc.unexplained.var <- function(Y, svd) {
   return((sum(Y^2) - sum(svd$d^2)) / prod(dim(Y)))
@@ -58,8 +51,7 @@ If I use a low-rank representation of the data, `flashier` will add factors. Thi
 
 ```{r noise.lr}
 noise.svd50 <- rsvd::rsvd(noise, k = 50)
-noise.lr50 <- svd.to.lr(noise.svd50)
-noise.fl.lr <- flashier(noise.lr50, greedy.Kmax = 5)
+noise.fl.lr <- flashier(noise.svd50, greedy.Kmax = 5)
 ```
 
 I can correct for this by adding some variance back in, so that the sum of squares of the low-rank representation $LDF$ (with $D = \text{diag}(d_1, \ldots, d_K)$) plus the expected sum of squares from the added variance is equal to the sum of squares of the original data object $Y$:
@@ -67,7 +59,7 @@ $$ \sigma^2 = \frac{\sum_{i, j} Y_{ij}^2 - \sum_k d_k^2}{np} $$
 
 ```{r noise.addvar}
 S <- sqrt(calc.unexplained.var(noise, noise.svd50))
-noise.fl.lr.addvar <- flashier(noise.lr50, S = S)
+noise.fl.lr.addvar <- flashier(noise.svd50, S = S)
 ```
 
 ## Example 2: Factors with disjoint nonzero row loadings
@@ -88,8 +80,7 @@ Without adding variance, the low-rank representation of the data again produces 
 
 ```{r four.factor.lr}
 four.factor.svd50 <- rsvd::rsvd(four.factor, k = 50)
-four.factor.lr50 <- svd.to.lr(four.factor.svd50)
-four.factor.fl.lr <- flashier(four.factor.lr50, greedy.Kmax = 10)
+four.factor.fl.lr <- flashier(four.factor.svd50, greedy.Kmax = 10)
 ggplot(data.frame(factor = 1:10, log10.pve = four.factor.fl.lr$pve),
        aes(x = factor, y = log10.pve)) + geom_point() +
   labs(x = "Factor", y = "PVE") + scale_y_log10()
@@ -99,7 +90,7 @@ When I add the unexplained variance back in, I get the correct factors, but they
 
 ```{r four.factor.addvar}
 S <- sqrt(calc.unexplained.var(four.factor, four.factor.svd50))
-four.factor.fl.lr.addvar <- flashier(four.factor.lr50, S = S)
+four.factor.fl.lr.addvar <- flashier(four.factor.svd50, S = S)
 plot.loadings(four.factor.fl.lr.addvar$loadings[[1]], "Low-rank data")
 ```
 
@@ -130,16 +121,16 @@ The factors obtained using a low-rank representation of the data are slightly no
 
 ```{r overlap.lr}
 overlap.svd50 <- rsvd::rsvd(overlap, k = 50)
-overlap.lr <- svd.to.lr(overlap.svd50)
 S <- sqrt(calc.unexplained.var(overlap, overlap.svd50))
-overlap.lr.fl <- flashier(overlap.lr, S = S)
+overlap.lr.fl <- flashier(overlap.svd50, S = S)
 plot.loadings(overlap.lr.fl$loadings[[1]], "Low-rank data")
 ```
 
 Backfitting helps correct some of the bias in favor of orthogonality, but doesn't quite fix the problem.
 
 ```{r overlap.bf}
-overlap.bf <- flashier(flash.init = overlap.fl, backfit = "only")
+overlap.bf <- flashier(flash.init = overlap.fl, backfit = "only",
+                       backfit.maxiter = 500)
 plot.loadings(overlap.bf$loadings[[1]], "Full data (backfit)")
 round(crossprod(overlap.bf$loadings[[1]]), 2)
 ```
