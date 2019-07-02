@@ -8,7 +8,7 @@ output:
 
 ## Featured
 
-[Note 5.](flashier_features.html) New features included in the `flashier` implementation of EBMF.
+[Note.](flashier_features.html) New features included in the `flashier` implementation of EBMF.
 
 [Investigation 21.](flashier_bench.html) Benchmarking `flashier`.
 
