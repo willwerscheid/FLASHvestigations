@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>", warning = FALSE)
 ```
 
 ## Introduction
@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>")
 I've implemented the ability to input a low-rank representation of data into `flashier` rather than the full data matrix. In principle, this should be much faster for very large data objects (though not for the examples considered here).
 
 ```{r fxns}
-devtools::load_all("~/Github/flashier")
+library(flashier)
 library(ggplot2)
 
 # Plots flashier row loadings.
@@ -73,7 +73,7 @@ LL[1:50, 1] <- LL[51:100, 2] <- LL[101:150, 3] <- LL[151:200, 4] <- sqrt(signal.
 FF <- matrix(rnorm(4 * n), ncol = 4)
 four.factor <- noise + LL %*% t(FF)
 four.factor.fl <- flashier(four.factor)
-plot.loadings(four.factor.fl$loadings[[1]], "Full data")
+plot.loadings(four.factor.fl$loadings.pm[[1]], "Full data")
 ```
 
 Without adding variance, the low-rank representation of the data again produces phantom factors. In this simple example, a scree plot easily picks them out.
@@ -91,7 +91,7 @@ When I add the unexplained variance back in, I get the correct factors, but they
 ```{r four.factor.addvar}
 S <- sqrt(calc.unexplained.var(four.factor, four.factor.svd50))
 four.factor.fl.lr.addvar <- flashier(four.factor.svd50, S = S)
-plot.loadings(four.factor.fl.lr.addvar$loadings[[1]], "Low-rank data")
+plot.loadings(four.factor.fl.lr.addvar$loadings.pm[[1]], "Low-rank data")
 ```
 
 Still, they look much better than the top four factors found using `rsvd`.
@@ -113,8 +113,8 @@ FF[sample(1:length(FF), length(FF) / 4)] <- 4 * rnorm(length(FF) / 4)
 
 overlap <- noise + LL %*% t(FF)
 overlap.fl <- flashier(overlap)
-plot.loadings(overlap.fl$loadings[[1]], "Full data")
-round(crossprod(overlap.fl$loadings[[1]]), 2)
+plot.loadings(overlap.fl$loadings.pm[[1]], "Full data")
+round(crossprod(overlap.fl$loadings.pm[[1]]), 2)
 ```
 
 The factors obtained using a low-rank representation of the data are slightly noisier, but very similar.
@@ -123,7 +123,7 @@ The factors obtained using a low-rank representation of the data are slightly no
 overlap.svd50 <- rsvd::rsvd(overlap, k = 50)
 S <- sqrt(calc.unexplained.var(overlap, overlap.svd50))
 overlap.lr.fl <- flashier(overlap.svd50, S = S)
-plot.loadings(overlap.lr.fl$loadings[[1]], "Low-rank data")
+plot.loadings(overlap.lr.fl$loadings.pm[[1]], "Low-rank data")
 ```
 
 Backfitting helps correct some of the bias in favor of orthogonality, but doesn't quite fix the problem.
@@ -131,12 +131,12 @@ Backfitting helps correct some of the bias in favor of orthogonality, but doesn'
 ```{r overlap.bf}
 overlap.bf <- flashier(flash.init = overlap.fl, backfit = "only",
                        backfit.maxiter = 500)
-plot.loadings(overlap.bf$loadings[[1]], "Full data (backfit)")
-round(crossprod(overlap.bf$loadings[[1]]), 2)
+plot.loadings(overlap.bf$loadings.pm[[1]], "Full data (backfit)")
+round(crossprod(overlap.bf$loadings.pm[[1]]), 2)
 ```
 
 ```{r overlap.lr.bf}
 overlap.lr.bf <- flashier(flash.init = overlap.lr.fl, backfit = "only",
                           backfit.maxiter = 500)
-plot.loadings(overlap.lr.bf$loadings[[1]], "Low-rank data (backfit)")
+plot.loadings(overlap.lr.bf$loadings.pm[[1]], "Low-rank data (backfit)")
 ```
