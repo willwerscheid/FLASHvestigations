@@ -1,0 +1,4 @@
+data.name <- "gtex"
+prior.family <- "normal.scale.mix"
+source("./bench_flashier.R")
+t.init; t.greedy; t.backfit
