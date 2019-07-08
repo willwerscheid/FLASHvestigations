@@ -538,10 +538,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree9cfd41c221695d6da9e6ed6c9bc78f1192d0e16etargetblank9cfd41ca"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/9cfd41c221695d6da9e6ed6c9bc78f1192d0e16e" target="_blank">9cfd41c</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree239862c96f1ca62288d91b920ff2da17f1c76f8etargetblank239862ca"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/239862c96f1ca62288d91b920ff2da17f1c76f8e" target="_blank">239862c</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree9cfd41c221695d6da9e6ed6c9bc78f1192d0e16etargetblank9cfd41ca" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree239862c96f1ca62288d91b920ff2da17f1c76f8etargetblank239862ca" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -601,6 +601,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/239862c96f1ca62288d91b920ff2da17f1c76f8e/analysis/parallel_v2.Rmd" target="_blank">239862c</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2019-07-08
+</td>
+<td>
+wflow_publish(c(“analysis/parallel_v2.Rmd”, “analysis/index.Rmd”))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/136ecb908c69610d0af440c0f56db7c363e32df5/docs/parallel_v2.html" target="_blank">136ecb9</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2019-07-08
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/9cfd41c221695d6da9e6ed6c9bc78f1192d0e16e/analysis/parallel_v2.Rmd" target="_blank">9cfd41c</a>
 </td>
 <td>
@@ -627,7 +661,7 @@ wflow_publish(“analysis/parallel_v2.Rmd”)
 </div>
 <div id="test-case" class="section level2">
 <h2>Test Case</h2>
-<p>For large problems, parallelization can provide a substantial speedup. As a test case, I greedily fit 50 factors to the droplet-based 3’ scRNA-seq dataset from Montoro et al. which I also used to benchmark <code>flashier</code>. (I used the same pre-processing steps, which are described <a href="flashier_bench.html#montoro_et_al_3’_scrna-seq_data">here</a>.) I backfit using both the default “dropout” method and the new implementation of the parallel approach. As shown below, parallel updates are able to attain the same ELBO as the “dropout” method in about 3-4 times fewer minutes. (While the parallel method stops earlier and thus has a lower final ELBO, the fit could be improved by lowering the convergence tolerance or doing an additional dropout backfit after the parallel backfit.)</p>
+<p>For large problems, parallelization can provide a substantial speedup. As a test case, I greedily fit 50 factors to the droplet-based 3’ scRNA-seq dataset from Montoro et al., which is, I think, on the smaller end of the scale of dataset that could benefit from parallel backfitting updates. The dataset, which I also used to benchmark <code>flashier</code>, is described <a href="flashier_bench.html#montoro_et_al_3’_scrna-seq_data">here</a>. I backfit using both the default “dropout” method and the new implementation of the parallel approach. As shown below, parallel updates are able to attain the same ELBO as the “dropout” method about 3-4 times more quickly. (While the parallel method stops earlier and thus has a lower final ELBO, the fit could be improved by lowering the convergence tolerance or doing an additional dropout backfit after the parallel backfit.)</p>
 <pre class="r"><code>library(ggplot2)
 
 timing &lt;- readRDS(&quot;./output/parallel_v2/timing.rds&quot;)
@@ -647,6 +681,43 @@ all.res$time &lt;- as.numeric(all.res$time)
 ggplot(all.res, aes(x = time, y = Obj, color = method)) + geom_line() +
   xlab(&quot;Elapsed time (min)&quot;) + ylab(&quot;ELBO&quot;)</code></pre>
 <p><img src="figure/parallel_v2.Rmd/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-1-1">
+Past versions of unnamed-chunk-1-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/136ecb908c69610d0af440c0f56db7c363e32df5/docs/figure/parallel_v2.Rmd/unnamed-chunk-1-1.png" target="_blank">136ecb9</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2019-07-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="limitations" class="section level2">
 <h2>Limitations</h2>
@@ -664,7 +735,12 @@ ggplot(all.res, aes(x = time, y = Obj, color = method)) + geom_line() +
 </div>
 <div id="fixed-factors" class="section level3">
 <h3>Fixed factors</h3>
-I haven’t implemented parallel updates for fixed factors, mainly because the handling is more complicated, but also because parallel updates can run into trouble when factor loadings are not approximately orthogonal. Consider, as an illustration, the case where loadings on two factors are identical. Then loadings updates will also be identical, and the updates to the expected residuals will be double what it would be if the factors were updated one at a time. This kind of situation can easily spiral out of control, as detailed in this <a href="parallel2.html">example</a>. <br> <br>
+<p>I haven’t implemented parallel updates for fixed factors, mainly because the handling is more complicated, but also because parallel updates can run into trouble when factor loadings are not approximately orthogonal. Consider, as an illustration, the case where loadings on two factors are identical. Then loadings updates will also be identical, and the updates to the expected residuals will be double what it would be if the factors were updated one at a time. This kind of situation can easily spiral out of control, as detailed in this <a href="parallel2.html">example</a>.</p>
+</div>
+</div>
+<div id="code" class="section level2">
+<h2>Code</h2>
+The code used in this analysis can be viewed <a href="https://github.com/willwerscheid/FLASHvestigations/blob/master/code/parallel_v2.R">here</a>. The <code>R</code> package versions used are those that appear in the session information below (“other attached packages”). <br> <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
 <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
@@ -687,23 +763,27 @@ I haven’t implemented parallel updates for fixed factors, mainly because the h
 #&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
 #&gt; 
 #&gt; other attached packages:
-#&gt; [1] ggplot2_3.2.0
+#&gt; [1] ggplot2_3.2.0  mixsqp_0.1-119 ashr_2.2-38    ebnm_0.1-24   
+#&gt; [5] flashier_0.1.6
 #&gt; 
 #&gt; loaded via a namespace (and not attached):
-#&gt;  [1] Rcpp_1.0.1        knitr_1.22        whisker_0.3-2    
-#&gt;  [4] magrittr_1.5      workflowr_1.2.0   tidyselect_0.2.5 
-#&gt;  [7] munsell_0.5.0     colorspace_1.4-1  R6_2.4.0         
-#&gt; [10] rlang_0.3.1       dplyr_0.8.0.1     stringr_1.4.0    
-#&gt; [13] tools_3.5.3       grid_3.5.3        data.table_1.12.2
-#&gt; [16] gtable_0.3.0      xfun_0.6          withr_2.1.2      
-#&gt; [19] git2r_0.25.2      htmltools_0.3.6   assertthat_0.2.1 
-#&gt; [22] yaml_2.2.0        lazyeval_0.2.2    rprojroot_1.3-2  
-#&gt; [25] digest_0.6.18     tibble_2.1.1      crayon_1.3.4     
-#&gt; [28] purrr_0.3.2       fs_1.2.7          glue_1.3.1       
-#&gt; [31] evaluate_0.13     rmarkdown_1.12    labeling_0.3     
-#&gt; [34] stringi_1.4.3     pillar_1.3.1      compiler_3.5.3   
-#&gt; [37] scales_1.0.0      backports_1.1.3   pkgconfig_2.0.2</code></pre>
-</div>
+#&gt;  [1] Rcpp_1.0.1        pillar_1.3.1      compiler_3.5.3   
+#&gt;  [4] git2r_0.25.2      workflowr_1.2.0   iterators_1.0.10 
+#&gt;  [7] tools_3.5.3       digest_0.6.18     tibble_2.1.1     
+#&gt; [10] evaluate_0.13     gtable_0.3.0      lattice_0.20-38  
+#&gt; [13] pkgconfig_2.0.2   rlang_0.3.1       Matrix_1.2-15    
+#&gt; [16] foreach_1.4.4     yaml_2.2.0        parallel_3.5.3   
+#&gt; [19] xfun_0.6          withr_2.1.2       dplyr_0.8.0.1    
+#&gt; [22] stringr_1.4.0     knitr_1.22        fs_1.2.7         
+#&gt; [25] tidyselect_0.2.5  rprojroot_1.3-2   grid_3.5.3       
+#&gt; [28] data.table_1.12.2 glue_1.3.1        R6_2.4.0         
+#&gt; [31] rmarkdown_1.12    purrr_0.3.2       magrittr_1.5     
+#&gt; [34] whisker_0.3-2     backports_1.1.3   scales_1.0.0     
+#&gt; [37] codetools_0.2-16  htmltools_0.3.6   MASS_7.3-51.1    
+#&gt; [40] assertthat_0.2.1  colorspace_1.4-1  labeling_0.3     
+#&gt; [43] stringi_1.4.3     lazyeval_0.2.2    doParallel_1.0.14
+#&gt; [46] pscl_1.5.2        munsell_0.5.0     truncnorm_1.0-8  
+#&gt; [49] SQUAREM_2017.10-1 crayon_1.3.4</code></pre>
 </div>
 </div>
 
