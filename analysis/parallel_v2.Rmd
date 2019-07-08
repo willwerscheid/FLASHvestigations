@@ -9,6 +9,10 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>", warning = FALSE)
+library(flashier)
+library(ebnm)
+library(ashr)
+library(mixsqp)
 ```
 
 
@@ -21,7 +25,7 @@ Each worker is responsible for $\frac{K}{\text{n.cores}}$ calls to `ebnm` (where
 
 ## Test Case
 
-For large problems, parallelization can provide a substantial speedup. As a test case, I greedily fit 50 factors to the droplet-based 3' scRNA-seq dataset from Montoro et al. which I also used to benchmark `flashier`. (I used the same pre-processing steps, which are described [here](flashier_bench.html#montoro_et_al_3’_scrna-seq_data).) I backfit using both the default "dropout" method and the new implementation of the parallel approach. As shown below, parallel updates are able to attain the same ELBO as the "dropout" method in about 3-4 times fewer minutes. (While the parallel method stops earlier and thus has a lower final ELBO, the fit could be improved by lowering the convergence tolerance or doing an additional dropout backfit after the parallel backfit.)
+For large problems, parallelization can provide a substantial speedup. As a test case, I greedily fit 50 factors to the droplet-based 3' scRNA-seq dataset from Montoro et al., which is, I think, on the smaller end of the scale of dataset that could benefit from parallel backfitting updates. The dataset, which I also used to benchmark `flashier`, is described [here](flashier_bench.html#montoro_et_al_3’_scrna-seq_data). I backfit using both the default "dropout" method and the new implementation of the parallel approach. As shown below, parallel updates are able to attain the same ELBO as the "dropout" method about 3-4 times more quickly. (While the parallel method stops earlier and thus has a lower final ELBO, the fit could be improved by lowering the convergence tolerance or doing an additional dropout backfit after the parallel backfit.)
 
 ```{r}
 library(ggplot2)
@@ -66,3 +70,7 @@ For row-wise or column-wise variance structures, however, the first term is much
 ### Fixed factors
 
 I haven't implemented parallel updates for fixed factors, mainly because the handling is more complicated, but also because parallel updates can run into trouble when factor loadings are not approximately orthogonal. Consider, as an illustration, the case where loadings on two factors are identical. Then loadings updates will also be identical, and the updates to the  expected residuals will be double what it would be if the factors were updated one at a time. This kind of situation can easily spiral out of control, as detailed in this [example](parallel2.html). 
+
+## Code
+
+The code used in this analysis can be viewed [here](https://github.com/willwerscheid/FLASHvestigations/blob/master/code/parallel_v2.R). The `R` package versions used are those that appear in the session information below ("other attached packages").

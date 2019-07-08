@@ -14,13 +14,10 @@ output:
 
 [Investigation 27.](lowrank.html) Using low-rank approximations to the data as input to `flashier`.
 
+[Investigation 28.](parallel_v2.html) For very large problems, performing backfitting updates in parallel can provide a substantial speed-up.
+
+
 ## In Progress
-
-Investigations 8 and 9 implement parallel backfitting updates.
-
-* [Investigation 8.](parallel.html) Parallelizing the backfitting algorithm shows promise.
-
-* [Investigation 9.](parallel2.html) An additional trick is needed to parallelize the backfitting updates performed in this [MASH v FLASH GTEx analysis](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHgtex3.html).
 
 [Investigation 10.](squarem.html) SQUAREM does poorly on FLASH backfits. DAAREM (a more recent algorithm by one of the authors of SQUAREM) does better, but offers smaller performance gains than parallelization.
 
@@ -60,6 +57,7 @@ Investigations 24 and 25 explore approaches to count data.
 
 * [Investigation 26.](trachea3.html) I compare FLASH fits of the "droplet" dataset in Montoro et al. using three different data transformations. 
 
+
 ## Still Relevant
 
 Notes 1 and 2 and Investigation 4 describe a way to compute the FLASH objective directly (rather than using the indirect method implemented in `flashr`).
@@ -81,19 +79,25 @@ The bug causing the problem described in Investigations 1-3 was fixed in version
 
 * [Investigation 3.](objective3.html) The objective can continue to get worse as loadings are repeatedly updated. Nonetheless, convergence takes place (from above!).
 
-Investigations 6 and 7 deal with warmstarts, which were implemented in version 0.5-14 of `flashr`.
-
-* [Investigation 6.](warmstart.html) Poor `optim` results can produce large decreases in the objective function. We should use warmstarts when `ebnm_fn = ebnm_pn`.
-
-* [Investigation 7.](warmstart2.html) The advantages of warmstarts are not nearly as compelling when `ebnm_fn = ebnm_ash`.
-
-Since the newest versions of `flashr` use a home-grown initialization function, Investigations 5a-b and 13 are no longer relevant.
+Since `flashier` uses a home-grown initialization function, Investigations 5a-b and 13 are no longer relevant.
 
 * [Investigation 5a.](init_fn.html) An argument for changing the default `init_fn` to `udv_si_svd` when there is missing data and `udv_svd` otherwise. Based on an analysis of GTEx data.
 
 * [Investigation 5b.](init_fn2.html) More evidence supporting the recommendations in Investigation 5a. 
 
 * [Investigation 13.](init_fn3.html) A counterargument. Results in Investigations 5a-b probably depend on the fact that $n$ is small ($n = 44$). For large $n$, setting `init_fn` to `udv_si` is best.
+
+Investigations 6 and 7 dealt with warmstarts, which were implemented in version 0.5-14 of `flashr`.
+
+* [Investigation 6.](warmstart.html) Poor `optim` results can produce large decreases in the objective function. We should use warmstarts when `ebnm_fn = ebnm_pn`.
+
+* [Investigation 7.](warmstart2.html) The advantages of warmstarts are not nearly as compelling when `ebnm_fn = ebnm_ash`.
+
+Investigations 8 and 9 were concerned with parallel backfitting updates, which are better covered by a more recent [investigation](parallel_v2.html).
+
+* [Investigation 8.](parallel.html) Parallelizing the backfitting algorithm shows promise.
+
+* [Investigation 9.](parallel2.html) An additional trick is needed to parallelize the backfitting updates performed in this [MASH v FLASH GTEx analysis](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHgtex3.html).
 
 The changes tested here were implemented in version 0.6-2 of `flashr`.
 
@@ -104,4 +108,3 @@ And the changes tested here were implemented in version 2.2-29 of `ashr`.
 * [Investigation 23.](truncnorm.html) I benchmark the rewritten `my_etruncnorm` and `my_vtruncnorm` functions in package `ashr` against their counterparts in package `truncnorm`.
 
 [Note 4.](matrix_ops.html) An early set of notes that identified key ways to reduce the memory footprint of `flashr`. The good ideas were implemented in `flashier`. Not all of the ideas were good.
-
