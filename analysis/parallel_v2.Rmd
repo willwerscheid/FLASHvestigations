@@ -1,0 +1,68 @@
+---
+title: "Parallel backfits"
+author: "Jason Willwerscheid"
+date: "7/6/2019"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>", warning = FALSE)
+```
+
+
+## Introduction
+
+I've rewritten `flashier`'s parallel backfitting algorithm. As before, factors can be backfit in parallel by setting parameter `backfit.order = "parallel"`. The number of cores and type of cluster (socket or fork) can be set using global options (e.g., `options(cl.type = "FORK", cl.cores = parallel::detectCores())`). 
+
+Each worker is responsible for $\frac{K}{\text{n.cores}}$ calls to `ebnm` (where $K$ is the total number of factors), so we can only expect performance benefits from parallelization when each call to `ebnm` is fairly computationally intensive and when $K$ is somewhat large. Further, since parallel updates are not guaranteed to produce a monotonic increase in the objective function, sequential updates should be preferred for all but the largest of problems.
+
+
+## Test Case
+
+For large problems, parallelization can provide a substantial speedup. As a test case, I greedily fit 50 factors to the droplet-based 3' scRNA-seq dataset from Montoro et al. which I also used to benchmark `flashier`. (I used the same pre-processing steps, which are described [here](flashier_bench.html#montoro_et_al_3’_scrna-seq_data).) I backfit using both the default "dropout" method and the new implementation of the parallel approach. As shown below, parallel updates are able to attain the same ELBO as the "dropout" method in about 3-4 times fewer minutes. (While the parallel method stops earlier and thus has a lower final ELBO, the fit could be improved by lowering the convergence tolerance or doing an additional dropout backfit after the parallel backfit.)
+
+```{r}
+library(ggplot2)
+
+timing <- readRDS("./output/parallel_v2/timing.rds")
+
+dropout.res <- data.table::fread("./output/parallel_v2/dropout_res.txt")
+dropout.res$method <- "dropout"
+dropout.res$time <- timing$dropout * 1:nrow(dropout.res) / nrow(dropout.res)
+tmp <- aggregate(Max.chg ~ Iter, dropout.res, max)
+
+parallel.res <- data.table::fread("./output/parallel_v2/parallel_res.txt")
+parallel.res$method <- "parallel"
+parallel.res$time <- timing$parallel * 1:nrow(parallel.res) / nrow(parallel.res)
+
+all.res <- rbind(dropout.res, parallel.res)
+all.res$time <- as.numeric(all.res$time)
+
+ggplot(all.res, aes(x = time, y = Obj, color = method)) + geom_line() +
+  xlab("Elapsed time (min)") + ylab("ELBO")
+```
+
+## Limitations
+
+### Variance Structure
+
+For now, I've restricted parallel backfits to the case where residual variance is assumed to be constant across all entries (`var.type = 0`). Whereas sequential backfitting can take advantage of the fact that the update to expected residuals is rank-one, parallel backfits must re-estimate the residual variance from scratch at each iteration. Recall that the most useful variance structures (row-wise, column-wise, and constant) can be estimated as simple functions of expected squared residuals (row-wise means, column-wise means, and the overall mean). Recall also that `flashier` doesn't usually store a full matrix of residuals $R$, so that the expected squared residual $R_{ij}^2$ must be calculated as:
+
+$$ \mathbb{E} R_{ij}^2 = \mathbb{E} (Y_{ij} - \sum_k L_{ik} F_{jk})^2 
+= Y_{ij}^2 - 2 Y_{ij} \sum_k \mathbb{E} L_{ik} \mathbb{E} F_{jk} 
++ \sum_{k \ne \ell} \mathbb{E} L_{ik} \mathbb{E} F_{jk} \mathbb{E} L_{i\ell} \mathbb{E} F_{j\ell} + \sum_k \mathbb{E} L_{ik}^2 \mathbb{E} F_{jk}^2 $$
+
+When residual variance is constant across all entries, we only need $\sum_{i, j} R_{ij}^2$, and each of the above terms can be efficiently summed over $i$ and $j$. The trick, of course, is to move the summation over $i$ and $j$ to the inside (and to pre-compute $\sum_{i, j} Y_{ij}^2$). For example,
+
+$$ \sum_{i, j} \sum_{k \ne \ell} \mathbb{E} L_{ik} \mathbb{E} F_{jk} \mathbb{E} L_{i\ell} \mathbb{E} F_{j\ell} = \sum_{k, \ell} \sum_i \mathbb{E} L_{ik} \mathbb{E} L_{i\ell} \sum_j \mathbb{E} F_{jk} \mathbb{E} F_{j\ell} - \sum_k 
+\sum_i (\mathbb{E} L_{ik})^2 \sum_j (\mathbb{E} F_{jk})^2 $$
+
+The first term on the RHS can be computed as `sum(crossprod(EL) * crossprod(EF))`; the second can be computed as `sum(colSums(EL^2) * colSums(EF^2))`.
+
+For row-wise or column-wise variance structures, however, the first term is much more difficult to compute. Instead of simply taking crossproducts, one must form a $n \times k^2$ (or $p \times k^2$) matrix, so that unless $k^2 \ll n$ (or $k^2 \ll p$), one would not be much worse off by simply storing the matrix of expected residuals. But we only stand to benefit from parallelization when we are doing large backfits on large data matrices; that is, when $k$ is not small and when storing a matrix of residuals is expensive.
+
+### Fixed factors
+
+I haven't implemented parallel updates for fixed factors, mainly because the handling is more complicated, but also because parallel updates can run into trouble when factor loadings are not approximately orthogonal. Consider, as an illustration, the case where loadings on two factors are identical. Then loadings updates will also be identical, and the updates to the  expected residuals will be double what it would be if the factors were updated one at a time. This kind of situation can easily spiral out of control, as detailed in this [example](parallel2.html). 
