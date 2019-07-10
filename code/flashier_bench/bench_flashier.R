@@ -20,16 +20,15 @@ t.init <- system.time({
                            prior.family = prior,
                            greedy.tol = tol,
                            greedy.maxiter = 1,
-                           backfit = "none",
                            final.nullchk = FALSE,
                            verbose.lvl = 3,
                            output.lvl = 0)
 })
 
 t.greedy <- system.time({
-  fl <- flashier::flashier(flash.init = fl,
+  fl <- flashier::flashier(init = fl,
                            greedy.tol = tol,
-                           backfit = "only",
+                           fit = "backfit.only",
                            warmstart.backfits = FALSE,
                            final.nullchk = FALSE,
                            verbose.lvl = 3,
@@ -38,20 +37,19 @@ t.greedy <- system.time({
 
 for (k in 2:nfactors) {
   t.init <- t.init + system.time({
-    fl <- flashier::flashier(flash.init = fl,
+    fl <- flashier::flashier(init = fl,
                              greedy.Kmax = 1,
                              greedy.tol = tol,
                              greedy.maxiter = 1,
-                             backfit = "none",
                              final.nullchk = FALSE,
                              verbose.lvl = 3,
                              output.lvl = 0)
   })
 
   t.greedy <- t.greedy + system.time({
-    fl <- flashier::flashier(flash.init = fl,
+    fl <- flashier::flashier(init = fl,
                              greedy.tol = tol,
-                             backfit = "only",
+                             fit = "backfit.only",
                              backfit.kset = k,
                              warmstart.backfits = FALSE,
                              final.nullchk = FALSE,
@@ -61,9 +59,9 @@ for (k in 2:nfactors) {
 }
 
 t.backfit <- system.time({
-  fl <- flashier::flashier(flash.init = fl,
+  fl <- flashier::flashier(init = fl,
                            greedy.tol = tol,
-                           backfit = "only",
+                           fit = "backfit.only",
                            backfit.maxiter = 500,
                            final.nullchk = FALSE,
                            verbose.lvl = 3,
