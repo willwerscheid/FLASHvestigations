@@ -18,35 +18,59 @@ library(mixsqp)
 
 ## Introduction
 
-I've rewritten `flashier`'s parallel backfitting algorithm. As before, factors can be backfit in parallel by setting parameter `backfit.order = "parallel"`. The number of cores and type of cluster (socket or fork) can be set using global options (e.g., `options(cl.type = "FORK", cl.cores = parallel::detectCores())`). 
+I've rewritten `flashier`'s parallel backfitting algorithm. As before, factors can be backfit in parallel by setting parameter `backfit.order = "parallel"`. The number of cores and type of cluster (socket or fork) can be set using global options (here, I use `options(cl.type = "FORK", cl.cores = parallel::detectCores())`). 
 
-Each worker is responsible for $\frac{K}{\text{n.cores}}$ calls to `ebnm` (where $K$ is the total number of factors), so we can only expect performance benefits from parallelization when each call to `ebnm` is fairly computationally intensive and when $K$ is somewhat large. Further, since parallel updates are not guaranteed to produce a monotonic increase in the objective function, sequential updates should be preferred for all but the largest of problems.
+Each worker is responsible for $\frac{K}{\text{n.cores}}$ calls to `ebnm` (where $K$ is the total number of factors), so we can only really expect performance benefits from parallelization when each call to `ebnm` is fairly computationally intensive and when $K$ is somewhat large. Further, since parallel updates are not guaranteed to produce a monotonic increase in the objective function, serial updates should generally be preferred when the dataset is not large.
 
 
-## Test Case
+## Test Cases
 
-For large problems, parallelization can provide a substantial speedup. As a test case, I greedily fit 50 factors to the droplet-based 3' scRNA-seq dataset from Montoro et al., which is, I think, on the smaller end of the scale of dataset that could benefit from parallel backfitting updates. The dataset, which I also used to benchmark `flashier`, is described [here](flashier_bench.html#montoro_et_al_3’_scrna-seq_data). I backfit using both the default "dropout" method and the new implementation of the parallel approach. As shown below, parallel updates are able to attain the same ELBO as the "dropout" method about 3-4 times more quickly. (While the parallel method stops earlier and thus has a lower final ELBO, the fit could be improved by lowering the convergence tolerance or doing an additional dropout backfit after the parallel backfit.)
+For large problems, parallelization can provide a noticeable speedup. As a first test case, I greedily fit 50 factors to the droplet-based 3' scRNA-seq dataset from Montoro et al., which is, I think, on the smaller end of the scale of dataset that could benefit from parallel backfitting updates. The dataset, which I also used to benchmark `flashier`, is described [here](flashier_bench.html#montoro_et_al_3’_scrna-seq_data). I backfit using both the default serial method and the new implementation of the parallel approach. As shown below, parallel updates are able to attain the same ELBO as the serial method about three times more quickly. 
 
-```{r}
+```{r droplet}
 library(ggplot2)
 
-timing <- readRDS("./output/parallel_v2/timing.rds")
+timing <- readRDS("./output/parallel_v2/sp_trachea_timing.rds")
 
-dropout.res <- data.table::fread("./output/parallel_v2/dropout_res.txt")
-dropout.res$method <- "dropout"
-dropout.res$time <- timing$dropout * 1:nrow(dropout.res) / nrow(dropout.res)
-tmp <- aggregate(Max.chg ~ Iter, dropout.res, max)
+serial.res <- data.table::fread("./output/parallel_v2/sp_trachea_serial.txt")
+serial.res$method <- "serial"
+serial.res$time <- timing$serial * 1:nrow(serial.res) / nrow(serial.res)
 
-parallel.res <- data.table::fread("./output/parallel_v2/parallel_res.txt")
+parallel.res <- data.table::fread("./output/parallel_v2/sp_trachea_parallel.txt")
 parallel.res$method <- "parallel"
 parallel.res$time <- timing$parallel * 1:nrow(parallel.res) / nrow(parallel.res)
 
-all.res <- rbind(dropout.res, parallel.res)
+all.res <- rbind(serial.res, parallel.res)
 all.res$time <- as.numeric(all.res$time)
 
 ggplot(all.res, aes(x = time, y = Obj, color = method)) + geom_line() +
-  xlab("Elapsed time (min)") + ylab("ELBO")
+  labs(x = "Elapsed time (min)", y = "ELBO", title = "Montoro et al. droplet-based dataset")
 ```
+
+Next, I repeat the experiment on the larger PulseSeq dataset from Montoro et al. (described [here](flashier_bench.html#montoro_et_al_full-length_scrna-seq_data)). I get bus errors when I try to use all available cores (using `parallel::detectCores()`), so I lower `cl.cores` to 16. (For both of these datasets, however, there is not much additional speedup after the first 8 cores.) Here, parallel updates are only about twice as fast as serial ones.
+
+Do note, however, that the default backfitting method already uses some tricks to speed up backfits. In particular, it stops updating any given factor when that factor appears to have converged. For example, factor 42 only gets updated 10 times, while factor 6 must be updated 249 times before it is considered to have converged. As a result, any changes that occur in the final 239 backfitting iterations will not be reflected in the final form of factor 42. In contrast, parallel backfits update every factor every time, so with the tolerance parameter set appropriately, parallel backfits will get one close to a local maximum much more reliably. It's possible to get the same reliability with serial backfits by setting `backfit.order = "sequential"`, but this will be much slower than the default method.
+
+```{r pulseseq}
+library(ggplot2)
+
+timing <- readRDS("./output/parallel_v2/pulseseq_timing.rds")
+
+serial.res <- data.table::fread("./output/parallel_v2/pulseseq_serial.txt")
+serial.res$method <- "serial"
+serial.res$time <- timing$serial * 1:nrow(serial.res) / nrow(serial.res)
+
+parallel.res <- data.table::fread("./output/parallel_v2/pulseseq_parallel.txt")
+parallel.res$method <- "parallel"
+parallel.res$time <- timing$parallel * 1:nrow(parallel.res) / nrow(parallel.res)
+
+all.res <- rbind(serial.res, parallel.res)
+all.res$time <- as.numeric(all.res$time)
+
+ggplot(all.res, aes(x = time, y = Obj, color = method)) + geom_line() +
+  labs(x = "Elapsed time (hr)", y = "ELBO", title = "Montoro et al. PulseSeq dataset")
+```
+
 
 ## Limitations
 
