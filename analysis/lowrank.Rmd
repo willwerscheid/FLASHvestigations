@@ -129,14 +129,14 @@ plot.loadings(overlap.lr.fl$loadings.pm[[1]], "Low-rank data")
 Backfitting helps correct some of the bias in favor of orthogonality, but doesn't quite fix the problem.
 
 ```{r overlap.bf}
-overlap.bf <- flashier(flash.init = overlap.fl, backfit = "only",
+overlap.bf <- flashier(init = overlap.fl, fit = "backfit.only",
                        backfit.maxiter = 500)
 plot.loadings(overlap.bf$loadings.pm[[1]], "Full data (backfit)")
 round(crossprod(overlap.bf$loadings.pm[[1]]), 2)
 ```
 
 ```{r overlap.lr.bf}
-overlap.lr.bf <- flashier(flash.init = overlap.lr.fl, backfit = "only",
+overlap.lr.bf <- flashier(init = overlap.lr.fl, fit = "backfit.only",
                           backfit.maxiter = 500)
 plot.loadings(overlap.lr.bf$loadings.pm[[1]], "Low-rank data (backfit)")
 ```
