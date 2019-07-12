@@ -1,0 +1,31 @@
+---
+title: "Notes on SQUAREM"
+author: "Jason Willwerscheid"
+date: "7/12/2019"
+output:
+  workflowr::wflow_html
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+SQUAREM and DAAREM require two functions, both of which operate on the same set of parameters: one (the "fixed-point" function) updates the parameters according to (for example) an EM algorithm; the other calculates the value of the objective function for a given set of parameter values.
+
+In our EBMF implementations, these steps are not distinguishable. Part of the objective (the KL divergence between prior and posteriors) falls out from the parameter updates, and it's not currently possible to calculate the objective for arbitrarily proposed parameter values.
+
+To use acceleration, we'd need to calculate the KL divergence directly. We could do this for point-normal prior families provided that we updated `ebnm` to be able to return the full posteriors (not just the first and second moments): see [here](obj_notes.html). The calculations for `ash` prior families are probably too complicated.
+
+So it might be possible to accelerate backfits when prior families are point-normal. The parameter set would be the priors on loadings, the full posterior for each loading, and the residual variance. The fixed-point function would do a single backfit iteration (ideally in parallel, but then monotonicity is no longer guaranteed). This would essentially have to be a complete iteration as it is implemented in `flashier`. Only the final step (calculating the objective) can be skipped, but we basically get the objective for free after we've updated everything else. 
+
+Finally, the objective function would calculate KL divergences directly and then also calculate expected squared residuals. The last step is almost prohibitively expensive when the residual variance is not assumed to be constant across all entries (the reasons are the same as those described [here](parallel_v2.html#variance_structure)). 
+
+So we are restricted to the case where prior families are point-normal and `var.type = 0`, and even in this case we are forced to repeat the expensive step of calculating expected squared residuals when doing a fixed-point (EM) iteration. Any benefits provided by acceleration would need to outweigh this cost. 
+
+To be more precise, each DAAREM iteration does a fixed-point iteration, calculates the objective, proposes a new set of parameter values by accelerating, and calculates the objective for these new values. Assuming the worst -- that the cost of the fixed-point iteration is dominated by calculating expected squared residuals -- one DAAREM iteration would have the same cost as three `flashier` iterations.
+
+So acceleration would need to cut the total number of iterations needed by up to a factor of three. It's possible that this would occur -- the DAAREM paper claims that acceleration can reduce the number of iterations by two or even three orders of magnitude. 
+
+Do note, however, that more than $3k(n + p)$ parameters need to be estimated to fit an EBMF model with point-normal prior families, and backfits only really become slow when both $n$ and $p$ are at least 10,000 and $k$ is greater than, say, 10. In contrast, the largest problem tested by the authors of the DAAREM paper has less than 1000 parameters. Further, when the number of EM iterations required for convergence (without acceleration) is less than 1000, as it is for EBMF in my experience, the speedups obtained by DAAREM are much less impressive (on the order of 10 or 20). 
+
+So it's far from clear that acceleration would provide a significant speedup, and given the limitations on the kinds of situations in which it could be applied, I don't think it's worth the hassle of implementing it.
