@@ -3,12 +3,12 @@ title: "Home"
 site: workflowr::wflow_site
 output:
   workflowr::wflow_html:
-    toc: false
+    toc: true
 ---
 
 ## Featured
 
-[Note.](flashier_features.html) New features included in the `flashier` implementation of EBMF.
+[New features](flashier_features.html) included in the `flashier` implementation of EBMF.
 
 [Investigation 21.](flashier_bench.html) Benchmarking `flashier`.
 
@@ -18,10 +18,6 @@ output:
 
 
 ## In Progress
-
-[Investigation 10.](squarem.html) SQUAREM does poorly on FLASH backfits. DAAREM (a more recent algorithm by one of the authors of SQUAREM) does better, but offers smaller performance gains than parallelization.
-
-[Investigation 11.](random.html) The order in which factor/loading pairs are updated (during backfitting) makes some difference, but not much.
 
 [Investigation 12.](arbitraryV.html) To fit a FLASH model with an arbitrary error covariance matrix, I follow up on a [suggestion](https://github.com/stephenslab/flashr/issues/17) by Matthew Stephens.
 
@@ -60,13 +56,20 @@ Investigations 24 and 25 explore approaches to count data.
 
 ## Still Relevant
 
-Notes 1 and 2 and Investigation 4 describe a way to compute the FLASH objective directly (rather than using the indirect method implemented in `flashr`).
+Investigation 4 and accompanying notes describe a way to compute the FLASH objective directly (rather than using the indirect method implemented in `flashr`).
 
-* [Note 1.](obj_notes.html) Notes on computing the FLASH objective function. I derive an explicit expression for the KL divergence between prior and posterior.
+* [Notes](obj_notes.html) on computing the FLASH objective function. I derive an explicit expression for the KL divergence between prior and posterior.
 
-* [Note 2.](flash_em.html) An alternate algorithm for optimizing the FLASH objective, using the explicit expression derived in the previous note.
+* [Notes](flash_em.html) for an alternate algorithm for optimizing the FLASH objective, using the explicit expression derived in the previous notes.
 
 * [Investigation 4.](alt_alg.html) The alternate algorithm agrees with FLASH with respect to both the objective and fit obtained.
+
+
+## Abandoned
+
+I'm no longer pursuing acceleration via SQUAREM/DAAREM. My reasons are detailed in these [notes](squarem_notes.html).
+
+* [Investigation 10.](squarem.html) SQUAREM does poorly on FLASH backfits. DAAREM (a more recent algorithm by one of the authors of SQUAREM) does better, but offers smaller performance gains than parallelization.
 
 
 ## Archived
@@ -99,12 +102,16 @@ Investigations 8 and 9 were concerned with parallel backfitting updates, which a
 
 * [Investigation 9.](parallel2.html) An additional trick is needed to parallelize the backfitting updates performed in this [MASH v FLASH GTEx analysis](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHgtex3.html).
 
+`flashier` implemented the ability to specify the order in which factors are updated. It makes very little difference when factor loadings are nearly orthogonal (as they usually are).
+
+* [Investigation 11.](random.html) The order in which factor/loading pairs are updated (during backfitting) makes some difference, but not much.
+
 The changes tested here were implemented in version 0.6-2 of `flashr`.
 
 * [Investigation 15.](scalar_tau.html) Tests an implementation of changes to the way `tau` is stored, as discussed  [here](https://github.com/stephenslab/flashr/issues/83).
 
-And the changes tested here were implemented in version 2.2-29 of `ashr`.
+These changes were implemented in version 2.2-29 of `ashr`.
 
 * [Investigation 23.](truncnorm.html) I benchmark the rewritten `my_etruncnorm` and `my_vtruncnorm` functions in package `ashr` against their counterparts in package `truncnorm`.
 
-[Note 4.](matrix_ops.html) An early set of notes that identified key ways to reduce the memory footprint of `flashr`. The good ideas were implemented in `flashier`. Not all of the ideas were good.
+An early set of [notes](matrix_ops.html) identified key ways to reduce the memory footprint of `flashr`. The good ideas were implemented in `flashier`. Not all of the ideas were good.
