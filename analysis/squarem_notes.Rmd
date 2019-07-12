@@ -1,5 +1,5 @@
 ---
-title: "Notes on SQUAREM"
+title: "Notes on SQUAREM/DAAREM"
 author: "Jason Willwerscheid"
 date: "7/12/2019"
 output:
