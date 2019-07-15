@@ -38,7 +38,7 @@ Investigation 4 and accompanying notes describe a way to compute the FLASH objec
 
 * [Notes](flash_em.html) towards an alternate algorithm for optimizing the FLASH objective, using the explicit expression derived in the previous notes.
 
-* [Investigation 4.](alt_alg.html) The alternate algorithm agrees with FLASH with respect to both the objective and fit obtained.
+* [Investigation 4.](alt_alg.html) The alternate algorithm agrees with `flashr` with respect to both the objective and fit obtained.
 
 
 ## Abandoned, For Now
