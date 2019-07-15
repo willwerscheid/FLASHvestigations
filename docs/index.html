@@ -470,10 +470,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstreeb971d9a5019e6ec7ecbe8e0d96a4355fb1716601targetblankb971d9aa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/b971d9a5019e6ec7ecbe8e0d96a4355fb1716601" target="_blank">b971d9a</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree0a61f3c86ba194c69f70d7ee4135de9b89d31523targetblank0a61f3ca"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/0a61f3c86ba194c69f70d7ee4135de9b89d31523" target="_blank">0a61f3c</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstreeb971d9a5019e6ec7ecbe8e0d96a4355fb1716601targetblankb971d9aa" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree0a61f3c86ba194c69f70d7ee4135de9b89d31523targetblank0a61f3ca" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -525,6 +525,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/0a61f3c86ba194c69f70d7ee4135de9b89d31523/analysis/index.Rmd" target="_blank">0a61f3c</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2019-07-15
+</td>
+<td>
+wflow_publish(“analysis/index.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/4f1396a5cc5f8f75d3d00e0127c3c3658e402904/docs/index.html" target="_blank">4f1396a</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2019-07-15
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 html
@@ -2513,10 +2547,10 @@ Start workflowr project.
 </div>
 <div id="under-construction" class="section level2">
 <h2>Under Construction</h2>
-<p>Note 3 and Investigation 18 explore stochastic approaches to fitting FLASH objects to very large datasets.</p>
+<p>Investigation 18 and accompanying notes explore stochastic approaches to fitting FLASH objects to very large datasets.</p>
 <ul>
-<li><p><a href="large_p.html">Note 3.</a> An idea for how to fit FLASH models when <span class="math inline">\(n\)</span> is manageable and <span class="math inline">\(p\)</span> is very large.</p></li>
-<li><p><a href="minibatch.html">Investigation 18.</a> I implement the idea described in Note 3 and I test it out on data from the GTEx project.</p></li>
+<li><p><a href="large_p.html">Notes</a> on fitting FLASH models when <span class="math inline">\(n\)</span> is manageable and <span class="math inline">\(p\)</span> is very large.</p></li>
+<li><p><a href="minibatch.html">Investigation 18.</a> I implement the idea described in the previous notes and I test it out on data from the GTEx project.</p></li>
 </ul>
 <p>Investigation 22 was meant as an illustration of how to apply <code>flashier</code> to tensor data, but ended up highlighting some interesting issues that arise with missing data.</p>
 <ul>
@@ -2528,7 +2562,7 @@ Start workflowr project.
 <p>Investigation 4 and accompanying notes describe a way to compute the FLASH objective directly (rather than using the indirect method implemented in <code>flashr</code>).</p>
 <ul>
 <li><p><a href="obj_notes.html">Notes</a> on computing the FLASH objective function. I derive an explicit expression for the KL divergence between prior and posterior.</p></li>
-<li><p><a href="flash_em.html">Notes</a> for an alternate algorithm for optimizing the FLASH objective, using the explicit expression derived in the previous notes.</p></li>
+<li><p><a href="flash_em.html">Notes</a> towards an alternate algorithm for optimizing the FLASH objective, using the explicit expression derived in the previous notes.</p></li>
 <li><p><a href="alt_alg.html">Investigation 4.</a> The alternate algorithm agrees with FLASH with respect to both the objective and fit obtained.</p></li>
 </ul>
 </div>
@@ -2586,7 +2620,7 @@ Start workflowr project.
 <ul>
 <li><a href="truncnorm.html">Investigation 23.</a> I benchmark the rewritten <code>my_etruncnorm</code> and <code>my_vtruncnorm</code> functions in package <code>ashr</code> against their counterparts in package <code>truncnorm</code>.</li>
 </ul>
-<p>Investigations 19a-b, 20, and 24-26 were early experiments on large single-cell RNA datasets. I’ve since created a <a href="https://willwerscheid.github.io/scFLASH/">repository</a> dedicated to studying applications of EBMF to scRNA data.</p>
+<p>Investigations 19a-b, 20, and 24-26 were early experiments on large single-cell RNA datasets. I’ve since created a <a href="https://willwerscheid.github.io/scFLASH/">repository</a> dedicated to studying applications of FLASH to scRNA data.</p>
 <ul>
 <li><p><a href="trachea.html">Investigation 19a.</a> An analysis of the smaller “droplet” dataset from <a href="https://www.nature.com/articles/s41586-018-0393-7">Montoro et al.</a></p></li>
 <li><p><a href="trachea2.html">Investigation 19b.</a> I redo my analysis of the “droplet” dataset, but this time I follow the authors’ preprocessing steps. Results are, I think, of much lower quality.</p></li>
