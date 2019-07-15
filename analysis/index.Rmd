@@ -6,7 +6,7 @@ output:
     toc: true
 ---
 
-## Featured
+## Flashiest
 
 [New features](flashier_features.html) included in the `flashier` implementation of EBMF.
 
@@ -14,20 +14,10 @@ output:
 
 [Investigation 27.](lowrank.html) Using low-rank approximations to the data as input to `flashier`.
 
-[Investigation 28.](parallel_v2.html) For very large problems, performing backfitting updates in parallel can provide a substantial speed-up.
+[Investigation 28.](parallel_v2.html) Performing backfitting updates in parallel.
 
 
-## In Progress
-
-[Investigation 12.](arbitraryV.html) To fit a FLASH model with an arbitrary error covariance matrix, I follow up on a [suggestion](https://github.com/stephenslab/flashr/issues/17) by Matthew Stephens.
-
-Investigations 14 and 16-17 illustrate three approaches to factorizing the GTEx donation matrix. The first is more naive, and is primarily intended as an illustration of how to do nonnegative matrix factorization using FLASH. The second and third are more sophisticated approaches that model the entries as count or binary data.
-
-* [Investigation 14.](nonnegative.html) An example of how to use nonnegative ASH priors to obtain a nonnegative matrix factorization.
-
-* [Investigation 16.](count_data.html) Instead of directly fitting FLASH, I fit count data via a Gaussian approximation to the Poisson log likelihood...
-
-* [Investigation 17.](binary_data.html) ... then I fit binary data via an approximation to the binomial log likelihood.
+## Under Construction
 
 Note 3 and Investigation 18 explore stochastic approaches to fitting FLASH objects to very large datasets.
 
@@ -35,26 +25,12 @@ Note 3 and Investigation 18 explore stochastic approaches to fitting FLASH objec
 
 * [Investigation 18.](minibatch.html) I implement the idea described in Note 3 and I test it out on data from the GTEx project.
 
-Investigations 19a-b and 20 try FLASH out on large single-cell RNA datasets.
+Investigation 22 was meant as an illustration of how to apply `flashier` to tensor data, but ended up highlighting some interesting issues that arise with missing data.
 
-* [Investigation 19a.](trachea.html) An analysis of the smaller "droplet" dataset from [Montoro et al.](https://www.nature.com/articles/s41586-018-0393-7)
-
-* [Investigation 19b.](trachea2.html) I redo my analysis of the "droplet" dataset, but this time I follow the authors' preprocessing steps. Results are, I think, of much lower quality.
-
-* [Investigation 20.](pulseseq.html) An analysis of the larger "pulse-seq" dataset from Montoro et al.
-
-[Investigation 22.](brain.html) A `flashier` analysis of the GTEx brain subtensor.
-
-Investigations 24 and 25 explore approaches to count data.
-
-* [Investigation 24.](count_shrinkage.html) I propose a new approach to factorizing count data that uses adaptive shrinkage to estimate the rate matrix.
-
-* [Investigation 25.](count_preproc_r1.html) I compare three different data transformations, three approaches to handling the heteroskedacity of the `log1p` transformation, and two approaches to dealing with row- and column-specific scaling.
-
-* [Investigation 26.](trachea3.html) I compare FLASH fits of the "droplet" dataset in Montoro et al. using three different data transformations. 
+* [Investigation 22.](brain.html) A `flashier` analysis of the GTEx brain subtensor.
 
 
-## Still Relevant
+## Reference Material
 
 Investigation 4 and accompanying notes describe a way to compute the FLASH objective directly (rather than using the indirect method implemented in `flashr`).
 
@@ -65,14 +41,32 @@ Investigation 4 and accompanying notes describe a way to compute the FLASH objec
 * [Investigation 4.](alt_alg.html) The alternate algorithm agrees with FLASH with respect to both the objective and fit obtained.
 
 
-## Abandoned
+## Abandoned, For Now
 
 I'm no longer pursuing acceleration via SQUAREM/DAAREM. My reasons are detailed in these [notes](squarem_notes.html).
 
 * [Investigation 10.](squarem.html) SQUAREM does poorly on FLASH backfits. DAAREM (a more recent algorithm by one of the authors of SQUAREM) does better, but offers smaller performance gains than parallelization.
 
+`flashier` implemented the ability to specify the order in which factors are updated. The order makes very little difference when factor loadings are nearly orthogonal (as they usually are).
 
-## Archived
+* [Investigation 11.](random.html) The order in which factor/loading pairs are updated (during backfitting) makes some difference, but not much.
+
+We became particularly interested in fitting models with a known error covariance matrix when we were working with GTEx data. The approach is much less promising for the applications I'm currently interested in.
+
+* [Investigation 12.](arbitraryV.html) To fit a FLASH model with an arbitrary error covariance matrix, I follow up on a [suggestion](https://github.com/stephenslab/flashr/issues/17) by Matthew Stephens.
+
+Investigations 14 and 16-17 were some very early experiments with count data. While the first made the usual FLASH assumption that errors are Gaussian, the second and third explicitly attempted to model the entries as count or binary data. So far, the latter approaches haven't worked terribly well, primarily due to the difficulty of choosing a good point to expand the log likelihood around.
+
+* [Investigation 14.](nonnegative.html) An example of how to use nonnegative ASH priors to obtain a nonnegative matrix factorization.
+
+* [Investigation 16.](count_data.html) Instead of directly fitting FLASH, I fit count data via a Gaussian approximation to the Poisson log likelihood...
+
+* [Investigation 17.](binary_data.html) ... then I fit binary data via an approximation to the binomial log likelihood.
+
+
+## Historical Curiosities
+
+An early set of [notes](matrix_ops.html) identified key ways to reduce the memory footprint of `flashr`. The good ideas were implemented in `flashier`. Not all of the ideas were good.
 
 The bug causing the problem described in Investigations 1-3 was fixed in version 0.1-13 of package `ebnm`.
 
@@ -90,28 +84,36 @@ Since `flashier` uses a home-grown initialization function, Investigations 5a-b 
 
 * [Investigation 13.](init_fn3.html) A counterargument. Results in Investigations 5a-b probably depend on the fact that $n$ is small ($n = 44$). For large $n$, setting `init_fn` to `udv_si` is best.
 
-Investigations 6 and 7 dealt with warmstarts, which were implemented in version 0.5-14 of `flashr`.
+Investigations 6 and 7 dealt with warmstarts. `ashr` now uses `mixsqp` rather than `Rmosek`. `ebnm` now calls `nlm` rather than `optim`.
 
 * [Investigation 6.](warmstart.html) Poor `optim` results can produce large decreases in the objective function. We should use warmstarts when `ebnm_fn = ebnm_pn`.
 
 * [Investigation 7.](warmstart2.html) The advantages of warmstarts are not nearly as compelling when `ebnm_fn = ebnm_ash`.
 
-Investigations 8 and 9 were concerned with parallel backfitting updates, which are better covered by a more recent [investigation](parallel_v2.html).
+Investigations 8 and 9 were concerned with parallel backfitting updates, which are better covered by [Investigation 28](parallel_v2.html).
 
 * [Investigation 8.](parallel.html) Parallelizing the backfitting algorithm shows promise.
 
 * [Investigation 9.](parallel2.html) An additional trick is needed to parallelize the backfitting updates performed in this [MASH v FLASH GTEx analysis](https://willwerscheid.github.io/MASHvFLASH/MASHvFLASHgtex3.html).
 
-`flashier` implemented the ability to specify the order in which factors are updated. It makes very little difference when factor loadings are nearly orthogonal (as they usually are).
-
-* [Investigation 11.](random.html) The order in which factor/loading pairs are updated (during backfitting) makes some difference, but not much.
-
 The changes tested here were implemented in version 0.6-2 of `flashr`.
 
 * [Investigation 15.](scalar_tau.html) Tests an implementation of changes to the way `tau` is stored, as discussed  [here](https://github.com/stephenslab/flashr/issues/83).
 
-These changes were implemented in version 2.2-29 of `ashr`.
+The changes tested here were implemented in version 2.2-29 of `ashr`.
 
 * [Investigation 23.](truncnorm.html) I benchmark the rewritten `my_etruncnorm` and `my_vtruncnorm` functions in package `ashr` against their counterparts in package `truncnorm`.
 
-An early set of [notes](matrix_ops.html) identified key ways to reduce the memory footprint of `flashr`. The good ideas were implemented in `flashier`. Not all of the ideas were good.
+Investigations 19a-b, 20, and 24-26 were early experiments on large single-cell RNA datasets. I've since created a [repository](https://willwerscheid.github.io/scFLASH/) dedicated to studying applications of EBMF to scRNA data.
+
+* [Investigation 19a.](trachea.html) An analysis of the smaller "droplet" dataset from [Montoro et al.](https://www.nature.com/articles/s41586-018-0393-7)
+
+* [Investigation 19b.](trachea2.html) I redo my analysis of the "droplet" dataset, but this time I follow the authors' preprocessing steps. Results are, I think, of much lower quality.
+
+* [Investigation 20.](pulseseq.html) An analysis of the larger "pulse-seq" dataset from Montoro et al.
+
+* [Investigation 24.](count_shrinkage.html) I propose a new approach to factorizing count data that uses adaptive shrinkage to estimate the rate matrix.
+
+* [Investigation 25.](count_preproc_r1.html) I compare three different data transformations, three approaches to handling the heteroskedacity of the `log1p` transformation, and two approaches to dealing with row- and column-specific scaling.
+
+* [Investigation 26.](trachea3.html) I compare FLASH fits of the "droplet" dataset in Montoro et al. using three different data transformations. 
