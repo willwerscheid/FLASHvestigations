@@ -19,11 +19,11 @@ output:
 
 ## Under Construction
 
-Note 3 and Investigation 18 explore stochastic approaches to fitting FLASH objects to very large datasets.
+Investigation 18 and accompanying notes explore stochastic approaches to fitting FLASH objects to very large datasets.
 
-* [Note 3.](large_p.html) An idea for how to fit FLASH models when $n$ is manageable and $p$ is very large.
+* [Notes](large_p.html) on fitting FLASH models when $n$ is manageable and $p$ is very large.
 
-* [Investigation 18.](minibatch.html) I implement the idea described in Note 3 and I test it out on data from the GTEx project.
+* [Investigation 18.](minibatch.html) I implement the idea described in the previous notes and I test it out on data from the GTEx project.
 
 Investigation 22 was meant as an illustration of how to apply `flashier` to tensor data, but ended up highlighting some interesting issues that arise with missing data.
 
@@ -36,7 +36,7 @@ Investigation 4 and accompanying notes describe a way to compute the FLASH objec
 
 * [Notes](obj_notes.html) on computing the FLASH objective function. I derive an explicit expression for the KL divergence between prior and posterior.
 
-* [Notes](flash_em.html) for an alternate algorithm for optimizing the FLASH objective, using the explicit expression derived in the previous notes.
+* [Notes](flash_em.html) towards an alternate algorithm for optimizing the FLASH objective, using the explicit expression derived in the previous notes.
 
 * [Investigation 4.](alt_alg.html) The alternate algorithm agrees with FLASH with respect to both the objective and fit obtained.
 
@@ -104,7 +104,7 @@ The changes tested here were implemented in version 2.2-29 of `ashr`.
 
 * [Investigation 23.](truncnorm.html) I benchmark the rewritten `my_etruncnorm` and `my_vtruncnorm` functions in package `ashr` against their counterparts in package `truncnorm`.
 
-Investigations 19a-b, 20, and 24-26 were early experiments on large single-cell RNA datasets. I've since created a [repository](https://willwerscheid.github.io/scFLASH/) dedicated to studying applications of EBMF to scRNA data.
+Investigations 19a-b, 20, and 24-26 were early experiments on large single-cell RNA datasets. I've since created a [repository](https://willwerscheid.github.io/scFLASH/) dedicated to studying applications of FLASH to scRNA data.
 
 * [Investigation 19a.](trachea.html) An analysis of the smaller "droplet" dataset from [Montoro et al.](https://www.nature.com/articles/s41586-018-0393-7)
 
