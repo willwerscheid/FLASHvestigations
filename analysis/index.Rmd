@@ -16,6 +16,8 @@ output:
 
 [Investigation 28.](parallel_v2.html) Performing backfitting updates in parallel.
 
+[Investigation 29.](extrapolate.html) Accelerating backfits via extrapolation.
+
 
 ## Under Construction
 
