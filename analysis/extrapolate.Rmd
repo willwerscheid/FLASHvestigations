@@ -1,0 +1,78 @@
+---
+title: "Acceleration via extrapolation"
+author: "Jason Willwerscheid"
+date: "7/22/2019"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>", warning = FALSE)
+library(flashier)
+library(ebnm)
+library(ashr)
+library(mixsqp)
+```
+
+
+## Introduction
+
+Some simple acceleration schemes that I've experimented with have turned out to be surprisingly effective for speeding up FLASH backfits. The inspiration is by way of [Ang and Gillis](https://www.mitpressjournals.org/doi/full/10.1162/neco_a_01157) (2019), but the idea is very simple. 
+
+Denote the set of optimization parameters as $\theta$ and let $\theta^{(k)}$ denote the values of the parameters after $k$ iterations. Let $g$ be the usual FLASH update function, so that 
+$$\theta^{(k + 1)} = g(\theta^{(k)})$$
+(In `flashier`, this corresponds to an update to the row loadings, either serially or in parallel, then an update to the column loadings, then an update to the variance parameter `tau`.) The updates will become smaller and smaller as the algorithm nears convergence, but they will, I think, usually be in the same direction from iteration to iteration. To try to speed things up, I nudge the parameters a bit farther in the direction of the previous update by setting
+$$\tilde{\theta}^{(k)} = \theta^{(k)} + \beta_k (\theta^{(k)} - \theta^{(k - 1)})$$
+(where $\beta_k$ parametrizes something like momentum) and then do the update by setting
+$$\theta^{(k + 1)} = g(\tilde{\theta}^{(k)})$$
+If the objective increases as a result of the update (that is, if $f(\theta^{(k + 1)}) > f(\theta^{(k)})$), then I congratulate myself on the success of the scheme and set $\beta_{k + 1} > \beta_k$ to try to hasten convergence even more. If the objective decreases, then I backtrack, do a standard update by setting
+$$\theta^{(k + 1)} = g(\theta^{(k)}),$$
+and set $\beta_{k + 1} < \beta_k$ so that the next attempt at extrapolation is more cautious. I think of the objective surface as a racetrack: I'd like to accelerate on the straightaways and brake around the curves. (The difference is that I'm racing blind and don't know whether I've hit a curve until after I've gone off the track!)
+
+I've tested extrapolation with both serial and parallel updates. I've found that parallel updates fare better if one alternates updates using extrapolation with standard updates:
+$$\begin{aligned}
+\theta^{(k + 1)} &= g(\theta^{(k)}) \\
+\theta^{(k + 2)} &= g(\theta^{(k + 1)} + \beta_{k + 1}(\theta^{(k + 1)} - \theta^{(k)})) \\
+\theta^{(k + 3)} &= g(\theta^{(k + 2)}) \\
+\theta^{(k + 4)} &= g(\theta^{(k + 3)} + \beta_{k + 3}(\theta^{(k + 3)} - \theta^{(k + 2)})) 
+\end{aligned}$$
+and so on. I imagine that this scheme works better because parallel updates are fairly erratic and become too unstable if extrapolation is used at every step.
+
+## Results
+
+I experiment on the droplet-based 3' scRNA-seq dataset from Montoro et al. (described [here](flashier_bench.html#montoro_et_al_3’_scrna-seq_data)). After greedily adding a number of factors, I perform backfits using serial and parallel updates, both with and without acceleration.
+
+I run two experiments. In the first case, I fit 40 factors using point-normal priors. In the second, I fit 100 factors using scale-mixture-of-normal priors. All parallel backfits are done using 8 cores; my previous experience suggests that any additional speedup provided by using more cores would be negligible.
+
+### 40 factors, point-normal priors
+
+```{r pn_res}
+library(ggplot2)
+
+trachea.res <- readRDS("./output/extrapolate/trachea_pnres.rds")
+trachea.res$minutes <- trachea.res$elapsed.time / 60
+
+ggplot(trachea.res, aes(x = minutes, y = elbo, color = fit)) + geom_line() 
+```
+
+The accelerated parallel method does better early on, but the accelerated serial method does better in the late game. Parallel updates with no acceleration also do well, but fizzle out too early.   
+
+These results suggest that it might be best to do parallel updates with acceleration for a small number of iterations before switching to serial updates (with acceleration).
+
+### 100 factors, scale-mixture-of-normal priors
+
+```{r ash_res}
+library(ggplot2)
+
+trachea.res <- readRDS("./output/extrapolate/trachea_ashres.rds")
+trachea.res$hours <- trachea.res$elapsed.time / 3600
+
+ggplot(trachea.res, aes(x = hours, y = elbo, color = fit)) + geom_line() 
+```
+
+Here I set the maximum number of iterations to 300. All methods hit the maximum before terminating. Results are otherwise similar to the above.
+
+## Code
+
+The code used in these experiments can be browsed [here](https://github.com/willwerscheid/FLASHvestigations/tree/master/code/extrapolate). The `R` package versions used are those that appear in the session information below ("other attached packages").
