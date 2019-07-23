@@ -1,5 +1,5 @@
 data <- readRDS("../../data/flashier_bench/sp_trachea.rds")
-out  <- "../../output/extrapolate/trachea_res.rds"
+out  <- "../../output/extrapolate/trachea_pnres.rds"
 
 maxiter <- 500
 tol <- 2.0
