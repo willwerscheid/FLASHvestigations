@@ -459,7 +459,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2019-07-23
+<strong>Last updated:</strong> 2019-07-25
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -538,10 +538,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstreede0c5e236742a398b771b53aac5b26fa97bf8c7etargetblankde0c5e2a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/de0c5e236742a398b771b53aac5b26fa97bf8c7e" target="_blank">de0c5e2</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree68a65586a62bafb148877d6988f70341bc91cd34targetblank68a6558a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/68a65586a62bafb148877d6988f70341bc91cd34" target="_blank">68a6558</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstreede0c5e236742a398b771b53aac5b26fa97bf8c7etargetblankde0c5e2a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree68a65586a62bafb148877d6988f70341bc91cd34targetblank68a6558a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -557,14 +557,15 @@ Ignored files:
     Ignored:    data/flashier_bench/
 
 Untracked files:
-    Untracked:  code/extrapolate/extrapolate_trachea_ash100.R
-    Untracked:  code/extrapolate/extrapolate_trachea_pn40.R
-    Untracked:  output/extrapolate/
+    Untracked:  code/extrapolate/daarem.R
 
 Unstaged changes:
+    Modified:   output/extrapolate/trachea_ashres.rds
+    Modified:   output/extrapolate/trachea_pnres.rds
+
+Staged changes:
     Modified:   code/extrapolate/extrapolate.R
-    Deleted:    code/extrapolate/extrapolate_trachea.R
-    Deleted:    code/extrapolate/extrapolate_trachea_ash.R
+    Modified:   code/extrapolate/extrapolate_trachea_pn40.R
 
 </code></pre>
 <p>
@@ -608,6 +609,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/68a65586a62bafb148877d6988f70341bc91cd34/analysis/extrapolate.Rmd" target="_blank">68a6558</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2019-07-25
+</td>
+<td>
+wflow_publish(“analysis/extrapolate.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/c69babf6e97313d3d22f378800fb3246d25558ce/docs/extrapolate.html" target="_blank">c69babf</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2019-07-23
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/de0c5e236742a398b771b53aac5b26fa97bf8c7e/analysis/extrapolate.Rmd" target="_blank">de0c5e2</a>
 </td>
 <td>
@@ -641,7 +676,7 @@ wflow_publish(“analysis/extrapolate.Rmd”)
 <div id="results" class="section level2">
 <h2>Results</h2>
 <p>I experiment on the droplet-based 3’ scRNA-seq dataset from Montoro et al. (described <a href="flashier_bench.html#montoro_et_al_3’_scrna-seq_data">here</a>). After greedily adding a number of factors, I perform backfits using serial and parallel updates, both with and without acceleration.</p>
-<p>I run two experiments. In the first case, I fit 40 factors using point-normal priors. In the second, I fit 100 factors using scale-mixture-of-normal priors. All parallel backfits are done using 8 cores; my previous experience suggests that any additional speedup provided by using more cores would be negligible.</p>
+<p>I run two experiments. In the first case, I fit 40 factors using point-normal priors. In the second, I fit 100 factors using scale-mixture-of-normal priors. In both cases, I set the maximum number of iterations to 300. All parallel backfits are done using 8 cores; my previous experience suggests that any additional speedup provided by using more cores would be negligible.</p>
 <div id="factors-point-normal-priors" class="section level3">
 <h3>40 factors, point-normal priors</h3>
 <pre class="r"><code>library(ggplot2)
@@ -651,7 +686,44 @@ trachea.res$minutes &lt;- trachea.res$elapsed.time / 60
 
 ggplot(trachea.res, aes(x = minutes, y = elbo, color = fit)) + geom_line() </code></pre>
 <p><img src="figure/extrapolate.Rmd/pn_res-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>The accelerated parallel method does better early on, but the accelerated serial method does better in the late game. Parallel updates with no acceleration also do well, but fizzle out too early.</p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pn_res-1">
+Past versions of pn_res-1.png
+</button>
+</p>
+<div id="fig-pn_res-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/c69babf6e97313d3d22f378800fb3246d25558ce/docs/figure/extrapolate.Rmd/pn_res-1.png" target="_blank">c69babf</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2019-07-23
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The accelerated parallel method does better early on, but the accelerated serial method does better in the late game. Parallel updates with no acceleration also do well, but fizzle out too early. (The serial and accelerated parallel methods only stop early because the maximum number of iterations is reached. With a larger <code>maxiter</code>, they will indeed converge.)</p>
 <p>These results suggest that it might be best to do parallel updates with acceleration for a small number of iterations before switching to serial updates (with acceleration).</p>
 </div>
 <div id="factors-scale-mixture-of-normal-priors" class="section level3">
@@ -663,7 +735,44 @@ trachea.res$hours &lt;- trachea.res$elapsed.time / 3600
 
 ggplot(trachea.res, aes(x = hours, y = elbo, color = fit)) + geom_line() </code></pre>
 <p><img src="figure/extrapolate.Rmd/ash_res-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>Here I set the maximum number of iterations to 300. All methods hit the maximum before terminating. Results are otherwise similar to the above.</p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-ash_res-1">
+Past versions of ash_res-1.png
+</button>
+</p>
+<div id="fig-ash_res-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/c69babf6e97313d3d22f378800fb3246d25558ce/docs/figure/extrapolate.Rmd/ash_res-1.png" target="_blank">c69babf</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2019-07-23
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Here all methods reach the maximum number of iterations before terminating. Results are otherwise similar to the above.</p>
 </div>
 </div>
 <div id="code" class="section level2">

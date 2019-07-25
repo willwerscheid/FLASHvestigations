@@ -1,5 +1,6 @@
 library(flashier)
 source("extrapolate_util.R")
+source("daarem.R")
 
 options(cl.cores = 8L, cl.type = "FORK")
 
@@ -67,6 +68,18 @@ t <- system.time({
 next.res <- data.frame(fit = "Parapolate",
                        elbo = res$obj,
                        elapsed.time = t[3] * 1:length(res$obj) / length(res$obj))
+all.res <- rbind(all.res, next.res)
+
+# Daarem. ---------------------------------------------------------------------
+message("Using DAAREM...")
+t <- system.time({
+  res <- daarem.flash(fl.greedy, update.fn = update.factors.serial,
+                      control = list(maxiter = maxiter, tol = tol))
+})
+next.res <- data.frame(fit = "DAAREM",
+                       elbo = res$objfn.track[-1],
+                       elapsed.time = (t[3] * 1:length(res$objfn.track[-1])
+                                       / length(res$objfn.track[-1])))
 all.res <- rbind(all.res, next.res)
 
 saveRDS(all.res, out)
