@@ -21,6 +21,8 @@ output:
 
 ## Under Construction
 
+[Investigation 30.](jean.html) A comparison of different variance structures and initialization methods using a GWAS dataset collated by Jean Morrison.
+
 Investigation 18 and accompanying notes explore stochastic approaches to fitting FLASH objects to very large datasets.
 
 * [Notes](large_p.html) on fitting FLASH models when $n$ is manageable and $p$ is very large.
