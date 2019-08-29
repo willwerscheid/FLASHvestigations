@@ -10,3 +10,5 @@ analysis/*html
 analysis/*_cache
 analysis/site_libs
 data/flashier_bench
+data/metabo3_gwas_mats.RDS
+output/jean
