@@ -1,0 +1,103 @@
+---
+title: "Comparing flashier fits of GWAS data"
+author: "Jason Willwerscheid"
+date: "8/29/2019"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>", warning = FALSE)
+library(tidyr)
+library(flashier)
+library(ebnm)
+library(ashr)
+library(mixsqp)
+```
+
+I run `flashier` on a GWAS dataset collated by Jean Morrison using eight different variance structures and three different initialization methods.
+
+## Variance structures
+
+The most general EBMF model is:
+$$ Y = LF' + S + E $$
+where $Y \in \mathbb{R}^{n \times p}$, $S_{ij} \sim N(0, \sigma_{ij}^2)$ and $E_{ij} \sim N(0, 1 / \tau_{ij})$, with the $\sigma_{ij}^2$s known and the $\tau_{ij}$s to be estimated (I ignore the priors on $L$ and $F$ here). One can either include $S$ or not; and one can make different assumptions about how $\tau$ is structured. I test eight variance structures:
+
+* "constant": $S = 0$ and $\tau_{ij} = \tau$ (1 variance parameter needs to be estimated)
+* "by-row": $S = 0$ and $\tau_{ij} = \tau_i$ ($n$ variance parameters)
+* "by-column": $S = 0$ and $\tau_{ij} = \tau_j$ ($p$ variance parameters)
+* "Kronecker": $S = 0$ and $\tau_{ij} = \tau_i^{(1)} \tau_j^{(2)}$ ($n + p$ variance parameters)
+* "zero": only $S$ is used; no additional variance is estimated
+* "noisy (constant)": $S$ is used and $\tau_{ij} = \tau$ (1 variance parameter)
+* "noisy (by-row)": $S$ is used and $\tau_{ij} = \tau_i$ ($n$ variance parameters)
+* "noisy (by-column)": $S$ is used and $\tau_{ij} = \tau_j$ ($p$ variance parameters)
+
+## Initialization methods
+
+* "flashier": the default method adds factors one at a time. Each factor is initialized by finding the best rank-one approximation to the matrix of residuals.
+* "softImpute": uses package `softImpute` to initialize factors. This gives different results when there is missing data.
+* "initialize from data": adds a bunch of factors all at once using `softImpute` and then refines the fit via backfitting.
+
+## Code
+
+The code used to produce the fits can be viewed [here](https://github.com/willwerscheid/FLASHvestigations/blob/master/code/jean/jean.R).
+
+## Results
+
+For each fit, I give the ELBO relative to the best overall ELBO attained and (in parentheses) the number of factors added.
+
+```{r res}
+res <- readRDS("./output/jean/flashier_res.rds")
+
+calls <- lapply(res, `[[`, "call")
+
+var.type <- sapply(calls, function(call) {
+  if (is.null(call$S)) {
+    return(switch(paste(as.character(call$var.type), collapse = " "),
+                  "0" = "constant",
+                  "1" = "by.row",
+                  "2" = "by.col",
+                  "1 2" = "kronecker"))
+  } else {
+    return(switch(paste(as.character(call$var.type), collapse = " "),
+                  "0" = "noisy.const",
+                  "1" = "noisy.byrow",
+                  "2" = "noisy.bycol",
+                  "1 2" = "noisy.kronecker",
+                  "zero"))
+  }
+})
+
+init.type <- sapply(calls, function(call) {
+  if (!is.null(call$init.fn))
+    return("soft.impute")
+  else if (!is.null(call$EF.init))
+    return("init.from.data")
+  else
+    return("flashier")
+})
+
+best.elbo <- max(sapply(res, `[[`, "elbo"))
+
+display.str <- sapply(res, function(fl) {
+  return(paste0(formatC(fl$elbo - best.elbo, format = "f", digits = 0), " (",
+                sum(fl$pve > 0), ")"))
+})
+
+df <- data.frame(var.type = factor(var.type,
+                                   levels = c("constant", "by.row", "by.col",
+                                              "kronecker", "zero", "noisy.const",
+                                              "noisy.byrow", "noisy.bycol")),
+                 init.type = factor(init.type,
+                                    levels = c("flashier", "soft.impute",
+                                               "init.from.data")),
+                 display.str = display.str)
+
+knitr::kable(df %>% spread(init.type, display.str))
+```
+
+Some observations:
+
+* `softImpute` typically does "better" (judging by the ELBO) than the default method.
+* "Initialize from data" does better than either, but leaves a lot of factors in place. 
