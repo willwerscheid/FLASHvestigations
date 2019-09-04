@@ -61,7 +61,6 @@ extrapolate.flash <- function(fl, maxiter = 100, tol = 0.01,
   beta.increase <- 1.2
   beta.reduce <- 0.5
   betamax <- 2
-  max.parafail <- 3
 
   if (parallel) {
     update.fn <- flashier:::update.factors.parallel
