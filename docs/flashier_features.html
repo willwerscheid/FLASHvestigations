@@ -442,7 +442,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2019-07-02
+<strong>Last updated:</strong> 2019-09-04
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -521,10 +521,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree52e6cfe856c368d35e1fe781c6ef3cecaae7faf0targetblank52e6cfea"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/52e6cfe856c368d35e1fe781c6ef3cecaae7faf0" target="_blank">52e6cfe</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree8560db8ef025425b1eea3456777d78f222ccb96atargetblank8560db8a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/8560db8ef025425b1eea3456777d78f222ccb96a" target="_blank">8560db8</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree52e6cfe856c368d35e1fe781c6ef3cecaae7faf0targetblank52e6cfea" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree8560db8ef025425b1eea3456777d78f222ccb96atargetblank8560db8a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -538,14 +538,17 @@ Ignored files:
     Ignored:    code/.DS_Store
     Ignored:    code/flashier_bench/.DS_Store
     Ignored:    data/flashier_bench/
+    Ignored:    data/metabo3_gwas_mats.RDS
+    Ignored:    output/jean/
 
 Untracked files:
-    Untracked:  code/ebspca.R
-    Untracked:  code/flashier_bench/.test2.swp
-    Untracked:  code/lowrank.R
+    Untracked:  code/extrapolate/extrapolate_gtex_ash30.R
+    Untracked:  code/fasfunction.R
+    Untracked:  code/nnmf.R
+    Untracked:  output/extrapolate/trachea_gtex.rds
 
 Unstaged changes:
-    Modified:   analysis/index.Rmd
+    Modified:   code/extrapolate/extrapolate_util.R
 
 </code></pre>
 <p>
@@ -584,6 +587,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/8560db8ef025425b1eea3456777d78f222ccb96a/analysis/flashier_features.Rmd" target="_blank">8560db8</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2019-09-04
+</td>
+<td>
+wflow_publish(“analysis/flashier_features.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/243f8114e4bede800884a0a47d6a2bcb7cec29fd/docs/flashier_features.html" target="_blank">243f811</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2019-07-02
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -680,7 +717,7 @@ workflowr::wflow_publish(“analysis/flashier_features.Rmd”)
 <li>Handles sparse matrices (of class <code>Matrix</code>), tensors (3-dimensional arrays), and low-rank matrix representations (as returned by, for example, <code>svd</code>, <code>irlba</code>, <code>rsvd</code>, and <code>softImpute</code>).</li>
 <li>Implements a full range of variance structures, including “kronecker” and “noisy.” In general, the estimated residual variance can be an arbitrary rank-one matrix or tensor.</li>
 <li>For simple variance structures (including “constant” and “by row”/“by column”), no <span class="math inline">\(n \times p\)</span> matrix is ever formed (so, for example, a matrix of residuals is never explicitly formed). This yields a large improvement in memory usage and runtime for very large data matrices. (Benchmarking results are <a href="flashier_bench.html">here</a>.)</li>
-<li>Speeds up backfits by dropping factors once they are no longer improving the objective very much (so, instead of updating every factor each iteration, only factors that are still changing are updated). Other backfit options are also available. The “montaigne” option always goes after the factor that most recently produced the largest improvement. While it produces much rougher fits, it can greatly reduce the number of backfit iterations.</li>
+<li>Speeds up backfits by using an “extrapolation” technique similar to the method described in <a href="https://www.mitpressjournals.org/doi/full/10.1162/neco_a_01157">Ang and Gillis</a> (2019).</li>
 <li>Simplifies the user interface. Everything is done via a single function with a small number of parameters, and the latter are more user-friendly. In particular, a new <code>prior.family</code> parameter replaces the less friendly <code>ebnm.fn</code> and <code>ebnm.param</code>.</li>
 <li>In constrast, the “workhorse” function gives many more options. One that I especially like allows the user to write an arbitrary function whose output will be displayed during optimization (allowing the user to inspect the progress of optimization however they like).</li>
 <li>Uses a home-grown initialization function rather than <code>softImpute</code>. The new function is much faster than <code>softImpute</code> for large matrices (see the <a href="flashier_bench.html">benchmarking results</a>).</li>
@@ -695,7 +732,7 @@ workflowr::wflow_publish(“analysis/flashier_features.Rmd”)
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 3.5.3 (2019-03-11)
 Platform: x86_64-apple-darwin15.6.0 (64-bit)
-Running under: macOS Mojave 10.14.5
+Running under: macOS Mojave 10.14.6
 
 Matrix products: default
 BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
