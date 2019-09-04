@@ -21,8 +21,6 @@ output:
 
 ## Under Construction
 
-[Investigation 30.](jean.html) A comparison of different variance structures and initialization methods using a GWAS dataset collated by Jean Morrison.
-
 Investigation 18 and accompanying notes explore stochastic approaches to fitting FLASH objects to very large datasets.
 
 * [Notes](large_p.html) on fitting FLASH models when $n$ is manageable and $p$ is very large.
@@ -32,6 +30,8 @@ Investigation 18 and accompanying notes explore stochastic approaches to fitting
 Investigation 22 was meant as an illustration of how to apply `flashier` to tensor data, but ended up highlighting some interesting issues that arise with missing data.
 
 * [Investigation 22.](brain.html) A `flashier` analysis of the GTEx brain subtensor.
+
+[Investigation 30.](jean.html) A comparison of different variance structures and initialization methods using a GWAS dataset collated by Jean Morrison.
 
 
 ## Reference Material
