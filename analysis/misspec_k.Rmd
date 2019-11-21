@@ -1,0 +1,67 @@
+---
+title: "The effect of non-Gaussian noise on the number of factors selected"
+author: "Jason Willwerscheid"
+date: "11/20/2019"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>", warning = TRUE)
+```
+
+I run a series of simulations in which I simulate from the true EBMF model (with Gaussian noise) and then vary the noise model to see whether EBMF is still able to select the correct number of components.
+
+The EBMF model is:
+$$ Y = LF' + E, $$
+where $Y \in \mathbb{R}^{n \times n}$, $L \in \mathbb{R}^{n \times k}$, $F \in \mathbb{R}^{n \times k}$, and $E \in \mathbb{R}^{n \times n}$. I fix $k$ at 10, but I vary $n$ from 50 to 5000.
+
+For each trial and each choice of $n$, I simulate factors and loadings from the following distributions:
+$$ \begin{aligned}
+L_{ik} &\sim \pi_{0\ell}^{(k)} \delta_0 + (1 - \pi_{0\ell}^{(k)}) N(0, \sigma_\ell^{(k)2}) \\
+F_{jk} &\sim \pi_{0f}^{(k)} \delta_0 + (1 - \pi_{0f}^{(k)}) N(0, \sigma_f^{(k)2})
+\end{aligned} $$
+$$ \begin{aligned}
+\pi_{0\ell}^{(k)}, \pi_{0f}^{(k)} &\sim \text{Beta}(0.5, 0.5) \\
+\sigma_\ell^{(k)2}, \sigma_f^{(k)2} &\sim \text{Gamma}(1, 2)
+\end{aligned} $$
+
+From each low-rank matrix $LF'$, I generate four different data matrices using different error models:
+
+1. The Gaussian model (i.e., the EBMF model):
+$$ Y = LF' + E, $$
+where 
+$$ E_{ij} \sim N(0, 0.5^2) $$
+1. A heavier-tailed model:
+$$ \begin{aligned}
+Y &= LF' + E \\
+E_{ij} &\sim 0.5 * t_5 
+\end{aligned} $$
+1. A Poisson model:
+$$ X = \text{Poisson(exp(LF'))} $$
+In this case, I fit `flash` to the transformed data matrix
+$$ Y = \log(X + 1) $$
+1. A Poisson-lognormal model:
+$$ \begin{aligned}
+X &= \text{Poisson(exp(LF' + E))} \\
+E_{ij} &\sim N(0, 0.5^2) \\
+Y &= \log(X + 1)
+\end{aligned} $$
+
+The code used to run the simulations can be viewed [here](https://github.com/willwerscheid/FLASHvestigations/blob/master/code/misspec_k/misspec_k.R).
+
+## Results
+
+As expected, `flash` selects an approximately correct number of factors when the model is correctly specified (recall that I fix $k = 10$) and when there is a sufficient amount of data. Under model misspecification, however, it is unable to do so. The behavior under Poisson and Poisson-lognormal noise is similar: we see the number of factors continue to increase, apparently without bound, as the size of the dataset gets larger. The behavior under $t$-noise is more erratic.
+
+```{r res}
+library(flashier)
+library(ggplot2)
+
+res <- readRDS("./output/misspec_k/misspec_k.rds")
+ggplot(res, aes(x = n, y = nfactors, col = n)) +
+  geom_boxplot() + geom_hline(aes(yintercept = 10), linetype = "dashed") + 
+  facet_wrap(~distn) + theme(legend.position = "none")
+```
