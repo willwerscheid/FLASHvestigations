@@ -33,6 +33,8 @@ Investigation 22 was meant as an illustration of how to apply `flashier` to tens
 
 [Investigation 30.](jean.html) A comparison of different variance structures and initialization methods using a GWAS dataset collated by Jean Morrison.
 
+[Investigation 31.](misspec_k.html) A simulation study examining the effect of non-Gaussian noise on the number of factors selected by `flash`.
+
 
 ## Reference Material
 
