@@ -1,0 +1,77 @@
+---
+title: "NPMLE via ebnm"
+author: "Jason Willwerscheid"
+date: "4/29/2020"
+output:
+  workflowr::wflow_html:
+    code_folding: show
+    toc: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>", warning = TRUE)
+```
+
+I want to test out approximations of NPMLEs using a dense `ashr` grid. Let $x_1, \ldots, x_n$ be $n$ observations with standard errors equal to 1. [Dicker and Zhao](https://arxiv.org/abs/1407.2635) show that when the true NPMLE has compact support, then a good approximation can be obtained by optimizing over the family of distributions that's supported on $\sqrt{n}$ equally spaced points between $\min (x)$ and $\max (x)$. Instead of using point masses, I use an `ashr` grid with $\sqrt{n}$ uniform components of equal width. Let's see how it works in practice.
+
+Here's the true distribution which I'll be sampling from. It's bimodal with peaks at -5 and 5, so a unimodal prior family wouldn't work very well.
+
+```{r true_g}
+suppressMessages(library(tidyverse))
+
+true_g <- ashr::normalmix(pi = rep(0.1, 10),
+                          mean = c(rep(-5, 5), rep(5, 5)),
+                          sd = c(0:4, 0:4))
+cdf_grid <- seq(-20, 20, by = 0.1)
+true_cdf <- drop(ashr::mixcdf(true_g, cdf_grid))
+ggplot(tibble(x = cdf_grid, y = true_cdf), aes(x = x, y = y)) + geom_line()
+```
+
+Now I sample 100, 1000, and 10000 observations from the true distribution, add normally distributed noise, and call `ebnm_npmle`.
+
+```{r samples}
+samp_from_g <- function(g, n) {
+  comp <- sample(1:length(g$pi), n, replace = TRUE, prob = g$pi)
+  mean <- g$mean[comp]
+  sd <- g$sd[comp]
+  return(rnorm(n, mean = mean, sd = sd))
+}
+
+estimate_g <- function(true_g, n, verbose = FALSE) {
+  samp <- samp_from_g(true_g, n) + rnorm(n) # Add N(0, 1) noise
+  ebnm_res <- ebnm::ebnm_npmle(samp, control = list(verbose = verbose))
+  return(ebnm_res$fitted_g)
+}
+
+set.seed(666)
+
+g100 <- estimate_g(true_g, 100)
+g1000 <- estimate_g(true_g, 1000)
+g10000 <- estimate_g(true_g, 10000)
+
+cdf100 <- drop(ashr::mixcdf(g100, cdf_grid))
+cdf1000 <- drop(ashr::mixcdf(g1000, cdf_grid))
+cdf10000 <- drop(ashr::mixcdf(g10000, cdf_grid))
+
+res <- tibble(x = rep(cdf_grid, 4), 
+              y = c(true_cdf, cdf100, cdf1000, cdf10000), 
+              cdf = c(rep("True", length(cdf_grid)),
+                      rep("n = 100", length(cdf_grid)),
+                      rep("n = 1000", length(cdf_grid)),
+                      rep("n = 10000", length(cdf_grid))))
+
+ggplot(res, aes(x = x, y = y, col = cdf)) + geom_line()
+```
+
+When $n$ gets too large, `mixsqp` gets bogged down. Compare $n = 10000$:
+
+```{r mixsqp10000}
+g10000 <- estimate_g(true_g, 10000, verbose = TRUE)
+```
+
+and $n = 100000$:
+
+```{r mixsqp100000}
+g100000 <- estimate_g(true_g, 100000, verbose = TRUE)
+```
+
