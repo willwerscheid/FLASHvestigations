@@ -35,6 +35,8 @@ Investigation 22 was meant as an illustration of how to apply `flashier` to tens
 
 [Investigation 31.](misspec_k.html) A simulation study examining the effect of non-Gaussian noise on the number of factors selected by `flash`.
 
+[Investigation 32.](ebnm_npmle.html) Approximating the NPMLE using `ebnm`.
+
 
 ## Reference Material
 
