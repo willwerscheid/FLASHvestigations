@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>NPMLE via ebnm</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("show" === "show");
+});
+</script>
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">NPMLE via ebnm</h1>
+<h4 class="author">Jason Willwerscheid</h4>
+<h4 class="date">4/29/2020</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#report"> Report <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2020-04-29
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>FLASHvestigations/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.2.0). The <em>Report</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="report" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20180714code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20180714)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20180714code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree8420f5deb9f408db252b601344990edcec817752targetblank8420f5da"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/8420f5deb9f408db252b601344990edcec817752" target="_blank">8420f5d</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree8420f5deb9f408db252b601344990edcec817752targetblank8420f5da" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.DS_Store
+    Ignored:    code/.DS_Store
+    Ignored:    code/flashier_bench/.DS_Store
+    Ignored:    data/.DS_Store
+    Ignored:    data/flashier_bench/
+    Ignored:    data/metabo3_gwas_mats.RDS
+    Ignored:    output/jean/
+
+Untracked files:
+    Untracked:  analysis/batting_order.Rmd
+    Untracked:  code/fasfunction.R
+    Untracked:  code/nnmf.R
+    Untracked:  code/wals.R
+    Untracked:  data/BR_teams_2019.csv
+    Untracked:  data/FG_teams_2019.csv
+    Untracked:  data/batting_order.rds
+    Untracked:  data/cole.rds
+    Untracked:  data/odorizzi.rds
+    Untracked:  data/pitcher.rds
+    Untracked:  data/pitcher2.rds
+    Untracked:  data/pitcher_all.rds
+    Untracked:  mlb2.R
+    Untracked:  mlb_standings.txt
+    Untracked:  ottoneu.R
+    Untracked:  phoible.R
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/8420f5deb9f408db252b601344990edcec817752/analysis/ebnm_npmle.Rmd" target="_blank">8420f5d</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-04-29
+</td>
+<td>
+wflow_publish(“analysis/ebnm_npmle.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<p>I want to test out approximations of NPMLEs using a dense <code>ashr</code> grid. Let <span class="math inline">\(x_1, \ldots, x_n\)</span> be <span class="math inline">\(n\)</span> observations with standard errors equal to 1. <a href="https://arxiv.org/abs/1407.2635">Dicker and Zhao</a> show that when the true NPMLE has compact support, then a good approximation can be obtained by optimizing over the family of distributions that’s supported on <span class="math inline">\(\sqrt{n}\)</span> equally spaced points between <span class="math inline">\(\min (x)\)</span> and <span class="math inline">\(\max (x)\)</span>. Instead of using point masses, I use an <code>ashr</code> grid with <span class="math inline">\(\sqrt{n}\)</span> uniform components of equal width. Let’s see how it works in practice.</p>
+<p>Here’s the true distribution which I’ll be sampling from. It’s bimodal with peaks at -5 and 5, so a unimodal prior family wouldn’t work very well.</p>
+<pre class="r"><code>suppressMessages(library(tidyverse))
+
+true_g &lt;- ashr::normalmix(pi = rep(0.1, 10),
+                          mean = c(rep(-5, 5), rep(5, 5)),
+                          sd = c(0:4, 0:4))
+cdf_grid &lt;- seq(-20, 20, by = 0.1)
+true_cdf &lt;- drop(ashr::mixcdf(true_g, cdf_grid))
+ggplot(tibble(x = cdf_grid, y = true_cdf), aes(x = x, y = y)) + geom_line()</code></pre>
+<p><img src="figure/ebnm_npmle.Rmd/true_g-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Now I sample 100, 1000, and 10000 observations from the true distribution, add normally distributed noise, and call <code>ebnm_npmle</code>.</p>
+<pre class="r"><code>samp_from_g &lt;- function(g, n) {
+  comp &lt;- sample(1:length(g$pi), n, replace = TRUE, prob = g$pi)
+  mean &lt;- g$mean[comp]
+  sd &lt;- g$sd[comp]
+  return(rnorm(n, mean = mean, sd = sd))
+}
+
+estimate_g &lt;- function(true_g, n, verbose = FALSE) {
+  samp &lt;- samp_from_g(true_g, n) + rnorm(n) # Add N(0, 1) noise
+  ebnm_res &lt;- ebnm::ebnm_npmle(samp, control = list(verbose = verbose))
+  return(ebnm_res$fitted_g)
+}
+
+set.seed(666)
+
+g100 &lt;- estimate_g(true_g, 100)
+g1000 &lt;- estimate_g(true_g, 1000)
+g10000 &lt;- estimate_g(true_g, 10000)
+
+cdf100 &lt;- drop(ashr::mixcdf(g100, cdf_grid))
+cdf1000 &lt;- drop(ashr::mixcdf(g1000, cdf_grid))
+cdf10000 &lt;- drop(ashr::mixcdf(g10000, cdf_grid))
+
+res &lt;- tibble(x = rep(cdf_grid, 4), 
+              y = c(true_cdf, cdf100, cdf1000, cdf10000), 
+              cdf = c(rep(&quot;True&quot;, length(cdf_grid)),
+                      rep(&quot;n = 100&quot;, length(cdf_grid)),
+                      rep(&quot;n = 1000&quot;, length(cdf_grid)),
+                      rep(&quot;n = 10000&quot;, length(cdf_grid))))
+
+ggplot(res, aes(x = x, y = y, col = cdf)) + geom_line()</code></pre>
+<p><img src="figure/ebnm_npmle.Rmd/samples-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>When <span class="math inline">\(n\)</span> gets too large, <code>mixsqp</code> gets bogged down. Compare <span class="math inline">\(n = 10000\)</span>:</p>
+<pre class="r"><code>g10000 &lt;- estimate_g(true_g, 10000, verbose = TRUE)</code></pre>
+<pre><code>#&gt; Running mix-SQP algorithm 0.3-31 on 10000 x 100 matrix
+#&gt; convergence tol. (SQP):     1.0e-08
+#&gt; conv. tol. (active-set):    1.0e-10
+#&gt; zero threshold (solution):  1.0e-08
+#&gt; zero thresh. (search dir.): 1.0e-14
+#&gt; l.s. sufficient decrease:   1.0e-02
+#&gt; step size reduction factor: 7.5e-01
+#&gt; minimum step size:          1.0e-08
+#&gt; max. iter (SQP):            1000
+#&gt; max. iter (active-set):     20
+#&gt; number of EM iterations:    20
+#&gt; Computing SVD of 10000 x 100 matrix.
+#&gt; Matrix is not low-rank; falling back to full matrix.
+#&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
+#&gt;    1 +2.030462224e+00  -- EM --  100 1.00e+00 1.98e-02  --  --
+#&gt;    2 +2.012745932e+00  -- EM --  100 1.00e+00 6.26e-03  --  --
+#&gt;    3 +2.009553447e+00  -- EM --  100 1.00e+00 3.17e-03  --  --
+#&gt;    4 +2.008362079e+00  -- EM --  100 1.00e+00 1.99e-03  --  --
+#&gt;    5 +2.007711941e+00  -- EM --  100 1.00e+00 1.45e-03  --  --
+#&gt;    6 +2.007298230e+00  -- EM --  100 1.00e+00 1.15e-03  --  --
+#&gt;    7 +2.007016171e+00  -- EM --  100 1.00e+00 9.60e-04  --  --
+#&gt;    8 +2.006815351e+00  -- EM --  100 1.00e+00 8.24e-04  --  --
+#&gt;    9 +2.006667310e+00  -- EM --  100 1.00e+00 7.20e-04  --  --
+#&gt;   10 +2.006554748e+00  -- EM --  100 1.00e+00 6.37e-04  --  --
+#&gt;   11 +2.006466694e+00  -- EM --  100 1.00e+00 5.69e-04  --  --
+#&gt;   12 +2.006395982e+00  -- EM --  100 1.00e+00 5.13e-04  --  --
+#&gt;   13 +2.006337819e+00  -- EM --  100 1.00e+00 4.65e-04  --  --
+#&gt;   14 +2.006288934e+00  -- EM --  100 1.00e+00 4.25e-04  --  --
+#&gt;   15 +2.006247056e+00  -- EM --  100 1.00e+00 3.90e-04  --  --
+#&gt;   16 +2.006210580e+00  -- EM --  100 1.00e+00 3.60e-04  --  --
+#&gt;   17 +2.006178354e+00  -- EM --  100 1.00e+00 3.34e-04  --  --
+#&gt;   18 +2.006149537e+00  -- EM --  100 1.00e+00 3.12e-04  --  --
+#&gt;   19 +2.006123508e+00  -- EM --  100 1.00e+00 2.92e-04  --  --
+#&gt;   20 +2.006099797e+00  -- EM --  100 1.00e+00 2.74e-04  --  --
+#&gt;    1 +2.006078047e+00 +1.332e-02 100  ------   ------   --  --
+#&gt;    2 +2.006057850e+00 +1.326e-02  80 1.00e+00 2.61e-03  20   1
+#&gt;    3 +2.006039264e+00 +1.287e-02  60 1.00e+00 1.92e-02  20   1
+#&gt;    4 +2.006019180e+00 +1.182e-02  40 1.00e+00 1.02e-01  20   1
+#&gt;    5 +2.005511332e+00 +2.118e-03  28 1.00e+00 1.18e-01  20   1
+#&gt;    6 +2.005496997e+00 +2.665e-04  30 1.00e+00 2.56e-02  20   1
+#&gt;    7 +2.005460778e+00 +1.722e-04  30 1.00e+00 1.50e-01  20   1
+#&gt;    8 +2.005452812e+00 +1.484e-04  30 1.00e+00 3.73e-02  20   1
+#&gt;    9 +2.005437216e+00 +9.627e-05  28 1.00e+00 4.61e-02  20   1
+#&gt;   10 +2.005432708e+00 +5.942e-05  27 1.00e+00 3.49e-02  20   1
+#&gt;   11 +2.005432478e+00 +6.458e-05  29 1.00e+00 3.71e-03  20   1
+#&gt;   12 +2.005430497e+00 +4.191e-05  29 1.00e+00 5.46e-02  20   1
+#&gt;   13 +2.005429142e+00 +1.908e-05  29 1.00e+00 2.41e-02  20   1
+#&gt;   14 +2.005429142e+00 +1.908e-05  29 1.00e+00 7.53e-08  20   1
+#&gt;   15 +2.005429142e+00 +1.908e-05  29 1.00e+00 3.38e-11  20   1
+#&gt;   16 +2.005429142e+00 +1.908e-05  29 1.00e+00 2.01e-12  20   1
+#&gt;   17 +2.005429142e+00 +1.908e-05  29 1.00e+00 1.80e-12  20   1
+#&gt;   18 +2.005429142e+00 +1.908e-05  29 1.00e+00 1.77e-12  20   1
+#&gt;   19 +2.005429142e+00 +1.908e-05  29 1.00e+00 2.49e-12  20   1
+#&gt;   20 +2.005429142e+00 +1.908e-05  29 1.00e+00 9.50e-13  20   1
+#&gt;   21 +2.005429142e+00 +1.908e-05  29 1.00e+00 5.77e-13  20   1
+#&gt;   22 +2.005429142e+00 +1.908e-05  29 1.00e+00 5.39e-13  20   1
+#&gt;   23 +2.005429142e+00 +1.908e-05  29 1.00e+00 9.52e-13  20   1
+#&gt;   24 +2.005429142e+00 +1.908e-05  29 1.00e+00 1.70e-12  20   1
+#&gt;   25 +2.005429142e+00 +1.908e-05  29 1.00e+00 1.21e-12  20   1
+#&gt;   26 +2.005429142e+00 +1.908e-05  29 1.00e+00 1.32e-12  20   1
+#&gt;   27 +2.005429142e+00 +1.908e-05  29 1.00e+00 9.14e-13  20   1
+#&gt;   28 +2.005429142e+00 +1.908e-05  29 1.00e+00 1.10e-12  20   1
+#&gt;   29 +2.005429142e+00 +1.908e-05  29 1.00e+00 9.27e-13  20   1
+#&gt;   30 +2.005429137e+00 +1.918e-05  30 1.00e+00 5.73e-04  20   1
+#&gt;   31 +2.005429137e+00 +1.918e-05  30 1.00e+00 5.78e-07  20   1
+#&gt;   32 +2.005429137e+00 +1.918e-05  30 1.00e+00 6.30e-10  20   1
+#&gt;   33 +2.005429137e+00 +1.918e-05  30 1.00e+00 8.29e-13  20   1
+#&gt;   34 +2.005429137e+00 +1.918e-05  30 1.00e+00 4.11e-12  20   1
+#&gt;   35 +2.005429137e+00 +1.918e-05  30 1.00e+00 4.02e-12  20   1
+#&gt;   36 +2.005429137e+00 +1.918e-05  30 1.00e+00 2.41e-12  20   1
+#&gt;   37 +2.005429137e+00 +1.918e-05  30 1.00e+00 1.10e-12  20   1
+#&gt;   38 +2.005429137e+00 +1.918e-05  30 1.00e+00 9.77e-13  20   1
+#&gt;   39 +2.005429137e+00 +1.918e-05  30 1.00e+00 3.06e-12  20   1
+#&gt;   40 +2.005429137e+00 +1.918e-05  30 1.00e+00 2.58e-12  20   1
+#&gt;   41 +2.005429137e+00 +1.918e-05  30 1.00e+00 1.01e-12  20   1
+#&gt;   42 +2.005429002e+00 -5.999e-06  30 1.00e+00 9.49e-03  20   1
+#&gt; Optimization took 3.34 seconds.
+#&gt; Convergence criteria met---optimal solution found.</code></pre>
+<p>and <span class="math inline">\(n = 100000\)</span>:</p>
+<pre class="r"><code>g100000 &lt;- estimate_g(true_g, 100000, verbose = TRUE)</code></pre>
+<pre><code>#&gt; Running mix-SQP algorithm 0.3-31 on 100000 x 317 matrix
+#&gt; convergence tol. (SQP):     1.0e-08
+#&gt; conv. tol. (active-set):    1.0e-10
+#&gt; zero threshold (solution):  1.0e-08
+#&gt; zero thresh. (search dir.): 1.0e-14
+#&gt; l.s. sufficient decrease:   1.0e-02
+#&gt; step size reduction factor: 7.5e-01
+#&gt; minimum step size:          1.0e-08
+#&gt; max. iter (SQP):            1000
+#&gt; max. iter (active-set):     20
+#&gt; number of EM iterations:    20
+#&gt; Computing SVD of 100000 x 317 matrix.
+#&gt; SVD computation took 28.23 seconds.
+#&gt; Rank of matrix is estimated to be 80.
+#&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
+#&gt;    1 +2.025005873e+00  -- EM --  317 1.00e+00 8.17e-03  --  --
+#&gt;    2 +2.005919110e+00  -- EM --  317 1.00e+00 2.44e-03  --  --
+#&gt;    3 +2.002278085e+00  -- EM --  317 1.00e+00 1.24e-03  --  --
+#&gt;    4 +2.000870033e+00  -- EM --  317 1.00e+00 7.75e-04  --  --
+#&gt;    5 +2.000107437e+00  -- EM --  317 1.00e+00 5.55e-04  --  --
+#&gt;    6 +1.999636078e+00  -- EM --  317 1.00e+00 4.31e-04  --  --
+#&gt;    7 +1.999326526e+00  -- EM --  317 1.00e+00 3.50e-04  --  --
+#&gt;    8 +1.999115017e+00  -- EM --  317 1.00e+00 2.93e-04  --  --
+#&gt;    9 +1.998965586e+00  -- EM --  317 1.00e+00 2.49e-04  --  --
+#&gt;   10 +1.998856663e+00  -- EM --  317 1.00e+00 2.15e-04  --  --
+#&gt;   11 +1.998774855e+00  -- EM --  317 1.00e+00 1.88e-04  --  --
+#&gt;   12 +1.998711637e+00  -- EM --  317 1.00e+00 1.66e-04  --  --
+#&gt;   13 +1.998661462e+00  -- EM --  317 1.00e+00 1.47e-04  --  --
+#&gt;   14 +1.998620653e+00  -- EM --  317 1.00e+00 1.32e-04  --  --
+#&gt;   15 +1.998586726e+00  -- EM --  317 1.00e+00 1.20e-04  --  --
+#&gt;   16 +1.998557972e+00  -- EM --  317 1.00e+00 1.09e-04  --  --
+#&gt;   17 +1.998533194e+00  -- EM --  317 1.00e+00 1.01e-04  --  --
+#&gt;   18 +1.998511540e+00  -- EM --  316 1.00e+00 9.33e-05  --  --
+#&gt;   19 +1.998492389e+00  -- EM --  316 1.00e+00 8.70e-05  --  --
+#&gt;   20 +1.998475286e+00  -- EM --  316 1.00e+00 8.16e-05  --  --
+#&gt;    1 +1.998459886e+00 +1.302e-02 316  ------   ------   --  --
+#&gt;    2 +1.998445889e+00 +1.239e-02 296 1.00e+00 7.59e-05  20   1
+#&gt;    3 +1.998433145e+00 +1.178e-02 276 1.00e+00 8.88e-05  20   1
+#&gt;    4 +1.998421482e+00 +1.119e-02 256 1.00e+00 1.09e-04  20   1
+#&gt;    5 +1.998410753e+00 +1.063e-02 236 1.00e+00 4.56e-04  20   1
+#&gt;    6 +1.998400863e+00 +1.008e-02 216 1.00e+00 9.47e-04  20   1
+#&gt;    7 +1.998391701e+00 +9.538e-03 196 1.00e+00 2.94e-03  20   1
+#&gt;    8 +1.998383206e+00 +9.022e-03 176 1.00e+00 1.94e-03  20   1
+#&gt;    9 +1.998375309e+00 +8.535e-03 156 1.00e+00 2.14e-03  20   1
+#&gt;   10 +1.998367951e+00 +8.072e-03 136 1.00e+00 3.22e-03  20   1
+#&gt;   11 +1.998361093e+00 +7.643e-03 116 1.00e+00 5.87e-03  20   1
+#&gt;   12 +1.998354621e+00 +7.223e-03  96 1.00e+00 1.02e-02  20   1
+#&gt;   13 +1.998348497e+00 +7.140e-03  76 1.00e+00 1.68e-02  20   1
+#&gt;   14 +1.998342127e+00 +6.999e-03  56 1.00e+00 4.50e-02  20   1
+#&gt;   15 +1.998256234e+00 +4.139e-03  36 1.00e+00 1.13e-01  20   1
+#&gt;   16 +1.998224811e+00 +3.176e-03  35 1.00e+00 2.94e-02  20   1
+#&gt;   17 +1.998222421e+00 +2.119e-04  35 1.00e+00 1.23e-03  20   1
+#&gt;   18 +1.998222016e+00 +2.157e-04  34 1.00e+00 6.01e-04  20   1
+#&gt;   19 +1.998221910e+00 +2.154e-04  35 1.00e+00 1.90e-04  20   1
+#&gt;   20 +1.998221865e+00 +2.164e-04  35 1.00e+00 1.49e-04  20   1
+#&gt;   21 +1.998219530e+00 +1.514e-04  35 1.00e+00 1.92e-02  20   1
+#&gt;   22 +1.998216396e+00 +7.652e-05  35 1.00e+00 5.28e-02  20   1
+#&gt;   23 +1.998216133e+00 +7.796e-05  35 1.00e+00 4.36e-03  20   1
+#&gt;   24 +1.998215900e+00 +7.869e-05  35 1.00e+00 2.19e-03  20   1
+#&gt;   25 +1.998214921e+00 +6.126e-05  36 1.00e+00 2.19e-02  20   1
+#&gt;   26 +1.998214534e+00 +6.132e-05  35 1.00e+00 4.42e-03  20   1
+#&gt;   27 +1.998214534e+00 +6.132e-05  35 1.00e+00 2.90e-07  20   1
+#&gt;   28 +1.998214534e+00 +6.132e-05  35 1.00e+00 6.37e-10  20   1
+#&gt;   29 +1.998214534e+00 +6.132e-05  35 1.00e+00 2.82e-12  20   1
+#&gt;   30 +1.998214534e+00 +6.132e-05  35 1.00e+00 1.44e-12  20   1
+#&gt;   31 +1.998214534e+00 +6.132e-05  35 1.00e+00 4.28e-13  20   1
+#&gt;   32 +1.998214534e+00 +6.132e-05  35 1.00e+00 4.04e-13  20   1
+#&gt;   33 +1.998214534e+00 +6.132e-05  35 1.00e+00 1.08e-12  20   1
+#&gt;   34 +1.998214513e+00 +6.135e-05  34 1.00e+00 2.48e-04  20   1
+#&gt;   35 +1.998214513e+00 +6.135e-05  34 1.00e+00 6.00e-07  20   1
+#&gt;   36 +1.998214513e+00 +6.135e-05  34 1.00e+00 8.12e-09  20   1
+#&gt;   37 +1.998214513e+00 +6.135e-05  34 1.00e+00 3.29e-10  20   1
+#&gt;   38 +1.998214513e+00 +6.135e-05  34 1.00e+00 1.36e-11  20   1
+#&gt;   39 +1.998214513e+00 +6.135e-05  34 1.00e+00 1.41e-12  20   1
+#&gt;   40 +1.998214513e+00 +6.135e-05  34 1.00e+00 3.21e-13  20   1
+#&gt;   41 +1.998214513e+00 +6.135e-05  34 1.00e+00 5.57e-13  20   1
+#&gt;   42 +1.998214513e+00 +6.135e-05  34 1.00e+00 1.62e-12  20   1
+#&gt;   43 +1.998214513e+00 +6.135e-05  34 1.00e+00 5.30e-13  20   1
+#&gt;   44 +1.998214513e+00 +6.135e-05  34 1.00e+00 3.29e-13  20   1
+#&gt;   45 +1.998214513e+00 +6.135e-05  34 1.00e+00 1.20e-13  20   1
+#&gt;   46 +1.998214513e+00 +6.135e-05  34 1.00e+00 4.23e-13  20   1
+#&gt;   47 +1.998214513e+00 +6.135e-05  34 1.00e+00 2.82e-13  20   1
+#&gt;   48 +1.998214513e+00 +6.135e-05  34 1.00e+00 2.08e-13  20   1
+#&gt;   49 +1.998214513e+00 +6.135e-05  34 1.00e+00 3.70e-13  20   1
+#&gt;   50 +1.998214513e+00 +6.135e-05  34 1.00e+00 4.62e-13  20   1
+#&gt;   51 +1.998214513e+00 +6.135e-05  34 1.00e+00 2.39e-13  20   1
+#&gt;   52 +1.998214513e+00 +6.135e-05  34 1.00e+00 2.27e-13  20   1
+#&gt;   53 +1.998214141e+00 +6.155e-05  34 1.00e+00 6.20e-03  20   1
+#&gt;   54 +1.998214141e+00 +6.155e-05  34 1.00e+00 2.60e-07  20   1
+#&gt;   55 +1.998214141e+00 +6.155e-05  34 1.00e+00 6.55e-11  20   1
+#&gt;   56 +1.998214141e+00 +6.155e-05  34 1.00e+00 1.39e-12  20   1
+#&gt;   57 +1.998214141e+00 +6.155e-05  34 1.00e+00 4.20e-13  20   1
+#&gt;   58 +1.998214141e+00 +6.155e-05  34 1.00e+00 2.20e-13  20   1
+#&gt;   59 +1.998214141e+00 +6.155e-05  34 1.00e+00 1.14e-12  20   1
+#&gt;   60 +1.998214141e+00 +6.155e-05  34 1.00e+00 1.61e-12  20   1
+#&gt;   61 +1.998214141e+00 +6.155e-05  34 1.00e+00 5.89e-13  20   1
+#&gt;   62 +1.998214141e+00 +6.155e-05  34 1.00e+00 9.85e-14  20   1
+#&gt;   63 +1.998214141e+00 +6.155e-05  34 1.00e+00 1.36e-12  20   1
+#&gt;   64 +1.998214141e+00 +6.155e-05  34 1.00e+00 3.28e-13  20   1
+#&gt;   65 +1.998214141e+00 +6.155e-05  34 1.00e+00 6.38e-13  20   1
+#&gt;   66 +1.998214141e+00 +6.155e-05  34 1.00e+00 3.87e-13  20   1
+#&gt;   67 +1.998214141e+00 +6.155e-05  34 1.00e+00 2.81e-13  20   1
+#&gt;   68 +1.998214141e+00 +6.155e-05  34 1.00e+00 8.49e-13  20   1
+#&gt;   69 +1.998214141e+00 +6.155e-05  34 1.00e+00 9.71e-13  20   1
+#&gt;   70 +1.998214141e+00 +6.155e-05  34 1.00e+00 5.34e-13  20   1
+#&gt;   71 +1.998214141e+00 +6.155e-05  34 1.00e+00 1.78e-12  20   1
+#&gt;   72 +1.998214141e+00 +6.155e-05  34 1.00e+00 7.69e-13  20   1
+#&gt;   73 +1.998214141e+00 +6.155e-05  34 1.00e+00 5.69e-13  20   1
+#&gt;   74 +1.998214141e+00 +6.155e-05  34 1.00e+00 2.76e-13  20   1
+#&gt;   75 +1.998214141e+00 +6.155e-05  34 1.00e+00 5.74e-13  20   1
+#&gt;   76 +1.998214141e+00 +6.155e-05  34 1.00e+00 1.05e-12  20   1
+#&gt;   77 +1.998214141e+00 +6.155e-05  34 1.00e+00 3.71e-13  20   1
+#&gt;   78 +1.998213990e+00 +6.151e-05  34 1.00e+00 1.75e-03  20   1
+#&gt;   79 +1.998213990e+00 +6.151e-05  34 1.00e+00 2.93e-07  20   1
+#&gt;   80 +1.998213990e+00 +6.151e-05  34 1.00e+00 6.05e-10  20   1
+#&gt;   81 +1.998213990e+00 +6.151e-05  34 1.00e+00 1.94e-12  20   1
+#&gt;   82 +1.998213990e+00 +6.151e-05  34 1.00e+00 1.37e-12  20   1
+#&gt;   83 +1.998213990e+00 +6.151e-05  34 1.00e+00 6.46e-13  20   1
+#&gt;   84 +1.998213990e+00 +6.151e-05  34 1.00e+00 4.40e-13  20   1
+#&gt;   85 +1.998213990e+00 +6.151e-05  34 1.00e+00 4.34e-13  20   1
+#&gt;   86 +1.998213990e+00 +6.151e-05  34 1.00e+00 1.08e-13  20   1
+#&gt;   87 +1.998213990e+00 +6.151e-05  34 1.00e+00 1.36e-12  20   1
+#&gt;   88 +1.998210175e+00 +2.189e-05  33 1.00e+00 6.01e-02  20   1
+#&gt;   89 +1.998210028e+00 +5.608e-05  33 1.00e+00 7.12e-03  20   1
+#&gt;   90 +1.998210028e+00 +5.566e-05  33 1.00e+00 7.82e-07  20   1
+#&gt;   91 +1.998210028e+00 +5.566e-05  33 1.00e+00 1.94e-10  20   1
+#&gt;   92 +1.998210028e+00 +5.566e-05  33 1.00e+00 3.96e-12  20   1
+#&gt;   93 +1.998209902e+00 +9.049e-05  34 1.00e+00 5.72e-03  20   1
+#&gt;   94 +1.998209495e+00 +2.169e-05  34 1.00e+00 8.85e-03  20   1
+#&gt;   95 +1.998209181e+00 +1.170e-05  35 1.00e+00 1.17e-02  20   1
+#&gt;   96 +1.998209133e+00 +1.178e-05  35 1.00e+00 1.91e-03  20   1
+#&gt;   97 +1.998208570e+00 +2.110e-05  35 1.00e+00 5.88e-02  20   1
+#&gt;   98 +1.998208570e+00 +2.060e-05  35 1.00e+00 4.83e-06  20   1
+#&gt;   99 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.19e-09  20   1
+#&gt;  100 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.02e-10  20   1
+#&gt;  101 +1.998208570e+00 +2.060e-05  35 1.00e+00 8.87e-12  20   1
+#&gt;  102 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.12e-12  20   1
+#&gt;  103 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.32e-12  20   1
+#&gt;  104 +1.998208570e+00 +2.060e-05  35 1.00e+00 4.56e-12  20   1
+#&gt;  105 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.96e-13  20   1
+#&gt;  106 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.61e-12  20   1
+#&gt;  107 +1.998208570e+00 +2.060e-05  35 1.00e+00 5.98e-12  20   1
+#&gt;  108 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.60e-12  20   1
+#&gt;  109 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.89e-12  20   1
+#&gt;  110 +1.998208570e+00 +2.060e-05  35 1.00e+00 7.26e-13  20   1
+#&gt;  111 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.03e-12  20   1
+#&gt;  112 +1.998208570e+00 +2.060e-05  35 1.00e+00 4.04e-13  20   1
+#&gt;  113 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.22e-12  20   1
+#&gt;  114 +1.998208570e+00 +2.060e-05  35 1.00e+00 6.69e-13  20   1
+#&gt;  115 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.41e-12  20   1
+#&gt;  116 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.56e-13  20   1
+#&gt;  117 +1.998208570e+00 +2.060e-05  35 1.00e+00 9.13e-13  20   1
+#&gt;  118 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.50e-12  20   1
+#&gt;  119 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.73e-13  20   1
+#&gt;  120 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.16e-12  20   1
+#&gt;  121 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.57e-12  20   1
+#&gt;  122 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.09e-12  20   1
+#&gt;  123 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.40e-13  20   1
+#&gt;  124 +1.998208570e+00 +2.060e-05  35 1.00e+00 4.28e-12  20   1
+#&gt;  125 +1.998208570e+00 +2.060e-05  35 1.00e+00 7.11e-12  20   1
+#&gt;  126 +1.998208570e+00 +2.060e-05  35 1.00e+00 8.12e-12  20   1
+#&gt;  127 +1.998208570e+00 +2.060e-05  35 1.00e+00 8.44e-13  20   1
+#&gt;  128 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.51e-12  20   1
+#&gt;  129 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.33e-12  20   1
+#&gt;  130 +1.998208570e+00 +2.060e-05  35 1.00e+00 5.67e-13  20   1
+#&gt;  131 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.48e-12  20   1
+#&gt;  132 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.16e-12  20   1
+#&gt;  133 +1.998208570e+00 +2.060e-05  35 1.00e+00 4.67e-13  20   1
+#&gt;  134 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.42e-12  20   1
+#&gt;  135 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.55e-12  20   1
+#&gt;  136 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.40e-12  20   1
+#&gt;  137 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.43e-12  20   1
+#&gt;  138 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.28e-12  20   1
+#&gt;  139 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.29e-12  20   1
+#&gt;  140 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.03e-12  20   1
+#&gt;  141 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.92e-12  20   1
+#&gt;  142 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.18e-12  20   1
+#&gt;  143 +1.998208570e+00 +2.060e-05  35 1.00e+00 4.75e-13  20   1
+#&gt;  144 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.97e-12  20   1
+#&gt;  145 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.82e-12  20   1
+#&gt;  146 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.29e-12  20   1
+#&gt;  147 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.47e-12  20   1
+#&gt;  148 +1.998208570e+00 +2.060e-05  35 1.00e+00 6.87e-13  20   1
+#&gt;  149 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.00e-12  20   1
+#&gt;  150 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.56e-12  20   1
+#&gt;  151 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.72e-12  20   1
+#&gt;  152 +1.998208570e+00 +2.060e-05  35 1.00e+00 5.87e-13  20   1
+#&gt;  153 +1.998208570e+00 +2.060e-05  35 1.00e+00 4.17e-12  20   1
+#&gt;  154 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.42e-12  20   1
+#&gt;  155 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.18e-12  20   1
+#&gt;  156 +1.998208570e+00 +2.060e-05  35 1.00e+00 4.77e-12  20   1
+#&gt;  157 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.83e-13  20   1
+#&gt;  158 +1.998208570e+00 +2.060e-05  35 1.00e+00 7.45e-12  20   1
+#&gt;  159 +1.998208570e+00 +2.060e-05  35 1.00e+00 7.23e-12  20   1
+#&gt;  160 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.79e-12  20   1
+#&gt;  161 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.57e-12  20   1
+#&gt;  162 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.02e-12  20   1
+#&gt;  163 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.78e-12  20   1
+#&gt;  164 +1.998208570e+00 +2.060e-05  35 1.00e+00 4.34e-12  20   1
+#&gt;  165 +1.998208570e+00 +2.060e-05  35 1.00e+00 4.43e-12  20   1
+#&gt;  166 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.94e-13  20   1
+#&gt;  167 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.50e-12  20   1
+#&gt;  168 +1.998208570e+00 +2.060e-05  35 1.00e+00 7.26e-13  20   1
+#&gt;  169 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.56e-13  20   1
+#&gt;  170 +1.998208570e+00 +2.060e-05  35 1.00e+00 7.54e-13  20   1
+#&gt;  171 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.24e-12  20   1
+#&gt;  172 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.66e-12  20   1
+#&gt;  173 +1.998208570e+00 +2.060e-05  35 1.00e+00 4.91e-12  20   1
+#&gt;  174 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.67e-13  20   1
+#&gt;  175 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.36e-12  20   1
+#&gt;  176 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.18e-12  20   1
+#&gt;  177 +1.998208570e+00 +2.060e-05  35 1.00e+00 4.29e-13  20   1
+#&gt;  178 +1.998208570e+00 +2.060e-05  35 1.00e+00 4.70e-12  20   1
+#&gt;  179 +1.998208570e+00 +2.060e-05  35 1.00e+00 5.61e-13  20   1
+#&gt;  180 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.10e-12  20   1
+#&gt;  181 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.95e-12  20   1
+#&gt;  182 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.70e-12  20   1
+#&gt;  183 +1.998208570e+00 +2.060e-05  35 1.00e+00 5.81e-13  20   1
+#&gt;  184 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.64e-12  20   1
+#&gt;  185 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.03e-12  20   1
+#&gt;  186 +1.998208570e+00 +2.060e-05  35 1.00e+00 1.93e-12  20   1
+#&gt;  187 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.91e-12  20   1
+#&gt;  188 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.70e-13  20   1
+#&gt;  189 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.19e-12  20   1
+#&gt;  190 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.84e-12  20   1
+#&gt;  191 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.85e-13  20   1
+#&gt;  192 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.91e-12  20   1
+#&gt;  193 +1.998208570e+00 +2.060e-05  35 1.00e+00 2.05e-13  20   1
+#&gt;  194 +1.998208570e+00 +2.060e-05  35 1.00e+00 3.19e-12  20   1
+#&gt;  195 +1.998208569e+00 +2.064e-05  36 1.00e+00 4.31e-05  20   1
+#&gt;  196 +1.998208569e+00 +2.064e-05  36 1.00e+00 4.39e-07  20   1
+#&gt;  197 +1.998208569e+00 +2.064e-05  36 1.00e+00 1.24e-08  20   1
+#&gt;  198 +1.998208569e+00 +2.064e-05  36 1.00e+00 5.55e-10  20   1
+#&gt;  199 +1.998208569e+00 +2.064e-05  36 1.00e+00 3.02e-11  20   1
+#&gt;  200 +1.998208569e+00 +2.064e-05  36 1.00e+00 3.99e-12  20   1
+#&gt;  201 +1.998208569e+00 +2.064e-05  36 1.00e+00 4.47e-13  20   1
+#&gt;  202 +1.998208569e+00 +2.064e-05  36 1.00e+00 4.14e-12  20   1
+#&gt;  203 +1.998208569e+00 +2.064e-05  36 1.00e+00 2.08e-12  20   1
+#&gt;  204 +1.998208569e+00 +2.064e-05  36 1.00e+00 2.51e-12  20   1
+#&gt;  205 +1.998208569e+00 +2.064e-05  36 1.00e+00 1.17e-12  20   1
+#&gt;  206 +1.998208569e+00 +2.064e-05  36 1.00e+00 2.48e-12  20   1
+#&gt;  207 +1.998208569e+00 +2.064e-05  36 1.00e+00 4.21e-13  20   1
+#&gt;  208 +1.998208569e+00 +2.064e-05  36 1.00e+00 1.04e-12  20   1
+#&gt;  209 +1.998208569e+00 +2.064e-05  36 1.00e+00 4.68e-12  20   1
+#&gt;  210 +1.998208569e+00 +2.064e-05  36 1.00e+00 2.21e-12  20   1
+#&gt;  211 +1.998208569e+00 +2.064e-05  36 1.00e+00 3.08e-12  20   1
+#&gt;  212 +1.998208569e+00 +2.064e-05  36 1.00e+00 7.50e-14  20   1
+#&gt;  213 +1.998208569e+00 +2.064e-05  36 1.00e+00 2.69e-12  20   1
+#&gt;  214 +1.998208569e+00 +2.064e-05  36 1.00e+00 1.44e-13  20   1
+#&gt;  215 +1.998208569e+00 +2.064e-05  36 1.00e+00 2.70e-12  20   1
+#&gt;  216 +1.998208569e+00 +2.064e-05  36 1.00e+00 1.31e-12  20   1
+#&gt;  217 +1.998208569e+00 +2.064e-05  36 1.00e+00 3.82e-12  20   1
+#&gt;  218 +1.998208569e+00 +2.064e-05  36 1.00e+00 2.98e-12  20   1
+#&gt;  219 +1.998208569e+00 +2.064e-05  36 1.00e+00 4.00e-12  20   1
+#&gt;  220 +1.998208569e+00 +2.064e-05  36 1.00e+00 2.94e-12  20   1
+#&gt;  221 +1.998208569e+00 +2.064e-05  36 1.00e+00 3.41e-12  20   1
+#&gt;  222 +1.998208569e+00 +2.064e-05  36 1.00e+00 2.80e-13  20   1
+#&gt;  223 +1.998208569e+00 +2.064e-05  36 1.00e+00 2.21e-12  20   1
+#&gt;  224 +1.998208569e+00 +2.064e-05  36 1.00e+00 6.21e-13  20   1
+#&gt;  225 +1.998208569e+00 +2.064e-05  36 1.00e+00 4.80e-12  20   1
+#&gt;  226 +1.998208569e+00 +2.064e-05  36 1.00e+00 5.43e-12  20   1
+#&gt;  227 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.29e-05  20   1
+#&gt;  228 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.73e-07  20   1
+#&gt;  229 +1.998208569e+00 +2.064e-05  35 1.00e+00 6.38e-09  20   1
+#&gt;  230 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.93e-10  20   1
+#&gt;  231 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.92e-11  20   1
+#&gt;  232 +1.998208569e+00 +2.064e-05  35 1.00e+00 7.27e-13  20   1
+#&gt;  233 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.50e-13  20   1
+#&gt;  234 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.97e-12  20   1
+#&gt;  235 +1.998208569e+00 +2.064e-05  35 1.00e+00 5.02e-12  20   1
+#&gt;  236 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.76e-12  20   1
+#&gt;  237 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.44e-12  20   1
+#&gt;  238 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.46e-12  20   1
+#&gt;  239 +1.998208569e+00 +2.064e-05  35 1.00e+00 7.57e-12  20   1
+#&gt;  240 +1.998208569e+00 +2.064e-05  35 1.00e+00 6.99e-12  20   1
+#&gt;  241 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.04e-12  20   1
+#&gt;  242 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.57e-12  20   1
+#&gt;  243 +1.998208569e+00 +2.064e-05  35 1.00e+00 5.88e-12  20   1
+#&gt;  244 +1.998208569e+00 +2.064e-05  35 1.00e+00 9.19e-13  20   1
+#&gt;  245 +1.998208569e+00 +2.064e-05  35 1.00e+00 5.43e-13  20   1
+#&gt;  246 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.25e-12  20   1
+#&gt;  247 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.49e-12  20   1
+#&gt;  248 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.53e-12  20   1
+#&gt;  249 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.04e-12  20   1
+#&gt;  250 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.90e-12  20   1
+#&gt;  251 +1.998208569e+00 +2.064e-05  35 1.00e+00 6.24e-13  20   1
+#&gt;  252 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.36e-12  20   1
+#&gt;  253 +1.998208569e+00 +2.064e-05  35 1.00e+00 5.73e-13  20   1
+#&gt;  254 +1.998208569e+00 +2.064e-05  35 1.00e+00 8.91e-13  20   1
+#&gt;  255 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.64e-12  20   1
+#&gt;  256 +1.998208569e+00 +2.064e-05  35 1.00e+00 6.13e-13  20   1
+#&gt;  257 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.52e-12  20   1
+#&gt;  258 +1.998208569e+00 +2.064e-05  35 1.00e+00 7.19e-13  20   1
+#&gt;  259 +1.998208569e+00 +2.064e-05  35 1.00e+00 5.79e-13  20   1
+#&gt;  260 +1.998208569e+00 +2.064e-05  35 1.00e+00 5.14e-13  20   1
+#&gt;  261 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.88e-13  20   1
+#&gt;  262 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.74e-12  20   1
+#&gt;  263 +1.998208569e+00 +2.064e-05  35 1.00e+00 8.24e-13  20   1
+#&gt;  264 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.15e-12  20   1
+#&gt;  265 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.85e-13  20   1
+#&gt;  266 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.77e-12  20   1
+#&gt;  267 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.50e-12  20   1
+#&gt;  268 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.51e-12  20   1
+#&gt;  269 +1.998208569e+00 +2.064e-05  35 1.00e+00 7.31e-12  20   1
+#&gt;  270 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.17e-12  20   1
+#&gt;  271 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.22e-12  20   1
+#&gt;  272 +1.998208569e+00 +2.064e-05  35 1.00e+00 7.45e-13  20   1
+#&gt;  273 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.38e-12  20   1
+#&gt;  274 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.95e-12  20   1
+#&gt;  275 +1.998208569e+00 +2.064e-05  35 1.00e+00 5.16e-12  20   1
+#&gt;  276 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.11e-13  20   1
+#&gt;  277 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.12e-12  20   1
+#&gt;  278 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.72e-12  20   1
+#&gt;  279 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.11e-13  20   1
+#&gt;  280 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.04e-12  20   1
+#&gt;  281 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.63e-12  20   1
+#&gt;  282 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.52e-12  20   1
+#&gt;  283 +1.998208569e+00 +2.064e-05  35 1.00e+00 6.93e-13  20   1
+#&gt;  284 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.35e-12  20   1
+#&gt;  285 +1.998208569e+00 +2.064e-05  35 1.00e+00 7.86e-13  20   1
+#&gt;  286 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.81e-13  20   1
+#&gt;  287 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.39e-12  20   1
+#&gt;  288 +1.998208569e+00 +2.064e-05  35 1.00e+00 9.78e-13  20   1
+#&gt;  289 +1.998208569e+00 +2.064e-05  35 1.00e+00 6.43e-13  20   1
+#&gt;  290 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.89e-13  20   1
+#&gt;  291 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.85e-12  20   1
+#&gt;  292 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.36e-12  20   1
+#&gt;  293 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.91e-12  20   1
+#&gt;  294 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.80e-12  20   1
+#&gt;  295 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.79e-12  20   1
+#&gt;  296 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.18e-12  20   1
+#&gt;  297 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.21e-12  20   1
+#&gt;  298 +1.998208569e+00 +2.064e-05  35 1.00e+00 6.44e-14  20   1
+#&gt;  299 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.95e-12  20   1
+#&gt;  300 +1.998208569e+00 +2.064e-05  35 1.00e+00 7.50e-12  20   1
+#&gt;  301 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.52e-12  20   1
+#&gt;  302 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.45e-12  20   1
+#&gt;  303 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.61e-12  20   1
+#&gt;  304 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.25e-12  20   1
+#&gt;  305 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.09e-13  20   1
+#&gt;  306 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.80e-12  20   1
+#&gt;  307 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.37e-13  20   1
+#&gt;  308 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.07e-12  20   1
+#&gt;  309 +1.998208569e+00 +2.064e-05  35 1.00e+00 5.83e-13  20   1
+#&gt;  310 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.39e-12  20   1
+#&gt;  311 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.77e-13  20   1
+#&gt;  312 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.81e-12  20   1
+#&gt;  313 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.62e-13  20   1
+#&gt;  314 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.24e-12  20   1
+#&gt;  315 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.99e-12  20   1
+#&gt;  316 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.60e-12  20   1
+#&gt;  317 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.15e-12  20   1
+#&gt;  318 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.49e-13  20   1
+#&gt;  319 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.49e-12  20   1
+#&gt;  320 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.12e-13  20   1
+#&gt;  321 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.32e-12  20   1
+#&gt;  322 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.95e-12  20   1
+#&gt;  323 +1.998208569e+00 +2.064e-05  35 1.00e+00 6.62e-12  20   1
+#&gt;  324 +1.998208569e+00 +2.064e-05  35 1.00e+00 6.28e-12  20   1
+#&gt;  325 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.07e-12  20   1
+#&gt;  326 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.40e-12  20   1
+#&gt;  327 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.37e-12  20   1
+#&gt;  328 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.63e-12  20   1
+#&gt;  329 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.16e-12  20   1
+#&gt;  330 +1.998208569e+00 +2.064e-05  35 1.00e+00 8.11e-13  20   1
+#&gt;  331 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.05e-13  20   1
+#&gt;  332 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.15e-13  20   1
+#&gt;  333 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.86e-12  20   1
+#&gt;  334 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.03e-12  20   1
+#&gt;  335 +1.998208569e+00 +2.064e-05  35 1.00e+00 6.13e-12  20   1
+#&gt;  336 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.46e-12  20   1
+#&gt;  337 +1.998208569e+00 +2.064e-05  35 1.00e+00 8.73e-13  20   1
+#&gt;  338 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.19e-12  20   1
+#&gt;  339 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.40e-12  20   1
+#&gt;  340 +1.998208569e+00 +2.064e-05  35 1.00e+00 6.91e-12  20   1
+#&gt;  341 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.87e-12  20   1
+#&gt;  342 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.19e-12  20   1
+#&gt;  343 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.10e-12  20   1
+#&gt;  344 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.97e-12  20   1
+#&gt;  345 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.24e-12  20   1
+#&gt;  346 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.62e-12  20   1
+#&gt;  347 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.18e-12  20   1
+#&gt;  348 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.40e-12  20   1
+#&gt;  349 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.00e-13  20   1
+#&gt;  350 +1.998208569e+00 +2.064e-05  35 1.00e+00 9.28e-14  20   1
+#&gt;  351 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.06e-13  20   1
+#&gt;  352 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.75e-12  20   1
+#&gt;  353 +1.998208569e+00 +2.064e-05  35 1.00e+00 5.29e-12  20   1
+#&gt;  354 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.42e-13  20   1
+#&gt;  355 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.09e-12  20   1
+#&gt;  356 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.98e-12  20   1
+#&gt;  357 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.83e-12  20   1
+#&gt;  358 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.38e-12  20   1
+#&gt;  359 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.66e-12  20   1
+#&gt;  360 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.24e-12  20   1
+#&gt;  361 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.99e-12  20   1
+#&gt;  362 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.81e-13  20   1
+#&gt;  363 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.61e-12  20   1
+#&gt;  364 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.64e-12  20   1
+#&gt;  365 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.86e-12  20   1
+#&gt;  366 +1.998208569e+00 +2.064e-05  35 1.00e+00 6.49e-12  20   1
+#&gt;  367 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.09e-12  20   1
+#&gt;  368 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.37e-13  20   1
+#&gt;  369 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.27e-12  20   1
+#&gt;  370 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.47e-12  20   1
+#&gt;  371 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.64e-12  20   1
+#&gt;  372 +1.998208569e+00 +2.064e-05  35 1.00e+00 8.46e-14  20   1
+#&gt;  373 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.69e-12  20   1
+#&gt;  374 +1.998208569e+00 +2.064e-05  35 1.00e+00 7.45e-13  20   1
+#&gt;  375 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.16e-12  20   1
+#&gt;  376 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.68e-12  20   1
+#&gt;  377 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.56e-13  20   1
+#&gt;  378 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.96e-12  20   1
+#&gt;  379 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.16e-12  20   1
+#&gt;  380 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.56e-12  20   1
+#&gt;  381 +1.998208569e+00 +2.064e-05  35 1.00e+00 9.11e-13  20   1
+#&gt;  382 +1.998208569e+00 +2.064e-05  35 1.00e+00 9.20e-13  20   1
+#&gt;  383 +1.998208569e+00 +2.064e-05  35 1.00e+00 5.96e-13  20   1
+#&gt;  384 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.26e-12  20   1
+#&gt;  385 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.19e-12  20   1
+#&gt;  386 +1.998208569e+00 +2.064e-05  35 1.00e+00 7.61e-14  20   1
+#&gt;  387 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.62e-12  20   1
+#&gt;  388 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.40e-12  20   1
+#&gt;  389 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.78e-12  20   1
+#&gt;  390 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.25e-12  20   1
+#&gt;  391 +1.998208569e+00 +2.064e-05  35 1.00e+00 8.96e-13  20   1
+#&gt;  392 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.17e-13  20   1
+#&gt;  393 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.89e-12  20   1
+#&gt;  394 +1.998208569e+00 +2.064e-05  35 1.00e+00 9.02e-13  20   1
+#&gt;  395 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.57e-12  20   1
+#&gt;  396 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.50e-12  20   1
+#&gt;  397 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.00e-12  20   1
+#&gt;  398 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.20e-13  20   1
+#&gt;  399 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.67e-12  20   1
+#&gt;  400 +1.998208569e+00 +2.064e-05  35 1.00e+00 7.15e-12  20   1
+#&gt;  401 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.04e-12  20   1
+#&gt;  402 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.77e-12  20   1
+#&gt;  403 +1.998208569e+00 +2.064e-05  35 1.00e+00 2.23e-12  20   1
+#&gt;  404 +1.998208569e+00 +2.064e-05  35 1.00e+00 9.50e-13  20   1
+#&gt;  405 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.07e-12  20   1
+#&gt;  406 +1.998208569e+00 +2.064e-05  35 1.00e+00 7.35e-12  20   1
+#&gt;  407 +1.998208569e+00 +2.064e-05  35 1.00e+00 1.76e-12  20   1
+#&gt;  408 +1.998208569e+00 +2.064e-05  35 1.00e+00 3.19e-12  20   1
+#&gt;  409 +1.998208569e+00 +2.064e-05  35 1.00e+00 4.52e-13  20   1
+#&gt;  410 +1.998208529e+00 +5.499e-06  36 1.00e+00 1.49e-02  20   1
+#&gt;  411 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.70e-07  20   1
+#&gt;  412 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.04e-09  20   1
+#&gt;  413 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.48e-11  20   1
+#&gt;  414 +1.998208529e+00 +5.516e-06  36 1.00e+00 9.25e-13  20   1
+#&gt;  415 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.35e-12  20   1
+#&gt;  416 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.48e-13  20   1
+#&gt;  417 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.64e-12  20   1
+#&gt;  418 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.18e-12  20   1
+#&gt;  419 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.79e-13  20   1
+#&gt;  420 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.83e-12  20   1
+#&gt;  421 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.76e-13  20   1
+#&gt;  422 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.61e-12  20   1
+#&gt;  423 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.12e-12  20   1
+#&gt;  424 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.02e-11  20   1
+#&gt;  425 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.58e-12  20   1
+#&gt;  426 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.59e-13  20   1
+#&gt;  427 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.23e-11  20   1
+#&gt;  428 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.88e-12  20   1
+#&gt;  429 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.47e-13  20   1
+#&gt;  430 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.05e-12  20   1
+#&gt;  431 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.43e-13  20   1
+#&gt;  432 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.06e-12  20   1
+#&gt;  433 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.04e-11  20   1
+#&gt;  434 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.76e-12  20   1
+#&gt;  435 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.03e-12  20   1
+#&gt;  436 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.57e-12  20   1
+#&gt;  437 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.43e-12  20   1
+#&gt;  438 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.51e-12  20   1
+#&gt;  439 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.12e-12  20   1
+#&gt;  440 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.96e-12  20   1
+#&gt;  441 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.72e-12  20   1
+#&gt;  442 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.10e-12  20   1
+#&gt;  443 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.04e-12  20   1
+#&gt;  444 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.16e-12  20   1
+#&gt;  445 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.09e-12  20   1
+#&gt;  446 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.10e-12  20   1
+#&gt;  447 +1.998208529e+00 +5.516e-06  36 1.00e+00 9.23e-13  20   1
+#&gt;  448 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.28e-12  20   1
+#&gt;  449 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.96e-13  20   1
+#&gt;  450 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.31e-12  20   1
+#&gt;  451 +1.998208529e+00 +5.516e-06  36 1.00e+00 9.37e-13  20   1
+#&gt;  452 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.17e-12  20   1
+#&gt;  453 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.49e-12  20   1
+#&gt;  454 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.74e-12  20   1
+#&gt;  455 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.98e-12  20   1
+#&gt;  456 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.45e-12  20   1
+#&gt;  457 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.06e-12  20   1
+#&gt;  458 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.26e-12  20   1
+#&gt;  459 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.29e-13  20   1
+#&gt;  460 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.58e-12  20   1
+#&gt;  461 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.52e-12  20   1
+#&gt;  462 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.49e-12  20   1
+#&gt;  463 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.31e-12  20   1
+#&gt;  464 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.31e-13  20   1
+#&gt;  465 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.86e-12  20   1
+#&gt;  466 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.71e-12  20   1
+#&gt;  467 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.78e-12  20   1
+#&gt;  468 +1.998208529e+00 +5.516e-06  36 1.00e+00 9.10e-12  20   1
+#&gt;  469 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.80e-12  20   1
+#&gt;  470 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.36e-12  20   1
+#&gt;  471 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.74e-12  20   1
+#&gt;  472 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.29e-12  20   1
+#&gt;  473 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.85e-12  20   1
+#&gt;  474 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.64e-12  20   1
+#&gt;  475 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.47e-12  20   1
+#&gt;  476 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.61e-12  20   1
+#&gt;  477 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.34e-12  20   1
+#&gt;  478 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.35e-12  20   1
+#&gt;  479 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.55e-12  20   1
+#&gt;  480 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.72e-12  20   1
+#&gt;  481 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.83e-12  20   1
+#&gt;  482 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.39e-12  20   1
+#&gt;  483 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.32e-12  20   1
+#&gt;  484 +1.998208529e+00 +5.516e-06  36 1.00e+00 9.96e-13  20   1
+#&gt;  485 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.84e-12  20   1
+#&gt;  486 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.81e-12  20   1
+#&gt;  487 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.75e-12  20   1
+#&gt;  488 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.74e-12  20   1
+#&gt;  489 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.45e-12  20   1
+#&gt;  490 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.21e-13  20   1
+#&gt;  491 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.95e-12  20   1
+#&gt;  492 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.20e-12  20   1
+#&gt;  493 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.74e-13  20   1
+#&gt;  494 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.44e-12  20   1
+#&gt;  495 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.09e-13  20   1
+#&gt;  496 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.68e-13  20   1
+#&gt;  497 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.94e-12  20   1
+#&gt;  498 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.33e-12  20   1
+#&gt;  499 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.94e-12  20   1
+#&gt;  500 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.33e-12  20   1
+#&gt;  501 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.96e-12  20   1
+#&gt;  502 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.76e-12  20   1
+#&gt;  503 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.04e-12  20   1
+#&gt;  504 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.26e-12  20   1
+#&gt;  505 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.95e-12  20   1
+#&gt;  506 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.25e-12  20   1
+#&gt;  507 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.91e-13  20   1
+#&gt;  508 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.29e-12  20   1
+#&gt;  509 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.66e-12  20   1
+#&gt;  510 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.13e-12  20   1
+#&gt;  511 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.22e-13  20   1
+#&gt;  512 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.41e-12  20   1
+#&gt;  513 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.20e-12  20   1
+#&gt;  514 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.42e-11  20   1
+#&gt;  515 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.70e-12  20   1
+#&gt;  516 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.76e-12  20   1
+#&gt;  517 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.93e-12  20   1
+#&gt;  518 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.15e-12  20   1
+#&gt;  519 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.83e-12  20   1
+#&gt;  520 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.37e-12  20   1
+#&gt;  521 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.44e-12  20   1
+#&gt;  522 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.46e-12  20   1
+#&gt;  523 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.36e-12  20   1
+#&gt;  524 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.56e-12  20   1
+#&gt;  525 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.10e-12  20   1
+#&gt;  526 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.06e-12  20   1
+#&gt;  527 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.66e-13  20   1
+#&gt;  528 +1.998208529e+00 +5.516e-06  36 1.00e+00 9.69e-13  20   1
+#&gt;  529 +1.998208529e+00 +5.516e-06  36 1.00e+00 9.89e-13  20   1
+#&gt;  530 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.02e-12  20   1
+#&gt;  531 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.28e-12  20   1
+#&gt;  532 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.21e-12  20   1
+#&gt;  533 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.91e-12  20   1
+#&gt;  534 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.41e-12  20   1
+#&gt;  535 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.39e-13  20   1
+#&gt;  536 +1.998208529e+00 +5.516e-06  36 1.00e+00 9.40e-12  20   1
+#&gt;  537 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.17e-12  20   1
+#&gt;  538 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.03e-12  20   1
+#&gt;  539 +1.998208529e+00 +5.516e-06  36 1.00e+00 9.39e-12  20   1
+#&gt;  540 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.54e-12  20   1
+#&gt;  541 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.50e-12  20   1
+#&gt;  542 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.79e-12  20   1
+#&gt;  543 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.02e-13  20   1
+#&gt;  544 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.41e-12  20   1
+#&gt;  545 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.41e-12  20   1
+#&gt;  546 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.96e-12  20   1
+#&gt;  547 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.03e-12  20   1
+#&gt;  548 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.07e-12  20   1
+#&gt;  549 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.76e-12  20   1
+#&gt;  550 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.45e-13  20   1
+#&gt;  551 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.04e-12  20   1
+#&gt;  552 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.74e-12  20   1
+#&gt;  553 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.92e-12  20   1
+#&gt;  554 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.99e-12  20   1
+#&gt;  555 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.91e-12  20   1
+#&gt;  556 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.24e-12  20   1
+#&gt;  557 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.97e-12  20   1
+#&gt;  558 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.87e-12  20   1
+#&gt;  559 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.26e-12  20   1
+#&gt;  560 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.85e-12  20   1
+#&gt;  561 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.23e-12  20   1
+#&gt;  562 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.71e-13  20   1
+#&gt;  563 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.58e-12  20   1
+#&gt;  564 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.16e-12  20   1
+#&gt;  565 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.87e-13  20   1
+#&gt;  566 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.08e-12  20   1
+#&gt;  567 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.38e-12  20   1
+#&gt;  568 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.64e-12  20   1
+#&gt;  569 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.39e-12  20   1
+#&gt;  570 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.00e-11  20   1
+#&gt;  571 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.13e-12  20   1
+#&gt;  572 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.68e-12  20   1
+#&gt;  573 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.79e-12  20   1
+#&gt;  574 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.10e-12  20   1
+#&gt;  575 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.43e-12  20   1
+#&gt;  576 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.24e-12  20   1
+#&gt;  577 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.80e-12  20   1
+#&gt;  578 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.37e-12  20   1
+#&gt;  579 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.68e-12  20   1
+#&gt;  580 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.93e-12  20   1
+#&gt;  581 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.60e-12  20   1
+#&gt;  582 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.28e-12  20   1
+#&gt;  583 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.55e-12  20   1
+#&gt;  584 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.52e-11  20   1
+#&gt;  585 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.98e-12  20   1
+#&gt;  586 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.56e-12  20   1
+#&gt;  587 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.47e-13  20   1
+#&gt;  588 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.09e-12  20   1
+#&gt;  589 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.46e-12  20   1
+#&gt;  590 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.75e-12  20   1
+#&gt;  591 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.01e-12  20   1
+#&gt;  592 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.79e-12  20   1
+#&gt;  593 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.78e-12  20   1
+#&gt;  594 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.60e-12  20   1
+#&gt;  595 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.28e-12  20   1
+#&gt;  596 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.43e-12  20   1
+#&gt;  597 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.45e-12  20   1
+#&gt;  598 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.78e-13  20   1
+#&gt;  599 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.37e-12  20   1
+#&gt;  600 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.02e-11  20   1
+#&gt;  601 +1.998208529e+00 +5.516e-06  36 1.00e+00 9.75e-12  20   1
+#&gt;  602 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.25e-12  20   1
+#&gt;  603 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.63e-12  20   1
+#&gt;  604 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.62e-12  20   1
+#&gt;  605 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.08e-12  20   1
+#&gt;  606 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.63e-12  20   1
+#&gt;  607 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.51e-12  20   1
+#&gt;  608 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.26e-12  20   1
+#&gt;  609 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.22e-12  20   1
+#&gt;  610 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.73e-12  20   1
+#&gt;  611 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.29e-12  20   1
+#&gt;  612 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.31e-12  20   1
+#&gt;  613 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.58e-12  20   1
+#&gt;  614 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.26e-11  20   1
+#&gt;  615 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.08e-13  20   1
+#&gt;  616 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.86e-13  20   1
+#&gt;  617 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.82e-12  20   1
+#&gt;  618 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.76e-12  20   1
+#&gt;  619 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.71e-12  20   1
+#&gt;  620 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.52e-12  20   1
+#&gt;  621 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.65e-12  20   1
+#&gt;  622 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.47e-12  20   1
+#&gt;  623 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.62e-12  20   1
+#&gt;  624 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.05e-11  20   1
+#&gt;  625 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.62e-12  20   1
+#&gt;  626 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.72e-12  20   1
+#&gt;  627 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.89e-12  20   1
+#&gt;  628 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.44e-12  20   1
+#&gt;  629 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.80e-12  20   1
+#&gt;  630 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.83e-12  20   1
+#&gt;  631 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.53e-12  20   1
+#&gt;  632 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.29e-12  20   1
+#&gt;  633 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.40e-12  20   1
+#&gt;  634 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.40e-12  20   1
+#&gt;  635 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.07e-11  20   1
+#&gt;  636 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.50e-13  20   1
+#&gt;  637 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.51e-12  20   1
+#&gt;  638 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.36e-12  20   1
+#&gt;  639 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.65e-12  20   1
+#&gt;  640 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.63e-13  20   1
+#&gt;  641 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.88e-12  20   1
+#&gt;  642 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.84e-13  20   1
+#&gt;  643 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.99e-12  20   1
+#&gt;  644 +1.998208529e+00 +5.516e-06  36 1.00e+00 9.16e-12  20   1
+#&gt;  645 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.57e-12  20   1
+#&gt;  646 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.95e-12  20   1
+#&gt;  647 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.28e-12  20   1
+#&gt;  648 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.95e-12  20   1
+#&gt;  649 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.06e-12  20   1
+#&gt;  650 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.11e-12  20   1
+#&gt;  651 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.77e-12  20   1
+#&gt;  652 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.62e-12  20   1
+#&gt;  653 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.62e-12  20   1
+#&gt;  654 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.18e-12  20   1
+#&gt;  655 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.77e-12  20   1
+#&gt;  656 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.41e-12  20   1
+#&gt;  657 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.27e-12  20   1
+#&gt;  658 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.94e-13  20   1
+#&gt;  659 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.06e-12  20   1
+#&gt;  660 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.44e-13  20   1
+#&gt;  661 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.43e-12  20   1
+#&gt;  662 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.68e-12  20   1
+#&gt;  663 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.03e-12  20   1
+#&gt;  664 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.26e-13  20   1
+#&gt;  665 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.38e-12  20   1
+#&gt;  666 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.48e-12  20   1
+#&gt;  667 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.14e-12  20   1
+#&gt;  668 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.80e-12  20   1
+#&gt;  669 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.88e-12  20   1
+#&gt;  670 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.84e-13  20   1
+#&gt;  671 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.76e-12  20   1
+#&gt;  672 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.99e-12  20   1
+#&gt;  673 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.60e-12  20   1
+#&gt;  674 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.23e-12  20   1
+#&gt;  675 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.90e-13  20   1
+#&gt;  676 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.31e-12  20   1
+#&gt;  677 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.54e-12  20   1
+#&gt;  678 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.29e-12  20   1
+#&gt;  679 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.13e-12  20   1
+#&gt;  680 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.44e-12  20   1
+#&gt;  681 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.58e-12  20   1
+#&gt;  682 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.11e-11  20   1
+#&gt;  683 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.37e-12  20   1
+#&gt;  684 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.63e-13  20   1
+#&gt;  685 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.23e-13  20   1
+#&gt;  686 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.22e-12  20   1
+#&gt;  687 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.20e-12  20   1
+#&gt;  688 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.54e-13  20   1
+#&gt;  689 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.02e-12  20   1
+#&gt;  690 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.49e-12  20   1
+#&gt;  691 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.36e-13  20   1
+#&gt;  692 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.38e-12  20   1
+#&gt;  693 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.30e-12  20   1
+#&gt;  694 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.39e-13  20   1
+#&gt;  695 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.29e-12  20   1
+#&gt;  696 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.65e-12  20   1
+#&gt;  697 +1.998208529e+00 +5.516e-06  36 1.00e+00 9.97e-13  20   1
+#&gt;  698 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.32e-13  20   1
+#&gt;  699 +1.998208529e+00 +5.516e-06  36 1.00e+00 9.94e-12  20   1
+#&gt;  700 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.85e-12  20   1
+#&gt;  701 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.71e-12  20   1
+#&gt;  702 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.30e-12  20   1
+#&gt;  703 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.32e-12  20   1
+#&gt;  704 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.89e-12  20   1
+#&gt;  705 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.08e-12  20   1
+#&gt;  706 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.09e-12  20   1
+#&gt;  707 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.95e-12  20   1
+#&gt;  708 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.00e-12  20   1
+#&gt;  709 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.22e-12  20   1
+#&gt;  710 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.13e-11  20   1
+#&gt;  711 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.58e-11  20   1
+#&gt;  712 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.33e-12  20   1
+#&gt;  713 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.73e-12  20   1
+#&gt;  714 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.36e-12  20   1
+#&gt;  715 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.95e-12  20   1
+#&gt;  716 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.24e-12  20   1
+#&gt;  717 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.01e-12  20   1
+#&gt;  718 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.78e-12  20   1
+#&gt;  719 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.01e-14  20   1
+#&gt;  720 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.30e-12  20   1
+#&gt;  721 +1.998208529e+00 +5.516e-06  36 1.00e+00 8.54e-13  20   1
+#&gt;  722 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.86e-12  20   1
+#&gt;  723 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.35e-12  20   1
+#&gt;  724 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.73e-12  20   1
+#&gt;  725 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.01e-12  20   1
+#&gt;  726 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.66e-13  20   1
+#&gt;  727 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.55e-12  20   1
+#&gt;  728 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.72e-13  20   1
+#&gt;  729 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.95e-12  20   1
+#&gt;  730 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.00e-12  20   1
+#&gt;  731 +1.998208529e+00 +5.516e-06  36 1.00e+00 9.47e-13  20   1
+#&gt;  732 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.06e-12  20   1
+#&gt;  733 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.21e-12  20   1
+#&gt;  734 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.50e-12  20   1
+#&gt;  735 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.18e-11  20   1
+#&gt;  736 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.88e-12  20   1
+#&gt;  737 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.97e-12  20   1
+#&gt;  738 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.85e-12  20   1
+#&gt;  739 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.35e-12  20   1
+#&gt;  740 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.78e-12  20   1
+#&gt;  741 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.58e-12  20   1
+#&gt;  742 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.77e-13  20   1
+#&gt;  743 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.55e-12  20   1
+#&gt;  744 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.05e-12  20   1
+#&gt;  745 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.08e-13  20   1
+#&gt;  746 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.60e-12  20   1
+#&gt;  747 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.63e-12  20   1
+#&gt;  748 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.29e-13  20   1
+#&gt;  749 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.83e-13  20   1
+#&gt;  750 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.67e-13  20   1
+#&gt;  751 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.35e-12  20   1
+#&gt;  752 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.81e-12  20   1
+#&gt;  753 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.90e-13  20   1
+#&gt;  754 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.12e-12  20   1
+#&gt;  755 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.45e-11  20   1
+#&gt;  756 +1.998208529e+00 +5.516e-06  36 1.00e+00 9.91e-12  20   1
+#&gt;  757 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.26e-12  20   1
+#&gt;  758 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.31e-12  20   1
+#&gt;  759 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.90e-12  20   1
+#&gt;  760 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.15e-12  20   1
+#&gt;  761 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.06e-12  20   1
+#&gt;  762 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.00e-12  20   1
+#&gt;  763 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.26e-13  20   1
+#&gt;  764 +1.998208529e+00 +5.516e-06  36 1.00e+00 5.82e-13  20   1
+#&gt;  765 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.78e-12  20   1
+#&gt;  766 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.10e-12  20   1
+#&gt;  767 +1.998208529e+00 +5.516e-06  36 1.00e+00 2.38e-12  20   1
+#&gt;  768 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.02e-13  20   1
+#&gt;  769 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.47e-12  20   1
+#&gt;  770 +1.998208529e+00 +5.516e-06  36 1.00e+00 3.74e-13  20   1
+#&gt;  771 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.87e-12  20   1
+#&gt;  772 +1.998208529e+00 +5.516e-06  36 1.00e+00 1.44e-12  20   1
+#&gt;  773 +1.998208529e+00 +5.516e-06  36 1.00e+00 7.38e-12  20   1
+#&gt;  774 +1.998208529e+00 +5.516e-06  36 1.00e+00 6.13e-12  20   1
+#&gt;  775 +1.998208529e+00 +5.516e-06  36 1.00e+00 4.99e-13  20   1
+#&gt;  776 +1.998208372e+00 +5.379e-06  36 1.00e+00 8.51e-03  20   1
+#&gt;  777 +1.998208372e+00 +5.379e-06  36 1.00e+00 6.62e-07  20   1
+#&gt;  778 +1.998208372e+00 +5.379e-06  36 1.00e+00 6.31e-09  20   1
+#&gt;  779 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.55e-10  20   1
+#&gt;  780 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.02e-11  20   1
+#&gt;  781 +1.998208372e+00 +5.379e-06  36 1.00e+00 4.54e-12  20   1
+#&gt;  782 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.11e-11  20   1
+#&gt;  783 +1.998208372e+00 +5.379e-06  36 1.00e+00 4.83e-12  20   1
+#&gt;  784 +1.998208372e+00 +5.379e-06  36 1.00e+00 8.71e-13  20   1
+#&gt;  785 +1.998208372e+00 +5.379e-06  36 1.00e+00 3.09e-12  20   1
+#&gt;  786 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.78e-12  20   1
+#&gt;  787 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.66e-12  20   1
+#&gt;  788 +1.998208372e+00 +5.379e-06  36 1.00e+00 7.08e-12  20   1
+#&gt;  789 +1.998208372e+00 +5.379e-06  36 1.00e+00 4.43e-12  20   1
+#&gt;  790 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.32e-12  20   1
+#&gt;  791 +1.998208372e+00 +5.379e-06  36 1.00e+00 8.75e-13  20   1
+#&gt;  792 +1.998208372e+00 +5.379e-06  36 1.00e+00 8.69e-13  20   1
+#&gt;  793 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.37e-12  20   1
+#&gt;  794 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.25e-12  20   1
+#&gt;  795 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.69e-12  20   1
+#&gt;  796 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.73e-12  20   1
+#&gt;  797 +1.998208372e+00 +5.379e-06  36 1.00e+00 4.31e-12  20   1
+#&gt;  798 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.80e-12  20   1
+#&gt;  799 +1.998208372e+00 +5.379e-06  36 1.00e+00 3.47e-12  20   1
+#&gt;  800 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.70e-12  20   1
+#&gt;  801 +1.998208372e+00 +5.379e-06  36 1.00e+00 7.98e-12  20   1
+#&gt;  802 +1.998208372e+00 +5.379e-06  36 1.00e+00 6.96e-12  20   1
+#&gt;  803 +1.998208372e+00 +5.379e-06  36 1.00e+00 8.67e-12  20   1
+#&gt;  804 +1.998208372e+00 +5.379e-06  36 1.00e+00 7.89e-12  20   1
+#&gt;  805 +1.998208372e+00 +5.379e-06  36 1.00e+00 4.91e-12  20   1
+#&gt;  806 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.10e-12  20   1
+#&gt;  807 +1.998208372e+00 +5.379e-06  36 1.00e+00 7.69e-13  20   1
+#&gt;  808 +1.998208372e+00 +5.379e-06  36 1.00e+00 3.13e-12  20   1
+#&gt;  809 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.01e-11  20   1
+#&gt;  810 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.50e-11  20   1
+#&gt;  811 +1.998208372e+00 +5.379e-06  36 1.00e+00 3.77e-12  20   1
+#&gt;  812 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.28e-11  20   1
+#&gt;  813 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.81e-12  20   1
+#&gt;  814 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.90e-12  20   1
+#&gt;  815 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.74e-11  20   1
+#&gt;  816 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.58e-11  20   1
+#&gt;  817 +1.998208372e+00 +5.379e-06  36 1.00e+00 7.13e-12  20   1
+#&gt;  818 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.03e-12  20   1
+#&gt;  819 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.30e-12  20   1
+#&gt;  820 +1.998208372e+00 +5.379e-06  36 1.00e+00 3.05e-12  20   1
+#&gt;  821 +1.998208372e+00 +5.379e-06  36 1.00e+00 9.90e-12  20   1
+#&gt;  822 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.78e-12  20   1
+#&gt;  823 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.93e-12  20   1
+#&gt;  824 +1.998208372e+00 +5.379e-06  36 1.00e+00 3.54e-12  20   1
+#&gt;  825 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.60e-12  20   1
+#&gt;  826 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.33e-12  20   1
+#&gt;  827 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.96e-12  20   1
+#&gt;  828 +1.998208372e+00 +5.379e-06  36 1.00e+00 3.96e-12  20   1
+#&gt;  829 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.58e-12  20   1
+#&gt;  830 +1.998208372e+00 +5.379e-06  36 1.00e+00 7.34e-12  20   1
+#&gt;  831 +1.998208372e+00 +5.379e-06  36 1.00e+00 9.83e-12  20   1
+#&gt;  832 +1.998208372e+00 +5.379e-06  36 1.00e+00 6.03e-12  20   1
+#&gt;  833 +1.998208372e+00 +5.379e-06  36 1.00e+00 3.16e-12  20   1
+#&gt;  834 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.35e-12  20   1
+#&gt;  835 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.98e-13  20   1
+#&gt;  836 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.55e-12  20   1
+#&gt;  837 +1.998208372e+00 +5.379e-06  36 1.00e+00 7.42e-12  20   1
+#&gt;  838 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.51e-12  20   1
+#&gt;  839 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.42e-12  20   1
+#&gt;  840 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.95e-12  20   1
+#&gt;  841 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.00e-12  20   1
+#&gt;  842 +1.998208372e+00 +5.379e-06  36 1.00e+00 4.47e-12  20   1
+#&gt;  843 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.90e-12  20   1
+#&gt;  844 +1.998208372e+00 +5.379e-06  36 1.00e+00 6.71e-12  20   1
+#&gt;  845 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.66e-12  20   1
+#&gt;  846 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.17e-12  20   1
+#&gt;  847 +1.998208372e+00 +5.379e-06  36 1.00e+00 9.01e-13  20   1
+#&gt;  848 +1.998208372e+00 +5.379e-06  36 1.00e+00 4.05e-12  20   1
+#&gt;  849 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.67e-12  20   1
+#&gt;  850 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.30e-12  20   1
+#&gt;  851 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.13e-11  20   1
+#&gt;  852 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.40e-11  20   1
+#&gt;  853 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.30e-12  20   1
+#&gt;  854 +1.998208372e+00 +5.379e-06  36 1.00e+00 8.80e-12  20   1
+#&gt;  855 +1.998208372e+00 +5.379e-06  36 1.00e+00 6.99e-13  20   1
+#&gt;  856 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.84e-12  20   1
+#&gt;  857 +1.998208372e+00 +5.379e-06  36 1.00e+00 4.61e-12  20   1
+#&gt;  858 +1.998208372e+00 +5.379e-06  36 1.00e+00 3.62e-12  20   1
+#&gt;  859 +1.998208372e+00 +5.379e-06  36 1.00e+00 8.00e-12  20   1
+#&gt;  860 +1.998208372e+00 +5.379e-06  36 1.00e+00 8.56e-12  20   1
+#&gt;  861 +1.998208372e+00 +5.379e-06  36 1.00e+00 7.29e-13  20   1
+#&gt;  862 +1.998208372e+00 +5.379e-06  36 1.00e+00 9.45e-12  20   1
+#&gt;  863 +1.998208372e+00 +5.379e-06  36 1.00e+00 9.51e-12  20   1
+#&gt;  864 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.37e-12  20   1
+#&gt;  865 +1.998208372e+00 +5.379e-06  36 1.00e+00 4.47e-12  20   1
+#&gt;  866 +1.998208372e+00 +5.379e-06  36 1.00e+00 3.02e-12  20   1
+#&gt;  867 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.84e-12  20   1
+#&gt;  868 +1.998208372e+00 +5.379e-06  36 1.00e+00 4.98e-12  20   1
+#&gt;  869 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.38e-12  20   1
+#&gt;  870 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.69e-12  20   1
+#&gt;  871 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.03e-11  20   1
+#&gt;  872 +1.998208372e+00 +5.379e-06  36 1.00e+00 4.56e-12  20   1
+#&gt;  873 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.29e-12  20   1
+#&gt;  874 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.35e-12  20   1
+#&gt;  875 +1.998208372e+00 +5.379e-06  36 1.00e+00 4.84e-12  20   1
+#&gt;  876 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.13e-12  20   1
+#&gt;  877 +1.998208372e+00 +5.379e-06  36 1.00e+00 8.21e-13  20   1
+#&gt;  878 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.67e-12  20   1
+#&gt;  879 +1.998208372e+00 +5.379e-06  36 1.00e+00 9.25e-14  20   1
+#&gt;  880 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.61e-12  20   1
+#&gt;  881 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.57e-12  20   1
+#&gt;  882 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.29e-12  20   1
+#&gt;  883 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.05e-12  20   1
+#&gt;  884 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.33e-12  20   1
+#&gt;  885 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.90e-12  20   1
+#&gt;  886 +1.998208372e+00 +5.379e-06  36 1.00e+00 6.51e-12  20   1
+#&gt;  887 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.91e-12  20   1
+#&gt;  888 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.52e-12  20   1
+#&gt;  889 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.86e-12  20   1
+#&gt;  890 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.33e-12  20   1
+#&gt;  891 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.63e-12  20   1
+#&gt;  892 +1.998208372e+00 +5.379e-06  36 1.00e+00 3.69e-12  20   1
+#&gt;  893 +1.998208372e+00 +5.379e-06  36 1.00e+00 6.42e-12  20   1
+#&gt;  894 +1.998208372e+00 +5.379e-06  36 1.00e+00 6.33e-12  20   1
+#&gt;  895 +1.998208372e+00 +5.379e-06  36 1.00e+00 4.38e-12  20   1
+#&gt;  896 +1.998208372e+00 +5.379e-06  36 1.00e+00 6.26e-13  20   1
+#&gt;  897 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.75e-12  20   1
+#&gt;  898 +1.998208372e+00 +5.379e-06  36 1.00e+00 7.58e-12  20   1
+#&gt;  899 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.53e-12  20   1
+#&gt;  900 +1.998208372e+00 +5.379e-06  36 1.00e+00 6.39e-12  20   1
+#&gt;  901 +1.998208372e+00 +5.379e-06  36 1.00e+00 7.34e-12  20   1
+#&gt;  902 +1.998208372e+00 +5.379e-06  36 1.00e+00 3.02e-12  20   1
+#&gt;  903 +1.998208372e+00 +5.379e-06  36 1.00e+00 9.76e-12  20   1
+#&gt;  904 +1.998208372e+00 +5.379e-06  36 1.00e+00 4.42e-12  20   1
+#&gt;  905 +1.998208372e+00 +5.379e-06  36 1.00e+00 9.40e-12  20   1
+#&gt;  906 +1.998208372e+00 +5.379e-06  36 1.00e+00 4.85e-12  20   1
+#&gt;  907 +1.998208372e+00 +5.379e-06  36 1.00e+00 7.80e-12  20   1
+#&gt;  908 +1.998208372e+00 +5.379e-06  36 1.00e+00 7.90e-12  20   1
+#&gt;  909 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.35e-12  20   1
+#&gt;  910 +1.998208372e+00 +5.379e-06  36 1.00e+00 7.30e-12  20   1
+#&gt;  911 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.22e-11  20   1
+#&gt;  912 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.12e-12  20   1
+#&gt;  913 +1.998208372e+00 +5.379e-06  36 1.00e+00 6.84e-12  20   1
+#&gt;  914 +1.998208372e+00 +5.379e-06  36 1.00e+00 8.76e-12  20   1
+#&gt;  915 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.91e-12  20   1
+#&gt;  916 +1.998208372e+00 +5.379e-06  36 1.00e+00 3.58e-12  20   1
+#&gt;  917 +1.998208372e+00 +5.379e-06  36 1.00e+00 8.62e-12  20   1
+#&gt;  918 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.10e-11  20   1
+#&gt;  919 +1.998208372e+00 +5.379e-06  36 1.00e+00 6.90e-12  20   1
+#&gt;  920 +1.998208372e+00 +5.379e-06  36 1.00e+00 2.88e-12  20   1
+#&gt;  921 +1.998208372e+00 +5.379e-06  36 1.00e+00 7.55e-12  20   1
+#&gt;  922 +1.998208372e+00 +5.379e-06  36 1.00e+00 5.01e-12  20   1
+#&gt;  923 +1.998208372e+00 +5.379e-06  36 1.00e+00 1.01e-12  20   1
+#&gt;  924 +1.998208359e+00 +5.396e-06  36 1.00e+00 9.19e-04  20   1
+#&gt;  925 +1.998208359e+00 +5.396e-06  36 1.00e+00 6.26e-07  20   1
+#&gt;  926 +1.998208359e+00 +5.396e-06  36 1.00e+00 6.12e-09  20   1
+#&gt;  927 +1.998208359e+00 +5.396e-06  36 1.00e+00 2.49e-10  20   1
+#&gt;  928 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.57e-11  20   1
+#&gt;  929 +1.998208359e+00 +5.396e-06  36 1.00e+00 6.82e-12  20   1
+#&gt;  930 +1.998208359e+00 +5.396e-06  36 1.00e+00 8.10e-12  20   1
+#&gt;  931 +1.998208359e+00 +5.396e-06  36 1.00e+00 4.13e-12  20   1
+#&gt;  932 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.99e-12  20   1
+#&gt;  933 +1.998208359e+00 +5.396e-06  36 1.00e+00 4.96e-12  20   1
+#&gt;  934 +1.998208359e+00 +5.396e-06  36 1.00e+00 2.29e-12  20   1
+#&gt;  935 +1.998208359e+00 +5.396e-06  36 1.00e+00 7.89e-12  20   1
+#&gt;  936 +1.998208359e+00 +5.396e-06  36 1.00e+00 5.53e-12  20   1
+#&gt;  937 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.07e-12  20   1
+#&gt;  938 +1.998208359e+00 +5.396e-06  36 1.00e+00 3.46e-12  20   1
+#&gt;  939 +1.998208359e+00 +5.396e-06  36 1.00e+00 6.44e-12  20   1
+#&gt;  940 +1.998208359e+00 +5.396e-06  36 1.00e+00 4.70e-12  20   1
+#&gt;  941 +1.998208359e+00 +5.396e-06  36 1.00e+00 5.37e-12  20   1
+#&gt;  942 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.77e-12  20   1
+#&gt;  943 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.02e-11  20   1
+#&gt;  944 +1.998208359e+00 +5.396e-06  36 1.00e+00 9.45e-12  20   1
+#&gt;  945 +1.998208359e+00 +5.396e-06  36 1.00e+00 4.53e-12  20   1
+#&gt;  946 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.92e-12  20   1
+#&gt;  947 +1.998208359e+00 +5.396e-06  36 1.00e+00 5.15e-12  20   1
+#&gt;  948 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.56e-12  20   1
+#&gt;  949 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.29e-12  20   1
+#&gt;  950 +1.998208359e+00 +5.396e-06  36 1.00e+00 2.30e-12  20   1
+#&gt;  951 +1.998208359e+00 +5.396e-06  36 1.00e+00 2.13e-12  20   1
+#&gt;  952 +1.998208359e+00 +5.396e-06  36 1.00e+00 2.85e-12  20   1
+#&gt;  953 +1.998208359e+00 +5.396e-06  36 1.00e+00 3.35e-13  20   1
+#&gt;  954 +1.998208359e+00 +5.396e-06  36 1.00e+00 4.12e-12  20   1
+#&gt;  955 +1.998208359e+00 +5.396e-06  36 1.00e+00 3.12e-12  20   1
+#&gt;  956 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.04e-11  20   1
+#&gt;  957 +1.998208359e+00 +5.396e-06  36 1.00e+00 8.38e-12  20   1
+#&gt;  958 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.15e-12  20   1
+#&gt;  959 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.86e-12  20   1
+#&gt;  960 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.18e-11  20   1
+#&gt;  961 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.32e-11  20   1
+#&gt;  962 +1.998208359e+00 +5.396e-06  36 1.00e+00 8.12e-12  20   1
+#&gt;  963 +1.998208359e+00 +5.396e-06  36 1.00e+00 7.02e-12  20   1
+#&gt;  964 +1.998208359e+00 +5.396e-06  36 1.00e+00 6.09e-12  20   1
+#&gt;  965 +1.998208359e+00 +5.396e-06  36 1.00e+00 5.21e-12  20   1
+#&gt;  966 +1.998208359e+00 +5.396e-06  36 1.00e+00 2.55e-12  20   1
+#&gt;  967 +1.998208359e+00 +5.396e-06  36 1.00e+00 7.31e-12  20   1
+#&gt;  968 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.26e-11  20   1
+#&gt;  969 +1.998208359e+00 +5.396e-06  36 1.00e+00 7.81e-12  20   1
+#&gt;  970 +1.998208359e+00 +5.396e-06  36 1.00e+00 4.99e-12  20   1
+#&gt;  971 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.02e-11  20   1
+#&gt;  972 +1.998208359e+00 +5.396e-06  36 1.00e+00 3.50e-12  20   1
+#&gt;  973 +1.998208359e+00 +5.396e-06  36 1.00e+00 3.74e-12  20   1
+#&gt;  974 +1.998208359e+00 +5.396e-06  36 1.00e+00 2.16e-12  20   1
+#&gt;  975 +1.998208359e+00 +5.396e-06  36 1.00e+00 6.40e-13  20   1
+#&gt;  976 +1.998208359e+00 +5.396e-06  36 1.00e+00 5.87e-13  20   1
+#&gt;  977 +1.998208359e+00 +5.396e-06  36 1.00e+00 3.54e-12  20   1
+#&gt;  978 +1.998208359e+00 +5.396e-06  36 1.00e+00 8.25e-13  20   1
+#&gt;  979 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.42e-12  20   1
+#&gt;  980 +1.998208359e+00 +5.396e-06  36 1.00e+00 4.50e-12  20   1
+#&gt;  981 +1.998208359e+00 +5.396e-06  36 1.00e+00 5.58e-12  20   1
+#&gt;  982 +1.998208359e+00 +5.396e-06  36 1.00e+00 6.35e-12  20   1
+#&gt;  983 +1.998208359e+00 +5.396e-06  36 1.00e+00 5.40e-12  20   1
+#&gt;  984 +1.998208359e+00 +5.396e-06  36 1.00e+00 3.98e-12  20   1
+#&gt;  985 +1.998208359e+00 +5.396e-06  36 1.00e+00 8.82e-12  20   1
+#&gt;  986 +1.998208359e+00 +5.396e-06  36 1.00e+00 9.41e-12  20   1
+#&gt;  987 +1.998208359e+00 +5.396e-06  36 1.00e+00 4.87e-12  20   1
+#&gt;  988 +1.998208359e+00 +5.396e-06  36 1.00e+00 9.22e-12  20   1
+#&gt;  989 +1.998208359e+00 +5.396e-06  36 1.00e+00 5.63e-13  20   1
+#&gt;  990 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.96e-12  20   1
+#&gt;  991 +1.998208359e+00 +5.396e-06  36 1.00e+00 3.13e-12  20   1
+#&gt;  992 +1.998208359e+00 +5.396e-06  36 1.00e+00 2.08e-12  20   1
+#&gt;  993 +1.998208359e+00 +5.396e-06  36 1.00e+00 3.35e-12  20   1
+#&gt;  994 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.19e-12  20   1
+#&gt;  995 +1.998208359e+00 +5.396e-06  36 1.00e+00 2.56e-13  20   1
+#&gt;  996 +1.998208359e+00 +5.396e-06  36 1.00e+00 2.41e-13  20   1
+#&gt;  997 +1.998208359e+00 +5.396e-06  36 1.00e+00 2.86e-12  20   1
+#&gt;  998 +1.998208359e+00 +5.396e-06  36 1.00e+00 5.48e-13  20   1
+#&gt;  999 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.75e-12  20   1
+#&gt; 1000 +1.998208359e+00 +5.396e-06  36 1.00e+00 1.85e-12  20   1
+#&gt; Optimization took 668.76 seconds.</code></pre>
+<pre><code>#&gt; Warning in mixsqp::mixsqp(A, w, pi_init, control = control): Failed to converge within iterations limit. If &quot;maxiter.sqp&quot; is
+#&gt; small, consider increasing it. Otherwise, convergence failure is
+#&gt; typically a numerical issue remedied by increasing &quot;eps&quot; slightly,
+#&gt; at the cost of slightly less accurate solution; see help(mixsqp).
+#&gt; An issue report may also be submitted to
+#&gt; https://github.com/stephenslab/mixsqp/issues, accompanied by an
+#&gt; .rds or .RData file containing the mixsqp inputs. If these inputs
+#&gt; are not accessible, an .RData file containing the inputs can be
+#&gt; generated by setting options(mixsqp.debug.mode = TRUE) before
+#&gt; running mixsqp.</code></pre>
+<pre><code>#&gt; Warning in estimate_mixprop(data, g, prior, optmethod = optmethod, control
+#&gt; = control, : Optimization failed to converge. Results may be unreliable.
+#&gt; Try increasing maxiter and rerunning.</code></pre>
+<br> <br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>#&gt; R version 3.5.3 (2019-03-11)
+#&gt; Platform: x86_64-apple-darwin15.6.0 (64-bit)
+#&gt; Running under: macOS Mojave 10.14.6
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+#&gt; 
+#&gt; locale:
+#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt; [1] forcats_0.4.0   stringr_1.4.0   dplyr_0.8.0.1   purrr_0.3.2    
+#&gt; [5] readr_1.3.1     tidyr_0.8.3     tibble_2.1.1    ggplot2_3.2.0  
+#&gt; [9] tidyverse_1.2.1
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] tidyselect_0.2.5  xfun_0.6          ashr_2.2-50      
+#&gt;  [4] haven_2.1.1       lattice_0.20-38   colorspace_1.4-1 
+#&gt;  [7] generics_0.0.2    htmltools_0.3.6   yaml_2.2.0       
+#&gt; [10] rlang_0.4.2       mixsqp_0.3-31     pillar_1.3.1     
+#&gt; [13] glue_1.3.1        withr_2.1.2       modelr_0.1.5     
+#&gt; [16] readxl_1.3.1      munsell_0.5.0     gtable_0.3.0     
+#&gt; [19] workflowr_1.2.0   cellranger_1.1.0  rvest_0.3.4      
+#&gt; [22] evaluate_0.13     labeling_0.3      knitr_1.22       
+#&gt; [25] invgamma_1.1      irlba_2.3.3       broom_0.5.1      
+#&gt; [28] Rcpp_1.0.1        scales_1.0.0      backports_1.1.3  
+#&gt; [31] jsonlite_1.6      truncnorm_1.0-8   fs_1.2.7         
+#&gt; [34] hms_0.4.2         digest_0.6.18     stringi_1.4.3    
+#&gt; [37] ebnm_0.1-21       grid_3.5.3        rprojroot_1.3-2  
+#&gt; [40] cli_1.1.0         tools_3.5.3       magrittr_1.5     
+#&gt; [43] lazyeval_0.2.2    crayon_1.3.4      whisker_0.3-2    
+#&gt; [46] pkgconfig_2.0.2   Matrix_1.2-15     SQUAREM_2017.10-1
+#&gt; [49] xml2_1.2.0        lubridate_1.7.4   assertthat_0.2.1 
+#&gt; [52] rmarkdown_1.12    httr_1.4.0        rstudioapi_0.10  
+#&gt; [55] R6_2.4.0          nlme_3.1-137      git2r_0.25.2     
+#&gt; [58] compiler_3.5.3</code></pre>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
