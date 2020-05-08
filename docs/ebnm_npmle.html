@@ -439,10 +439,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree4afebf9bb297b3457288ce340902e8cce24a1911targetblank4afebf9a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/4afebf9bb297b3457288ce340902e8cce24a1911" target="_blank">4afebf9</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstreeff42bb048671f2787eedcc3cb827949f5ede8926targetblankff42bb0a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/ff42bb048671f2787eedcc3cb827949f5ede8926" target="_blank">ff42bb0</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree4afebf9bb297b3457288ce340902e8cce24a1911targetblank4afebf9a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstreeff42bb048671f2787eedcc3cb827949f5ede8926targetblankff42bb0a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -515,6 +515,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/ff42bb048671f2787eedcc3cb827949f5ede8926/analysis/ebnm_npmle.Rmd" target="_blank">ff42bb0</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-08
+</td>
+<td>
+wflow_publish(“analysis/ebnm_npmle.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/1af4141cf4b13ddbf403d907e27d85dfaf68b515/docs/ebnm_npmle.html" target="_blank">1af4141</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-08
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -658,6 +692,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/1af4141cf4b13ddbf403d907e27d85dfaf68b515/docs/figure/ebnm_npmle.Rmd/samples-1.png" target="_blank">1af4141</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-08
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/93fda1316268b2762eacb11a58519a155c95303e/docs/figure/ebnm_npmle.Rmd/samples-1.png" target="_blank">93fda13</a>
 </td>
 <td>
@@ -672,298 +717,57 @@ Jason Willwerscheid
 </div>
 </div>
 <p>I want to see how grid density affects convergence properties and the quality of the solution. From a log likelihood perspective, using a grid of points spaced at a distance equal to half the standard deviation of the noise gives a solution that is pretty much just as good as a very fine grid:</p>
-<pre class="r"><code>mixsqp_control = list(verbose = TRUE)
+<pre class="r"><code>mixsqp_control = list()
 
 scale_vec &lt;- exp(seq(-2.5, 0, by = 0.5))
 res_list &lt;- list()
 for (scale in scale_vec) {
   ebnm_res &lt;- ebnm::ebnm_npmle(samp, scale = scale, control = mixsqp_control)
   res_list &lt;- c(res_list, list(ebnm_res))
-}</code></pre>
-<pre><code>#&gt; Running mix-SQP algorithm 0.3-39 on 1000 x 333 matrix
-#&gt; convergence tol. (SQP):     1.0e-08
-#&gt; conv. tol. (active-set):    1.0e-10
-#&gt; zero threshold (solution):  1.0e-08
-#&gt; zero thresh. (search dir.): 1.0e-14
-#&gt; l.s. sufficient decrease:   1.0e-02
-#&gt; step size reduction factor: 7.5e-01
-#&gt; minimum step size:          1.0e-08
-#&gt; max. iter (SQP):            1000
-#&gt; max. iter (active-set):     20
-#&gt; number of EM iterations:    20
-#&gt; Computing SVD of 1000 x 333 matrix.
-#&gt; SVD computation took 0.21 seconds.
-#&gt; Rank of matrix is estimated to be 54.
-#&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
-#&gt;    1 +2.011796452e+00  -- EM --  333 1.00e+00 4.41e-03  --  --
-#&gt;    2 +1.992414270e+00  -- EM --  333 1.00e+00 1.60e-03  --  --
-#&gt;    3 +1.988522596e+00  -- EM --  333 1.00e+00 8.49e-04  --  --
-#&gt;    4 +1.986781647e+00  -- EM --  333 1.00e+00 5.72e-04  --  --
-#&gt;    5 +1.985687545e+00  -- EM --  333 1.00e+00 4.51e-04  --  --
-#&gt;    6 +1.984913363e+00  -- EM --  333 1.00e+00 3.85e-04  --  --
-#&gt;    7 +1.984332567e+00  -- EM --  333 1.00e+00 3.41e-04  --  --
-#&gt;    8 +1.983879139e+00  -- EM --  333 1.00e+00 3.08e-04  --  --
-#&gt;    9 +1.983514156e+00  -- EM --  333 1.00e+00 2.81e-04  --  --
-#&gt;   10 +1.983213153e+00  -- EM --  333 1.00e+00 2.58e-04  --  --
-#&gt;   11 +1.982960026e+00  -- EM --  333 1.00e+00 2.37e-04  --  --
-#&gt;   12 +1.982743762e+00  -- EM --  333 1.00e+00 2.20e-04  --  --
-#&gt;   13 +1.982556580e+00  -- EM --  333 1.00e+00 2.04e-04  --  --
-#&gt;   14 +1.982392820e+00  -- EM --  333 1.00e+00 1.89e-04  --  --
-#&gt;   15 +1.982248263e+00  -- EM --  333 1.00e+00 1.77e-04  --  --
-#&gt;   16 +1.982119692e+00  -- EM --  333 1.00e+00 1.65e-04  --  --
-#&gt;   17 +1.982004604e+00  -- EM --  333 1.00e+00 1.55e-04  --  --
-#&gt;   18 +1.981901017e+00  -- EM --  333 1.00e+00 1.46e-04  --  --
-#&gt;   19 +1.981807336e+00  -- EM --  333 1.00e+00 1.38e-04  --  --
-#&gt;   20 +1.981722260e+00  -- EM --  333 1.00e+00 1.30e-04  --  --
-#&gt;    1 +1.981644714e+00 +2.724e-02 333  ------   ------   --  --
-#&gt;    2 +1.981574057e+00 +2.612e-02 313 1.00e+00 4.18e-04  20   1
-#&gt;    3 +1.981509579e+00 +2.510e-02 293 1.00e+00 4.64e-04  20   1
-#&gt;    4 +1.981450312e+00 +2.411e-02 273 1.00e+00 6.43e-04  20   1
-#&gt;    5 +1.981395713e+00 +2.316e-02 253 1.00e+00 1.76e-03  20   1
-#&gt;    6 +1.981345333e+00 +2.227e-02 233 1.00e+00 4.64e-03  20   1
-#&gt;    7 +1.981298555e+00 +2.141e-02 213 1.00e+00 2.62e-03  20   1
-#&gt;    8 +1.981254964e+00 +2.056e-02 193 1.00e+00 4.51e-03  20   1
-#&gt;    9 +1.981214243e+00 +1.974e-02 173 1.00e+00 6.99e-03  20   1
-#&gt;   10 +1.981176158e+00 +1.894e-02 153 1.00e+00 1.58e-02  20   1
-#&gt;   11 +1.981140518e+00 +1.815e-02 133 1.00e+00 1.61e-02  20   1
-#&gt;   12 +1.981107313e+00 +1.738e-02 113 1.00e+00 1.10e-02  20   1
-#&gt;   13 +1.981076238e+00 +1.662e-02  93 1.00e+00 1.84e-02  20   1
-#&gt;   14 +1.981046794e+00 +1.588e-02  73 1.00e+00 2.94e-02  20   1
-#&gt;   15 +1.981018759e+00 +1.515e-02  53 1.00e+00 3.05e-02  20   1
-#&gt;   16 +1.980963406e+00 +1.318e-02  33 1.00e+00 1.16e-01  20   1
-#&gt;   17 +1.979931743e+00 +2.785e-03  21 1.00e+00 1.37e-01  20   1
-#&gt;   18 +1.979774527e+00 +1.645e-04  19 1.00e+00 4.00e-02  20   1
-#&gt;   19 +1.979588348e+00 +1.284e-05  19 1.00e+00 2.49e-01  20   1
-#&gt;   20 +1.979566452e+00 +7.207e-05  20 1.00e+00 8.14e-02  20   1
-#&gt;   21 +1.979556652e+00 -5.155e-06  21 1.00e+00 6.55e-02  20   1
-#&gt; Optimization took 5.88 seconds.
-#&gt; Convergence criteria met---optimal solution found.
-#&gt; Running mix-SQP algorithm 0.3-39 on 1000 x 202 matrix
-#&gt; convergence tol. (SQP):     1.0e-08
-#&gt; conv. tol. (active-set):    1.0e-10
-#&gt; zero threshold (solution):  1.0e-08
-#&gt; zero thresh. (search dir.): 1.0e-14
-#&gt; l.s. sufficient decrease:   1.0e-02
-#&gt; step size reduction factor: 7.5e-01
-#&gt; minimum step size:          1.0e-08
-#&gt; max. iter (SQP):            1000
-#&gt; max. iter (active-set):     20
-#&gt; number of EM iterations:    20
-#&gt; Computing SVD of 1000 x 202 matrix.
-#&gt; SVD computation took 0.12 seconds.
-#&gt; Rank of matrix is estimated to be 54.
-#&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
-#&gt;    1 +2.010871416e+00  -- EM --  202 1.00e+00 7.27e-03  --  --
-#&gt;    2 +1.991469270e+00  -- EM --  202 1.00e+00 2.64e-03  --  --
-#&gt;    3 +1.987573534e+00  -- EM --  202 1.00e+00 1.40e-03  --  --
-#&gt;    4 +1.985831384e+00  -- EM --  202 1.00e+00 9.43e-04  --  --
-#&gt;    5 +1.984736562e+00  -- EM --  202 1.00e+00 7.43e-04  --  --
-#&gt;    6 +1.983961793e+00  -- EM --  202 1.00e+00 6.34e-04  --  --
-#&gt;    7 +1.983380490e+00  -- EM --  202 1.00e+00 5.63e-04  --  --
-#&gt;    8 +1.982926620e+00  -- EM --  202 1.00e+00 5.08e-04  --  --
-#&gt;    9 +1.982561245e+00  -- EM --  202 1.00e+00 4.62e-04  --  --
-#&gt;   10 +1.982259891e+00  -- EM --  202 1.00e+00 4.24e-04  --  --
-#&gt;   11 +1.982006442e+00  -- EM --  202 1.00e+00 3.90e-04  --  --
-#&gt;   12 +1.981789882e+00  -- EM --  202 1.00e+00 3.60e-04  --  --
-#&gt;   13 +1.981602423e+00  -- EM --  202 1.00e+00 3.34e-04  --  --
-#&gt;   14 +1.981438405e+00  -- EM --  202 1.00e+00 3.11e-04  --  --
-#&gt;   15 +1.981293605e+00  -- EM --  202 1.00e+00 2.90e-04  --  --
-#&gt;   16 +1.981164803e+00  -- EM --  202 1.00e+00 2.72e-04  --  --
-#&gt;   17 +1.981049497e+00  -- EM --  202 1.00e+00 2.55e-04  --  --
-#&gt;   18 +1.980945702e+00  -- EM --  202 1.00e+00 2.40e-04  --  --
-#&gt;   19 +1.980851823e+00  -- EM --  202 1.00e+00 2.27e-04  --  --
-#&gt;   20 +1.980766560e+00  -- EM --  202 1.00e+00 2.15e-04  --  --
-#&gt;    1 +1.980688834e+00 +2.705e-02 202  ------   ------   --  --
-#&gt;    2 +1.980618066e+00 +2.600e-02 182 1.00e+00 7.53e-04  20   1
-#&gt;    3 +1.980553569e+00 +2.161e-02 162 1.00e+00 2.63e-03  20   1
-#&gt;    4 +1.980494559e+00 +2.099e-02 142 1.00e+00 6.88e-03  20   1
-#&gt;    5 +1.980440360e+00 +2.043e-02 122 1.00e+00 7.47e-03  20   1
-#&gt;    6 +1.980390185e+00 +1.992e-02 102 1.00e+00 1.77e-02  20   1
-#&gt;    7 +1.980343849e+00 +1.942e-02  82 1.00e+00 2.86e-02  20   1
-#&gt;    8 +1.980300923e+00 +1.896e-02  62 1.00e+00 2.33e-02  20   1
-#&gt;    9 +1.980260466e+00 +1.849e-02  42 1.00e+00 6.00e-02  20   1
-#&gt;   10 +1.979173236e+00 +3.470e-03  22 1.00e+00 9.13e-02  20   1
-#&gt;   11 +1.978795443e+00 +1.148e-03  20 1.00e+00 6.14e-02  20   1
-#&gt;   12 +1.978702181e+00 +2.210e-04  21 1.00e+00 9.53e-02  20   1
-#&gt;   13 +1.978617979e+00 +6.352e-05  21 1.00e+00 1.39e-01  20   1
-#&gt;   14 +1.978593621e+00 -5.711e-06  21 1.00e+00 2.41e-01  20   1
-#&gt; Optimization took 1.08 seconds.
-#&gt; Convergence criteria met---optimal solution found.
-#&gt; Running mix-SQP algorithm 0.3-39 on 1000 x 123 matrix
-#&gt; convergence tol. (SQP):     1.0e-08
-#&gt; conv. tol. (active-set):    1.0e-10
-#&gt; zero threshold (solution):  1.0e-08
-#&gt; zero thresh. (search dir.): 1.0e-14
-#&gt; l.s. sufficient decrease:   1.0e-02
-#&gt; step size reduction factor: 7.5e-01
-#&gt; minimum step size:          1.0e-08
-#&gt; max. iter (SQP):            1000
-#&gt; max. iter (active-set):     20
-#&gt; number of EM iterations:    20
-#&gt; Computing SVD of 1000 x 123 matrix.
-#&gt; Matrix is not low-rank; falling back to full matrix.
-#&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
-#&gt;    1 +2.008470006e+00  -- EM --  123 1.00e+00 1.19e-02  --  --
-#&gt;    2 +1.989014265e+00  -- EM --  123 1.00e+00 4.35e-03  --  --
-#&gt;    3 +1.985107611e+00  -- EM --  123 1.00e+00 2.30e-03  --  --
-#&gt;    4 +1.983362239e+00  -- EM --  123 1.00e+00 1.55e-03  --  --
-#&gt;    5 +1.982265495e+00  -- EM --  123 1.00e+00 1.22e-03  --  --
-#&gt;    6 +1.981489155e+00  -- EM --  123 1.00e+00 1.04e-03  --  --
-#&gt;    7 +1.980906498e+00  -- EM --  123 1.00e+00 9.19e-04  --  --
-#&gt;    8 +1.980451444e+00  -- EM --  123 1.00e+00 8.28e-04  --  --
-#&gt;    9 +1.980085021e+00  -- EM --  123 1.00e+00 7.54e-04  --  --
-#&gt;   10 +1.979782722e+00  -- EM --  123 1.00e+00 6.90e-04  --  --
-#&gt;   11 +1.979528412e+00  -- EM --  123 1.00e+00 6.35e-04  --  --
-#&gt;   12 +1.979311056e+00  -- EM --  123 1.00e+00 5.87e-04  --  --
-#&gt;   13 +1.979122857e+00  -- EM --  123 1.00e+00 5.44e-04  --  --
-#&gt;   14 +1.978958144e+00  -- EM --  123 1.00e+00 5.07e-04  --  --
-#&gt;   15 +1.978812689e+00  -- EM --  123 1.00e+00 4.73e-04  --  --
-#&gt;   16 +1.978683269e+00  -- EM --  123 1.00e+00 4.44e-04  --  --
-#&gt;   17 +1.978567376e+00  -- EM --  123 1.00e+00 4.17e-04  --  --
-#&gt;   18 +1.978463025e+00  -- EM --  123 1.00e+00 3.93e-04  --  --
-#&gt;   19 +1.978368616e+00  -- EM --  123 1.00e+00 3.71e-04  --  --
-#&gt;   20 +1.978282848e+00  -- EM --  123 1.00e+00 3.51e-04  --  --
-#&gt;    1 +1.978204641e+00 +2.750e-02 123  ------   ------   --  --
-#&gt;    2 +1.978133583e+00 +2.630e-02 103 1.00e+00 4.17e-03  20   1
-#&gt;    3 +1.978069312e+00 +2.524e-02  83 1.00e+00 2.53e-02  20   1
-#&gt;    4 +1.978010859e+00 +2.031e-02  63 1.00e+00 4.38e-02  20   1
-#&gt;    5 +1.977956319e+00 +1.991e-02  43 1.00e+00 5.01e-02  20   1
-#&gt;    6 +1.977440097e+00 +1.181e-02  23 1.00e+00 1.07e-01  20   1
-#&gt;    7 +1.976253978e+00 +3.962e-03  19 1.00e+00 8.34e-02  20   1
-#&gt;    8 +1.976171392e+00 +2.572e-04  20 1.00e+00 4.88e-02  20   1
-#&gt;    9 +1.976125135e+00 +1.732e-05  20 1.00e+00 8.51e-02  20   1
-#&gt;   10 +1.976113864e+00 -5.881e-06  22 1.00e+00 1.36e-01  20   1
-#&gt; Optimization took 0.37 seconds.
-#&gt; Convergence criteria met---optimal solution found.
-#&gt; Running mix-SQP algorithm 0.3-39 on 1000 x 75 matrix
-#&gt; convergence tol. (SQP):     1.0e-08
-#&gt; conv. tol. (active-set):    1.0e-10
-#&gt; zero threshold (solution):  1.0e-08
-#&gt; zero thresh. (search dir.): 1.0e-14
-#&gt; l.s. sufficient decrease:   1.0e-02
-#&gt; step size reduction factor: 7.5e-01
-#&gt; minimum step size:          1.0e-08
-#&gt; max. iter (SQP):            1000
-#&gt; max. iter (active-set):     20
-#&gt; number of EM iterations:    20
-#&gt; Computing SVD of 1000 x 75 matrix.
-#&gt; Matrix is not low-rank; falling back to full matrix.
-#&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
-#&gt;    1 +2.001920062e+00  -- EM --   75 1.00e+00 1.95e-02  --  --
-#&gt;    2 +1.982320355e+00  -- EM --   75 1.00e+00 7.13e-03  --  --
-#&gt;    3 +1.978384270e+00  -- EM --   75 1.00e+00 3.76e-03  --  --
-#&gt;    4 +1.976630282e+00  -- EM --   75 1.00e+00 2.52e-03  --  --
-#&gt;    5 +1.975528440e+00  -- EM --   75 1.00e+00 1.97e-03  --  --
-#&gt;    6 +1.974747940e+00  -- EM --   75 1.00e+00 1.67e-03  --  --
-#&gt;    7 +1.974161688e+00  -- EM --   75 1.00e+00 1.48e-03  --  --
-#&gt;    8 +1.973703484e+00  -- EM --   75 1.00e+00 1.33e-03  --  --
-#&gt;    9 +1.973334262e+00  -- EM --   75 1.00e+00 1.21e-03  --  --
-#&gt;   10 +1.973029439e+00  -- EM --   75 1.00e+00 1.10e-03  --  --
-#&gt;   11 +1.972772820e+00  -- EM --   75 1.00e+00 1.01e-03  --  --
-#&gt;   12 +1.972553329e+00  -- EM --   75 1.00e+00 9.36e-04  --  --
-#&gt;   13 +1.972363139e+00  -- EM --   75 1.00e+00 8.68e-04  --  --
-#&gt;   14 +1.972196558e+00  -- EM --   75 1.00e+00 8.08e-04  --  --
-#&gt;   15 +1.972049344e+00  -- EM --   75 1.00e+00 7.55e-04  --  --
-#&gt;   16 +1.971918262e+00  -- EM --   75 1.00e+00 7.08e-04  --  --
-#&gt;   17 +1.971800794e+00  -- EM --   75 1.00e+00 6.66e-04  --  --
-#&gt;   18 +1.971694948e+00  -- EM --   75 1.00e+00 6.28e-04  --  --
-#&gt;   19 +1.971599119e+00  -- EM --   75 1.00e+00 5.94e-04  --  --
-#&gt;   20 +1.971511999e+00  -- EM --   75 1.00e+00 5.63e-04  --  --
-#&gt;    1 +1.971432506e+00 +2.732e-02  75  ------   ------   --  --
-#&gt;    2 +1.971360224e+00 +2.629e-02  55 1.00e+00 2.41e-02  20   1
-#&gt;    3 +1.971270477e+00 +1.264e-02  35 1.00e+00 6.28e-02  20   1
-#&gt;    4 +1.969803909e+00 +4.659e-03  21 1.00e+00 1.23e-01  20   1
-#&gt;    5 +1.969590351e+00 +3.901e-04  23 1.00e+00 1.39e-01  20   1
-#&gt;    6 +1.969426720e+00 +3.357e-05  21 1.00e+00 8.78e-02  20   1
-#&gt;    7 +1.969394886e+00 -5.299e-06  22 1.00e+00 7.51e-02  13   1
-#&gt; Optimization took 0.09 seconds.
-#&gt; Convergence criteria met---optimal solution found.
-#&gt; Running mix-SQP algorithm 0.3-39 on 1000 x 45 matrix
-#&gt; convergence tol. (SQP):     1.0e-08
-#&gt; conv. tol. (active-set):    1.0e-10
-#&gt; zero threshold (solution):  1.0e-08
-#&gt; zero thresh. (search dir.): 1.0e-14
-#&gt; l.s. sufficient decrease:   1.0e-02
-#&gt; step size reduction factor: 7.5e-01
-#&gt; minimum step size:          1.0e-08
-#&gt; max. iter (SQP):            1000
-#&gt; max. iter (active-set):     20
-#&gt; number of EM iterations:    20
-#&gt; Computing SVD of 1000 x 45 matrix.
-#&gt; Matrix is not low-rank; falling back to full matrix.
-#&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
-#&gt;    1 +1.983903994e+00  -- EM --   45 1.00e+00 3.24e-02  --  --
-#&gt;    2 +1.963896819e+00  -- EM --   45 1.00e+00 1.20e-02  --  --
-#&gt;    3 +1.959876618e+00  -- EM --   45 1.00e+00 6.09e-03  --  --
-#&gt;    4 +1.958098559e+00  -- EM --   45 1.00e+00 3.75e-03  --  --
-#&gt;    5 +1.956982863e+00  -- EM --   45 1.00e+00 2.92e-03  --  --
-#&gt;    6 +1.956191091e+00  -- EM --   45 1.00e+00 2.50e-03  --  --
-#&gt;    7 +1.955595037e+00  -- EM --   45 1.00e+00 2.23e-03  --  --
-#&gt;    8 +1.955128155e+00  -- EM --   45 1.00e+00 2.02e-03  --  --
-#&gt;    9 +1.954751115e+00  -- EM --   45 1.00e+00 1.85e-03  --  --
-#&gt;   10 +1.954439114e+00  -- EM --   45 1.00e+00 1.71e-03  --  --
-#&gt;   11 +1.954175804e+00  -- EM --   45 1.00e+00 1.58e-03  --  --
-#&gt;   12 +1.953950010e+00  -- EM --   45 1.00e+00 1.46e-03  --  --
-#&gt;   13 +1.953753851e+00  -- EM --   45 1.00e+00 1.35e-03  --  --
-#&gt;   14 +1.953581608e+00  -- EM --   45 1.00e+00 1.26e-03  --  --
-#&gt;   15 +1.953429033e+00  -- EM --   45 1.00e+00 1.17e-03  --  --
-#&gt;   16 +1.953292893e+00  -- EM --   45 1.00e+00 1.09e-03  --  --
-#&gt;   17 +1.953170675e+00  -- EM --   45 1.00e+00 1.02e-03  --  --
-#&gt;   18 +1.953060393e+00  -- EM --   45 1.00e+00 9.53e-04  --  --
-#&gt;   19 +1.952960444e+00  -- EM --   45 1.00e+00 8.92e-04  --  --
-#&gt;   20 +1.952869515e+00  -- EM --   45 1.00e+00 8.37e-04  --  --
-#&gt;    1 +1.952786518e+00 +1.799e-02  45  ------   ------   --  --
-#&gt;    2 +1.952210633e+00 +1.414e-02  25 1.00e+00 5.85e-02  20   1
-#&gt;    3 +1.950781554e+00 +6.206e-03  19 1.00e+00 1.08e-01  20   1
-#&gt;    4 +1.950764842e+00 +9.368e-06  23 1.00e+00 3.61e-02  16   1
-#&gt;    5 +1.950764842e+00 -5.843e-06  23 1.00e+00 5.76e-05  20   1
-#&gt; Optimization took 0.02 seconds.
-#&gt; Convergence criteria met---optimal solution found.
-#&gt; Running mix-SQP algorithm 0.3-39 on 1000 x 28 matrix
-#&gt; convergence tol. (SQP):     1.0e-08
-#&gt; conv. tol. (active-set):    1.0e-10
-#&gt; zero threshold (solution):  1.0e-08
-#&gt; zero thresh. (search dir.): 1.0e-14
-#&gt; l.s. sufficient decrease:   1.0e-02
-#&gt; step size reduction factor: 7.5e-01
-#&gt; minimum step size:          1.0e-08
-#&gt; max. iter (SQP):            1000
-#&gt; max. iter (active-set):     20
-#&gt; number of EM iterations:    20
-#&gt; Computing SVD of 1000 x 28 matrix.
-#&gt; Matrix is not low-rank; falling back to full matrix.
-#&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
-#&gt;    1 +1.940511172e+00  -- EM --   28 1.00e+00 5.13e-02  --  --
-#&gt;    2 +1.919496514e+00  -- EM --   28 1.00e+00 1.94e-02  --  --
-#&gt;    3 +1.915264075e+00  -- EM --   28 1.00e+00 1.00e-02  --  --
-#&gt;    4 +1.913430767e+00  -- EM --   28 1.00e+00 6.25e-03  --  --
-#&gt;    5 +1.912288152e+00  -- EM --   28 1.00e+00 4.40e-03  --  --
-#&gt;    6 +1.911476710e+00  -- EM --   28 1.00e+00 3.55e-03  --  --
-#&gt;    7 +1.910865049e+00  -- EM --   28 1.00e+00 3.17e-03  --  --
-#&gt;    8 +1.910385717e+00  -- EM --   28 1.00e+00 2.89e-03  --  --
-#&gt;    9 +1.909998650e+00  -- EM --   28 1.00e+00 2.67e-03  --  --
-#&gt;   10 +1.909678364e+00  -- EM --   28 1.00e+00 2.47e-03  --  --
-#&gt;   11 +1.909407934e+00  -- EM --   28 1.00e+00 2.30e-03  --  --
-#&gt;   12 +1.909175721e+00  -- EM --   28 1.00e+00 2.14e-03  --  --
-#&gt;   13 +1.908973491e+00  -- EM --   28 1.00e+00 1.99e-03  --  --
-#&gt;   14 +1.908795267e+00  -- EM --   28 1.00e+00 1.86e-03  --  --
-#&gt;   15 +1.908636613e+00  -- EM --   28 1.00e+00 1.74e-03  --  --
-#&gt;   16 +1.908494176e+00  -- EM --   28 1.00e+00 1.62e-03  --  --
-#&gt;   17 +1.908365372e+00  -- EM --   28 1.00e+00 1.52e-03  --  --
-#&gt;   18 +1.908248182e+00  -- EM --   28 1.00e+00 1.42e-03  --  --
-#&gt;   19 +1.908141002e+00  -- EM --   28 1.00e+00 1.34e-03  --  --
-#&gt;   20 +1.908042541e+00  -- EM --   28 1.00e+00 1.25e-03  --  --
-#&gt;    1 +1.907951747e+00 +2.512e-02  28  ------   ------   --  --
-#&gt;    2 +1.906212170e+00 +1.758e-03  18 1.00e+00 3.54e-02  12   1
-#&gt;    3 +1.906211582e+00 -5.622e-06  18 1.00e+00 1.26e-03   2   1
-#&gt; Optimization took 0.01 seconds.
-#&gt; Convergence criteria met---optimal solution found.</code></pre>
-<pre class="r"><code>
+}
+
 ggplot(tibble(grid_dens = scale_vec, 
               llik = sapply(res_list, `[[`, &quot;log_likelihood&quot;)), 
        aes(x = grid_dens, y = llik)) + 
   geom_point()</code></pre>
 <p><img src="figure/ebnm_npmle.Rmd/llik1000-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-llik1000-1">
+Past versions of llik1000-1.png
+</button>
+</p>
+<div id="fig-llik1000-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/1af4141cf4b13ddbf403d907e27d85dfaf68b515/docs/figure/ebnm_npmle.Rmd/llik1000-1.png" target="_blank">1af4141</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Visually, the CDFs are very similar for all densities less than 0.5 SD:</p>
 <pre class="r"><code>cdf_df &lt;- tibble(x = rep(cdf_grid, length(res_list)), 
                  y = as.vector(sapply(res_list, 
@@ -972,6 +776,43 @@ ggplot(tibble(grid_dens = scale_vec,
 ggplot(cdf_df, aes(x = x, y = y, col = grid_dens)) + 
   geom_line()</code></pre>
 <p><img src="figure/ebnm_npmle.Rmd/cdf1000-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-cdf1000-1">
+Past versions of cdf1000-1.png
+</button>
+</p>
+<div id="fig-cdf1000-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/1af4141cf4b13ddbf403d907e27d85dfaf68b515/docs/figure/ebnm_npmle.Rmd/cdf1000-1.png" target="_blank">1af4141</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Interestingly, the number of nonzero components is pretty much constant even as the total number of components increases:</p>
 <pre class="r"><code>cat(&quot;Number of components:\n&quot;,
     rev(sapply(res_list, function(res) length(res$fitted_g$pi))), &quot;\n&quot;,
@@ -989,290 +830,50 @@ res_list &lt;- list()
 for (scale in scale_vec) {
   ebnm_res &lt;- ebnm::ebnm_npmle(samp, scale = scale, control = mixsqp_control)
   res_list &lt;- c(res_list, list(ebnm_res))
-}</code></pre>
-<pre><code>#&gt; Running mix-SQP algorithm 0.3-39 on 10000 x 421 matrix
-#&gt; convergence tol. (SQP):     1.0e-08
-#&gt; conv. tol. (active-set):    1.0e-10
-#&gt; zero threshold (solution):  1.0e-08
-#&gt; zero thresh. (search dir.): 1.0e-14
-#&gt; l.s. sufficient decrease:   1.0e-02
-#&gt; step size reduction factor: 7.5e-01
-#&gt; minimum step size:          1.0e-08
-#&gt; max. iter (SQP):            1000
-#&gt; max. iter (active-set):     20
-#&gt; number of EM iterations:    20
-#&gt; Computing SVD of 10000 x 421 matrix.
-#&gt; SVD computation took 3.57 seconds.
-#&gt; Rank of matrix is estimated to be 70.
-#&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
-#&gt;    1 +2.024431705e+00  -- EM --  421 1.00e+00 5.14e-03  --  --
-#&gt;    2 +2.005292240e+00  -- EM --  421 1.00e+00 1.61e-03  --  --
-#&gt;    3 +2.001485507e+00  -- EM --  421 1.00e+00 8.11e-04  --  --
-#&gt;    4 +1.999953997e+00  -- EM --  421 1.00e+00 5.04e-04  --  --
-#&gt;    5 +1.999115254e+00  -- EM --  421 1.00e+00 3.57e-04  --  --
-#&gt;    6 +1.998601264e+00  -- EM --  421 1.00e+00 2.74e-04  --  --
-#&gt;    7 +1.998269736e+00  -- EM --  421 1.00e+00 2.20e-04  --  --
-#&gt;    8 +1.998048473e+00  -- EM --  421 1.00e+00 1.83e-04  --  --
-#&gt;    9 +1.997896397e+00  -- EM --  421 1.00e+00 1.55e-04  --  --
-#&gt;   10 +1.997788855e+00  -- EM --  421 1.00e+00 1.33e-04  --  --
-#&gt;   11 +1.997710587e+00  -- EM --  421 1.00e+00 1.16e-04  --  --
-#&gt;   12 +1.997651931e+00  -- EM --  421 1.00e+00 1.02e-04  --  --
-#&gt;   13 +1.997606659e+00  -- EM --  421 1.00e+00 9.04e-05  --  --
-#&gt;   14 +1.997570694e+00  -- EM --  421 1.00e+00 8.10e-05  --  --
-#&gt;   15 +1.997541325e+00  -- EM --  421 1.00e+00 7.31e-05  --  --
-#&gt;   16 +1.997516726e+00  -- EM --  421 1.00e+00 6.65e-05  --  --
-#&gt;   17 +1.997495650e+00  -- EM --  421 1.00e+00 6.10e-05  --  --
-#&gt;   18 +1.997477235e+00  -- EM --  421 1.00e+00 5.63e-05  --  --
-#&gt;   19 +1.997460876e+00  -- EM --  421 1.00e+00 5.25e-05  --  --
-#&gt;   20 +1.997446142e+00  -- EM --  421 1.00e+00 4.91e-05  --  --
-#&gt;    1 +1.997432723e+00 +2.350e-02 421  ------   ------   --  --
-#&gt;    2 +1.997420399e+00 +2.256e-02 401 1.00e+00 6.10e-05  20   1
-#&gt;    3 +1.997409003e+00 +2.169e-02 381 1.00e+00 1.82e-04  20   1
-#&gt;    4 +1.997398392e+00 +2.089e-02 361 1.00e+00 1.92e-04  20   1
-#&gt;    5 +1.997388454e+00 +2.018e-02 341 1.00e+00 3.97e-04  20   1
-#&gt;    6 +1.997379118e+00 +1.954e-02 321 1.00e+00 7.96e-04  20   1
-#&gt;    7 +1.997370339e+00 +1.898e-02 301 1.00e+00 1.66e-03  20   1
-#&gt;    8 +1.997362049e+00 +1.844e-02 281 1.00e+00 2.28e-03  20   1
-#&gt;    9 +1.997354191e+00 +1.792e-02 261 1.00e+00 2.54e-03  20   1
-#&gt;   10 +1.997346722e+00 +1.740e-02 241 1.00e+00 5.98e-03  20   1
-#&gt;   11 +1.997339656e+00 +1.687e-02 221 1.00e+00 4.23e-03  20   1
-#&gt;   12 +1.997332957e+00 +1.633e-02 201 1.00e+00 3.79e-03  20   1
-#&gt;   13 +1.997326508e+00 +1.578e-02 181 1.00e+00 1.22e-02  20   1
-#&gt;   14 +1.997320382e+00 +1.518e-02 161 1.00e+00 1.52e-02  20   1
-#&gt;   15 +1.997314604e+00 +1.462e-02 141 1.00e+00 1.08e-02  20   1
-#&gt;   16 +1.997309096e+00 +1.407e-02 121 1.00e+00 5.77e-03  20   1
-#&gt;   17 +1.997303852e+00 +1.353e-02 101 1.00e+00 7.02e-03  20   1
-#&gt;   18 +1.997298415e+00 +1.248e-02  81 1.00e+00 1.83e-02  20   1
-#&gt;   19 +1.997293212e+00 +1.145e-02  61 1.00e+00 4.12e-02  20   1
-#&gt;   20 +1.997278828e+00 +8.156e-03  41 1.00e+00 1.18e-01  20   1
-#&gt;   21 +1.997041649e+00 +1.031e-03  25 1.00e+00 1.18e-01  20   1
-#&gt;   22 +1.997034393e+00 +4.634e-05  26 1.00e+00 3.42e-03  20   1
-#&gt;   23 +1.996997194e+00 +3.545e-07  27 1.00e+00 1.62e-01  20   1
-#&gt;   24 +1.996990956e+00 -5.942e-06  29 1.00e+00 2.60e-02  20   1
-#&gt; Optimization took 16.50 seconds.
-#&gt; Convergence criteria met---optimal solution found.
-#&gt; Running mix-SQP algorithm 0.3-39 on 10000 x 256 matrix
-#&gt; convergence tol. (SQP):     1.0e-08
-#&gt; conv. tol. (active-set):    1.0e-10
-#&gt; zero threshold (solution):  1.0e-08
-#&gt; zero thresh. (search dir.): 1.0e-14
-#&gt; l.s. sufficient decrease:   1.0e-02
-#&gt; step size reduction factor: 7.5e-01
-#&gt; minimum step size:          1.0e-08
-#&gt; max. iter (SQP):            1000
-#&gt; max. iter (active-set):     20
-#&gt; number of EM iterations:    20
-#&gt; Computing SVD of 10000 x 256 matrix.
-#&gt; Matrix is not low-rank; falling back to full matrix.
-#&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
-#&gt;    1 +2.023505987e+00  -- EM --  256 1.00e+00 8.44e-03  --  --
-#&gt;    2 +2.004346140e+00  -- EM --  256 1.00e+00 2.64e-03  --  --
-#&gt;    3 +2.000534004e+00  -- EM --  256 1.00e+00 1.33e-03  --  --
-#&gt;    4 +1.999000152e+00  -- EM --  256 1.00e+00 8.29e-04  --  --
-#&gt;    5 +1.998159845e+00  -- EM --  256 1.00e+00 5.88e-04  --  --
-#&gt;    6 +1.997644661e+00  -- EM --  256 1.00e+00 4.51e-04  --  --
-#&gt;    7 +1.997312210e+00  -- EM --  256 1.00e+00 3.63e-04  --  --
-#&gt;    8 +1.997090241e+00  -- EM --  256 1.00e+00 3.02e-04  --  --
-#&gt;    9 +1.996937632e+00  -- EM --  256 1.00e+00 2.55e-04  --  --
-#&gt;   10 +1.996829690e+00  -- EM --  256 1.00e+00 2.19e-04  --  --
-#&gt;   11 +1.996751123e+00  -- EM --  256 1.00e+00 1.91e-04  --  --
-#&gt;   12 +1.996692244e+00  -- EM --  256 1.00e+00 1.67e-04  --  --
-#&gt;   13 +1.996646806e+00  -- EM --  256 1.00e+00 1.49e-04  --  --
-#&gt;   14 +1.996610715e+00  -- EM --  256 1.00e+00 1.33e-04  --  --
-#&gt;   15 +1.996581251e+00  -- EM --  256 1.00e+00 1.20e-04  --  --
-#&gt;   16 +1.996556580e+00  -- EM --  256 1.00e+00 1.10e-04  --  --
-#&gt;   17 +1.996535448e+00  -- EM --  256 1.00e+00 1.01e-04  --  --
-#&gt;   18 +1.996516990e+00  -- EM --  256 1.00e+00 9.31e-05  --  --
-#&gt;   19 +1.996500595e+00  -- EM --  256 1.00e+00 8.66e-05  --  --
-#&gt;   20 +1.996485833e+00  -- EM --  256 1.00e+00 8.11e-05  --  --
-#&gt;    1 +1.996472389e+00 +2.313e-02 256  ------   ------   --  --
-#&gt;    2 +1.996460049e+00 +2.232e-02 236 1.00e+00 1.58e-04  20   1
-#&gt;    3 +1.996448643e+00 +2.159e-02 216 1.00e+00 7.67e-04  20   1
-#&gt;    4 +1.996438030e+00 +1.968e-02 196 1.00e+00 1.12e-03  20   1
-#&gt;    5 +1.996428109e+00 +1.890e-02 176 1.00e+00 5.39e-03  20   1
-#&gt;    6 +1.996418794e+00 +1.809e-02 156 1.00e+00 1.08e-02  20   1
-#&gt;    7 +1.996409905e+00 +1.717e-02 136 1.00e+00 1.38e-02  20   1
-#&gt;    8 +1.996401592e+00 +1.617e-02 116 1.00e+00 2.78e-02  20   1
-#&gt;    9 +1.996393802e+00 +1.523e-02  96 1.00e+00 1.23e-02  20   1
-#&gt;   10 +1.996386208e+00 +1.402e-02  76 1.00e+00 2.65e-02  20   1
-#&gt;   11 +1.996378576e+00 +1.252e-02  56 1.00e+00 4.41e-02  20   1
-#&gt;   12 +1.996338164e+00 +8.490e-03  36 1.00e+00 9.75e-02  20   1
-#&gt;   13 +1.996099336e+00 +3.164e-04  27 1.00e+00 4.35e-02  20   1
-#&gt;   14 +1.996091475e+00 -6.183e-06  27 1.00e+00 1.10e-02  20   1
-#&gt; Optimization took 8.50 seconds.
-#&gt; Convergence criteria met---optimal solution found.
-#&gt; Running mix-SQP algorithm 0.3-39 on 10000 x 155 matrix
-#&gt; convergence tol. (SQP):     1.0e-08
-#&gt; conv. tol. (active-set):    1.0e-10
-#&gt; zero threshold (solution):  1.0e-08
-#&gt; zero thresh. (search dir.): 1.0e-14
-#&gt; l.s. sufficient decrease:   1.0e-02
-#&gt; step size reduction factor: 7.5e-01
-#&gt; minimum step size:          1.0e-08
-#&gt; max. iter (SQP):            1000
-#&gt; max. iter (active-set):     20
-#&gt; number of EM iterations:    20
-#&gt; Computing SVD of 10000 x 155 matrix.
-#&gt; Matrix is not low-rank; falling back to full matrix.
-#&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
-#&gt;    1 +2.021015099e+00  -- EM --  155 1.00e+00 1.39e-02  --  --
-#&gt;    2 +2.001799345e+00  -- EM --  155 1.00e+00 4.37e-03  --  --
-#&gt;    3 +1.997972385e+00  -- EM --  155 1.00e+00 2.21e-03  --  --
-#&gt;    4 +1.996432112e+00  -- EM --  155 1.00e+00 1.37e-03  --  --
-#&gt;    5 +1.995587520e+00  -- EM --  155 1.00e+00 9.76e-04  --  --
-#&gt;    6 +1.995069059e+00  -- EM --  155 1.00e+00 7.48e-04  --  --
-#&gt;    7 +1.994734071e+00  -- EM --  155 1.00e+00 6.03e-04  --  --
-#&gt;    8 +1.994510162e+00  -- EM --  155 1.00e+00 5.01e-04  --  --
-#&gt;    9 +1.994356084e+00  -- EM --  155 1.00e+00 4.24e-04  --  --
-#&gt;   10 +1.994247040e+00  -- EM --  155 1.00e+00 3.64e-04  --  --
-#&gt;   11 +1.994167648e+00  -- EM --  155 1.00e+00 3.17e-04  --  --
-#&gt;   12 +1.994108152e+00  -- EM --  155 1.00e+00 2.78e-04  --  --
-#&gt;   13 +1.994062253e+00  -- EM --  155 1.00e+00 2.47e-04  --  --
-#&gt;   14 +1.994025817e+00  -- EM --  155 1.00e+00 2.21e-04  --  --
-#&gt;   15 +1.993996091e+00  -- EM --  155 1.00e+00 2.00e-04  --  --
-#&gt;   16 +1.993971220e+00  -- EM --  155 1.00e+00 1.82e-04  --  --
-#&gt;   17 +1.993949934e+00  -- EM --  155 1.00e+00 1.67e-04  --  --
-#&gt;   18 +1.993931354e+00  -- EM --  155 1.00e+00 1.55e-04  --  --
-#&gt;   19 +1.993914862e+00  -- EM --  155 1.00e+00 1.44e-04  --  --
-#&gt;   20 +1.993900020e+00  -- EM --  155 1.00e+00 1.35e-04  --  --
-#&gt;    1 +1.993886508e+00 +2.331e-02 155  ------   ------   --  --
-#&gt;    2 +1.993874123e+00 +1.710e-02 135 1.00e+00 5.06e-04  20   1
-#&gt;    3 +1.993862764e+00 +1.527e-02 115 1.00e+00 4.38e-03  20   1
-#&gt;    4 +1.993852136e+00 +1.474e-02  95 1.00e+00 1.90e-02  20   1
-#&gt;    5 +1.993842303e+00 +1.426e-02  75 1.00e+00 2.70e-02  20   1
-#&gt;    6 +1.993832679e+00 +1.380e-02  55 1.00e+00 5.41e-02  20   1
-#&gt;    7 +1.993743300e+00 +6.595e-03  35 1.00e+00 9.65e-02  20   1
-#&gt;    8 +1.993523462e+00 +4.799e-04  28 1.00e+00 4.46e-02  20   1
-#&gt;    9 +1.993523448e+00 -5.974e-06  28 1.00e+00 1.46e-04  20   1
-#&gt; Optimization took 2.26 seconds.
-#&gt; Convergence criteria met---optimal solution found.
-#&gt; Running mix-SQP algorithm 0.3-39 on 10000 x 94 matrix
-#&gt; convergence tol. (SQP):     1.0e-08
-#&gt; conv. tol. (active-set):    1.0e-10
-#&gt; zero threshold (solution):  1.0e-08
-#&gt; zero thresh. (search dir.): 1.0e-14
-#&gt; l.s. sufficient decrease:   1.0e-02
-#&gt; step size reduction factor: 7.5e-01
-#&gt; minimum step size:          1.0e-08
-#&gt; max. iter (SQP):            1000
-#&gt; max. iter (active-set):     20
-#&gt; number of EM iterations:    20
-#&gt; Computing SVD of 10000 x 94 matrix.
-#&gt; Matrix is not low-rank; falling back to full matrix.
-#&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
-#&gt;    1 +2.014211990e+00  -- EM --   94 1.00e+00 2.29e-02  --  --
-#&gt;    2 +1.994844637e+00  -- EM --   94 1.00e+00 7.19e-03  --  --
-#&gt;    3 +1.990977384e+00  -- EM --   94 1.00e+00 3.64e-03  --  --
-#&gt;    4 +1.989419703e+00  -- EM --   94 1.00e+00 2.26e-03  --  --
-#&gt;    5 +1.988563494e+00  -- EM --   94 1.00e+00 1.61e-03  --  --
-#&gt;    6 +1.988036125e+00  -- EM --   94 1.00e+00 1.24e-03  --  --
-#&gt;    7 +1.987694219e+00  -- EM --   94 1.00e+00 1.00e-03  --  --
-#&gt;    8 +1.987464997e+00  -- EM --   94 1.00e+00 8.34e-04  --  --
-#&gt;    9 +1.987306886e+00  -- EM --   94 1.00e+00 7.07e-04  --  --
-#&gt;   10 +1.987194803e+00  -- EM --   94 1.00e+00 6.08e-04  --  --
-#&gt;   11 +1.987113132e+00  -- EM --   94 1.00e+00 5.29e-04  --  --
-#&gt;   12 +1.987051929e+00  -- EM --   94 1.00e+00 4.65e-04  --  --
-#&gt;   13 +1.987004750e+00  -- EM --   94 1.00e+00 4.13e-04  --  --
-#&gt;   14 +1.986967350e+00  -- EM --   94 1.00e+00 3.70e-04  --  --
-#&gt;   15 +1.986936895e+00  -- EM --   94 1.00e+00 3.34e-04  --  --
-#&gt;   16 +1.986911466e+00  -- EM --   94 1.00e+00 3.05e-04  --  --
-#&gt;   17 +1.986889749e+00  -- EM --   94 1.00e+00 2.80e-04  --  --
-#&gt;   18 +1.986870830e+00  -- EM --   94 1.00e+00 2.58e-04  --  --
-#&gt;   19 +1.986854068e+00  -- EM --   94 1.00e+00 2.40e-04  --  --
-#&gt;   20 +1.986839003e+00  -- EM --   94 1.00e+00 2.25e-04  --  --
-#&gt;    1 +1.986825306e+00 +2.345e-02  94  ------   ------   --  --
-#&gt;    2 +1.986812789e+00 +2.246e-02  74 1.00e+00 1.33e-02  20   1
-#&gt;    3 +1.986800937e+00 +2.120e-02  54 1.00e+00 4.23e-02  20   1
-#&gt;    4 +1.986693681e+00 +1.164e-02  34 1.00e+00 1.18e-01  20   1
-#&gt;    5 +1.986454060e+00 +4.429e-04  29 1.00e+00 6.01e-02  20   1
-#&gt;    6 +1.986448229e+00 -5.843e-06  29 1.00e+00 2.38e-03  20   1
-#&gt; Optimization took 0.68 seconds.
-#&gt; Convergence criteria met---optimal solution found.
-#&gt; Running mix-SQP algorithm 0.3-39 on 10000 x 57 matrix
-#&gt; convergence tol. (SQP):     1.0e-08
-#&gt; conv. tol. (active-set):    1.0e-10
-#&gt; zero threshold (solution):  1.0e-08
-#&gt; zero thresh. (search dir.): 1.0e-14
-#&gt; l.s. sufficient decrease:   1.0e-02
-#&gt; step size reduction factor: 7.5e-01
-#&gt; minimum step size:          1.0e-08
-#&gt; max. iter (SQP):            1000
-#&gt; max. iter (active-set):     20
-#&gt; number of EM iterations:    20
-#&gt; Computing SVD of 10000 x 57 matrix.
-#&gt; Matrix is not low-rank; falling back to full matrix.
-#&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
-#&gt;    1 +1.995993431e+00  -- EM --   57 1.00e+00 3.70e-02  --  --
-#&gt;    2 +1.976214692e+00  -- EM --   57 1.00e+00 1.16e-02  --  --
-#&gt;    3 +1.972237405e+00  -- EM --   57 1.00e+00 5.96e-03  --  --
-#&gt;    4 +1.970632501e+00  -- EM --   57 1.00e+00 3.74e-03  --  --
-#&gt;    5 +1.969744805e+00  -- EM --   57 1.00e+00 2.68e-03  --  --
-#&gt;    6 +1.969193118e+00  -- EM --   57 1.00e+00 2.08e-03  --  --
-#&gt;    7 +1.968832146e+00  -- EM --   57 1.00e+00 1.69e-03  --  --
-#&gt;    8 +1.968588151e+00  -- EM --   57 1.00e+00 1.41e-03  --  --
-#&gt;    9 +1.968418734e+00  -- EM --   57 1.00e+00 1.20e-03  --  --
-#&gt;   10 +1.968298078e+00  -- EM --   57 1.00e+00 1.03e-03  --  --
-#&gt;   11 +1.968209939e+00  -- EM --   57 1.00e+00 8.99e-04  --  --
-#&gt;   12 +1.968143868e+00  -- EM --   57 1.00e+00 7.91e-04  --  --
-#&gt;   13 +1.968093019e+00  -- EM --   57 1.00e+00 7.03e-04  --  --
-#&gt;   14 +1.968052840e+00  -- EM --   57 1.00e+00 6.31e-04  --  --
-#&gt;   15 +1.968020263e+00  -- EM --   57 1.00e+00 5.70e-04  --  --
-#&gt;   16 +1.967993194e+00  -- EM --   57 1.00e+00 5.19e-04  --  --
-#&gt;   17 +1.967970185e+00  -- EM --   57 1.00e+00 4.76e-04  --  --
-#&gt;   18 +1.967950228e+00  -- EM --   57 1.00e+00 4.40e-04  --  --
-#&gt;   19 +1.967932607e+00  -- EM --   57 1.00e+00 4.09e-04  --  --
-#&gt;   20 +1.967916814e+00  -- EM --   57 1.00e+00 3.83e-04  --  --
-#&gt;    1 +1.967902478e+00 +2.307e-02  57  ------   ------   --  --
-#&gt;    2 +1.967862203e+00 +1.489e-02  37 1.00e+00 3.16e-02  20   1
-#&gt;    3 +1.967543847e+00 +1.475e-03  29 1.00e+00 8.97e-02  20   1
-#&gt;    4 +1.967543808e+00 -5.771e-06  29 1.00e+00 1.00e-03  20   1
-#&gt; Optimization took 0.22 seconds.
-#&gt; Convergence criteria met---optimal solution found.
-#&gt; Running mix-SQP algorithm 0.3-39 on 10000 x 35 matrix
-#&gt; convergence tol. (SQP):     1.0e-08
-#&gt; conv. tol. (active-set):    1.0e-10
-#&gt; zero threshold (solution):  1.0e-08
-#&gt; zero thresh. (search dir.): 1.0e-14
-#&gt; l.s. sufficient decrease:   1.0e-02
-#&gt; step size reduction factor: 7.5e-01
-#&gt; minimum step size:          1.0e-08
-#&gt; max. iter (SQP):            1000
-#&gt; max. iter (active-set):     20
-#&gt; number of EM iterations:    20
-#&gt; Computing SVD of 10000 x 35 matrix.
-#&gt; Matrix is not low-rank; falling back to full matrix.
-#&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
-#&gt;    1 +1.951853222e+00  -- EM --   35 1.00e+00 6.05e-02  --  --
-#&gt;    2 +1.931006703e+00  -- EM --   35 1.00e+00 1.95e-02  --  --
-#&gt;    3 +1.926739177e+00  -- EM --   35 1.00e+00 1.01e-02  --  --
-#&gt;    4 +1.925012384e+00  -- EM --   35 1.00e+00 6.34e-03  --  --
-#&gt;    5 +1.924043980e+00  -- EM --   35 1.00e+00 4.55e-03  --  --
-#&gt;    6 +1.923428706e+00  -- EM --   35 1.00e+00 3.52e-03  --  --
-#&gt;    7 +1.923016357e+00  -- EM --   35 1.00e+00 2.85e-03  --  --
-#&gt;    8 +1.922731218e+00  -- EM --   35 1.00e+00 2.37e-03  --  --
-#&gt;    9 +1.922529262e+00  -- EM --   35 1.00e+00 2.00e-03  --  --
-#&gt;   10 +1.922383141e+00  -- EM --   35 1.00e+00 1.71e-03  --  --
-#&gt;   11 +1.922275244e+00  -- EM --   35 1.00e+00 1.47e-03  --  --
-#&gt;   12 +1.922193954e+00  -- EM --   35 1.00e+00 1.28e-03  --  --
-#&gt;   13 +1.922131460e+00  -- EM --   35 1.00e+00 1.12e-03  --  --
-#&gt;   14 +1.922082433e+00  -- EM --   35 1.00e+00 9.89e-04  --  --
-#&gt;   15 +1.922043184e+00  -- EM --   35 1.00e+00 8.79e-04  --  --
-#&gt;   16 +1.922011132e+00  -- EM --   35 1.00e+00 7.86e-04  --  --
-#&gt;   17 +1.921984446e+00  -- EM --   35 1.00e+00 7.12e-04  --  --
-#&gt;   18 +1.921961820e+00  -- EM --   35 1.00e+00 6.51e-04  --  --
-#&gt;   19 +1.921942307e+00  -- EM --   35 1.00e+00 5.97e-04  --  --
-#&gt;   20 +1.921925217e+00  -- EM --   35 1.00e+00 5.51e-04  --  --
-#&gt;    1 +1.921910042e+00 +8.142e-03  35  ------   ------   --  --
-#&gt;    2 +1.921511265e+00 +5.085e-04  28 1.00e+00 4.14e-02  12   1
-#&gt;    3 +1.921511234e+00 -5.629e-06  28 1.00e+00 3.08e-04   3   1
-#&gt; Optimization took 0.09 seconds.
-#&gt; Convergence criteria met---optimal solution found.</code></pre>
-<pre class="r"><code>
+}
+
 ggplot(tibble(grid_dens = scale_vec, 
               llik = sapply(res_list, `[[`, &quot;log_likelihood&quot;)), 
        aes(x = grid_dens, y = llik)) + 
   geom_point()</code></pre>
 <p><img src="figure/ebnm_npmle.Rmd/llik10000-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-llik10000-1">
+Past versions of llik10000-1.png
+</button>
+</p>
+<div id="fig-llik10000-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/1af4141cf4b13ddbf403d907e27d85dfaf68b515/docs/figure/ebnm_npmle.Rmd/llik10000-1.png" target="_blank">1af4141</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>
 cdf_df &lt;- tibble(x = rep(cdf_grid, length(res_list)), 
                  y = as.vector(sapply(res_list, 
@@ -1281,6 +882,43 @@ cdf_df &lt;- tibble(x = rep(cdf_grid, length(res_list)),
 ggplot(cdf_df, aes(x = x, y = y, col = grid_dens)) + 
   geom_line()</code></pre>
 <p><img src="figure/ebnm_npmle.Rmd/llik10000-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-llik10000-2">
+Past versions of llik10000-2.png
+</button>
+</p>
+<div id="fig-llik10000-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/1af4141cf4b13ddbf403d907e27d85dfaf68b515/docs/figure/ebnm_npmle.Rmd/llik10000-2.png" target="_blank">1af4141</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>
 cat(&quot;Number of components:\n&quot;,
     rev(sapply(res_list, function(res) length(res$fitted_g$pi))), &quot;\n&quot;,
@@ -1339,7 +977,7 @@ g10000 &lt;- ebnm::ebnm_npmle(samp, scale = 0.25, control = list(verbose = TRUE)
 #&gt;    8 +1.995453336e+00 +5.102e-04  27 1.00e+00 6.01e-03  20   1
 #&gt;    9 +1.995425984e+00 +1.469e-06  27 1.00e+00 5.12e-02  20   1
 #&gt;   10 +1.995412578e+00 -8.542e-07  30 1.00e+00 1.03e-01  20   1
-#&gt; Optimization took 1.99 seconds.
+#&gt; Optimization took 1.72 seconds.
 #&gt; Convergence criteria met---optimal solution found.</code></pre>
 <p>and <span class="math inline">\(n = 100000\)</span> with <code>scale = 1 / 5</code>:</p>
 <pre class="r"><code>set.seed(666)
@@ -1391,7 +1029,7 @@ g100000 &lt;- ebnm::ebnm_npmle(samp, scale = 0.2, control = list(verbose = TRUE)
 #&gt;    9 +2.001057776e+00 +4.822e-03  45 1.00e+00 8.57e-02  20   1
 #&gt;   10 +2.000856234e+00 +1.105e-04  34 1.00e+00 4.51e-02  20   1
 #&gt;   11 +2.000856230e+00 -5.901e-06  34 1.00e+00 1.31e-03  20   1
-#&gt; Optimization took 36.68 seconds.
+#&gt; Optimization took 33.35 seconds.
 #&gt; Convergence criteria met---optimal solution found.</code></pre>
 <br> <br>
 <p>
