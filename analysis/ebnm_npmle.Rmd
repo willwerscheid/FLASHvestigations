@@ -46,9 +46,9 @@ ggplot(tibble(x = samp), aes(x = x)) + geom_histogram(binwidth = 1)
 I want to see how grid density affects convergence properties and the quality of the solution. From a log likelihood perspective, using a grid of points spaced at a distance equal to half the standard deviation of the noise gives a solution that is pretty much just as good as a very fine grid:
 
 ```{r llik1000}
-mixsqp_control = list()
+mixsqp_control = list(verbose = TRUE)
 
-scale_vec <- exp(seq(-2.5, 0, by = 0.5))
+scale_vec <- (max(samp) - min(samp) + 1e-4) / 2^(5:9)
 res_list <- list()
 for (scale in scale_vec) {
   ebnm_res <- ebnm::ebnm_npmle(samp, scale = scale, control = mixsqp_control)
@@ -76,16 +76,17 @@ Interestingly, the number of nonzero components is pretty much constant even as 
 
 ```{r ncomp}
 cat("Number of components:\n",
-    rev(sapply(res_list, function(res) length(res$fitted_g$pi))), "\n",
+    sapply(res_list, function(res) length(res$fitted_g$pi)), "\n",
     "Number of nonzero components:\n",
-    rev(sapply(res_list, function(res) sum(res$fitted_g$pi > 0))))
+    sapply(res_list, function(res) sum(res$fitted_g$pi > 0)))
 ```
 
-I redo with 10000 observations. The same conclusions still hold, more or less. A good rule of thumb might be to set `scale` equal to $\text{SD} / \log_{10} (n)$:
+I redo with 10000 observations. The same conclusions still hold, more or less. That the likelihood appears to decrease when large numbers of components are used is, I think, due to numerical error, but it says something about how accurate of a solution we should be aiming for. A good rule of thumb might be to set `scale` equal to $\text{SD} / \log_{10} (n)$ (provided that there are no more than, say, 300 components).
 
 ```{r llik10000}
 n <- 10000
 samp <- samp_from_g(true_g, n) + rnorm(n)
+scale_vec <- (max(samp) - min(samp) + 1e-4) / 2^(5:9)
 
 res_list <- list()
 for (scale in scale_vec) {
@@ -106,9 +107,9 @@ ggplot(cdf_df, aes(x = x, y = y, col = grid_dens)) +
   geom_line()
 
 cat("Number of components:\n",
-    rev(sapply(res_list, function(res) length(res$fitted_g$pi))), "\n",
+    sapply(res_list, function(res) length(res$fitted_g$pi)), "\n",
     "Number of nonzero components:\n",
-    rev(sapply(res_list, function(res) sum(res$fitted_g$pi > 0))))
+    sapply(res_list, function(res) sum(res$fitted_g$pi > 0)))
 ```
 
 I include two examples with verbose output for inspection. Compare $n = 10000$ with `scale = 1 / 4`:
