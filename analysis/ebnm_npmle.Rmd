@@ -27,7 +27,7 @@ true_cdf <- drop(ashr::mixcdf(true_g, cdf_grid))
 ggplot(tibble(x = cdf_grid, y = true_cdf), aes(x = x, y = y)) + geom_line()
 ```
 
-Now I sample 100, 1000, and 10000 observations from the true distribution, add normally distributed noise, and call `ebnm_npmle`.
+I start by sampling 1000 observations and adding normally distributed noise.
 
 ```{r samples}
 samp_from_g <- function(g, n) {
@@ -37,41 +37,95 @@ samp_from_g <- function(g, n) {
   return(rnorm(n, mean = mean, sd = sd))
 }
 
-estimate_g <- function(true_g, n, verbose = FALSE) {
-  samp <- samp_from_g(true_g, n) + rnorm(n) # Add N(0, 1) noise
-  ebnm_res <- ebnm::ebnm_npmle(samp, control = list(verbose = verbose))
-  return(ebnm_res$fitted_g)
+set.seed(666)
+n <- 1000
+samp <- samp_from_g(true_g, n) + rnorm(n)
+ggplot(tibble(x = samp), aes(x = x)) + geom_histogram(binwidth = 1)
+```
+
+I want to see how grid density affects convergence properties and the quality of the solution. From a log likelihood perspective, using a grid of points spaced at a distance equal to half the standard deviation of the noise gives a solution that is pretty much just as good as a very fine grid:
+
+```{r llik1000}
+mixsqp_control = list(verbose = TRUE)
+
+scale_vec <- exp(seq(-2.5, 0, by = 0.5))
+res_list <- list()
+for (scale in scale_vec) {
+  ebnm_res <- ebnm::ebnm_npmle(samp, scale = scale, control = mixsqp_control)
+  res_list <- c(res_list, list(ebnm_res))
 }
 
-set.seed(666)
-
-g100 <- estimate_g(true_g, 100)
-g1000 <- estimate_g(true_g, 1000)
-g10000 <- estimate_g(true_g, 10000)
-
-cdf100 <- drop(ashr::mixcdf(g100, cdf_grid))
-cdf1000 <- drop(ashr::mixcdf(g1000, cdf_grid))
-cdf10000 <- drop(ashr::mixcdf(g10000, cdf_grid))
-
-res <- tibble(x = rep(cdf_grid, 4), 
-              y = c(true_cdf, cdf100, cdf1000, cdf10000), 
-              cdf = c(rep("True", length(cdf_grid)),
-                      rep("n = 100", length(cdf_grid)),
-                      rep("n = 1000", length(cdf_grid)),
-                      rep("n = 10000", length(cdf_grid))))
-
-ggplot(res, aes(x = x, y = y, col = cdf)) + geom_line()
+ggplot(tibble(grid_dens = scale_vec, 
+              llik = sapply(res_list, `[[`, "log_likelihood")), 
+       aes(x = grid_dens, y = llik)) + 
+  geom_point()
 ```
 
-When $n$ gets too large, `mixsqp` gets bogged down. Compare $n = 10000$:
+Visually, the CDFs are very similar for all densities less than 0.5 SD:
+
+```{r cdf1000}
+cdf_df <- tibble(x = rep(cdf_grid, length(res_list)), 
+                 y = as.vector(sapply(res_list, 
+                                      function(res) drop(ashr::mixcdf(res$fitted_g, cdf_grid)))),
+                 grid_dens = as.factor(rep(round(scale_vec, 2), each = length(cdf_grid))))
+ggplot(cdf_df, aes(x = x, y = y, col = grid_dens)) + 
+  geom_line()
+```
+
+Interestingly, the number of nonzero components is pretty much constant even as the total number of components increases:
+
+```{r ncomp}
+cat("Number of components:\n",
+    rev(sapply(res_list, function(res) length(res$fitted_g$pi))), "\n",
+    "Number of nonzero components:\n",
+    rev(sapply(res_list, function(res) sum(res$fitted_g$pi > 0))))
+```
+
+I redo with 10000 observations. The same conclusions still hold, more or less. A good rule of thumb might be to set `scale` equal to $\text{SD} / \log_{10} (n)$:
+
+```{r llik10000}
+n <- 10000
+samp <- samp_from_g(true_g, n) + rnorm(n)
+
+res_list <- list()
+for (scale in scale_vec) {
+  ebnm_res <- ebnm::ebnm_npmle(samp, scale = scale, control = mixsqp_control)
+  res_list <- c(res_list, list(ebnm_res))
+}
+
+ggplot(tibble(grid_dens = scale_vec, 
+              llik = sapply(res_list, `[[`, "log_likelihood")), 
+       aes(x = grid_dens, y = llik)) + 
+  geom_point()
+
+cdf_df <- tibble(x = rep(cdf_grid, length(res_list)), 
+                 y = as.vector(sapply(res_list, 
+                                      function(res) drop(ashr::mixcdf(res$fitted_g, cdf_grid)))),
+                 grid_dens = as.factor(rep(round(scale_vec, 2), each = length(cdf_grid))))
+ggplot(cdf_df, aes(x = x, y = y, col = grid_dens)) + 
+  geom_line()
+
+cat("Number of components:\n",
+    rev(sapply(res_list, function(res) length(res$fitted_g$pi))), "\n",
+    "Number of nonzero components:\n",
+    rev(sapply(res_list, function(res) sum(res$fitted_g$pi > 0))))
+```
+
+I include two examples with verbose output for inspection. Compare $n = 10000$ with `scale = 1 / 4`:
 
 ```{r mixsqp10000}
-g10000 <- estimate_g(true_g, 10000, verbose = TRUE)
+set.seed(666)
+n <- 10000
+samp <- samp_from_g(true_g, n) + rnorm(n)
+g10000 <- ebnm::ebnm_npmle(samp, scale = 0.25, control = list(verbose = TRUE))
 ```
 
-and $n = 100000$:
+and $n = 100000$ with `scale = 1 / 5`:
 
 ```{r mixsqp100000}
-g100000 <- estimate_g(true_g, 100000, verbose = TRUE)
+set.seed(666)
+n <- 100000
+samp <- samp_from_g(true_g, n) + rnorm(n)
+g100000 <- ebnm::ebnm_npmle(samp, scale = 0.2, control = list(verbose = TRUE))
 ```
 
