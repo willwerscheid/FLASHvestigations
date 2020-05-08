@@ -46,7 +46,7 @@ ggplot(tibble(x = samp), aes(x = x)) + geom_histogram(binwidth = 1)
 I want to see how grid density affects convergence properties and the quality of the solution. From a log likelihood perspective, using a grid of points spaced at a distance equal to half the standard deviation of the noise gives a solution that is pretty much just as good as a very fine grid:
 
 ```{r llik1000}
-mixsqp_control = list(verbose = TRUE)
+mixsqp_control = list()
 
 scale_vec <- exp(seq(-2.5, 0, by = 0.5))
 res_list <- list()
