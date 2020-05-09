@@ -43,7 +43,7 @@ samp <- samp_from_g(true_g, n) + rnorm(n)
 ggplot(tibble(x = samp), aes(x = x)) + geom_histogram(binwidth = 1)
 ```
 
-I want to see how grid density affects convergence properties and the quality of the solution. From a log likelihood perspective, using a grid of points spaced at a distance that's about half the standard deviation of the noise gives a solution that is pretty much just as good as a very fine grid. Note that the Dicker and Zhao recommendation -- $\sqrt{n} \approx 32$, which corresponds to a `scale` of a little more than 0.8 -- produces a noticeably worse solution. 
+I want to see how grid density affects convergence properties and the quality of the solution. From a log likelihood perspective, using a grid of points spaced at a distance that's about half the standard deviation of the noise gives a solution that's pretty much just as good as a very fine grid. Note that the Dicker and Zhao recommendation --- $\sqrt{n} \approx 32$, which corresponds to a `scale` of a little more than 0.8 --- produces a noticeably worse solution. 
 
 ```{r llik1000}
 mixsqp_control = list()
@@ -81,7 +81,7 @@ cat("Number of components:\n",
     sapply(res_list, function(res) sum(res$fitted_g$pi > 0)))
 ```
 
-I redo with 10000 observations. The same conclusions still hold, more or less. That the likelihood appears to decrease when large numbers of components are used is, I think, due to numerical error, but it says something about how accurate of a solution we should be aiming for. A good rule of thumb might be to set `scale` equal to $\text{SD} / \log_{10} (n)$ (with a maximum of, say, 300 components).
+I redo with 10000 observations. The same conclusions still hold, more or less. That the likelihood appears to decrease when large numbers of components are used is, I think, due to numerical error, but it says something about how accurate of a solution we should be aiming for. A good rule of thumb might be to set `scale` equal to $\text{SD} / (\log_{10} (n) - 1)$ (with a maximum of, say, 300 components).
 
 ```{r llik10000}
 n <- 10000
@@ -112,21 +112,21 @@ cat("Number of components:\n",
     sapply(res_list, function(res) sum(res$fitted_g$pi > 0)))
 ```
 
-I include two examples with verbose output for inspection. Compare $n = 10000$ with `scale = 1 / 4`:
+I include two examples with verbose output for inspection. Compare $n = 10000$ with `scale = 1 / 3`:
 
 ```{r mixsqp10000}
 set.seed(666)
 n <- 10000
 samp <- samp_from_g(true_g, n) + rnorm(n)
-g10000 <- ebnm::ebnm_npmle(samp, scale = 0.25, control = list(verbose = TRUE))
+g10000 <- ebnm::ebnm_npmle(samp, scale = 1/3, control = list(verbose = TRUE))
 ```
 
-and $n = 100000$ with `scale = 1 / 5`:
+and $n = 100000$ with `scale = 1 / 4`:
 
 ```{r mixsqp100000}
 set.seed(666)
 n <- 100000
 samp <- samp_from_g(true_g, n) + rnorm(n)
-g100000 <- ebnm::ebnm_npmle(samp, scale = 0.2, control = list(verbose = TRUE))
+g100000 <- ebnm::ebnm_npmle(samp, scale = 1/4, control = list(verbose = TRUE))
 ```
 
