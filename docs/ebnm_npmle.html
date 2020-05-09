@@ -12,7 +12,7 @@
 <meta name="author" content="Jason Willwerscheid" />
 
 
-<title>NPMLE via ebnm</title>
+<title>NPMLE via ebnm (equally spaced components)</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -333,7 +333,7 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">NPMLE via ebnm</h1>
+<h1 class="title toc-ignore">NPMLE via ebnm (equally spaced components)</h1>
 <h4 class="author">Jason Willwerscheid</h4>
 <h4 class="date">4/29/2020</h4>
 
@@ -439,10 +439,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree28c2fd269f88245a72963e7c2444d9a245bd1e71targetblank28c2fd2a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/28c2fd269f88245a72963e7c2444d9a245bd1e71" target="_blank">28c2fd2</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree9431e1316216fe97428c990242ddca4a284640a0targetblank9431e13a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/9431e1316216fe97428c990242ddca4a284640a0" target="_blank">9431e13</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree28c2fd269f88245a72963e7c2444d9a245bd1e71targetblank28c2fd2a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree9431e1316216fe97428c990242ddca4a284640a0targetblank9431e13a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -462,6 +462,7 @@ Ignored files:
 
 Untracked files:
     Untracked:  analysis/batting_order.Rmd
+    Untracked:  analysis/ebnm_npmle2.Rmd
     Untracked:  code/fasfunction.R
     Untracked:  code/nnmf.R
     Untracked:  code/wals.R
@@ -515,6 +516,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/9431e1316216fe97428c990242ddca4a284640a0/analysis/ebnm_npmle.Rmd" target="_blank">9431e13</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-09
+</td>
+<td>
+wflow_publish(“analysis/ebnm_npmle.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/49ea2d563312d95a4a03317787eb7e2d94189221/docs/ebnm_npmle.html" target="_blank">49ea2d5</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-09
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1199,7 +1234,7 @@ g10000 &lt;- ebnm::ebnm_npmle(samp, scale = 1/3, control = list(verbose = TRUE))
 #&gt;    5 +1.991536288e+00 +5.979e-04  29 1.00e+00 1.03e-01  20   1
 #&gt;    6 +1.991498046e+00 +2.760e-03  28 1.00e+00 3.19e-03  20   1
 #&gt;    7 +1.991476812e+00 -6.163e-06  28 1.00e+00 1.40e-02  20   1
-#&gt; Optimization took 0.84 seconds.
+#&gt; Optimization took 0.88 seconds.
 #&gt; Convergence criteria met---optimal solution found.</code></pre>
 <p>and <span class="math inline">\(n = 100000\)</span> with <code>scale = 1 / 4</code>:</p>
 <pre class="r"><code>set.seed(666)
@@ -1249,7 +1284,7 @@ g100000 &lt;- ebnm::ebnm_npmle(samp, scale = 1/4, control = list(verbose = TRUE)
 #&gt;    7 +1.999204995e+00 +7.209e-03  44 1.00e+00 6.93e-02  20   1
 #&gt;    8 +1.999002271e+00 +8.581e-05  34 1.00e+00 1.29e-01  20   1
 #&gt;    9 +1.999002268e+00 -5.900e-06  34 1.00e+00 3.78e-04  20   1
-#&gt; Optimization took 19.94 seconds.
+#&gt; Optimization took 19.84 seconds.
 #&gt; Convergence criteria met---optimal solution found.</code></pre>
 <br> <br>
 <p>
