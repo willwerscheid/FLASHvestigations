@@ -439,10 +439,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree9ae95a811f374239eb27e91002d1f4a4653c270btargetblank9ae95a8a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/9ae95a811f374239eb27e91002d1f4a4653c270b" target="_blank">9ae95a8</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree28c2fd269f88245a72963e7c2444d9a245bd1e71targetblank28c2fd2a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/28c2fd269f88245a72963e7c2444d9a245bd1e71" target="_blank">28c2fd2</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree9ae95a811f374239eb27e91002d1f4a4653c270btargetblank9ae95a8a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree28c2fd269f88245a72963e7c2444d9a245bd1e71targetblank28c2fd2a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -453,7 +453,6 @@ Ignored files:
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
     Ignored:    analysis/.DS_Store
-    Ignored:    analysis/figure/
     Ignored:    code/.DS_Store
     Ignored:    code/flashier_bench/.DS_Store
     Ignored:    data/.DS_Store
@@ -516,6 +515,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/28c2fd269f88245a72963e7c2444d9a245bd1e71/analysis/ebnm_npmle.Rmd" target="_blank">28c2fd2</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-09
+</td>
+<td>
+wflow_publish(“analysis/ebnm_npmle.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/9484aa57e51c87f486deed6d19cd9ace05026d40/docs/ebnm_npmle.html" target="_blank">9484aa5</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-09
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -819,7 +852,7 @@ Jason Willwerscheid
 </table>
 </div>
 </div>
-<p>I want to see how grid density affects convergence properties and the quality of the solution. From a log likelihood perspective, using a grid of points spaced at a distance that’s about half the standard deviation of the noise gives a solution that is pretty much just as good as a very fine grid. Note that the Dicker and Zhao recommendation – <span class="math inline">\(\sqrt{n} \approx 32\)</span>, which corresponds to a <code>scale</code> of a little more than 0.8 – produces a noticeably worse solution.</p>
+<p>I want to see how grid density affects convergence properties and the quality of the solution. From a log likelihood perspective, using a grid of points spaced at a distance that’s about half the standard deviation of the noise gives a solution that’s pretty much just as good as a very fine grid. Note that the Dicker and Zhao recommendation — <span class="math inline">\(\sqrt{n} \approx 32\)</span>, which corresponds to a <code>scale</code> of a little more than 0.8 — produces a noticeably worse solution.</p>
 <pre class="r"><code>mixsqp_control = list()
 
 scale_vec &lt;- (max(samp) - min(samp) + 1e-4) / 2^(5:9)
@@ -856,6 +889,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/9484aa57e51c87f486deed6d19cd9ace05026d40/docs/figure/ebnm_npmle.Rmd/llik1000-1.png" target="_blank">9484aa5</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-09
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/af9055d767c8f4aebaa8feb557ddbc41f2cb1854/docs/figure/ebnm_npmle.Rmd/llik1000-1.png" target="_blank">af9055d</a>
@@ -914,6 +958,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/9484aa57e51c87f486deed6d19cd9ace05026d40/docs/figure/ebnm_npmle.Rmd/cdf1000-1.png" target="_blank">9484aa5</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-09
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/af9055d767c8f4aebaa8feb557ddbc41f2cb1854/docs/figure/ebnm_npmle.Rmd/cdf1000-1.png" target="_blank">af9055d</a>
 </td>
 <td>
@@ -947,7 +1002,7 @@ Jason Willwerscheid
 #&gt;  32 64 128 256 512 
 #&gt;  Number of nonzero components:
 #&gt;  20 20 22 19 21</code></pre>
-<p>I redo with 10000 observations. The same conclusions still hold, more or less. That the likelihood appears to decrease when large numbers of components are used is, I think, due to numerical error, but it says something about how accurate of a solution we should be aiming for. A good rule of thumb might be to set <code>scale</code> equal to <span class="math inline">\(\text{SD} / \log_{10} (n)\)</span> (with a maximum of, say, 300 components).</p>
+<p>I redo with 10000 observations. The same conclusions still hold, more or less. That the likelihood appears to decrease when large numbers of components are used is, I think, due to numerical error, but it says something about how accurate of a solution we should be aiming for. A good rule of thumb might be to set <code>scale</code> equal to <span class="math inline">\(\text{SD} / (\log_{10} (n) - 1)\)</span> (with a maximum of, say, 300 components).</p>
 <pre class="r"><code>n &lt;- 10000
 samp &lt;- samp_from_g(true_g, n) + rnorm(n)
 scale_vec &lt;- (max(samp) - min(samp) + 1e-4) / 2^(5:9)
@@ -985,6 +1040,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/9484aa57e51c87f486deed6d19cd9ace05026d40/docs/figure/ebnm_npmle.Rmd/llik10000-1.png" target="_blank">9484aa5</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-09
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/af9055d767c8f4aebaa8feb557ddbc41f2cb1854/docs/figure/ebnm_npmle.Rmd/llik10000-1.png" target="_blank">af9055d</a>
@@ -1043,6 +1109,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/9484aa57e51c87f486deed6d19cd9ace05026d40/docs/figure/ebnm_npmle.Rmd/llik10000-2.png" target="_blank">9484aa5</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-09
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/af9055d767c8f4aebaa8feb557ddbc41f2cb1854/docs/figure/ebnm_npmle.Rmd/llik10000-2.png" target="_blank">af9055d</a>
 </td>
 <td>
@@ -1076,12 +1153,12 @@ cat(&quot;Number of components:\n&quot;,
 #&gt;  32 64 128 256 512 
 #&gt;  Number of nonzero components:
 #&gt;  24 27 29 28 28</code></pre>
-<p>I include two examples with verbose output for inspection. Compare <span class="math inline">\(n = 10000\)</span> with <code>scale = 1 / 4</code>:</p>
+<p>I include two examples with verbose output for inspection. Compare <span class="math inline">\(n = 10000\)</span> with <code>scale = 1 / 3</code>:</p>
 <pre class="r"><code>set.seed(666)
 n &lt;- 10000
 samp &lt;- samp_from_g(true_g, n) + rnorm(n)
-g10000 &lt;- ebnm::ebnm_npmle(samp, scale = 0.25, control = list(verbose = TRUE))</code></pre>
-<pre><code>#&gt; Running mix-SQP algorithm 0.3-40 on 10000 x 141 matrix
+g10000 &lt;- ebnm::ebnm_npmle(samp, scale = 1/3, control = list(verbose = TRUE))</code></pre>
+<pre><code>#&gt; Running mix-SQP algorithm 0.3-40 on 10000 x 106 matrix
 #&gt; convergence tol. (SQP):     1.0e-08
 #&gt; conv. tol. (active-set):    1.0e-10
 #&gt; zero threshold (solution):  1.0e-08
@@ -1092,47 +1169,44 @@ g10000 &lt;- ebnm::ebnm_npmle(samp, scale = 0.25, control = list(verbose = TRUE)
 #&gt; max. iter (SQP):            1000
 #&gt; max. iter (active-set):     20
 #&gt; number of EM iterations:    20
-#&gt; Computing SVD of 10000 x 141 matrix.
+#&gt; Computing SVD of 10000 x 106 matrix.
 #&gt; Matrix is not low-rank; falling back to full matrix.
 #&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
-#&gt;    1 +2.021669639e+00  -- EM --  141 1.00e+00 1.52e-02  --  --
-#&gt;    2 +2.003108745e+00  -- EM --  141 1.00e+00 4.73e-03  --  --
-#&gt;    3 +1.999697243e+00  -- EM --  141 1.00e+00 2.38e-03  --  --
-#&gt;    4 +1.998416351e+00  -- EM --  141 1.00e+00 1.49e-03  --  --
-#&gt;    5 +1.997724431e+00  -- EM --  141 1.00e+00 1.07e-03  --  --
-#&gt;    6 +1.997291274e+00  -- EM --  141 1.00e+00 8.47e-04  --  --
-#&gt;    7 +1.997001201e+00  -- EM --  141 1.00e+00 7.05e-04  --  --
-#&gt;    8 +1.996798354e+00  -- EM --  141 1.00e+00 6.04e-04  --  --
-#&gt;    9 +1.996651348e+00  -- EM --  141 1.00e+00 5.27e-04  --  --
-#&gt;   10 +1.996541268e+00  -- EM --  141 1.00e+00 4.66e-04  --  --
-#&gt;   11 +1.996456255e+00  -- EM --  141 1.00e+00 4.17e-04  --  --
-#&gt;   12 +1.996388659e+00  -- EM --  141 1.00e+00 3.76e-04  --  --
-#&gt;   13 +1.996333437e+00  -- EM --  141 1.00e+00 3.42e-04  --  --
-#&gt;   14 +1.996287192e+00  -- EM --  141 1.00e+00 3.13e-04  --  --
-#&gt;   15 +1.996247599e+00  -- EM --  141 1.00e+00 2.88e-04  --  --
-#&gt;   16 +1.996213038e+00  -- EM --  141 1.00e+00 2.67e-04  --  --
-#&gt;   17 +1.996182366e+00  -- EM --  141 1.00e+00 2.49e-04  --  --
-#&gt;   18 +1.996154761e+00  -- EM --  141 1.00e+00 2.33e-04  --  --
-#&gt;   19 +1.996129627e+00  -- EM --  141 1.00e+00 2.20e-04  --  --
-#&gt;   20 +1.996106521e+00  -- EM --  141 1.00e+00 2.08e-04  --  --
-#&gt;    1 +1.996085115e+00 +2.593e-02 141  ------   ------   --  --
-#&gt;    2 +1.996065053e+00 +2.524e-02 121 1.00e+00 1.15e-03  20   1
-#&gt;    3 +1.996046287e+00 +2.414e-02 101 1.00e+00 8.55e-03  20   1
-#&gt;    4 +1.996028650e+00 +2.262e-02  81 1.00e+00 2.53e-02  20   1
-#&gt;    5 +1.996011918e+00 +2.092e-02  61 1.00e+00 3.00e-02  20   1
-#&gt;    6 +1.995978643e+00 +1.922e-02  41 1.00e+00 1.20e-01  20   1
-#&gt;    7 +1.995479254e+00 +3.028e-03  26 1.00e+00 4.68e-02  20   1
-#&gt;    8 +1.995453336e+00 +5.102e-04  27 1.00e+00 6.01e-03  20   1
-#&gt;    9 +1.995425984e+00 +1.469e-06  27 1.00e+00 5.12e-02  20   1
-#&gt;   10 +1.995412578e+00 -8.542e-07  30 1.00e+00 1.03e-01  20   1
-#&gt; Optimization took 1.90 seconds.
+#&gt;    1 +2.017844701e+00  -- EM --  106 1.00e+00 2.01e-02  --  --
+#&gt;    2 +1.999198085e+00  -- EM --  106 1.00e+00 6.22e-03  --  --
+#&gt;    3 +1.995764707e+00  -- EM --  106 1.00e+00 3.14e-03  --  --
+#&gt;    4 +1.994475590e+00  -- EM --  106 1.00e+00 1.97e-03  --  --
+#&gt;    5 +1.993778832e+00  -- EM --  106 1.00e+00 1.42e-03  --  --
+#&gt;    6 +1.993342140e+00  -- EM --  106 1.00e+00 1.12e-03  --  --
+#&gt;    7 +1.993049352e+00  -- EM --  106 1.00e+00 9.35e-04  --  --
+#&gt;    8 +1.992844415e+00  -- EM --  106 1.00e+00 8.02e-04  --  --
+#&gt;    9 +1.992695810e+00  -- EM --  106 1.00e+00 7.00e-04  --  --
+#&gt;   10 +1.992584511e+00  -- EM --  106 1.00e+00 6.20e-04  --  --
+#&gt;   11 +1.992498572e+00  -- EM --  106 1.00e+00 5.55e-04  --  --
+#&gt;   12 +1.992430274e+00  -- EM --  106 1.00e+00 5.01e-04  --  --
+#&gt;   13 +1.992374518e+00  -- EM --  106 1.00e+00 4.55e-04  --  --
+#&gt;   14 +1.992327867e+00  -- EM --  106 1.00e+00 4.17e-04  --  --
+#&gt;   15 +1.992287964e+00  -- EM --  106 1.00e+00 3.84e-04  --  --
+#&gt;   16 +1.992253165e+00  -- EM --  106 1.00e+00 3.56e-04  --  --
+#&gt;   17 +1.992222307e+00  -- EM --  106 1.00e+00 3.32e-04  --  --
+#&gt;   18 +1.992194556e+00  -- EM --  106 1.00e+00 3.11e-04  --  --
+#&gt;   19 +1.992169304e+00  -- EM --  106 1.00e+00 2.93e-04  --  --
+#&gt;   20 +1.992146101e+00  -- EM --  106 1.00e+00 2.77e-04  --  --
+#&gt;    1 +1.992124612e+00 +2.684e-02 106  ------   ------   --  --
+#&gt;    2 +1.992104166e+00 +1.625e-02  86 1.00e+00 2.44e-03  20   1
+#&gt;    3 +1.992085384e+00 +1.499e-02  66 1.00e+00 1.61e-02  20   1
+#&gt;    4 +1.992066831e+00 +1.215e-02  46 1.00e+00 7.34e-02  20   1
+#&gt;    5 +1.991536288e+00 +5.979e-04  29 1.00e+00 1.03e-01  20   1
+#&gt;    6 +1.991498046e+00 +2.760e-03  28 1.00e+00 3.19e-03  20   1
+#&gt;    7 +1.991476812e+00 -6.163e-06  28 1.00e+00 1.40e-02  20   1
+#&gt; Optimization took 0.84 seconds.
 #&gt; Convergence criteria met---optimal solution found.</code></pre>
-<p>and <span class="math inline">\(n = 100000\)</span> with <code>scale = 1 / 5</code>:</p>
+<p>and <span class="math inline">\(n = 100000\)</span> with <code>scale = 1 / 4</code>:</p>
 <pre class="r"><code>set.seed(666)
 n &lt;- 100000
 samp &lt;- samp_from_g(true_g, n) + rnorm(n)
-g100000 &lt;- ebnm::ebnm_npmle(samp, scale = 0.2, control = list(verbose = TRUE))</code></pre>
-<pre><code>#&gt; Running mix-SQP algorithm 0.3-40 on 100000 x 206 matrix
+g100000 &lt;- ebnm::ebnm_npmle(samp, scale = 1/4, control = list(verbose = TRUE))</code></pre>
+<pre><code>#&gt; Running mix-SQP algorithm 0.3-40 on 100000 x 165 matrix
 #&gt; convergence tol. (SQP):     1.0e-08
 #&gt; conv. tol. (active-set):    1.0e-10
 #&gt; zero threshold (solution):  1.0e-08
@@ -1143,41 +1217,39 @@ g100000 &lt;- ebnm::ebnm_npmle(samp, scale = 0.2, control = list(verbose = TRUE)
 #&gt; max. iter (SQP):            1000
 #&gt; max. iter (active-set):     20
 #&gt; number of EM iterations:    20
-#&gt; Computing SVD of 100000 x 206 matrix.
+#&gt; Computing SVD of 100000 x 165 matrix.
 #&gt; Matrix is not low-rank; falling back to full matrix.
 #&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
-#&gt;    1 +2.027223557e+00  -- EM --  206 1.00e+00 1.32e-02  --  --
-#&gt;    2 +2.008410910e+00  -- EM --  206 1.00e+00 3.89e-03  --  --
-#&gt;    3 +2.004864385e+00  -- EM --  206 1.00e+00 1.97e-03  --  --
-#&gt;    4 +2.003493379e+00  -- EM --  206 1.00e+00 1.23e-03  --  --
-#&gt;    5 +2.002746710e+00  -- EM --  206 1.00e+00 8.83e-04  --  --
-#&gt;    6 +2.002283415e+00  -- EM --  206 1.00e+00 6.85e-04  --  --
-#&gt;    7 +2.001978999e+00  -- EM --  206 1.00e+00 5.58e-04  --  --
-#&gt;    8 +2.001771577e+00  -- EM --  206 1.00e+00 4.68e-04  --  --
-#&gt;    9 +2.001625879e+00  -- EM --  206 1.00e+00 4.00e-04  --  --
-#&gt;   10 +2.001520556e+00  -- EM --  206 1.00e+00 3.46e-04  --  --
-#&gt;   11 +2.001442247e+00  -- EM --  206 1.00e+00 3.04e-04  --  --
-#&gt;   12 +2.001382396e+00  -- EM --  206 1.00e+00 2.69e-04  --  --
-#&gt;   13 +2.001335418e+00  -- EM --  206 1.00e+00 2.41e-04  --  --
-#&gt;   14 +2.001297602e+00  -- EM --  206 1.00e+00 2.18e-04  --  --
-#&gt;   15 +2.001266443e+00  -- EM --  206 1.00e+00 1.98e-04  --  --
-#&gt;   16 +2.001240223e+00  -- EM --  206 1.00e+00 1.82e-04  --  --
-#&gt;   17 +2.001217743e+00  -- EM --  206 1.00e+00 1.68e-04  --  --
-#&gt;   18 +2.001198156e+00  -- EM --  206 1.00e+00 1.56e-04  --  --
-#&gt;   19 +2.001180852e+00  -- EM --  206 1.00e+00 1.46e-04  --  --
-#&gt;   20 +2.001165386e+00  -- EM --  205 1.00e+00 1.37e-04  --  --
-#&gt;    1 +2.001151433e+00 +1.545e-02 205  ------   ------   --  --
-#&gt;    2 +2.001138745e+00 +1.456e-02 185 1.00e+00 1.27e-04  20   1
-#&gt;    3 +2.001127136e+00 +1.372e-02 165 1.00e+00 3.26e-04  20   1
-#&gt;    4 +2.001116433e+00 +1.293e-02 145 1.00e+00 1.30e-03  20   1
-#&gt;    5 +2.001106483e+00 +1.290e-02 125 1.00e+00 6.38e-03  20   1
-#&gt;    6 +2.001097281e+00 +1.310e-02 105 1.00e+00 1.31e-02  20   1
-#&gt;    7 +2.001088677e+00 +1.310e-02  85 1.00e+00 1.52e-02  20   1
-#&gt;    8 +2.001080384e+00 +1.230e-02  65 1.00e+00 3.06e-02  20   1
-#&gt;    9 +2.001057776e+00 +4.822e-03  45 1.00e+00 8.57e-02  20   1
-#&gt;   10 +2.000856234e+00 +1.105e-04  34 1.00e+00 4.51e-02  20   1
-#&gt;   11 +2.000856230e+00 -5.901e-06  34 1.00e+00 1.31e-03  20   1
-#&gt; Optimization took 34.75 seconds.
+#&gt;    1 +2.025450905e+00  -- EM --  165 1.00e+00 1.65e-02  --  --
+#&gt;    2 +2.006598306e+00  -- EM --  165 1.00e+00 4.88e-03  --  --
+#&gt;    3 +2.003041504e+00  -- EM --  165 1.00e+00 2.48e-03  --  --
+#&gt;    4 +2.001666403e+00  -- EM --  165 1.00e+00 1.55e-03  --  --
+#&gt;    5 +2.000917158e+00  -- EM --  165 1.00e+00 1.12e-03  --  --
+#&gt;    6 +2.000451914e+00  -- EM --  165 1.00e+00 8.68e-04  --  --
+#&gt;    7 +2.000145975e+00  -- EM --  165 1.00e+00 7.08e-04  --  --
+#&gt;    8 +1.999937370e+00  -- EM --  165 1.00e+00 5.94e-04  --  --
+#&gt;    9 +1.999790761e+00  -- EM --  165 1.00e+00 5.08e-04  --  --
+#&gt;   10 +1.999684739e+00  -- EM --  165 1.00e+00 4.40e-04  --  --
+#&gt;   11 +1.999605894e+00  -- EM --  165 1.00e+00 3.86e-04  --  --
+#&gt;   12 +1.999545631e+00  -- EM --  165 1.00e+00 3.42e-04  --  --
+#&gt;   13 +1.999498334e+00  -- EM --  165 1.00e+00 3.06e-04  --  --
+#&gt;   14 +1.999460269e+00  -- EM --  165 1.00e+00 2.76e-04  --  --
+#&gt;   15 +1.999428913e+00  -- EM --  165 1.00e+00 2.52e-04  --  --
+#&gt;   16 +1.999402535e+00  -- EM --  165 1.00e+00 2.31e-04  --  --
+#&gt;   17 +1.999379927e+00  -- EM --  165 1.00e+00 2.13e-04  --  --
+#&gt;   18 +1.999360233e+00  -- EM --  165 1.00e+00 1.98e-04  --  --
+#&gt;   19 +1.999342839e+00  -- EM --  165 1.00e+00 1.85e-04  --  --
+#&gt;   20 +1.999327297e+00  -- EM --  165 1.00e+00 1.73e-04  --  --
+#&gt;    1 +1.999313278e+00 +1.489e-02 164  ------   ------   --  --
+#&gt;    2 +1.999300526e+00 +1.404e-02 144 1.00e+00 1.64e-04  20   1
+#&gt;    3 +1.999288840e+00 +1.303e-02 124 1.00e+00 2.11e-03  20   1
+#&gt;    4 +1.999278015e+00 +1.313e-02 104 1.00e+00 8.06e-03  20   1
+#&gt;    5 +1.999267948e+00 +1.423e-02  84 1.00e+00 1.73e-02  20   1
+#&gt;    6 +1.999258562e+00 +1.443e-02  64 1.00e+00 4.36e-02  20   1
+#&gt;    7 +1.999204995e+00 +7.209e-03  44 1.00e+00 6.93e-02  20   1
+#&gt;    8 +1.999002271e+00 +8.581e-05  34 1.00e+00 1.29e-01  20   1
+#&gt;    9 +1.999002268e+00 -5.900e-06  34 1.00e+00 3.78e-04  20   1
+#&gt; Optimization took 19.94 seconds.
 #&gt; Convergence criteria met---optimal solution found.</code></pre>
 <br> <br>
 <p>
