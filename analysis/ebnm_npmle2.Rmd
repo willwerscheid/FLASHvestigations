@@ -14,13 +14,14 @@ knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>", warning = TR
 
 I want to better understand the NPMLE problem. Say I have five observations, which I'll just simulate from a standard normal distribution:
 $$ x_i \sim N(0, 1 - \sigma^2) + N(0, \sigma^2), $$
-In this setup, $N(0, 1 - \sigma^2)$ represents the signal, which is unknown, while $N(0, \sigma^2)$ represents the noise, which is of known magnitude. There are two limit cases. In the noiseless case ($\sigma^2 = 0$), the NPMLE is just the empirical distribution. When $\sigma^2 = 1$, I'd expect to get a point mass at the sample mean (but this will of course depend on the draw). Varying $\sigma^2$ should thus produce a series of distributions that are intermediate between the two. I check this. The points at the bottom of each plot mark the observations; the x marks the sample mean.
+In this setup, $N(0, 1 - \sigma^2)$ represents the signal, which is unknown, while $N(0, \sigma^2)$ represents the noise, which is of known magnitude. There are two limit cases. In the noiseless case ($\sigma^2 = 0$), the NPMLE is just the empirical distribution. When $\sigma^2 = 1$, I'd expect to get a point mass at the sample mean (but this will of course depend on the draw and, in particular, whether the sample variance is greater than 1). Varying $\sigma^2$ should thus produce a series of distributions that are intermediate between the two. I check this. The points at the bottom of each plot mark the observations; the x marks the sample mean.
 
 ```{r ex1}
 suppressMessages(library(tidyverse))
 
 set.seed(90210)
 samp <- rnorm(5)
+cat("Sample variance:", var(samp))
 
 cdf_grid <- seq(-2.5, 2.5, by = 0.05)
 cdf_df <- tibble()
@@ -48,6 +49,7 @@ I noted above that you don't always get a point mass when $\sigma^2 \approx 1$. 
 ```{r ex2}
 set.seed(666)
 samp <- rnorm(5)
+cat("Sample variance:", var(samp))
 
 cdf_df <- tibble()
 
