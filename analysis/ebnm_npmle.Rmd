@@ -1,5 +1,5 @@
 ---
-title: "NPMLE via ebnm"
+title: "NPMLE via ebnm (equally spaced components)"
 author: "Jason Willwerscheid"
 date: "4/29/2020"
 output:
