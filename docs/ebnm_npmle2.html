@@ -439,10 +439,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstreeef263de6d3ba395863c5044dd2422231b929b214targetblankef263dea"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/ef263de6d3ba395863c5044dd2422231b929b214" target="_blank">ef263de</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree1a35b112866775a53cc24926b1c5e4c9cba486datargetblank1a35b11a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/1a35b112866775a53cc24926b1c5e4c9cba486da" target="_blank">1a35b11</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstreeef263de6d3ba395863c5044dd2422231b929b214targetblankef263dea" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree1a35b112866775a53cc24926b1c5e4c9cba486datargetblank1a35b11a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -520,6 +520,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/1a35b112866775a53cc24926b1c5e4c9cba486da/analysis/ebnm_npmle2.Rmd" target="_blank">1a35b11</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-09
+</td>
+<td>
+wflow_publish(“analysis/ebnm_npmle2.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/c9bba214443ee27e6d01d6d58b5d48d085551dcd/docs/ebnm_npmle2.html" target="_blank">c9bba21</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-09
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/willwerscheid/FLASHvestigations/blob/ef263de6d3ba395863c5044dd2422231b929b214/analysis/ebnm_npmle2.Rmd" target="_blank">ef263de</a>
 </td>
 <td>
@@ -539,12 +573,14 @@ wflow_publish(“analysis/ebnm_npmle2.Rmd”)
 </div>
 </div>
 </div>
-<p>I want to better understand the NPMLE problem. Say I have five observations, which I’ll just simulate from a standard normal distribution: <span class="math display">\[ x_i \sim N(0, 1 - \sigma^2) + N(0, \sigma^2), \]</span> In this setup, <span class="math inline">\(N(0, 1 - \sigma^2)\)</span> represents the signal, which is unknown, while <span class="math inline">\(N(0, \sigma^2)\)</span> represents the noise, which is of known magnitude. There are two limit cases. In the noiseless case (<span class="math inline">\(\sigma^2 = 0\)</span>), the NPMLE is just the empirical distribution. When <span class="math inline">\(\sigma^2 = 1\)</span>, I’d expect to get a point mass at the sample mean (but this will of course depend on the draw). Varying <span class="math inline">\(\sigma^2\)</span> should thus produce a series of distributions that are intermediate between the two. I check this. The points at the bottom of each plot mark the observations; the x marks the sample mean.</p>
+<p>I want to better understand the NPMLE problem. Say I have five observations, which I’ll just simulate from a standard normal distribution: <span class="math display">\[ x_i \sim N(0, 1 - \sigma^2) + N(0, \sigma^2), \]</span> In this setup, <span class="math inline">\(N(0, 1 - \sigma^2)\)</span> represents the signal, which is unknown, while <span class="math inline">\(N(0, \sigma^2)\)</span> represents the noise, which is of known magnitude. There are two limit cases. In the noiseless case (<span class="math inline">\(\sigma^2 = 0\)</span>), the NPMLE is just the empirical distribution. When <span class="math inline">\(\sigma^2 = 1\)</span>, I’d expect to get a point mass at the sample mean (but this will of course depend on the draw and, in particular, whether the sample variance is greater than 1). Varying <span class="math inline">\(\sigma^2\)</span> should thus produce a series of distributions that are intermediate between the two. I check this. The points at the bottom of each plot mark the observations; the x marks the sample mean.</p>
 <pre class="r"><code>suppressMessages(library(tidyverse))
 
 set.seed(90210)
 samp &lt;- rnorm(5)
-
+cat(&quot;Sample variance:&quot;, var(samp))</code></pre>
+<pre><code>#&gt; Sample variance: 0.906486</code></pre>
+<pre class="r"><code>
 cdf_grid &lt;- seq(-2.5, 2.5, by = 0.05)
 cdf_df &lt;- tibble()
 
@@ -565,10 +601,49 @@ ggplot(cdf_df, aes(x = x, y = y)) + geom_line() +
   geom_point(data = tibble(x = mean(samp), y = 0), shape = 4) +
   facet_wrap(~s2)</code></pre>
 <p><img src="figure/ebnm_npmle2.Rmd/ex1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-ex1-1">
+Past versions of ex1-1.png
+</button>
+</p>
+<div id="fig-ex1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/c9bba214443ee27e6d01d6d58b5d48d085551dcd/docs/figure/ebnm_npmle2.Rmd/ex1-1.png" target="_blank">c9bba21</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>I noted above that you don’t always get a point mass when <span class="math inline">\(\sigma^2 \approx 1\)</span>. I illustrate using a different seed.</p>
 <pre class="r"><code>set.seed(666)
 samp &lt;- rnorm(5)
-
+cat(&quot;Sample variance:&quot;, var(samp))</code></pre>
+<pre><code>#&gt; Sample variance: 3.197535</code></pre>
+<pre class="r"><code>
 cdf_df &lt;- tibble()
 
 for (s2 in c(.01, .05, .1, .25, .5, .75, .9, .95, .99)) {
@@ -583,7 +658,45 @@ ggplot(cdf_df, aes(x = x, y = y)) + geom_line() +
   geom_point(data = tibble(x = samp, y = 0), shape = 1) +
   geom_point(data = tibble(x = mean(samp), y = 0), shape = 4) +
   facet_wrap(~s2)</code></pre>
-<img src="figure/ebnm_npmle2.Rmd/ex2-1.png" width="672" style="display: block; margin: auto;" /> <br> <br>
+<p><img src="figure/ebnm_npmle2.Rmd/ex2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-ex2-1">
+Past versions of ex2-1.png
+</button>
+</p>
+<div id="fig-ex2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/c9bba214443ee27e6d01d6d58b5d48d085551dcd/docs/figure/ebnm_npmle2.Rmd/ex2-1.png" target="_blank">c9bba21</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<br> <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
 <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
