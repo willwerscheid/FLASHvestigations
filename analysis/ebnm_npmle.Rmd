@@ -12,7 +12,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>", warning = TRUE)
 ```
 
-I want to test out approximations of NPMLEs using a dense `ashr` grid. Let $x_1, \ldots, x_n$ be $n$ observations with standard errors equal to 1. [Dicker and Zhao](https://arxiv.org/abs/1407.2635) show that when the true NPMLE has compact support, then a good approximation can be obtained by optimizing over the family of distributions that's supported on $\sqrt{n}$ equally spaced points between $\min (x)$ and $\max (x)$. Instead of using point masses, I use an `ashr` grid with $\sqrt{n}$ uniform components of equal width. Let's see how it works in practice.
+I want to test out approximations of NPMLEs using a dense `ashr` grid. Let $x_1, \ldots, x_n$ be $n$ observations with standard errors equal to 1. [Dicker and Zhao](https://arxiv.org/abs/1407.2635) show that when the true NPMLE has compact support, then a good approximation can be obtained by optimizing over the family of distributions that's supported on $\sqrt{n}$ equally spaced points between $\min (x)$ and $\max (x)$. Instead of using point masses, I use an `ashr` grid with uniform components of equal width. Let's see how it works in practice.
 
 Here's the true distribution which I'll be sampling from. It's bimodal with peaks at -5 and 5, so a unimodal prior family wouldn't work very well.
 
@@ -43,7 +43,7 @@ samp <- samp_from_g(true_g, n) + rnorm(n)
 ggplot(tibble(x = samp), aes(x = x)) + geom_histogram(binwidth = 1)
 ```
 
-I want to see how grid density affects convergence properties and the quality of the solution. From a log likelihood perspective, using a grid of points spaced at a distance equal to half the standard deviation of the noise gives a solution that is pretty much just as good as a very fine grid:
+I want to see how grid density affects convergence properties and the quality of the solution. From a log likelihood perspective, using a grid of points spaced at a distance that's about half the standard deviation of the noise gives a solution that is pretty much just as good as a very fine grid. Note that the Dicker and Zhao recommendation -- $\sqrt{n} \approx 32$, which corresponds to a `scale` of a little more than 0.8 -- produces a noticeably worse solution. 
 
 ```{r llik1000}
 mixsqp_control = list()
@@ -55,20 +55,20 @@ for (scale in scale_vec) {
   res_list <- c(res_list, list(ebnm_res))
 }
 
-ggplot(tibble(grid_dens = scale_vec, 
+ggplot(tibble(scale = scale_vec, 
               llik = sapply(res_list, `[[`, "log_likelihood")), 
-       aes(x = grid_dens, y = llik)) + 
+       aes(x = scale, y = llik)) + 
   geom_point()
 ```
 
-Visually, the CDFs are very similar for all densities less than 0.5 SD:
+Visually, the CDFs are very similar for all `scale`s less than 0.5 SD:
 
 ```{r cdf1000}
 cdf_df <- tibble(x = rep(cdf_grid, length(res_list)), 
                  y = as.vector(sapply(res_list, 
                                       function(res) drop(ashr::mixcdf(res$fitted_g, cdf_grid)))),
-                 grid_dens = as.factor(rep(round(scale_vec, 2), each = length(cdf_grid))))
-ggplot(cdf_df, aes(x = x, y = y, col = grid_dens)) + 
+                 scale = as.factor(rep(round(scale_vec, 2), each = length(cdf_grid))))
+ggplot(cdf_df, aes(x = x, y = y, col = scale)) + 
   geom_line()
 ```
 
@@ -81,7 +81,7 @@ cat("Number of components:\n",
     sapply(res_list, function(res) sum(res$fitted_g$pi > 0)))
 ```
 
-I redo with 10000 observations. The same conclusions still hold, more or less. That the likelihood appears to decrease when large numbers of components are used is, I think, due to numerical error, but it says something about how accurate of a solution we should be aiming for. A good rule of thumb might be to set `scale` equal to $\text{SD} / \log_{10} (n)$ (provided that there are no more than, say, 300 components).
+I redo with 10000 observations. The same conclusions still hold, more or less. That the likelihood appears to decrease when large numbers of components are used is, I think, due to numerical error, but it says something about how accurate of a solution we should be aiming for. A good rule of thumb might be to set `scale` equal to $\text{SD} / \log_{10} (n)$ (with a maximum of, say, 300 components).
 
 ```{r llik10000}
 n <- 10000
@@ -94,16 +94,16 @@ for (scale in scale_vec) {
   res_list <- c(res_list, list(ebnm_res))
 }
 
-ggplot(tibble(grid_dens = scale_vec, 
+ggplot(tibble(scale = scale_vec, 
               llik = sapply(res_list, `[[`, "log_likelihood")), 
-       aes(x = grid_dens, y = llik)) + 
+       aes(x = scale, y = llik)) + 
   geom_point()
 
 cdf_df <- tibble(x = rep(cdf_grid, length(res_list)), 
                  y = as.vector(sapply(res_list, 
                                       function(res) drop(ashr::mixcdf(res$fitted_g, cdf_grid)))),
-                 grid_dens = as.factor(rep(round(scale_vec, 2), each = length(cdf_grid))))
-ggplot(cdf_df, aes(x = x, y = y, col = grid_dens)) + 
+                 scale = as.factor(rep(round(scale_vec, 2), each = length(cdf_grid))))
+ggplot(cdf_df, aes(x = x, y = y, col = scale)) + 
   geom_line()
 
 cat("Number of components:\n",
