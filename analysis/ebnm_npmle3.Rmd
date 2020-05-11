@@ -1,0 +1,179 @@
+---
+title: "NPMLE via ebnm (gradual refinement of the grid)"
+author: "Jason Willwerscheid"
+date: "4/29/2020"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>", warning = TRUE)
+```
+
+Here's an idea for approximating a dense-grid NPMLE without using hundreds of components: estimate using a small number of components (30 or so); throw out the zero components and cut the remaining components in half; re-estimate; repeat as needed. In most cases, the NPMLE is a relatively small number of point masses. My hope is that a coarse grid can find the correct regions of support and can subsequently be refined down to (approximate) point masses.
+
+I use the same distribution as I did in my first [NPMLE investigation](ebnm_npmle.Rmd). I begin with a sample of 1000 observations.
+
+```{r true_g}
+suppressMessages(library(tidyverse))
+
+true_g <- ashr::normalmix(pi = rep(0.1, 10),
+                          mean = c(rep(-5, 5), rep(5, 5)),
+                          sd = c(0:4, 0:4))
+cdf_grid <- seq(-20, 20, by = 0.1)
+
+samp_from_g <- function(g, n) {
+  comp <- sample(1:length(g$pi), n, replace = TRUE, prob = g$pi)
+  mean <- g$mean[comp]
+  sd <- g$sd[comp]
+  return(rnorm(n, mean = mean, sd = sd))
+}
+
+set.seed(666)
+n <- 1000
+samp <- samp_from_g(true_g, n) + rnorm(n)
+```
+
+I approximate the NPMLE using the "refinement" method described above.
+
+```{r refine1000}
+refine_g <- function(g) {
+  comp_len <- g$b[1] - g$a[1]
+  
+  nz_comp <- which(g$pi > 1e-8)
+
+  g_new <- ashr::unimix(pi = rep(g$pi[nz_comp] / 2, each = 2),
+                        a = rep(g$a[nz_comp], each = 2),
+                        b = rep(g$b[nz_comp], each = 2))
+
+  g_new$a[2 * 1:length(nz_comp)] <- g_new$a[2 * 1:length(nz_comp)] + comp_len / 2
+  g_new$b[2 * 1:length(nz_comp) - 1] <- g_new$a[2 * 1:length(nz_comp) - 1] + comp_len / 2
+  
+  return(g_new)
+}
+
+tol <- 0.05
+
+t_refine <- system.time({
+  ncomp <- 30
+  comp_len <- (max(samp) - min(samp)) / ncomp
+  g_init <- ashr::unimix(pi = rep(1 / ncomp, ncomp),
+                         a = min(samp) + 0:(ncomp - 1) * comp_len,
+                         b = min(samp) + 1:ncomp * comp_len)
+  ebnm_res <- ebnm::ebnm_npmle(samp, g_init = g_init)
+  
+  comp_len <- ebnm_res$fitted_g$b[1] - ebnm_res$fitted_g$a[1]
+  while (comp_len > tol) {
+    g_init <- refine_g(ebnm_res$fitted_g)
+    ebnm_res <- ebnm::ebnm_npmle(samp, g_init = g_init)
+    comp_len <- ebnm_res$fitted_g$b[1] - ebnm_res$fitted_g$a[1]
+    cat("Component length:", round(comp_len, 3), 
+        " Log Likelihood:", ebnm_res$log_likelihood, "\n")
+  }
+})
+cat("Elapsed time (refinement method):", t_refine[3], "seconds \n\n")
+```
+
+The log likelihood doesn't change much; in this example, it would probably suffice to just use the initial 30-component estimate. 
+
+Now I estimate the NPMLE using a dense grid with components that have the same length as the final estimate obtained using the refinement method. There are $30 \times 2^4 = 480$ components, so estimation is slow. I'll call this the "one-shot" method.
+
+```{r oneshot1000}
+t_oneshot <- system.time({
+  ncomp <- round((max(samp) - min(samp)) / comp_len)
+  g_init <- ashr::unimix(pi = rep(1 / ncomp, ncomp),
+                         a = min(samp) + 0:(ncomp - 1) * comp_len,
+                         b = min(samp) + 1:ncomp * comp_len)
+  ebnm_res2 <- ebnm::ebnm_npmle(samp, g_init = g_init)
+  comp_len <- ebnm_res2$fitted_g$b[1] - ebnm_res2$fitted_g$a[1]
+  cat("Component length:", round(comp_len, 3), "Likelihood:", ebnm_res2$log_likelihood, "\n")
+})
+cat("Elapsed time (one-shot method):", t_oneshot[3], "seconds \n")
+```
+
+It's very slow, as I'd expect. More surprisingly, the log likelihood is a bit worse. Visually, the CDFs are nearly identical:
+
+```{r cdf1000}
+res_list <- list(ebnm_res, ebnm_res2)
+cdf_df <- tibble(x = rep(cdf_grid, length(res_list)), 
+                 y = as.vector(sapply(res_list, 
+                                      function(res) drop(ashr::mixcdf(res$fitted_g, cdf_grid)))),
+                 method = (rep(c("refinement", "oneshot"), each = length(cdf_grid))))
+ggplot(cdf_df, aes(x = x, y = y, col = method)) + 
+  geom_line()
+```
+
+I repeat with a larger sample.
+
+```{r ex2}
+set.seed(666)
+n <- 10000
+samp <- samp_from_g(true_g, n) + rnorm(n, sd = 1)
+
+tol <- 0.1
+
+t_refine <- system.time({
+  ncomp <- 30
+  comp_len <- (max(samp) - min(samp)) / ncomp
+  g_init <- ashr::unimix(pi = rep(1 / ncomp, ncomp),
+                         a = min(samp) + 0:(ncomp - 1) * comp_len,
+                         b = min(samp) + 1:ncomp * comp_len)
+  ebnm_res <- ebnm::ebnm_npmle(samp, g_init = g_init)
+  
+  comp_len <- ebnm_res$fitted_g$b[1] - ebnm_res$fitted_g$a[1]
+  while (comp_len > tol) {
+    g_init <- refine_g(ebnm_res$fitted_g)
+    ebnm_res <- ebnm::ebnm_npmle(samp, g_init = g_init)
+    comp_len <- ebnm_res$fitted_g$b[1] - ebnm_res$fitted_g$a[1]
+    cat("Component length:", round(comp_len, 3), 
+        " Log Likelihood:", ebnm_res$log_likelihood, "\n")
+  }
+})
+cat("Elapsed time (refinement method):", t_refine[3], "seconds \n\n")
+
+t_oneshot <- system.time({
+  ncomp <- round((max(samp) - min(samp)) / comp_len)
+  g_init <- ashr::unimix(pi = rep(1 / ncomp, ncomp),
+                         a = min(samp) + 0:(ncomp - 1) * comp_len,
+                         b = min(samp) + 1:ncomp * comp_len)
+  ebnm_res2 <- ebnm::ebnm_npmle(samp, g_init = g_init)
+  comp_len <- ebnm_res2$fitted_g$b[1] - ebnm_res2$fitted_g$a[1]
+  cat("Component length:", round(comp_len, 3), "Likelihood:", ebnm_res2$log_likelihood, "\n")
+})
+cat("Elapsed time (one-shot method):", t_oneshot[3], "seconds \n")
+
+res_list <- list(ebnm_res, ebnm_res2)
+cdf_df <- tibble(x = rep(cdf_grid, length(res_list)), 
+                 y = as.vector(sapply(res_list, 
+                                      function(res) drop(ashr::mixcdf(res$fitted_g, cdf_grid)))),
+                 method = (rep(c("refinement", "oneshot"), each = length(cdf_grid))))
+ggplot(cdf_df, aes(x = x, y = y, col = method)) + 
+  geom_line()
+```
+The log likelihood of the one-shot method is again a bit worse. I check both results by removing the zero components and re-estimating (this should reduce the rounding error).
+
+```{r check_ex2}
+nz_comp <- which(ebnm_res$fitted_g$pi > 1e-8)
+g_init <- ashr::unimix(pi = ebnm_res$fitted_g$pi[nz_comp],
+                       a = ebnm_res$fitted_g$a[nz_comp],
+                       b = ebnm_res$fitted_g$b[nz_comp])
+ebnm_res_check <- ebnm::ebnm_npmle(samp, g_init = g_init)
+cat("Log likelihood (refinement method):", ebnm_res_check$log_likelihood, "\n")
+
+nz_comp <- which(ebnm_res2$fitted_g$pi > 1e-8)
+g_init <- ashr::unimix(pi = ebnm_res2$fitted_g$pi[nz_comp],
+                       a = ebnm_res2$fitted_g$a[nz_comp],
+                       b = ebnm_res2$fitted_g$b[nz_comp])
+ebnm_res_check2 <- ebnm::ebnm_npmle(samp, g_init = g_init)
+cat("Log likelihood (one-shot method):", ebnm_res_check2$log_likelihood, "\n")
+```
+
+So it's not simply numerical error. I'm not sure what's going on here. The grids are very slightly different, but not by much:
+
+```{r check2}
+cat("Amount of non-overlap for each component obtained using the refinement method:\n")
+sapply(ebnm_res$fitted_g$a, function(x) min(abs(x - ebnm_res2$fitted_g$a))) +
+  sapply(ebnm_res$fitted_g$b, function(x) min(abs(x - ebnm_res2$fitted_g$b)))
+```
