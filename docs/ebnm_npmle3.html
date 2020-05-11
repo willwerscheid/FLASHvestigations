@@ -360,7 +360,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2020-05-10
+<strong>Last updated:</strong> 2020-05-11
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -439,10 +439,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstreeedb3695966ff2c901a84c1c8cfb7a3139505c5a1targetblankedb3695a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/edb3695966ff2c901a84c1c8cfb7a3139505c5a1" target="_blank">edb3695</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree2425abd5d3ed460281508f40d2b64448b95c7e75targetblank2425abda"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/2425abd5d3ed460281508f40d2b64448b95c7e75" target="_blank">2425abd</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstreeedb3695966ff2c901a84c1c8cfb7a3139505c5a1targetblankedb3695a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree2425abd5d3ed460281508f40d2b64448b95c7e75targetblank2425abda" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -515,6 +515,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/2425abd5d3ed460281508f40d2b64448b95c7e75/analysis/ebnm_npmle3.Rmd" target="_blank">2425abd</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-11
+</td>
+<td>
+wflow_publish(“analysis/ebnm_npmle3.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/c70f0b918f37edf9bd8d784ee906d7a9a1cd74b9/docs/ebnm_npmle3.html" target="_blank">c70f0b9</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-10
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -599,7 +633,7 @@ t_refine &lt;- system.time({
 #&gt; Component length: 0.057  Log Likelihood: -2899.086 
 #&gt; Component length: 0.028  Log Likelihood: -2899.081</code></pre>
 <pre class="r"><code>cat(&quot;Elapsed time (refinement method):&quot;, t_refine[3], &quot;seconds \n\n&quot;)</code></pre>
-<pre><code>#&gt; Elapsed time (refinement method): 0.94 seconds</code></pre>
+<pre><code>#&gt; Elapsed time (refinement method): 0.943 seconds</code></pre>
 <p>The log likelihood doesn’t change much; in this example, it would probably suffice to just use the initial 30-component estimate.</p>
 <p>Now I estimate the NPMLE using a dense grid with components that have the same length as the final estimate obtained using the refinement method. There are <span class="math inline">\(30 \times 2^4 = 480\)</span> components, so estimation is slow. I’ll call this the “one-shot” method.</p>
 <pre class="r"><code>t_oneshot &lt;- system.time({
@@ -609,11 +643,12 @@ t_refine &lt;- system.time({
                          b = min(samp) + 1:ncomp * comp_len)
   ebnm_res2 &lt;- ebnm::ebnm_npmle(samp, g_init = g_init)
   comp_len &lt;- ebnm_res2$fitted_g$b[1] - ebnm_res2$fitted_g$a[1]
-  cat(&quot;Component length:&quot;, round(comp_len, 3), &quot;Likelihood:&quot;, ebnm_res2$log_likelihood, &quot;\n&quot;)
+  cat(&quot;Component length:&quot;, round(comp_len, 3), 
+      &quot;Log Likelihood:&quot;, ebnm_res2$log_likelihood, &quot;\n&quot;)
 })</code></pre>
-<pre><code>#&gt; Component length: 0.028 Likelihood: -2899.108</code></pre>
+<pre><code>#&gt; Component length: 0.028 Log Likelihood: -2899.108</code></pre>
 <pre class="r"><code>cat(&quot;Elapsed time (one-shot method):&quot;, t_oneshot[3], &quot;seconds \n&quot;)</code></pre>
-<pre><code>#&gt; Elapsed time (one-shot method): 258.708 seconds</code></pre>
+<pre><code>#&gt; Elapsed time (one-shot method): 248.615 seconds</code></pre>
 <p>It’s very slow, as I’d expect. More surprisingly, the log likelihood is a bit worse. Visually, the CDFs are nearly identical:</p>
 <pre class="r"><code>res_list &lt;- list(ebnm_res, ebnm_res2)
 cdf_df &lt;- tibble(x = rep(cdf_grid, length(res_list)), 
@@ -623,6 +658,43 @@ cdf_df &lt;- tibble(x = rep(cdf_grid, length(res_list)),
 ggplot(cdf_df, aes(x = x, y = y, col = method)) + 
   geom_line()</code></pre>
 <p><img src="figure/ebnm_npmle3.Rmd/cdf1000-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-cdf1000-1">
+Past versions of cdf1000-1.png
+</button>
+</p>
+<div id="fig-cdf1000-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/c70f0b918f37edf9bd8d784ee906d7a9a1cd74b9/docs/figure/ebnm_npmle3.Rmd/cdf1000-1.png" target="_blank">c70f0b9</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-10
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>I repeat with a larger sample.</p>
 <pre class="r"><code>set.seed(666)
 n &lt;- 10000
@@ -652,7 +724,7 @@ t_refine &lt;- system.time({
 #&gt; Component length: 0.146  Log Likelihood: -29194.83 
 #&gt; Component length: 0.073  Log Likelihood: -29194.79</code></pre>
 <pre class="r"><code>cat(&quot;Elapsed time (refinement method):&quot;, t_refine[3], &quot;seconds \n\n&quot;)</code></pre>
-<pre><code>#&gt; Elapsed time (refinement method): 8.367 seconds</code></pre>
+<pre><code>#&gt; Elapsed time (refinement method): 8.113 seconds</code></pre>
 <pre class="r"><code>
 t_oneshot &lt;- system.time({
   ncomp &lt;- round((max(samp) - min(samp)) / comp_len)
@@ -661,11 +733,12 @@ t_oneshot &lt;- system.time({
                          b = min(samp) + 1:ncomp * comp_len)
   ebnm_res2 &lt;- ebnm::ebnm_npmle(samp, g_init = g_init)
   comp_len &lt;- ebnm_res2$fitted_g$b[1] - ebnm_res2$fitted_g$a[1]
-  cat(&quot;Component length:&quot;, round(comp_len, 3), &quot;Likelihood:&quot;, ebnm_res2$log_likelihood, &quot;\n&quot;)
+  cat(&quot;Component length:&quot;, round(comp_len, 3), 
+      &quot;Log Likelihood:&quot;, ebnm_res2$log_likelihood, &quot;\n&quot;)
 })</code></pre>
-<pre><code>#&gt; Component length: 0.073 Likelihood: -29194.99</code></pre>
+<pre><code>#&gt; Component length: 0.073 Log Likelihood: -29194.99</code></pre>
 <pre class="r"><code>cat(&quot;Elapsed time (one-shot method):&quot;, t_oneshot[3], &quot;seconds \n&quot;)</code></pre>
-<pre><code>#&gt; Elapsed time (one-shot method): 30.326 seconds</code></pre>
+<pre><code>#&gt; Elapsed time (one-shot method): 30.811 seconds</code></pre>
 <pre class="r"><code>
 res_list &lt;- list(ebnm_res, ebnm_res2)
 cdf_df &lt;- tibble(x = rep(cdf_grid, length(res_list)), 
@@ -674,7 +747,45 @@ cdf_df &lt;- tibble(x = rep(cdf_grid, length(res_list)),
                  method = (rep(c(&quot;refinement&quot;, &quot;oneshot&quot;), each = length(cdf_grid))))
 ggplot(cdf_df, aes(x = x, y = y, col = method)) + 
   geom_line()</code></pre>
-<p><img src="figure/ebnm_npmle3.Rmd/ex2-1.png" width="672" style="display: block; margin: auto;" /> The log likelihood of the one-shot method is again a bit worse. I check both results by removing the zero components and re-estimating (this should reduce the rounding error).</p>
+<p><img src="figure/ebnm_npmle3.Rmd/ex2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-ex2-1">
+Past versions of ex2-1.png
+</button>
+</p>
+<div id="fig-ex2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/c70f0b918f37edf9bd8d784ee906d7a9a1cd74b9/docs/figure/ebnm_npmle3.Rmd/ex2-1.png" target="_blank">c70f0b9</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-10
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The log likelihood of the one-shot method is again a bit worse. I check both results by removing the zero components and re-estimating (this should reduce the rounding error).</p>
 <pre class="r"><code>nz_comp &lt;- which(ebnm_res$fitted_g$pi &gt; 1e-8)
 g_init &lt;- ashr::unimix(pi = ebnm_res$fitted_g$pi[nz_comp],
                        a = ebnm_res$fitted_g$a[nz_comp],
@@ -690,7 +801,7 @@ g_init &lt;- ashr::unimix(pi = ebnm_res2$fitted_g$pi[nz_comp],
 ebnm_res_check2 &lt;- ebnm::ebnm_npmle(samp, g_init = g_init)
 cat(&quot;Log likelihood (one-shot method):&quot;, ebnm_res_check2$log_likelihood, &quot;\n&quot;)</code></pre>
 <pre><code>#&gt; Log likelihood (one-shot method): -29194.99</code></pre>
-<p>So it’s not simply numerical error. I’m not sure what’s going on here. The grids are very slightly different, but not by much:</p>
+<p>So it’s not simply numerical error. I’m not sure what’s going on here. The grids are very slightly different, but not by enough to explain these results, I don’t think:</p>
 <pre class="r"><code>cat(&quot;Amount of non-overlap for each component obtained using the refinement method:\n&quot;)</code></pre>
 <pre><code>#&gt; Amount of non-overlap for each component obtained using the refinement method:</code></pre>
 <pre class="r"><code>sapply(ebnm_res$fitted_g$a, function(x) min(abs(x - ebnm_res2$fitted_g$a))) +
