@@ -154,32 +154,36 @@ cdf_df <- tibble(x = rep(cdf_grid, length(res_list)),
 ggplot(cdf_df, aes(x = x, y = y, col = method)) + 
   geom_line()
 ```
-The log likelihood of the one-shot method is again a bit worse. I check both results by removing the zero components, aligning the grids (there are differences of about 1e-13 in the endpoints) and re-estimating. This should reduce the rounding error.
+The log likelihood of the one-shot method is again a bit worse. To see what's going on, I initialize the one-shot grid to the refinement solution, fix the prior, and check the log likelihood:
 
-```{r check_ex2}
-nz_comp <- which(ebnm_res$fitted_g$pi > 1e-8)
-g_init <- ashr::unimix(pi = ebnm_res$fitted_g$pi[nz_comp],
-                       a = ebnm_res$fitted_g$a[nz_comp],
-                       b = ebnm_res$fitted_g$b[nz_comp])
-mids <- (g_init$a + g_init$b) / 2
-g_init$a <- ebnm_res2$fitted_g$a[sapply(mids, function(x) max(which(ebnm_res2$fitted_g$a < x)))]
-g_init$b <- ebnm_res2$fitted_g$b[sapply(mids, function(x) min(which(ebnm_res2$fitted_g$b > x)))]
-ebnm_res_check <- ebnm::ebnm_npmle(samp, g_init = g_init)
-cat("Log likelihood (refinement method):", ebnm_res_check$log_likelihood, "\n")
+```{r reest}
+mids <- (ebnm_res$fitted_g$a + ebnm_res$fitted_g$b) / 2
+which_comp <- sapply(mids, function(x) max(which(ebnm_res2$fitted_g$a < x)))
+pi_init <- rep(0, length(ebnm_res2$fitted_g$pi))
+pi_init[which_comp] <- ebnm_res$fitted_g$pi
 
-nz_comp <- which(ebnm_res2$fitted_g$pi > 1e-8)
-g_init2 <- ashr::unimix(pi = ebnm_res2$fitted_g$pi[nz_comp],
-                        a = ebnm_res2$fitted_g$a[nz_comp],
-                        b = ebnm_res2$fitted_g$b[nz_comp])
-ebnm_res_check2 <- ebnm::ebnm_npmle(samp, g_init = g_init2)
+g_init <- ebnm_res2$fitted_g
+g_init$fitted_g$pi <- pi_init
+ebnm_res_check <- ebnm::ebnm_npmle(samp, g_init = g_init, fix_g = TRUE)
+ebnm_res_check$log_likelihood
+```
+
+Note that this is the exact same `g`, but the additional 400+ zero components introduces enough numerical error to change the log likelihood to a noticeable extent. And indeed, if I re-run `mixsqp` using the refinement initialization, I do get a very slight improvement in the log likelihood:
+
+```{r rerun}
+ebnm_res_check2 <- ebnm::ebnm_npmle(samp, g_init = g_init)
 cat("Log likelihood (one-shot method):", ebnm_res_check2$log_likelihood, "\n")
 ```
 
-So it's not simply numerical error. I'm not sure what's going on here, but `mixsqp` is not finding the best solution. I provide the verbose output of the two checks for inspection.
+This minor improvement appears as follows:
 
-```{r mixsqp}
-g_init <- ashr::unimix(pi = rep(1 / ncomp, ncomp),
-                       a = min(samp) + 0:(ncomp - 1) * comp_len,
-                       b = min(samp) + 1:ncomp * comp_len)
-ebnm_res2 <- ebnm::ebnm_npmle(samp, g_init = g_init, control = list(verbose = TRUE))
+```{r replot}
+res_list <- list(ebnm_res_check, ebnm_res_check2)
+cdf_df <- tibble(x = rep(cdf_grid, length(res_list)), 
+                 y = as.vector(sapply(res_list, 
+                                      function(res) drop(ashr::mixcdf(res$fitted_g, cdf_grid)))),
+                 method = (rep(c("refinement", "oneshot"), each = length(cdf_grid))))
+ggplot(cdf_df, aes(x = x, y = y, col = method)) + 
+  geom_line()
 ```
+
