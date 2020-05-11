@@ -1,7 +1,7 @@
 ---
 title: "NPMLE via ebnm (gradual refinement of the grid)"
 author: "Jason Willwerscheid"
-date: "4/29/2020"
+date: "5/10/2020"
 output:
   workflowr::wflow_html:
     code_folding: hide
@@ -106,7 +106,7 @@ ggplot(cdf_df, aes(x = x, y = y, col = method)) +
   geom_line()
 ```
 
-I repeat with a larger sample.
+I repeat with a larger sample ($n = 10000$).
 
 ```{r ex2}
 set.seed(666)
@@ -154,28 +154,32 @@ cdf_df <- tibble(x = rep(cdf_grid, length(res_list)),
 ggplot(cdf_df, aes(x = x, y = y, col = method)) + 
   geom_line()
 ```
-The log likelihood of the one-shot method is again a bit worse. I check both results by removing the zero components and re-estimating (this should reduce the rounding error).
+The log likelihood of the one-shot method is again a bit worse. I check both results by removing the zero components, aligning the grids (there are differences of about 1e-13 in the endpoints) and re-estimating. This should reduce the rounding error.
 
 ```{r check_ex2}
 nz_comp <- which(ebnm_res$fitted_g$pi > 1e-8)
 g_init <- ashr::unimix(pi = ebnm_res$fitted_g$pi[nz_comp],
                        a = ebnm_res$fitted_g$a[nz_comp],
                        b = ebnm_res$fitted_g$b[nz_comp])
+mids <- (g_init$a + g_init$b) / 2
+g_init$a <- ebnm_res2$fitted_g$a[sapply(mids, function(x) max(which(ebnm_res2$fitted_g$a < x)))]
+g_init$b <- ebnm_res2$fitted_g$b[sapply(mids, function(x) min(which(ebnm_res2$fitted_g$b > x)))]
 ebnm_res_check <- ebnm::ebnm_npmle(samp, g_init = g_init)
 cat("Log likelihood (refinement method):", ebnm_res_check$log_likelihood, "\n")
 
 nz_comp <- which(ebnm_res2$fitted_g$pi > 1e-8)
-g_init <- ashr::unimix(pi = ebnm_res2$fitted_g$pi[nz_comp],
-                       a = ebnm_res2$fitted_g$a[nz_comp],
-                       b = ebnm_res2$fitted_g$b[nz_comp])
-ebnm_res_check2 <- ebnm::ebnm_npmle(samp, g_init = g_init)
+g_init2 <- ashr::unimix(pi = ebnm_res2$fitted_g$pi[nz_comp],
+                        a = ebnm_res2$fitted_g$a[nz_comp],
+                        b = ebnm_res2$fitted_g$b[nz_comp])
+ebnm_res_check2 <- ebnm::ebnm_npmle(samp, g_init = g_init2)
 cat("Log likelihood (one-shot method):", ebnm_res_check2$log_likelihood, "\n")
 ```
 
-So it's not simply numerical error. I'm not sure what's going on here. The grids are very slightly different, but not by enough to explain these results, I don't think:
+So it's not simply numerical error. I'm not sure what's going on here, but `mixsqp` is not finding the best solution. I provide the verbose output of the two checks for inspection.
 
-```{r check2}
-cat("Amount of non-overlap for each component obtained using the refinement method:\n")
-sapply(ebnm_res$fitted_g$a, function(x) min(abs(x - ebnm_res2$fitted_g$a))) +
-  sapply(ebnm_res$fitted_g$b, function(x) min(abs(x - ebnm_res2$fitted_g$b)))
+```{r mixsqp}
+g_init <- ashr::unimix(pi = rep(1 / ncomp, ncomp),
+                       a = min(samp) + 0:(ncomp - 1) * comp_len,
+                       b = min(samp) + 1:ncomp * comp_len)
+ebnm_res2 <- ebnm::ebnm_npmle(samp, g_init = g_init, control = list(verbose = TRUE))
 ```
