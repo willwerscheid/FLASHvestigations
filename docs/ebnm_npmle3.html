@@ -335,7 +335,7 @@ div.section {
 
 <h1 class="title toc-ignore">NPMLE via ebnm (gradual refinement of the grid)</h1>
 <h4 class="author">Jason Willwerscheid</h4>
-<h4 class="date">4/29/2020</h4>
+<h4 class="date">5/10/2020</h4>
 
 </div>
 
@@ -439,10 +439,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree2425abd5d3ed460281508f40d2b64448b95c7e75targetblank2425abda"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/2425abd5d3ed460281508f40d2b64448b95c7e75" target="_blank">2425abd</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree305975d26c0e96bd957b4983425a8c8f084c96f9targetblank305975da"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/305975d26c0e96bd957b4983425a8c8f084c96f9" target="_blank">305975d</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree2425abd5d3ed460281508f40d2b64448b95c7e75targetblank2425abda" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree305975d26c0e96bd957b4983425a8c8f084c96f9targetblank305975da" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -515,6 +515,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/305975d26c0e96bd957b4983425a8c8f084c96f9/analysis/ebnm_npmle3.Rmd" target="_blank">305975d</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-11
+</td>
+<td>
+wflow_publish(“analysis/ebnm_npmle3.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/03d03cf47c51a1e7922b60529c569c235ebd142b/docs/ebnm_npmle3.html" target="_blank">03d03cf</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-05-11
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -633,7 +667,7 @@ t_refine &lt;- system.time({
 #&gt; Component length: 0.057  Log Likelihood: -2899.086 
 #&gt; Component length: 0.028  Log Likelihood: -2899.081</code></pre>
 <pre class="r"><code>cat(&quot;Elapsed time (refinement method):&quot;, t_refine[3], &quot;seconds \n\n&quot;)</code></pre>
-<pre><code>#&gt; Elapsed time (refinement method): 0.943 seconds</code></pre>
+<pre><code>#&gt; Elapsed time (refinement method): 1.059 seconds</code></pre>
 <p>The log likelihood doesn’t change much; in this example, it would probably suffice to just use the initial 30-component estimate.</p>
 <p>Now I estimate the NPMLE using a dense grid with components that have the same length as the final estimate obtained using the refinement method. There are <span class="math inline">\(30 \times 2^4 = 480\)</span> components, so estimation is slow. I’ll call this the “one-shot” method.</p>
 <pre class="r"><code>t_oneshot &lt;- system.time({
@@ -648,7 +682,7 @@ t_refine &lt;- system.time({
 })</code></pre>
 <pre><code>#&gt; Component length: 0.028 Log Likelihood: -2899.108</code></pre>
 <pre class="r"><code>cat(&quot;Elapsed time (one-shot method):&quot;, t_oneshot[3], &quot;seconds \n&quot;)</code></pre>
-<pre><code>#&gt; Elapsed time (one-shot method): 248.615 seconds</code></pre>
+<pre><code>#&gt; Elapsed time (one-shot method): 253.49 seconds</code></pre>
 <p>It’s very slow, as I’d expect. More surprisingly, the log likelihood is a bit worse. Visually, the CDFs are nearly identical:</p>
 <pre class="r"><code>res_list &lt;- list(ebnm_res, ebnm_res2)
 cdf_df &lt;- tibble(x = rep(cdf_grid, length(res_list)), 
@@ -695,7 +729,7 @@ Jason Willwerscheid
 </table>
 </div>
 </div>
-<p>I repeat with a larger sample.</p>
+<p>I repeat with a larger sample (<span class="math inline">\(n = 10000\)</span>).</p>
 <pre class="r"><code>set.seed(666)
 n &lt;- 10000
 samp &lt;- samp_from_g(true_g, n) + rnorm(n, sd = 1)
@@ -724,7 +758,7 @@ t_refine &lt;- system.time({
 #&gt; Component length: 0.146  Log Likelihood: -29194.83 
 #&gt; Component length: 0.073  Log Likelihood: -29194.79</code></pre>
 <pre class="r"><code>cat(&quot;Elapsed time (refinement method):&quot;, t_refine[3], &quot;seconds \n\n&quot;)</code></pre>
-<pre><code>#&gt; Elapsed time (refinement method): 8.113 seconds</code></pre>
+<pre><code>#&gt; Elapsed time (refinement method): 8.828 seconds</code></pre>
 <pre class="r"><code>
 t_oneshot &lt;- system.time({
   ncomp &lt;- round((max(samp) - min(samp)) / comp_len)
@@ -738,7 +772,7 @@ t_oneshot &lt;- system.time({
 })</code></pre>
 <pre><code>#&gt; Component length: 0.073 Log Likelihood: -29194.99</code></pre>
 <pre class="r"><code>cat(&quot;Elapsed time (one-shot method):&quot;, t_oneshot[3], &quot;seconds \n&quot;)</code></pre>
-<pre><code>#&gt; Elapsed time (one-shot method): 30.811 seconds</code></pre>
+<pre><code>#&gt; Elapsed time (one-shot method): 32.457 seconds</code></pre>
 <pre class="r"><code>
 res_list &lt;- list(ebnm_res, ebnm_res2)
 cdf_df &lt;- tibble(x = rep(cdf_grid, length(res_list)), 
@@ -785,39 +819,93 @@ Jason Willwerscheid
 </table>
 </div>
 </div>
-<p>The log likelihood of the one-shot method is again a bit worse. I check both results by removing the zero components and re-estimating (this should reduce the rounding error).</p>
+<p>The log likelihood of the one-shot method is again a bit worse. I check both results by removing the zero components, aligning the grids (there are differences of about 1e-13 in the endpoints) and re-estimating. This should reduce the rounding error.</p>
 <pre class="r"><code>nz_comp &lt;- which(ebnm_res$fitted_g$pi &gt; 1e-8)
 g_init &lt;- ashr::unimix(pi = ebnm_res$fitted_g$pi[nz_comp],
                        a = ebnm_res$fitted_g$a[nz_comp],
                        b = ebnm_res$fitted_g$b[nz_comp])
+mids &lt;- (g_init$a + g_init$b) / 2
+g_init$a &lt;- ebnm_res2$fitted_g$a[sapply(mids, function(x) max(which(ebnm_res2$fitted_g$a &lt; x)))]
+g_init$b &lt;- ebnm_res2$fitted_g$b[sapply(mids, function(x) min(which(ebnm_res2$fitted_g$b &gt; x)))]
 ebnm_res_check &lt;- ebnm::ebnm_npmle(samp, g_init = g_init)
 cat(&quot;Log likelihood (refinement method):&quot;, ebnm_res_check$log_likelihood, &quot;\n&quot;)</code></pre>
 <pre><code>#&gt; Log likelihood (refinement method): -29194.79</code></pre>
 <pre class="r"><code>
 nz_comp &lt;- which(ebnm_res2$fitted_g$pi &gt; 1e-8)
-g_init &lt;- ashr::unimix(pi = ebnm_res2$fitted_g$pi[nz_comp],
-                       a = ebnm_res2$fitted_g$a[nz_comp],
-                       b = ebnm_res2$fitted_g$b[nz_comp])
-ebnm_res_check2 &lt;- ebnm::ebnm_npmle(samp, g_init = g_init)
+g_init2 &lt;- ashr::unimix(pi = ebnm_res2$fitted_g$pi[nz_comp],
+                        a = ebnm_res2$fitted_g$a[nz_comp],
+                        b = ebnm_res2$fitted_g$b[nz_comp])
+ebnm_res_check2 &lt;- ebnm::ebnm_npmle(samp, g_init = g_init2)
 cat(&quot;Log likelihood (one-shot method):&quot;, ebnm_res_check2$log_likelihood, &quot;\n&quot;)</code></pre>
 <pre><code>#&gt; Log likelihood (one-shot method): -29194.99</code></pre>
-<p>So it’s not simply numerical error. I’m not sure what’s going on here. The grids are very slightly different, but not by enough to explain these results, I don’t think:</p>
-<pre class="r"><code>cat(&quot;Amount of non-overlap for each component obtained using the refinement method:\n&quot;)</code></pre>
-<pre><code>#&gt; Amount of non-overlap for each component obtained using the refinement method:</code></pre>
-<pre class="r"><code>sapply(ebnm_res$fitted_g$a, function(x) min(abs(x - ebnm_res2$fitted_g$a))) +
-  sapply(ebnm_res$fitted_g$b, function(x) min(abs(x - ebnm_res2$fitted_g$b)))</code></pre>
-<pre><code>#&gt;  [1] 1.421085e-14 1.776357e-14 2.486900e-14 2.486900e-14 4.440892e-14
-#&gt;  [6] 4.618528e-14 4.796163e-14 4.796163e-14 6.217249e-14 6.217249e-14
-#&gt; [11] 8.704149e-14 8.526513e-14 9.414691e-14 9.592327e-14 1.048051e-13
-#&gt; [16] 1.065814e-13 1.048051e-13 1.065814e-13 1.261213e-13 1.261213e-13
-#&gt; [21] 1.403322e-13 1.403322e-13 1.438849e-13 1.456613e-13 1.545430e-13
-#&gt; [26] 1.563194e-13 1.652012e-13 1.669775e-13 1.794120e-13 1.811884e-13
-#&gt; [31] 1.829648e-13 1.829648e-13 2.042810e-13 2.042810e-13 2.149392e-13
-#&gt; [36] 2.149392e-13 2.291500e-13 2.309264e-13 2.327027e-13 2.327027e-13
-#&gt; [41] 2.433609e-13 2.451372e-13 2.469136e-13 2.469136e-13 2.682299e-13
-#&gt; [46] 2.700062e-13 2.717826e-13 2.682299e-13 2.895462e-13 2.913225e-13
-#&gt; [51] 3.144152e-13 3.161915e-13 3.179679e-13 3.179679e-13 3.428369e-13
-#&gt; [56] 3.446132e-13</code></pre>
+<p>So it’s not simply numerical error. I’m not sure what’s going on here, but <code>mixsqp</code> is not finding the best solution. I provide the verbose output of the two checks for inspection.</p>
+<pre class="r"><code>g_init &lt;- ashr::unimix(pi = rep(1 / ncomp, ncomp),
+                       a = min(samp) + 0:(ncomp - 1) * comp_len,
+                       b = min(samp) + 1:ncomp * comp_len)
+ebnm_res2 &lt;- ebnm::ebnm_npmle(samp, g_init = g_init, control = list(verbose = TRUE))</code></pre>
+<pre><code>#&gt; Running mix-SQP algorithm 0.3-40 on 10000 x 480 matrix
+#&gt; convergence tol. (SQP):     1.0e-08
+#&gt; conv. tol. (active-set):    1.0e-10
+#&gt; zero threshold (solution):  1.0e-08
+#&gt; zero thresh. (search dir.): 1.0e-14
+#&gt; l.s. sufficient decrease:   1.0e-02
+#&gt; step size reduction factor: 7.5e-01
+#&gt; minimum step size:          1.0e-08
+#&gt; max. iter (SQP):            1000
+#&gt; max. iter (active-set):     20
+#&gt; number of EM iterations:    20
+#&gt; Computing SVD of 10000 x 480 matrix.
+#&gt; SVD computation took 3.70 seconds.
+#&gt; Rank of matrix is estimated to be 69.
+#&gt; iter        objective max(rdual) nnz stepsize max.diff nqp nls
+#&gt;    1 +2.026193858e+00  -- EM --  480 1.00e+00 4.47e-03  --  --
+#&gt;    2 +2.007734789e+00  -- EM --  480 1.00e+00 1.39e-03  --  --
+#&gt;    3 +2.004349193e+00  -- EM --  480 1.00e+00 7.07e-04  --  --
+#&gt;    4 +2.003078053e+00  -- EM --  480 1.00e+00 4.44e-04  --  --
+#&gt;    5 +2.002391879e+00  -- EM --  480 1.00e+00 3.21e-04  --  --
+#&gt;    6 +2.001962914e+00  -- EM --  480 1.00e+00 2.53e-04  --  --
+#&gt;    7 +2.001676052e+00  -- EM --  480 1.00e+00 2.10e-04  --  --
+#&gt;    8 +2.001475671e+00  -- EM --  480 1.00e+00 1.79e-04  --  --
+#&gt;    9 +2.001330547e+00  -- EM --  480 1.00e+00 1.56e-04  --  --
+#&gt;   10 +2.001221896e+00  -- EM --  480 1.00e+00 1.37e-04  --  --
+#&gt;   11 +2.001137966e+00  -- EM --  480 1.00e+00 1.23e-04  --  --
+#&gt;   12 +2.001071191e+00  -- EM --  480 1.00e+00 1.10e-04  --  --
+#&gt;   13 +2.001016590e+00  -- EM --  480 1.00e+00 1.00e-04  --  --
+#&gt;   14 +2.000970817e+00  -- EM --  480 1.00e+00 9.15e-05  --  --
+#&gt;   15 +2.000931585e+00  -- EM --  480 1.00e+00 8.42e-05  --  --
+#&gt;   16 +2.000897301e+00  -- EM --  480 1.00e+00 7.80e-05  --  --
+#&gt;   17 +2.000866845e+00  -- EM --  480 1.00e+00 7.26e-05  --  --
+#&gt;   18 +2.000839410e+00  -- EM --  480 1.00e+00 6.80e-05  --  --
+#&gt;   19 +2.000814413e+00  -- EM --  480 1.00e+00 6.39e-05  --  --
+#&gt;   20 +2.000791421e+00  -- EM --  480 1.00e+00 6.04e-05  --  --
+#&gt;    1 +2.000770112e+00 +2.796e-02 480  ------   ------   --  --
+#&gt;    2 +2.000750169e+00 +2.741e-02 460 1.00e+00 5.83e-05  20   1
+#&gt;    3 +2.000731553e+00 +2.537e-02 440 1.00e+00 5.66e-05  20   1
+#&gt;    4 +2.000714062e+00 +1.930e-02 420 1.00e+00 5.98e-05  20   1
+#&gt;    5 +2.000697565e+00 +1.856e-02 400 1.00e+00 2.00e-04  20   1
+#&gt;    6 +2.000682002e+00 +1.782e-02 380 1.00e+00 3.64e-04  20   1
+#&gt;    7 +2.000667257e+00 +1.704e-02 360 1.00e+00 1.00e-03  20   1
+#&gt;    8 +2.000653235e+00 +1.623e-02 340 1.00e+00 6.93e-04  20   1
+#&gt;    9 +2.000639866e+00 +1.543e-02 320 1.00e+00 7.96e-04  20   1
+#&gt;   10 +2.000627113e+00 +1.465e-02 300 1.00e+00 1.59e-03  20   1
+#&gt;   11 +2.000614954e+00 +1.390e-02 280 1.00e+00 2.68e-03  20   1
+#&gt;   12 +2.000603340e+00 +1.319e-02 260 1.00e+00 1.18e-03  20   1
+#&gt;   13 +2.000592233e+00 +1.251e-02 240 1.00e+00 2.37e-03  20   1
+#&gt;   14 +2.000581604e+00 +1.186e-02 220 1.00e+00 2.31e-03  20   1
+#&gt;   15 +2.000571437e+00 +1.123e-02 200 1.00e+00 5.85e-03  20   1
+#&gt;   16 +2.000561726e+00 +1.065e-02 180 1.00e+00 3.52e-03  20   1
+#&gt;   17 +2.000552436e+00 +1.010e-02 160 1.00e+00 5.22e-03  20   1
+#&gt;   18 +2.000543542e+00 +9.583e-03 140 1.00e+00 6.72e-03  20   1
+#&gt;   19 +2.000535009e+00 +9.104e-03 120 1.00e+00 6.37e-03  20   1
+#&gt;   20 +2.000526753e+00 +8.873e-03 100 1.00e+00 1.14e-02  20   1
+#&gt;   21 +2.000518668e+00 +8.781e-03  80 1.00e+00 2.34e-02  20   1
+#&gt;   22 +2.000510654e+00 +7.631e-03  60 1.00e+00 3.91e-02  20   1
+#&gt;   23 +2.000486484e+00 +7.335e-03  40 1.00e+00 1.11e-01  20   1
+#&gt;   24 +2.000139561e+00 +1.858e-03  28 1.00e+00 1.36e-01  20   1
+#&gt;   25 +2.000115418e+00 +2.200e-04  27 1.00e+00 1.14e-02  20   1
+#&gt;   26 +2.000100938e+00 -5.719e-06  27 1.00e+00 3.03e-02  20   1
+#&gt; Optimization took 22.88 seconds.
+#&gt; Convergence criteria met---optimal solution found.</code></pre>
 <br> <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
