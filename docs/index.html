@@ -439,7 +439,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2020-04-29
+<strong>Last updated:</strong> 2020-11-07
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -470,10 +470,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree6b7a77380e5d57b5853914cfd6ea94906484205ctargetblank6b7a773a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/6b7a77380e5d57b5853914cfd6ea94906484205c" target="_blank">6b7a773</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree6befda13ac45e5f428c46e2d461f1c92d10eb153targetblank6befda1a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/6befda13ac45e5f428c46e2d461f1c92d10eb153" target="_blank">6befda1</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree6b7a77380e5d57b5853914cfd6ea94906484205ctargetblank6b7a773a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstree6befda13ac45e5f428c46e2d461f1c92d10eb153targetblank6befda1a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -492,7 +492,9 @@ Ignored files:
     Ignored:    output/jean/
 
 Untracked files:
+    Untracked:  analysis/ashr_grid_refinement.Rmd
     Untracked:  analysis/batting_order.Rmd
+    Untracked:  ashr_grid.R
     Untracked:  code/fasfunction.R
     Untracked:  code/nnmf.R
     Untracked:  code/wals.R
@@ -501,13 +503,19 @@ Untracked files:
     Untracked:  data/batting_order.rds
     Untracked:  data/cole.rds
     Untracked:  data/odorizzi.rds
+    Untracked:  data/oll_budget.txt
+    Untracked:  data/oll_standings.tsv
     Untracked:  data/pitcher.rds
     Untracked:  data/pitcher2.rds
     Untracked:  data/pitcher_all.rds
     Untracked:  mlb2.R
     Untracked:  mlb_standings.txt
     Untracked:  ottoneu.R
+    Untracked:  output/ashr_grid/
     Untracked:  phoible.R
+
+Unstaged changes:
+    Modified:   analysis/ebnm_npmle3.Rmd
 
 </code></pre>
 <p>
@@ -546,6 +554,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/6befda13ac45e5f428c46e2d461f1c92d10eb153/analysis/index.Rmd" target="_blank">6befda1</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-11-07
+</td>
+<td>
+wflow_publish(“analysis/index.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/FLASHvestigations/2a53750ab9a3707f1af6599d30c48eac83aa58ef/docs/index.html" target="_blank">2a53750</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-04-29
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -2784,6 +2826,7 @@ Start workflowr project.
 </ul>
 <p><a href="jean.html">Investigation 30.</a> A comparison of different variance structures and initialization methods using a GWAS dataset collated by Jean Morrison.</p>
 <p><a href="misspec_k.html">Investigation 31.</a> A simulation study examining the effect of non-Gaussian noise on the number of factors selected by <code>flash</code>.</p>
+<p><a href="ebnm_npmle.html">Investigation 32.</a> Approximating the NPMLE using <code>ebnm</code>.</p>
 <p><a href="ebnm_npmle.html">Investigation 32.</a> Approximating the NPMLE using <code>ebnm</code>.</p>
 </div>
 <div id="reference-material" class="section level2">
