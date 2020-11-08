@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Quality of ashr Grid Approximations</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FLASHvestigations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/willwerscheid/FLASHvestigations">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Quality of ashr Grid Approximations</h1>
+<h4 class="author">Jason Willwerscheid</h4>
+<h4 class="date">11/6/2020</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#report"> Report <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2020-11-07
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>FLASHvestigations/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.2.0). The <em>Report</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="report" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20180714code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20180714)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20180714code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20180714)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstreebb9467a337ef473a11abc28609d2bde980d66deftargetblankbb9467aa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/FLASHvestigations/tree/bb9467a337ef473a11abc28609d2bde980d66def" target="_blank">bb9467a</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidFLASHvestigationstreebb9467a337ef473a11abc28609d2bde980d66deftargetblankbb9467aa" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.DS_Store
+    Ignored:    code/.DS_Store
+    Ignored:    code/flashier_bench/.DS_Store
+    Ignored:    data/.DS_Store
+    Ignored:    data/flashier_bench/
+    Ignored:    data/metabo3_gwas_mats.RDS
+    Ignored:    output/jean/
+
+Untracked files:
+    Untracked:  analysis/ashr_grid_refinement.Rmd
+    Untracked:  analysis/batting_order.Rmd
+    Untracked:  ashr_grid.R
+    Untracked:  code/fasfunction.R
+    Untracked:  code/nnmf.R
+    Untracked:  code/wals.R
+    Untracked:  data/BR_teams_2019.csv
+    Untracked:  data/FG_teams_2019.csv
+    Untracked:  data/batting_order.rds
+    Untracked:  data/cole.rds
+    Untracked:  data/odorizzi.rds
+    Untracked:  data/oll_budget.txt
+    Untracked:  data/oll_standings.tsv
+    Untracked:  data/pitcher.rds
+    Untracked:  data/pitcher2.rds
+    Untracked:  data/pitcher_all.rds
+    Untracked:  mlb2.R
+    Untracked:  mlb_standings.txt
+    Untracked:  ottoneu.R
+    Untracked:  output/ashr_grid/
+    Untracked:  phoible.R
+
+Unstaged changes:
+    Modified:   analysis/ebnm_npmle3.Rmd
+    Modified:   analysis/index.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/FLASHvestigations/blob/bb9467a337ef473a11abc28609d2bde980d66def/analysis/ashr_grid.Rmd" target="_blank">bb9467a</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-11-07
+</td>
+<td>
+wflow_publish(“analysis/ashr_grid.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<p>I want to think about how to set the <code>ashr</code> grid to ensure that we get a good approximation to the exact MLE.</p>
+<div id="scale-mixtures-of-normals" class="section level2">
+<h2>Scale mixtures of normals</h2>
+<p>Let <span class="math inline">\(\mathcal{G}\)</span> be the family of all scale mixtures of normals and let <span class="math inline">\(\hat{g} \in \mathcal{G}\)</span> be the MLE solution to the EBNM problem. In <code>ashr</code>, we approximate <span class="math inline">\(\mathcal{G}\)</span> by the family of finite mixtures of normals <span class="math display">\[ \pi_1 \mathcal{N}(0, \sigma_1^2) + \ldots + \pi_K \mathcal{N}(0, \sigma_K^2), \]</span> where the grid <span class="math inline">\(\{ \sigma_1^2, \ldots, \sigma_K^2 \}\)</span> is fixed in advance. Let <span class="math inline">\(\tilde{\mathcal{G}}\)</span> be this restricted family and let <span class="math inline">\(\hat{\tilde{g}} \in \tilde{\mathcal{G}}\)</span> be the restricted MLE solution (as given by <code>ashr</code>).</p>
+<p>The quality of the grid can be measured by the per-observation difference in log likelihood <span class="math display">\[ \frac{1}{n} \sum_{i = 1}^n \left( \log p(x_i \mid s_i, \hat{g}) - \log p(x_i \mid s_i, \hat{\tilde{g}}) \right) \]</span></p>
+<p>Assume that all standard errors <span class="math inline">\(s_i\)</span> are identical to <span class="math inline">\(s\)</span>. Then the likelihood <span class="math inline">\(p(x_i \mid s_i, \hat{g})\)</span> is <span class="math display">\[ h(x_i) := \int \mathcal{N}(x_i; 0, \tau^2 + s^2) df(\tau), \]</span> where <span class="math inline">\(f\)</span> is the mixing density of <span class="math inline">\(\hat{g}\)</span>, and <span class="math inline">\(p(x_i \mid s_i, \hat{\tilde{g}})\)</span> is <span class="math display">\[ \tilde{h}(x_i) := \pi_1 \mathcal{N}(x_i; 0, \sigma_1^2 + s^2) + \ldots + \pi_K \mathcal{N}(x_i; 0, \sigma_K^2 + s^2) \]</span></p>
+<p>Next, assume that the population distribution of the <span class="math inline">\(x_i\)</span>s is truly <span class="math inline">\(h\)</span>, so that the expected value of the per-observation difference in log likelihood is the KL-divergence between <span class="math inline">\(h\)</span> and <span class="math inline">\(\tilde{h}\)</span> <span class="math display">\[ \text{KL}(h \mid\mid \tilde{h}) = \mathbb{E}_h \log \frac{h(x)}{\tilde{h}(x)} \]</span></p>
+<p>Finally, to simplify analysis, assume that <span class="math inline">\(h\)</span> is a finite mixture of normals <span class="math display">\[ h(x_i) = \rho_1 \mathcal{N}(x_i; 0, \tau_1^2 + s^2) + \ldots + \rho_L \mathcal{N}(x_i; 0, \tau_L^2 + s^2) \]</span> (Note, however, that <span class="math inline">\(\hat{g}\)</span> can be approximated arbitrary well by a finite mixture!)</p>
+<p>Now, for each <span class="math inline">\(1 \le \ell \le L\)</span>, let <span class="math inline">\(\sigma_{k(\ell)}^2\)</span> be the largest <span class="math inline">\(\sigma_k^2\)</span> such that <span class="math inline">\(\sigma_k^2 \le \tau_\ell^2\)</span>, so that <span class="math inline">\(\sigma_{k(\ell) + 1}^2\)</span> is the smallest <span class="math inline">\(\sigma_k^2\)</span> such that <span class="math inline">\(\tau_\ell^2 &lt; \sigma_k^2\)</span>. In other words, if <span class="math inline">\(\sigma_1^2, \ldots, \sigma_K^2\)</span> divides the positive real line into segments, then <span class="math inline">\(\tau_\ell^2\)</span> is on the segment <span class="math inline">\(\left[\sigma_{k(\ell)}^2, \sigma_{k(\ell) + 1}^2\right)\)</span>. (I assume that <span class="math inline">\(\sigma_1^2\)</span> has been chosen sufficiently small and <span class="math inline">\(\sigma_K^2\)</span> sufficiently large.) Now approximate each mixture component of <span class="math inline">\(h\)</span> by a mixture of two normals: <span class="math display">\[ \tilde{\tilde{h}} := \rho_1 \left( \omega_1 \mathcal{N}(0, \sigma_{k(1)}^2 + s^2) + (1 - \omega_1) \mathcal{N}(0, \sigma_{k(1) + 1}^2 + s^2) \right) + \ldots + 
+\rho_L \left( \omega_L \mathcal{N}(0, \sigma_{k(L)}^2 + s^2) + (1 - \omega_L) \mathcal{N}(0, \sigma_{k(L) + 1}^2 + s^2) \right), \]</span> where <span class="math inline">\(\omega_1, \ldots, \omega_L\)</span> remains to be determined.</p>
+<p>Since <span class="math inline">\(\tilde{\tilde{h}}\)</span> is on the <code>ashr</code> grid and <span class="math inline">\(\tilde{h}\)</span> is the maximum likelihood estimate on the <code>ashr</code> grid, it must be true that <span class="math display">\[ \text{KL}(h \mid\mid \tilde{h}) \le \text{KL}(h \mid\mid \tilde{\tilde{h}}) \]</span> for any choice of <span class="math inline">\(\omega_1, \ldots, \omega_L\)</span>. Further (see section 6 <a href="https://ieeexplore-ieee-org/document/4218101">here</a>), <span class="math display">\[ \begin{aligned}
+\text{KL}(h \mid\mid \tilde{\tilde{h}}) 
+&amp;\le
+\sum_\ell \rho_\ell \left( \text{KL} \left(\mathcal{N}(0, \tau_\ell^2 + s^2) \mid\mid \omega_\ell \mathcal{N}(0, \sigma_{k(\ell)}^2 + s^2) + (1 - \omega_\ell) \mathcal{N}(0, \sigma_{k(\ell) + 1}^2 + s^2) \right) \right) \\
+&amp;\le 
+\max_\ell \text{KL}\left(\mathcal{N}(0, \tau_\ell^2 + s^2) \mid\mid \omega_\ell \mathcal{N}(0, \sigma_{k(\ell)}^2 + s^2) + (1 - \omega_\ell) \mathcal{N}(0, \sigma_{k(\ell) + 1}^2 + s^2) \right)\\
+&amp;\le
+\max_{k,\ \sigma_k \le \tau \le \sigma_{k + 1}} \text{KL}\left(\mathcal{N}(0, \tau^2 + s^2) \mid\mid \omega \mathcal{N}(0, \sigma_k^2 + s^2) + (1 - \omega) \mathcal{N}(0, \sigma_{k + 1}^2 + s^2) \right)
+\end{aligned} \]</span> Next, since KL-divergence is invariant to scaling, if we set the grid so that the ratio <span class="math display">\[ m_k := \frac{\sigma_{k + 1}^2 + s^2}{\sigma_k^2 + s^2} \]</span> is identical to <span class="math inline">\(m\)</span> for all <span class="math inline">\(1 \le k \le K - 1\)</span>, then we can conclude that <span class="math display">\[ \text{KL}(h \mid\mid \tilde{h}) \le \max_{1 \le a \le m} \text{KL} (\mathcal{N}(0, a) \mid\mid \omega \mathcal{N}(0, 1) + (1 - \omega) \mathcal{N}(0, m))\]</span> Since this is true for all <span class="math inline">\(0 \le \omega \le 1\)</span>, we can get an upper bound for the per-observation difference in likelihood (given the assumptions listed above) by solving the minimax problem <span class="math display">\[ \text{KL}(h \mid\mid \tilde{h}) \le \max_{1 \le a \le m} \min_\omega \text{KL} (\mathcal{N}(0, a) \mid\mid \omega \mathcal{N}(0, 1) + (1 - \omega) \mathcal{N}(0, m)) \]</span> I use importance sampling to approximate the KL-divergence. The current <code>ashr</code> default <span class="math inline">\(m = \sqrt{2}\)</span> gives:</p>
+<pre class="r"><code>log_add &lt;- function(x, y) {
+  C &lt;- pmax(x, y)
+  x &lt;- x - C
+  y &lt;- y - C
+  return(log(exp(x) + exp(y)) + C)
+}
+
+# To &quot;sample&quot; from different a, sample once and then scale depending on a. This method ensures a
+#   smooth optimization objective.
+smn_KLdiv &lt;- function(a, omega, m, samp) {
+  samp &lt;- samp * sqrt(a)
+  h_llik &lt;- mean(dnorm(samp, sd = sqrt(a), log = TRUE))
+  llik1 &lt;- log(omega) + dnorm(samp, sd = 1, log = TRUE)
+  llik2 &lt;- log(1 - omega) + dnorm(samp, sd = sqrt(m), log = TRUE)
+  htilde_llik &lt;- mean(log_add(llik1, llik2))
+  return(h_llik - htilde_llik)
+}
+
+min_smnKLdiv &lt;- function(a, m, samp) {
+  optres &lt;- optimize(function(omega) smn_KLdiv(a, omega, m, samp), interval = c(0, 1), maximum = FALSE)
+  return(optres$objective)
+}
+
+ub_smnKLdiv &lt;- function(m, samp) {
+  optres &lt;- optimize(function(a) min_smnKLdiv(a, m, samp), interval = c(1, m), maximum = TRUE)
+  return(optres$objective)
+}
+
+set.seed(666)
+sampsize &lt;- 1000000
+samp &lt;- rnorm(sampsize)
+
+default_ub &lt;- ub_smnKLdiv(sqrt(2), samp)
+default_ub</code></pre>
+<pre><code>#&gt; [1] 0.0001525892</code></pre>
+<p>Thus <code>ashr</code> will give an approximation that’s within one log likelihood unit of the exact solution for problems as large as <span class="math inline">\(n = 6000\)</span> or so. (Note, however, that <code>ashr</code> spaces the <span class="math inline">\(\sigma_k^2\)</span>s equally rather than <span class="math inline">\(\sigma_k^2 + s^2\)</span>, as would be more efficient. When <span class="math inline">\(s = 1\)</span> and <span class="math inline">\(m = \sqrt{2}\)</span>, for example, it’s best to use the grid <span class="math inline">\(\{0, \sqrt{2} - 1, 1, 2\sqrt{2} - 1, 3, \ldots\}\)</span>.)</p>
+<p>To get a sense of how tight the upper bound is, we can sample <span class="math inline">\(a \sim \text{Unif}\left[1, m\right]\)</span> to get an “expected” KL-divergence.</p>
+<pre class="r"><code>m &lt;- sqrt(2)
+
+set.seed(666)
+a &lt;- runif(1000, min = 1, max = m)
+
+# Use a smaller sample here.
+sampsize &lt;- 50000
+samp &lt;- rnorm(sampsize)
+
+default_ev &lt;- mean(sapply(a, function(a) min_smnKLdiv(a, m, samp)))
+default_ev</code></pre>
+<pre><code>#&gt; [1] 3.857677e-05</code></pre>
+<p>So the above upper bound can be expected to be reasonably tight.</p>
+<p>For larger problems or to obtain better approximations, a denser grid can be used. I show upper bounds and expected values for a range of <span class="math inline">\(m\)</span> (the <a href="https://github.com/willwerscheid/FLASHvestigations/blob/master/code/ashr_grid/ashr_grid_smn.R">code</a> was run in advance):</p>
+<pre class="r"><code>smn_res &lt;- readRDS(&quot;./output/ashr_grid/smn_res.rds&quot;)
+smn_res &lt;- as_tibble(smn_res)
+
+df &lt;- gather(smn_res, &quot;metric&quot;, &quot;KLdiv&quot;, -m) %&gt;%
+  filter(KLdiv &gt; 0) %&gt;%
+  mutate(metric = ifelse(metric == &quot;ub&quot;, &quot;bound&quot;, &quot;expected&quot;))
+
+ggplot(df, aes(x = m, y = KLdiv, color = metric)) + 
+  geom_line() +
+  scale_y_log10() +
+  labs(x = &quot;grid multiplier&quot;, y = &quot;KL divergence&quot;, color = &quot;&quot;)</code></pre>
+<p><img src="figure/ashr_grid.Rmd/smn_plot-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="symmetric-unimodal-priors" class="section level2">
+<h2>Symmetric unimodal priors</h2>
+<p>Now let <span class="math inline">\(\mathcal{G}\)</span> be the family of symmetric priors that are unimodal at zero. <code>ashr</code> approximates <span class="math inline">\(\mathcal{G}\)</span> by the family of finite mixtures of uniforms <span class="math display">\[ \pi_1 \text{Unif}\left[-a_1, a_1\right] + \ldots + \pi_K \text{Unif}\left[-a_K, a_K\right], \]</span> where the grid <span class="math inline">\(\{ a_1, \ldots, a_K \}\)</span> is fixed in advance.</p>
+<p>Let all notation be similar to the above, and let <span class="math display">\[\text{UN}(a, s^2)\]</span> denote the convolution of a uniform distribution on <span class="math inline">\(\left[-a, a\right]\)</span> with <span class="math inline">\(\mathcal{N}(0, s^2)\)</span> noise. Then, by an identical argument to the above, <span class="math display">\[ \text{KL}(h \mid\mid \tilde{h}) \le 
+\max_{k,\ a_k \le a \le a_{k + 1}} \min_\omega \text{KL}\left(\text{UN}(a, s^2) \mid\mid \omega \text{UN}(a_k, s^2) + (1 - \omega) \text{UN}(a_{k + 1}, s^2) \right) \]</span></p>
+<p>Unlike for scale mixtures of normals, however, a scaling argument can’t reduce this to a single minimax problem, and it’s not immediately clear how the grid should be spaced. To get an idea of what an optimal grid should look like, I set <span class="math inline">\(s = 1\)</span>, choose a target KL-divergence, and then iteratively construct the grid:</p>
+<pre class="r"><code>log_minus &lt;- function(x, y) {
+  C &lt;- pmax(x, y)
+  x &lt;- x - C
+  y &lt;- y - C
+  return(log(exp(x) - exp(y)) + C)
+}
+
+llik_UN &lt;- function(a, samp) {
+  llik1 &lt;- pnorm(a, mean = samp, log.p = TRUE)
+  llik2 &lt;- pnorm(-a, mean = samp, log.p = TRUE)
+  return(log_minus(llik1, llik2) - log(2 * a))
+}
+
+UN_KLdiv &lt;- function(a, omega, aleft, aright, unif_samp, norm_samp) {
+  samp &lt;- a * unif_samp + norm_samp
+  h_llik &lt;- mean(llik_UN(a, samp))
+  llik1 &lt;- log(omega) + llik_UN(aleft, samp)
+  llik2 &lt;- log(1 - omega) + llik_UN(aright, samp)
+  htilde_llik &lt;- mean(log_add(llik1, llik2))
+  return(h_llik - htilde_llik)
+}
+
+min_symmKLdiv &lt;- function(a, aleft, aright, unif_samp, norm_samp) {
+  optres &lt;- optimize(function(omega) UN_KLdiv(a, omega, aleft, aright, unif_samp, norm_samp), 
+                     interval = c(0, 1), maximum = FALSE)
+  return(optres$objective)
+}
+
+ub_symmKLdiv &lt;- function(aleft, aright, unif_samp, norm_samp) {
+  optres &lt;- optimize(function(a) min_symmKLdiv(a, aleft, aright, unif_samp, norm_samp), 
+                     interval = c(aleft, aright), maximum = TRUE)
+  return(optres$objective)
+}
+
+find_next_gridpt &lt;- function(aleft, targetKL, unif_samp, norm_samp, max_space) {
+  uniroot_fn &lt;- function(aright) {ub_symmKLdiv(aleft, aright, unif_samp, norm_samp) - targetKL}
+  optres &lt;- uniroot(uniroot_fn, c(aleft + 1e-6, aleft + max_space))
+  return(optres$root)
+}
+
+build_grid &lt;- function(targetKL, unif_samp, norm_samp, len = 30L) {
+  i &lt;- 1
+  startpt &lt;- 1e-6
+  cat(&quot;Gridpoint&quot;, i, &quot;:&quot;, startpt, &quot;\n&quot;)
+  i &lt;- 2
+  nextpt &lt;- find_next_gridpt(startpt, targetKL, unif_samp, norm_samp, max_space = 10)
+  grid &lt;- c(startpt, nextpt)
+  cat(&quot;Gridpoint&quot;, i, &quot;:&quot;, max(grid), &quot;\n&quot;)
+  last_ratio &lt;- 2 * nextpt
+  for (i in 3:len) {
+    nextpt &lt;- find_next_gridpt(max(grid), targetKL, unif_samp, norm_samp, max(grid) * last_ratio)
+    last_ratio &lt;- nextpt / max(grid)
+    grid &lt;- c(grid, nextpt)
+    cat(&quot;Gridpoint&quot;, i, &quot;:&quot;, max(grid), &quot;\n&quot;)
+  }
+  return(grid)
+}
+
+# The sample size again needs to be relatively small.
+sampsize &lt;- 50000
+unif_samp &lt;- runif(sampsize, min = -1, max = 1)
+norm_samp &lt;- rnorm(sampsize)
+
+grid &lt;- build_grid(targetKL = default_ub, unif_samp, norm_samp, len = 3L)</code></pre>
+<pre><code>#&gt; Gridpoint 1 : 1e-06 
+#&gt; Gridpoint 2 : 1.31824 
+#&gt; Gridpoint 3 : 1.993085</code></pre>
+<p>Since the problem is slow to solve, I’ve only added three grid points here as an illustration. In <a href="https://github.com/willwerscheid/FLASHvestigations/blob/master/code/ashr_grid/ashr_grid_symm_ub.R">code</a> run in advance, I’ve built <code>ashr</code> grids for various KL-divergence targets. They appear as follows:</p>
+<pre class="r"><code>symm_res &lt;- readRDS(&quot;./output/ashr_grid/symm_ub_res.rds&quot;)
+
+df &lt;- symm_res %&gt;%
+  mutate(KL = as.factor(KL)) %&gt;%
+  mutate(KL = fct_relevel(KL, rev))
+
+ggplot(df, aes(x = idx, y = grid, color = as.factor(KL))) + 
+  geom_point() +
+  labs(x = &quot;index (k)&quot;, y = &quot;grid point location (a_k)&quot;, color = &quot;KL-divergence&quot;)</code></pre>
+<p><img src="figure/ashr_grid.Rmd/symm_ub_plot-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>What happens as <span class="math inline">\(k \to \infty\)</span>? Intuitively, as <span class="math inline">\(a\)</span> becomes very large, we can ignore the additive noise and just look at the KL-divergence between uniforms: <span class="math display">\[\begin{aligned}
+\text{KL}\left(\text{Unif}\left[-a, a\right] \mid\mid \omega \text{Unif}\left[-a_k, a_k \right] + (1 - \omega) \text{Unif}\left[-a_{k + 1}, a_{k + 1}\right] \right)
+&amp;= -\frac{a_k}{a} \log \frac{\frac{\omega}{2a_k} + \frac{1 - \omega}{2a_{k + 1}}}{\frac{1}{2a}} - \frac{a - a_k}{a} \log \frac{\frac{1 - \omega}{2a_{k + 1}}}{\frac{1}{2a}} \\
+&amp;= -\frac{a_k}{a} \log \left(\frac{\omega a_{k + 1}}{(1 - \omega)a_k} + 1\right) - \log \frac{a(1 - \omega)}{a_{k + 1}}
+\end{aligned}\]</span> This is minimized over <span class="math inline">\(0 \le \omega \le 1\)</span> by setting <span class="math display">\[ \omega = \frac{a_k(a_{k + 1} - a)}{a(a_{k + 1} - a_k)} \]</span> so that <span class="math display">\[ \begin{aligned}
+\min_\omega \text{KL}\left(\text{Unif}\left[-a, a\right] \mid\mid \omega \text{Unif}\left[-a_k, a_k \right] + (1 - \omega) \text{Unif}\left[-a_{k + 1}, a_{k + 1}\right] \right) 
+&amp;= \frac{a - a_k}{a} \log \frac{a_{k + 1} - a_k}{a - a_k} \\
+&amp;\approx \frac{a - a_k}{a_k} \log \frac{a_{k + 1} - a_k}{a - a_k}
+\end{aligned} \]</span> The function <span class="math inline">\(x \log x\)</span> is minimized at <span class="math inline">\(x = \frac{1}{e}\)</span>, so <span class="math display">\[ \max_a \min_\omega \text{KL}\left(\text{Unif}\left[-a, a\right] \mid\mid \omega \text{Unif}\left[-a_k, a_k \right] + (1 - \omega) \text{Unif}\left[-a_{k + 1}, a_{k + 1}\right] \right) 
+\approx \frac{a_{k + 1} - a_k}{ea_k} \]</span> Given <span class="math inline">\(a_k\)</span> and a desired target KL-divergence <span class="math inline">\(\kappa\)</span>, then, we should set <span class="math display">\[ a_{k + 1} = (1 + \kappa e)a_k\]</span> That is, the spacing between grid points grows exponentially as <span class="math inline">\(k \to \infty\)</span>, but for most reasonable values of <span class="math inline">\(\kappa\)</span> it grows so slowly that it will essentially look linear.</p>
+<p>To check these calculations, I set <span class="math inline">\(a_k = 100000\)</span> and <span class="math inline">\(\kappa = .001\)</span> and I calculate <span class="math inline">\(a_{k + 1}\)</span> using the above code:</p>
+<pre class="r"><code>nextpt &lt;- find_next_gridpt(aleft = 100000, targetKL = 1e-3, unif_samp, norm_samp, max_space = 500)
+cat(&quot; Next grid point:&quot;, nextpt, &quot;\n&quot;,
+    &quot;Estimated rate of growth as k goes to infinity:&quot;, 1 + exp(1)*1e-3)</code></pre>
+<pre><code>#&gt;  Next grid point: 100295.9 
+#&gt;  Estimated rate of growth as k goes to infinity: 1.002718</code></pre>
+So the above argument appears to be sound. <br> <br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>#&gt; R version 3.5.3 (2019-03-11)
+#&gt; Platform: x86_64-apple-darwin15.6.0 (64-bit)
+#&gt; Running under: macOS Mojave 10.14.6
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+#&gt; 
+#&gt; locale:
+#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt; [1] forcats_0.4.0   stringr_1.4.0   dplyr_0.8.0.1   purrr_0.3.2    
+#&gt; [5] readr_1.3.1     tidyr_0.8.3     tibble_2.1.1    ggplot2_3.2.0  
+#&gt; [9] tidyverse_1.2.1
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] Rcpp_1.0.4.6     cellranger_1.1.0 pillar_1.3.1     compiler_3.5.3  
+#&gt;  [5] git2r_0.25.2     workflowr_1.2.0  tools_3.5.3      digest_0.6.18   
+#&gt;  [9] lubridate_1.7.4  jsonlite_1.6     evaluate_0.13    nlme_3.1-137    
+#&gt; [13] gtable_0.3.0     lattice_0.20-38  pkgconfig_2.0.2  rlang_0.4.2     
+#&gt; [17] cli_1.1.0        rstudioapi_0.10  yaml_2.2.0       haven_2.1.1     
+#&gt; [21] xfun_0.6         withr_2.1.2      xml2_1.2.0       httr_1.4.0      
+#&gt; [25] knitr_1.22       hms_0.4.2        generics_0.0.2   fs_1.2.7        
+#&gt; [29] rprojroot_1.3-2  grid_3.5.3       tidyselect_0.2.5 glue_1.3.1      
+#&gt; [33] R6_2.4.0         readxl_1.3.1     rmarkdown_1.12   modelr_0.1.5    
+#&gt; [37] magrittr_1.5     whisker_0.3-2    backports_1.1.3  scales_1.0.0    
+#&gt; [41] htmltools_0.3.6  rvest_0.3.4      assertthat_0.2.1 colorspace_1.4-1
+#&gt; [45] labeling_0.3     stringi_1.4.3    lazyeval_0.2.2   munsell_0.5.0   
+#&gt; [49] broom_0.5.1      crayon_1.3.4</code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
