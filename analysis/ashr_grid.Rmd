@@ -57,9 +57,9 @@ Next, since KL-divergence is invariant to scaling, if we set the grid so that th
 $$ m_k := \frac{\sigma_{k + 1}^2 + s^2}{\sigma_k^2 + s^2} $$
 is identical to $m$ for all $1 \le k \le K - 1$, then we can conclude that 
 $$ \text{KL}(h \mid\mid \tilde{h}) \le \max_{1 \le a \le m} \text{KL} (\mathcal{N}(0, a) \mid\mid \omega \mathcal{N}(0, 1) + (1 - \omega) \mathcal{N}(0, m))$$
-Since this is true for all $0 \le \omega \le 1$, we can get an upper bound for the per-observation difference in likelihood (given the assumptions listed above) by solving the minimax problem 
+Since this is true for all $0 \le \omega \le 1$, we can get an upper bound for the per-observation difference in log likelihood (given the assumptions listed above) by solving the minimax problem 
 $$ \text{KL}(h \mid\mid \tilde{h}) \le \max_{1 \le a \le m} \min_\omega \text{KL} (\mathcal{N}(0, a) \mid\mid \omega \mathcal{N}(0, 1) + (1 - \omega) \mathcal{N}(0, m)) $$
-I use importance sampling to approximate the KL-divergence. The current `ashr` default $m = \sqrt{2}$ gives:
+I use importance sampling to approximate the KL-divergence. The current `ashr` default $m = \sqrt{2}$ gives an upper bound of
 
 ```{r smn_ub}
 log_add <- function(x, y) {
@@ -98,7 +98,7 @@ default_ub <- ub_smnKLdiv(sqrt(2), samp)
 default_ub
 ```
 
-Thus `ashr` will give an approximation that's within one log likelihood unit of the exact solution for problems as large as $n = 6000$ or so. (Note, however, that `ashr` spaces the $\sigma_k^2$s equally rather than $\sigma_k^2 + s^2$, as would be more efficient. When $s = 1$ and $m = \sqrt{2}$, for example, it's best to use the grid $\{0, \sqrt{2} - 1, 1, 2\sqrt{2} - 1, 3, \ldots\}$.)
+Thus, using the default settings, `ashr` will give an approximation that's within one log likelihood unit of the exact solution for problems as large as $n = 6000$ or so. (Note, however, that `ashr` spaces the $\sigma_k^2$s equally rather than $\sigma_k^2 + s^2$, as would be more efficient: $\{0, (m - 1)s^2, (m^2 - 1)s^2, (m^3 - 1)s^2, \ldots\}$.)
 
 To get a sense of how tight the upper bound is, we can sample $a \sim \text{Unif}\left[1, m\right]$ to get an "expected" KL-divergence.
 ```{r smn_ev}
@@ -114,7 +114,7 @@ samp <- rnorm(sampsize)
 default_ev <- mean(sapply(a, function(a) min_smnKLdiv(a, m, samp)))
 default_ev
 ```
-So the above upper bound can be expected to be reasonably tight.
+So the above upper bound should be pretty close to the actual KL-divergence.
 
 For larger problems or to obtain better approximations, a denser grid can be used. I show upper bounds and expected values for a range of $m$ (the [code](https://github.com/willwerscheid/FLASHvestigations/blob/master/code/ashr_grid/ashr_grid_smn.R) was run in advance):
 
@@ -246,12 +246,68 @@ $$ \max_a \min_\omega \text{KL}\left(\text{Unif}\left[-a, a\right] \mid\mid \ome
 \approx \frac{a_{k + 1} - a_k}{ea_k} $$
 Given $a_k$ and a desired target KL-divergence $\kappa$, then, we should set
 $$ a_{k + 1} = (1 + \kappa e)a_k$$
-That is, the spacing between grid points grows exponentially as $k \to \infty$, but for most reasonable values of $\kappa$ it grows so slowly that it will essentially look linear. 
+That is, the spacing between grid points grows exponentially as $k \to \infty$, but for reasonable values of $\kappa$ it grows so slowly that it will essentially look linear. 
 
-To check these calculations, I set $a_k = 100000$ and $\kappa = .001$ and I calculate $a_{k + 1}$ using the above code:
+To check these calculations, I set $a_k = 100000$ and $\kappa = .001$. I calculate the optimal $a_{k + 1}$ as above and I check it against the rough estimate given in the last display:
 ```{r ex}
 nextpt <- find_next_gridpt(aleft = 100000, targetKL = 1e-3, unif_samp, norm_samp, max_space = 500)
-cat(" Next grid point:", nextpt, "\n",
+cat(" Optimal next grid point:", nextpt, "\n",
     "Estimated rate of growth as k goes to infinity:", 1 + exp(1)*1e-3)
 ```
 So the above argument appears to be sound.
+
+## Recommendations
+
+1. For scale mixtures of normals with $s_i \equiv s$, we should use the grid $\{0, (m - 1)s^2, (m^2 - 1)s^2, (m^3 - 1)s^2, \ldots\}$. When the standard errors $s_i$ are not all the same, it's probably best to set $s = \min_i s_i$. 
+
+1. I wouldn't expect half-normal mixtures to behave much differently from normal, so the same grid will likely work for `mixcompdist = "halfnormal"`.
+
+1. Similarly, any approach that works for symmetric unimodal priors should work for `mixcompdist` settings `halfuniform`, `+uniform`, and `-uniform`.
+
+1. Finally, for symmetric unimodal priors, a linearly spaced grid is both simple to implement and not terribly far from the optimal grid. However, if there are very large observations, then the number of mixture components required will become prohibitive. I propose fixing the number of mixture components $K$ and then combining the a linear grid with a quantile-based approach. Specifically, set `grid1` to be the linear grid $\{0, \delta, 2\delta, \ldots, (K - 1)\delta\}$. $\delta$ should be chosen to match the target KL-divergence (for example, to get a similar bound to the default setting for scale mixtures of normals, set $\delta = 0.7$). If $\max \vert x_i \vert > (K - 1)\delta$, then set `grid2` to be `quantile(abs(x), (1:K)/K)`. Let the final grid be `pmax(grid1, grid2)`.
+For a particularly challenging example, take
+$$ \theta \sim 0.5 \delta_0 + 0.4 \text{Unif}[-5, 5] + 0.1 t_3 $$
+with standard errors $s = 1$. In all cases, the method I've proposed finds a solution that is at least as good as the solution found using the default grid. I also include scale mixture of normals results for comparison.
+
+```{r sim}
+nsim <- 20
+nobs <- 10000
+sim_res <- tibble()
+for (i in 1:nsim) {
+  theta_comp <- sample(3, nobs, replace = TRUE, prob = c(0.5, 0.4, 0.1))
+  unif_samp <- runif(nobs, -5, 5)
+  t_samp <- rt(nobs, df = 3)
+  theta <- rep(0, nobs)
+  theta[theta_comp == 2] <- unif_samp[theta_comp == 2]
+  theta[theta_comp == 3] <- t_samp[theta_comp == 3]
+  x <- theta + rnorm(nobs)
+  
+  smn_res <- ashr::ash(x, 1, "normal", prior = "uniform")
+  symm_res_def <- ashr::ash(x, 1, "uniform", prior = "uniform")
+
+  # Use the same number of mixture components as the default method uses.
+  K <- length(symm_res_def$fitted_g$pi)
+  grid1 <- 0.7 * 0:(K - 1)
+  grid2 <- c(0, quantile(abs(x), (1:(K - 1) / (K - 1))))
+  grid <- pmax(grid1, grid2)
+  symm_res_cust <- ashr::ash(x, 1, "uniform", prior = "uniform", pointmass = FALSE, mixsd = grid)
+  
+  sim_res <- sim_res %>%
+    bind_rows(tibble(trial = i, 
+                     smn_llik = smn_res$loglik, 
+                     symm_def_llik = symm_res_def$loglik,
+                     symm_cust_llik = symm_res_cust$loglik))
+}
+
+sim_res <- sim_res %>%
+  mutate(symm_cust_diff = symm_cust_llik - symm_def_llik,
+         smn_diff = smn_llik - symm_cust_llik)
+
+ggplot(sim_res, aes(y = symm_cust_diff)) + 
+  geom_boxplot() +
+  labs(title = "increase in log likelihood vs. default (my method)", y = "")
+
+ggplot(sim_res, aes(y = smn_diff)) + 
+  geom_boxplot() +
+  labs(title = "increase in log likelihood vs. default (scale mix of normals)", y = "")
+```
