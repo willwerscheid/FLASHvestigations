@@ -37,7 +37,7 @@ Investigation 22 was meant as an illustration of how to apply `flashier` to tens
 
 [Investigation 32.](ebnm_npmle.html) Approximating the NPMLE using `ebnm`.
 
-[Investigation 32.](ebnm_npmle.html) Approximating the NPMLE using `ebnm`.
+[Investigation 33.](ashr_grid.html) An analysis of the quality of `ashr` grids.
 
 ## Reference Material
 
